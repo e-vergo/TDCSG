@@ -254,6 +254,123 @@ ring_nf
 
 4. **Sorry tracking matters**: Small increases in sorry count (24→25) can happen when improving documentation or restructuring, but the overall trend should be downward.
 
+## ⚠️ Behaviors to AVOID
+
+These are anti-patterns that waste time and don't advance the formalization:
+
+### 1. **Replacing sorry with sorry**
+❌ **DON'T**: Replace one sorry with another sorry without making actual progress
+```lean
+-- BAD: Just restructured the sorry, didn't prove anything
+theorem foo : P := by
+  sorry  -- Changed from "sorry -- need to prove P" to "sorry -- requires lemma Q"
+```
+✅ **DO**: Either prove something concrete OR leave the original sorry if blocked
+```lean
+-- GOOD: Actually reduced the problem
+theorem foo : P := by
+  have h1 : Q := by
+    -- Actual proof steps here
+    exact ...
+  sorry  -- Now only need to show P from Q (real progress!)
+```
+
+### 2. **Comment-only changes**
+❌ **DON'T**: Add detailed comments to a sorry without attempting the proof
+- Comments are helpful, but they don't eliminate sorries
+- Only add extensive comments if you've genuinely attempted the proof and understand why it's hard
+- Better to try the proof first, then document obstacles
+
+✅ **DO**: Try the proof first, make real progress, THEN add comments if you get stuck
+```lean
+-- GOOD: Made progress, then documented what remains
+theorem foo : P := by
+  unfold P
+  have h1 : Q := by exact lemma1
+  have h2 : R := by exact lemma2
+  sorry  -- Only need to combine h1 and h2, but requires finding the right mathlib lemma
+```
+
+### 3. **Not checking for errors after edits**
+❌ **DON'T**: Move on to the next file without verifying your changes don't introduce errors
+- ALWAYS run `lean_diagnostic_messages` after editing a file
+- Check that you haven't introduced type errors, syntax errors, or broken existing proofs
+- Verify the build still succeeds (or at least, only has sorry warnings)
+
+✅ **DO**: Check diagnostics immediately after every edit
+```
+1. Edit file
+2. Run lean_diagnostic_messages
+3. Fix any errors
+4. Only then move to next task
+```
+
+### 4. **Ignoring the sorry count**
+❌ **DON'T**: Lose track of whether you're actually reducing sorries
+- If you work on a file and the sorry count stays the same (or increases), you haven't made progress
+- Don't fool yourself by "reorganizing" sorries
+
+✅ **DO**: Track sorry count before and after your work
+- Start session: note sorry count
+- After working on a file: verify count decreased
+- If count didn't decrease, either that's okay (working on infrastructure) or you need to rethink approach
+
+### 5. **Proof by wishful thinking**
+❌ **DON'T**: Use tactics that you hope will work without checking the goal
+```lean
+-- BAD: Throwing tactics at the wall
+theorem foo : P := by
+  simp
+  ring
+  linarith
+  sorry  -- None of those worked, gave up
+```
+
+✅ **DO**: Check the goal, understand what you need, use appropriate tactics
+```lean
+-- GOOD: Methodical approach
+theorem foo : P := by
+  -- Goal: P
+  unfold P
+  -- Goal: Q
+  have h : R := by exact lemma1
+  -- Now I can use h to prove Q
+  exact h.trans lemma2
+```
+
+### 6. **Not using available infrastructure**
+❌ **DON'T**: Try to prove something from scratch when we already have the tools
+- Check if ComplexRepresentation.lean has what you need (we have lots of ζ₅ lemmas!)
+- Check if GoldenRatio.lean has φ properties you need
+- Search mathlib before proving basic facts
+
+✅ **DO**: Use what's already proven
+- Check `ComplexRepresentation.lean` for root of unity facts
+- Check `GoldenRatio.lean` for φ identities
+- Use `lean_loogle` and `lean_leansearch` to find mathlib theorems
+
+### 7. **Working on dependent theorems before their dependencies**
+❌ **DON'T**: Try to prove Theorem2 before completing the GG5Geometry lemmas it depends on
+- Check the dependency graph in this file
+- Work bottom-up: prove foundations before conclusions
+
+✅ **DO**: Follow the dependency order
+- Complete Basic.lean → ComplexRepresentation.lean → GoldenRatio.lean → GroupAction.lean → ...
+- If a theorem needs a sorry lemma, either prove that lemma first or move to a different theorem
+
+### 8. **Vague error messages in sorry comments**
+❌ **DON'T**: Write `sorry -- this is hard` or `sorry -- TODO`
+- Not helpful for future sessions
+- Doesn't capture what you learned from attempting it
+
+✅ **DO**: Write specific, actionable sorry comments
+```lean
+sorry  -- Requires: (1) showing word for g is [(0,true), (1,false)]
+       --          (2) expanding leftRotationInv and rightRotation
+       --          (3) algebraic simplification of the composition
+       --          (4) proving independence from z (translation property)
+```
+
 ## 💡 Pro Tips from Experience
 
 1. **Trust mathlib**: Before proving something from scratch, search for it. Mathlib often has exactly what you need.
