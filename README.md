@@ -8,16 +8,21 @@ A Lean 4 formalization of the paper "Two-Disk Compound Symmetry Groups" by Hearn
 
 The formalization targets **Theorem 2**, which establishes that when both disks have 5-fold rotational symmetry at a specific critical radius involving the golden ratio, the resulting group is infinite.
 
-### Recent Progress (Latest Session)
+## 📈 Progress Timeline
+
+### Session 2 (Current) - December 2024
 - **Sorries reduced**: 37 → 24 (35% reduction)
-- **Files completed**: ComplexRepresentation.lean now fully proven (11 theorems including helper lemmas)
-- **Build status**: Maintained zero compile errors throughout
-- **Key achievements**:
-  - Proven all root of unity properties including `sum_zeta5_powers` using mathlib's primitive root lemmas
-  - Added complete ζ₅ computational lemmas (`zeta5_pow_4`, `zeta5_pow_5`, `zeta5_is_primitive`)
-  - Proven rotation isometries and golden ratio lemmas
-  - Improved `applyGroupElement` structure and documentation
-- **Infrastructure**: Cleaned up duplicate files, improved proof structure
+- **Major milestone**: ComplexRepresentation.lean fully proven (11 theorems)
+- **Key breakthroughs**:
+  - Connected primitive roots theory from mathlib to prove `sum_zeta5_powers`
+  - Established all ζ₅ computational infrastructure needed for geometric proofs
+  - Fixed critical build errors in norm calculations
+  - Improved FreeGroup structure for group actions
+
+### Session 1 - December 2024
+- **Initial formalization**: 37 sorries across 9 files
+- **Scaffolding complete**: All theorem statements type-check
+- **Foundation laid**: Basic.lean fully proven, core definitions established
 
 ## Project Status
 
@@ -167,6 +172,23 @@ A two-disk system consists of:
 - **Paper**: "Two-Disk Compound Symmetry Groups" by Robert A. Hearn, William Kretschmer, Tomas Rokicki, Benjamin Streeter, and Eric Vergo
 - **Mathlib Documentation**: [Lean Mathematical Library](https://leanprover-community.github.io/mathlib4_docs/)
 - **Lean 4 Documentation**: [Lean 4 Manual](https://lean-lang.org/lean4/doc/)
+
+## 🎯 Remaining Challenges
+
+### Critical Path to Theorem 2
+The main theorem depends on three key components that need completion:
+
+1. **FreeGroup Implementation** (Blocking multiple files)
+   - Need proper recursion for `applyGroupElement`
+   - This blocks all Translation and Theorem2 case proofs
+
+2. **Complex Geometry Calculations** (Mathematical complexity)
+   - Proving `E_constraint`: |E + 1| = r_c requires expanding ζ₅ in terms of cos(2π/5) and sin(2π/5)
+   - The values involve φ through the identity cos(2π/5) = (φ-1)/2
+
+3. **Piecewise Isometry Composition** (Technical challenge)
+   - Need partition refinement for composing piecewise isometries
+   - Requires tracking how regions map through function composition
 
 ## Next Steps
 
