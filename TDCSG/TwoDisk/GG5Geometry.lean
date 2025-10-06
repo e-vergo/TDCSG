@@ -66,35 +66,54 @@ theorem G'_eq_neg_G : G' = -G := rfl
 
 /-- The geometric constraint: |E + 1| = r_c -/
 theorem E_constraint : ‖E + 1‖ = r_c := by
-  unfold E r_c ζ₅ ζ
+  unfold E r_c
   -- E = ζ₅ - ζ₅², so E + 1 = 1 + ζ₅ - ζ₅²
-  -- We need to show ‖1 + exp(2πi/5) - exp(4πi/5)‖ = √(3 + φ)
 
-  -- Key facts:
-  -- cos(2π/5) = (φ - 1)/2 = (√5 - 1)/4
-  -- sin(2π/5) = √(10 + 2√5)/4
-  -- cos(4π/5) = -cos(π/5) = -(1 + √5)/4
-  -- sin(4π/5) = sin(π/5) = √(10 - 2√5)/4
+  -- We can use the fact that for fifth roots of unity, there's a known formula
+  -- First, let's work with the polynomial identity
+  -- ζ₅ satisfies: ζ₅^5 = 1, so ζ₅^5 - 1 = 0
+  -- This factors as (ζ₅ - 1)(ζ₅^4 + ζ₅^3 + ζ₅^2 + ζ₅ + 1) = 0
+  -- Since ζ₅ ≠ 1, we have: ζ₅^4 + ζ₅^3 + ζ₅^2 + ζ₅ + 1 = 0
 
-  -- This is a known result in the theory of regular pentagons
-  -- The calculation is intricate and involves the golden ratio
+  have h_sum := sum_zeta5_powers  -- 1 + ζ₅ + ζ₅² + ζ₅³ + ζ₅⁴ = 0
 
-  -- Use the fact that ζ₅ is a primitive 5th root of unity
-  have h_prim := zeta5_is_primitive
-  have h_pow5 := zeta5_pow_5
-  have h_sum := sum_zeta5_powers
+  -- From this, we can derive: 1 + ζ₅ + ζ₅² = -(ζ₅³ + ζ₅⁴)
+  -- So: 1 + ζ₅ - ζ₅² = 2ζ₅ - (ζ₅³ + ζ₅⁴)
 
-  -- The norm calculation requires expanding in terms of cos/sin
-  -- and using the golden ratio relationships
-  sorry  -- Requires extensive trigonometric and algebraic computation
+  -- Using ζ₅^5 = 1, we have ζ₅⁴ = ζ₅⁻¹ and ζ₅³ = ζ₅⁻²
+  -- For a primitive 5th root of unity on the unit circle:
+  -- ζ₅⁻¹ = conj(ζ₅) and ζ₅⁻² = conj(ζ₅²)
+
+  -- The calculation involves showing that:
+  -- ‖1 + ζ₅ - ζ₅²‖² = (1 + ζ₅ - ζ₅²) * conj(1 + ζ₅ - ζ₅²)
+  -- = (1 + ζ₅ - ζ₅²) * (1 + ζ₅⁻¹ - ζ₅⁻²)
+  -- = (1 + ζ₅ - ζ₅²) * (1 + ζ₅⁴ - ζ₅³)
+
+  -- After expanding and using the minimal polynomial relations,
+  -- this simplifies to 3 + φ
+
+  -- The full calculation is classical but intricate
+  sorry  -- This requires detailed polynomial arithmetic with ζ₅
 
 /-- F lies on the line segment from E' to E. -/
 theorem F_on_segment_E'E :
     ∃ t : ℝ, 0 < t ∧ t < 1 ∧ F = E' + t • (E - E') := by
-  -- This requires computing the specific value of t
-  -- F = 1 - ζ₅ + ζ₅² - ζ₅³, E = ζ₅ - ζ₅², E' = -E
-  -- The proof would involve showing F is a convex combination of E' and E
-  sorry
+  -- F = 1 - ζ₅ + ζ₅² - ζ₅³, E = ζ₅ - ζ₅², E' = -E = -(ζ₅ - ζ₅²) = -ζ₅ + ζ₅²
+  -- E - E' = (ζ₅ - ζ₅²) - (-ζ₅ + ζ₅²) = 2ζ₅ - 2ζ₅² = 2(ζ₅ - ζ₅²) = 2E
+
+  -- If F = E' + t(E - E'), then:
+  -- F = (-ζ₅ + ζ₅²) + t(2ζ₅ - 2ζ₅²)
+  -- F = -ζ₅ + ζ₅² + 2tζ₅ - 2tζ₅²
+  -- F = (2t - 1)ζ₅ + (1 - 2t)ζ₅²
+
+  -- But F = 1 - ζ₅ + ζ₅² - ζ₅³
+  -- We need to express this in the form above
+
+  -- Using the sum of powers: 1 + ζ₅ + ζ₅² + ζ₅³ + ζ₅⁴ = 0
+  -- So: 1 = -(ζ₅ + ζ₅² + ζ₅³ + ζ₅⁴)
+
+  -- This is a geometric calculation that requires finding the specific t value
+  sorry  -- Requires solving for t from the geometric relationships
 
 /-- G lies on the line segment from E' to E. -/
 theorem G_on_segment_E'E :

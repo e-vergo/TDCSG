@@ -79,7 +79,11 @@ theorem transformations_stay_in_intersection :
               (FreeGroup.of 1)⁻¹ * (FreeGroup.of 0)⁻¹ * (FreeGroup.of 1)⁻¹
     ∀ z ∈ sys.diskIntersection, ∀ g ∈ [g1, g2, g3],
       applyGroupElement sys g z ∈ sys.diskIntersection := by
-  sorry
+  -- This requires showing that for the specific critical radius and these specific
+  -- group elements, points in the intersection remain in the intersection
+  -- This is a geometric property that follows from the critical radius constraint
+  sorry  -- Requires detailed geometric analysis of how these specific transformations
+         -- preserve the intersection at the critical radius
 
 /-- The three operations allow arbitrary movement along E'E. -/
 theorem can_move_arbitrarily_on_segment :

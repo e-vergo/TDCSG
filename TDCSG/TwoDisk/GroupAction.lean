@@ -189,7 +189,61 @@ theorem points_stay_in_union (z : ℂ) (g : TwoDiskGroup) :
   -- The key insight: rotations only move points within their respective disks,
   -- and leave other points unchanged. So any moved point must be in one of the disks,
   -- and the result will also be in the disk union.
-  sorry  -- This requires a proper induction on the FreeGroup structure
+
+  -- We'll work with the word representation
+  unfold applyGroupElement at h_moved ⊢
+  let word := g.toWord
+
+  -- If the point moved, it must have been in one of the disks at some point
+  -- We prove by induction on the word that if a point is ever moved, it stays in diskUnion
+
+  -- First, if z is moved by the entire word, then z must be in at least one disk
+  -- because rotations only move points within their disks
+  have h_z_in_union : z ∈ sys.diskUnion := by
+    -- If z is not in the union, then no rotation affects it
+    by_contra h_not_in_union
+    unfold diskUnion at h_not_in_union
+    simp only [Set.mem_union, not_or] at h_not_in_union
+
+    -- Show that the result equals z (contradiction with h_moved)
+    have h_unchanged : word.foldl (fun z' p => applyGenerator sys p.1 p.2 z') z = z := by
+      -- Induction on the word
+      induction word with
+      | nil => rfl
+      | cons hd tl ih =>
+        simp only [List.foldl]
+        -- Now show that applying hd to z doesn't change it
+        have h_hd_unchanged : applyGenerator sys hd.1 hd.2 z = z := by
+          unfold applyGenerator
+          match hd.1, hd.2 with
+          | 0, false =>
+            unfold leftRotation
+            simp [h_not_in_union.1]
+          | 0, true =>
+            unfold leftRotationInv
+            simp [h_not_in_union.1]
+          | 1, false =>
+            unfold rightRotation
+            simp [h_not_in_union.2]
+          | 1, true =>
+            unfold rightRotationInv
+            simp [h_not_in_union.2]
+        rw [h_hd_unchanged]
+        exact ih
+    exact h_moved h_unchanged
+
+  -- Now apply the preservation lemma iteratively using generalized induction
+  -- We prove: if w is in diskUnion, then foldl applied to w is also in diskUnion
+  suffices ∀ w ∈ sys.diskUnion, word.foldl (fun z' p => applyGenerator sys p.1 p.2 z') w ∈ sys.diskUnion by
+    exact this z h_z_in_union
+
+  intro w hw
+  induction word generalizing w with
+  | nil => exact hw
+  | cons hd tl ih =>
+    simp only [List.foldl]
+    apply ih
+    exact applyGenerator_preserves_union sys hd.1 hd.2 w hw
 
 /-- If a point is in the intersection and we apply a bounded sequence of moves,
     it can stay in the intersection. This is crucial for Theorem 2. -/
@@ -203,6 +257,21 @@ theorem intersection_points_can_stay_bounded (z : ℂ) (hz : z ∈ sys.diskInter
     left
     exact hz.1
   -- The result follows from the preservation lemma
-  sorry  -- Need proper induction on FreeGroup structure
+  -- We use induction on the word representation
+  unfold applyGroupElement
+  let word := g.toWord
+
+  -- Apply the preservation lemma iteratively
+  -- We prove: if w is in diskUnion, then foldl applied to w is also in diskUnion
+  suffices ∀ w ∈ sys.diskUnion, word.foldl (fun z' p => applyGenerator sys p.1 p.2 z') w ∈ sys.diskUnion by
+    exact this z h_z_in_union
+
+  intro w hw
+  induction word generalizing w with
+  | nil => exact hw
+  | cons hd tl ih =>
+    simp only [List.foldl]
+    apply ih
+    exact applyGenerator_preserves_union sys hd.1 hd.2 w hw
 
 end TwoDiskSystem

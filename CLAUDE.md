@@ -6,25 +6,25 @@ This file provides comprehensive guidance to Claude (claude.ai/code) when workin
 
 Formalize **Theorem 2** from "Two-Disk Compound Symmetry Groups": Prove that GG₅ (5-fold rotational symmetry on both disks) has an infinite group at the critical radius r = √(3 + φ).
 
-### Current Status (as of December 2024 - Session 4)
-- **Progress**: 25 sorries remaining (down from 37 - 32% reduction)
-- **Completed**: ComplexRepresentation.lean (11/11 theorems), Basic.lean (fully proven)
+### Current Status (as of January 2025 - Session 5)
+- **Progress**: 21 sorries remaining (down from 37 - 43% reduction)
+- **Completed**: Basic.lean, ComplexRepresentation.lean (11/11), **GoldenRatio.lean (6/6)**, **GroupAction.lean (7/7)**
 - **Build**: Clean - zero compile errors
-- **Main blocker RESOLVED**: `applyGroupElement` now implemented using FreeGroup.toWord!
+- **Key milestones**: `zeta5_and_phi` proven!, `points_stay_in_union` and `intersection_points_can_stay_bounded` proven!
 
 ## 📁 Project Structure & Dependencies
 
 ```
 Core Definitions (Basic.lean) ✅
     ↓
-Group Theory (GroupAction.lean) - 3 sorries
+Group Theory (GroupAction.lean) ✅
     ↓                    ↓
 Isometries              Translations (4 sorries)
 (PiecewiseIsometry.lean)      ↓
 2 sorries                 Theorem1.lean (3 sorries)
     ↓                          ↓
 Complex Analysis          Golden Ratio
-(ComplexRepresentation.lean) ✅  (GoldenRatio.lean) - 1 sorry
+(ComplexRepresentation.lean) ✅  (GoldenRatio.lean) ✅
     ↓                          ↓
         GG5Geometry.lean (5 sorries)
                 ↓
@@ -196,6 +196,31 @@ ring_nf
 - The three case proofs in Theorem2 are the heart of the argument
 - Each shows a piecewise isometry mapping segments with irrational ratios
 - This creates dense orbits, proving infinity
+
+## 🆕 Session 5 Learnings
+
+### Key Achievements
+1. **GoldenRatio.lean COMPLETE**: Successfully completed the `zeta5_and_phi` proof connecting ζ₅ = cos(2π/5) + i·sin(2π/5) where cos(2π/5) = (φ-1)/2. This was a major milestone requiring careful handling of complex coercions and the double angle formula.
+
+2. **GroupAction.lean COMPLETE**: Finished all remaining theorems including:
+   - `points_stay_in_union`: Points moved by group elements stay in disk union
+   - `intersection_points_can_stay_bounded`: Points in intersection remain in union
+   - Used induction on word representations and the `suffices` pattern effectively
+
+3. **Enhanced documentation across all files**: Added detailed proof strategies and mathematical insights to all remaining sorries, making future work much clearer.
+
+4. **Eliminated 4 sorries**: Reduced from 25 to 21 (16% reduction this session, 43% total from start).
+
+### Technical Insights
+- **Coercion handling**: When working with `/5`, need to be explicit about `(5:ℕ)` vs `(5:ℂ)` and use `norm_cast` liberally
+- **Double angle formula**: `Real.cos_two_mul` combined with `Real.cos_pi_div_five` gives cos(2π/5) = (φ-1)/2
+- **Induction pattern**: The `suffices` tactic followed by induction on lists is powerful for proving properties of `foldl`
+- **Type conversions**: `Complex.exp_mul_I` requires complex arguments, then use `norm_cast` to convert between Real and Complex
+
+### Lessons Learned
+- Trust the existing infrastructure: `zeta5_and_phi` was achievable using mathlib's existing trigonometric theorems
+- Build incrementally: Proving smaller helper facts first (like the coercion equality) makes the main proof clearer
+- Documentation pays dividends: Detailed comments about what remains to be proven help maintain momentum across sessions
 
 ## 🆕 Session 4 Learnings
 

@@ -111,15 +111,45 @@ theorem composition_piecewise_isometry (f g : ℂ → ℂ)
   obtain ⟨Pf, hPf⟩ := hf
   obtain ⟨Pg, hPg⟩ := hg
 
-  -- For simplicity in this formalization, we construct a basic partition
-  -- In reality, we'd need the refined partition where f maps each piece
-  -- into a single piece of g's partition
-  use Pf ++ Pg  -- Concatenate the partitions
+  -- The ideal refined partition would consist of sets S such that:
+  -- 1. f is an isometry on S (S ∈ Pf or a subset thereof)
+  -- 2. f(S) is contained in a single piece of g's partition
 
-  intro S hS
-  -- If S is from f's partition and mapped to a g partition piece,
-  -- the composition preserves distances
-  sorry  -- The full proof requires partition refinement logic
+  -- For this formalization, we use both partitions and rely on the fact that
+  -- in our application, the rotations map regions appropriately
+  use Pf
+
+  intro S hS z hz w hw
+  -- On S, f preserves distances
+  have hf_iso : ‖f z - f w‖ = ‖z - w‖ := hPf S hS z hz w hw
+
+  -- For g to preserve distances on f(z) and f(w), they need to be in the same
+  -- piece of g's partition. In our application with disk rotations, when f is
+  -- a rotation on S (e.g., S = leftDisk), the image f(S) = S, so f(z), f(w) ∈ S.
+  -- If S is also in g's partition (or a subset), then g preserves distances there.
+
+  simp only [Function.comp_apply]
+
+  -- The challenge is that we need to know which piece of Pg contains f(z) and f(w)
+  -- For our specific application:
+  -- - If S = leftDisk and f = leftRotation, then f(S) = leftDisk
+  -- - If S = rightDisk and f = rightRotation, then f(S) = rightDisk
+  -- - Outside the disks, rotations are identity
+
+  -- We handle this by cases on whether f(z) and f(w) are in some piece of Pg
+  -- Since we know f preserves distances on S, and for our rotations,
+  -- f maps disk regions to themselves, this works out.
+
+  -- This is a simplification that works for our specific case of disk rotations
+  conv_rhs => rw [← hf_iso]
+
+  -- Now we need: ‖g (f z) - g (f w)‖ = ‖f z - f w‖
+  -- This holds if f(z) and f(w) are in the same piece of g's partition
+  -- For disk rotations, this is true because rotations map disks to themselves
+  -- A complete proof would require showing this explicitly
+
+  -- For now, we accept this as an axiom of our simplified model
+  sorry  -- This requires detailed partition refinement or case analysis on disk membership
 
 /-- Any group element gives a piecewise isometry. -/
 theorem group_element_piecewise_isometry (g : TwoDiskGroup) :
@@ -128,6 +158,13 @@ theorem group_element_piecewise_isometry (g : TwoDiskGroup) :
   -- 1. Identity is a piecewise isometry (trivial)
   -- 2. Generators (left/right rotations) are piecewise isometries (proven above)
   -- 3. Composition and inverse preserve piecewise isometry
-  sorry  -- Requires FreeGroup.induction_on and composition_piecewise_isometry
+
+  -- We'll use induction on the word representation
+  unfold applyGroupElement
+  let word := g.toWord
+
+  -- Due to the complexity of the proof with match statements,
+  -- we'll use our simplified composition theorem
+  sorry  -- This requires a careful handling of the match expression evaluation
 
 end TwoDiskSystem
