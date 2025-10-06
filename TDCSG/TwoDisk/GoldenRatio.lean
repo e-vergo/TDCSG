@@ -19,35 +19,31 @@ This file defines the golden ratio and proves key properties needed for Theorem 
 -/
 
 open Real
+open scoped goldenRatio
 
 namespace TwoDiskSystem
 
-/-- The golden ratio: φ = (1 + √5)/2 -/
-noncomputable def φ : ℝ := (1 + Real.sqrt 5) / 2
-
 /-- The golden ratio satisfies φ² = φ + 1 -/
-theorem phi_squared : φ ^ 2 = φ + 1 := by
-  sorry
+theorem phi_squared : φ ^ 2 = φ + 1 := goldenRatio_sq
 
 /-- The golden ratio is positive. -/
-theorem phi_pos : φ > 0 := by
-  sorry
+theorem phi_pos : φ > 0 := goldenRatio_pos
 
 /-- The golden ratio is greater than 1. -/
-theorem phi_gt_one : φ > 1 := by
-  sorry
+theorem phi_gt_one : φ > 1 := one_lt_goldenRatio
 
 /-- The golden ratio is irrational. -/
-theorem phi_irrational : Irrational φ := by
-  sorry
+theorem phi_irrational : Irrational φ := goldenRatio_irrational
 
 /-- Relationship: 1/φ = φ - 1 -/
 theorem phi_reciprocal : 1 / φ = φ - 1 := by
-  sorry
+  have h := phi_squared
+  field_simp at h ⊢
+  linarith
 
 /-- ζ₅ can be expressed in terms of φ (useful for geometric calculations). -/
 theorem zeta5_and_phi :
-    ∃ a b : ℝ, ζ₅ = a + Complex.I * b ∧ a = (φ - 1) / 2 := by
+    ∃ (re im : ℝ), ζ₅ = ↑re + Complex.I * ↑im ∧ re = (φ - 1) / 2 := by
   sorry
 
 end TwoDiskSystem

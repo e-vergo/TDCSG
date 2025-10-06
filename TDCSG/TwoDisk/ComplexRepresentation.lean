@@ -23,27 +23,36 @@ open Complex Real
 namespace TwoDiskSystem
 
 /-- The primitive n-th root of unity: ζₙ = e^(2πi/n) -/
-def ζ (n : ℕ) : ℂ := exp (2 * π * I / n)
+noncomputable def ζ (n : ℕ) : ℂ := exp (2 * π * I / n)
 
 /-- ζ₅ is specifically the fifth root of unity. -/
-def ζ₅ : ℂ := ζ 5
+noncomputable def ζ₅ : ℂ := ζ 5
 
 /-- ζₙ^n = 1 -/
 theorem zeta_pow_n (n : ℕ) (hn : n > 0) : (ζ n) ^ n = 1 := by
-  sorry
+  unfold ζ
+  rw [← Complex.exp_nat_mul, mul_div_cancel₀]
+  · exact exp_two_pi_mul_I
+  · exact Nat.cast_ne_zero.mpr (Nat.pos_iff_ne_zero.mp hn)
 
 /-- |ζₙ| = 1 -/
-theorem zeta_abs (n : ℕ) (hn : n > 0) : Complex.abs (ζ n) = 1 := by
-  sorry
+theorem zeta_abs (n : ℕ) (_hn : n > 0) : ‖ζ n‖ = 1 := by
+  unfold ζ
+  rw [norm_exp]
+  simp only [mul_comm, div_re]
+  norm_num
 
 /-- ζₙ⁻¹ = ζₙ̄ (complex conjugate) -/
-theorem zeta_inv (n : ℕ) (hn : n > 0) : (ζ n)⁻¹ = conj (ζ n) := by
-  sorry
+theorem zeta_inv (n : ℕ) (hn : n > 0) : (ζ n)⁻¹ = starRingEnd ℂ (ζ n) := by
+  exact inv_eq_conj (zeta_abs n hn)
 
 /-- Express rotation by angle θ around center c as complex multiplication. -/
 theorem rotation_as_multiplication (θ : ℝ) (c z : ℂ) :
-    c + exp (I * θ) * (z - c) = c + (cos θ + I * sin θ) * (z - c) := by
-  sorry
+    c + exp (I * (θ : ℂ)) * (z - c) = c + (↑(Real.cos θ) + I * ↑(Real.sin θ)) * (z - c) := by
+  congr 1
+  rw [mul_comm I, exp_mul_I]
+  rw [← ofReal_cos, ← ofReal_sin]
+  ring
 
 /-- Left rotation can be expressed using ζₙ₁. -/
 theorem leftRotation_as_zeta (sys : TwoDiskSystem) (z : ℂ) (hz : z ∈ sys.leftDisk) :

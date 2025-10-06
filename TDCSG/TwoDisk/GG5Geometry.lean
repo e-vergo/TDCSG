@@ -20,6 +20,7 @@ including the key points E, F, G and their properties.
 -/
 
 open Complex Real
+open scoped goldenRatio
 
 namespace TwoDiskSystem
 
@@ -45,7 +46,7 @@ noncomputable def G : ℂ := 2 * F - E
 noncomputable def G' : ℂ := -G
 
 /-- The geometric constraint: |E + 1| = r_c -/
-theorem E_constraint : Complex.abs (E + 1) = r_c := by
+theorem E_constraint : ‖E + 1‖ = r_c := by
   sorry
 
 /-- F lies on the line segment from E' to E. -/
@@ -67,22 +68,22 @@ theorem ordering_on_line :
 
 /-- Key ratio: |E - E'| / |F - F'| = φ -/
 theorem distance_ratio_phi :
-    Complex.abs (E - E') / Complex.abs (F - F') = φ := by
+    ‖E - E'‖ / ‖F - F'‖ = φ := by
   sorry
 
 /-- The distance |F - F'|. -/
 theorem distance_F_F' :
-    ∃ d : ℝ, Complex.abs (F - F') = d := by
+    ∃ d : ℝ, ‖F - F'‖ = d := by
   sorry
 
 /-- The distance |E - G|. -/
 theorem distance_E_G :
-    ∃ d : ℝ, Complex.abs (E - G) = d := by
+    ∃ d : ℝ, ‖E - G‖ = d := by
   sorry
 
 /-- The two translation distances are not rationally related to the total length. -/
 theorem translations_irrational_ratio :
-    Irrational (Complex.abs (E - E') / Complex.abs (F - F')) := by
+    Irrational (‖E - E'‖ / ‖F - F'‖) := by
   sorry
 
 end TwoDiskSystem

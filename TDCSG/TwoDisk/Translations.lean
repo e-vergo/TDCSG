@@ -31,15 +31,15 @@ def IsTranslation (f : ℂ → ℂ) (v : ℂ) : Prop :=
     Points at (-1, 0) are moved but net rotation is 0. -/
 theorem a_inv_b_is_translation_in_intersection (h : sys.r₁ ≥ 2 ∧ sys.r₂ ≥ 2) :
     ∃ v : ℂ, ∀ z ∈ sys.diskIntersection,
-      sys.applyGroupElement (FreeGroup.of 0)⁻¹ (sys.applyGroupElement (FreeGroup.of 1) z) = z + v := by
+      applyGroupElement sys (FreeGroup.of 0)⁻¹ (applyGroupElement sys (FreeGroup.of 1) z) = z + v := by
   sorry
 
 /-- For equal radii and rotation counts, a⁻¹b represents one side of a regular n-gon
     of circumradius 2. -/
 theorem translation_forms_ngon_side (h : sys.n₁ = sys.n₂) (hr : sys.r₁ = sys.r₂) :
-    ∃ v : ℂ, Complex.abs v = 2 * Real.sin (Real.pi / sys.n₁) ∧
+    ∃ v : ℂ, ‖v‖ = 2 * Real.sin (Real.pi / sys.n₁) ∧
       ∀ z ∈ sys.diskIntersection,
-        sys.applyGroupElement (FreeGroup.of 0)⁻¹ (sys.applyGroupElement (FreeGroup.of 1) z) = z + v := by
+        applyGroupElement sys (FreeGroup.of 0)⁻¹ (applyGroupElement sys (FreeGroup.of 1) z) = z + v := by
   sorry
 
 /-- For n > 5, we can construct arbitrarily small translations by taking
@@ -47,8 +47,8 @@ theorem translation_forms_ngon_side (h : sys.n₁ = sys.n₂) (hr : sys.r₁ = s
 theorem arbitrarily_small_translations_large_n (h : sys.n₁ = sys.n₂) (hn : sys.n₁ > 5)
     (hr : sys.r₁ ≥ 4 ∧ sys.r₂ ≥ 4) :
     ∀ ε > 0, ∃ (g : TwoDiskGroup) (v : ℂ),
-      Complex.abs v < ε ∧ Complex.abs v > 0 ∧
-      ∀ z ∈ sys.diskIntersection, sys.applyGroupElement g z = z + v := by
+      ‖v‖ < ε ∧ ‖v‖ > 0 ∧
+      ∀ z ∈ sys.diskIntersection, applyGroupElement sys g z = z + v := by
   sorry
 
 /-- For n = 5, we can construct arbitrarily small translations using
@@ -56,8 +56,8 @@ theorem arbitrarily_small_translations_large_n (h : sys.n₁ = sys.n₂) (hn : s
 theorem arbitrarily_small_translations_n5 (h : sys.n₁ = 5 ∧ sys.n₂ = 5)
     (hr : sys.r₁ ≥ 4 ∧ sys.r₂ ≥ 4) :
     ∀ ε > 0, ∃ (g : TwoDiskGroup) (v : ℂ),
-      Complex.abs v < ε ∧ Complex.abs v > 0 ∧
-      ∀ z ∈ sys.diskIntersection, sys.applyGroupElement g z = z + v := by
+      ‖v‖ < ε ∧ ‖v‖ > 0 ∧
+      ∀ z ∈ sys.diskIntersection, applyGroupElement sys g z = z + v := by
   sorry
 
 end TwoDiskSystem

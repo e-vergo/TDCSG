@@ -43,7 +43,7 @@ theorem case1_transformation :
     ∀ z : ℂ, ∃ t : ℝ, 0 ≤ t ∧ t ≤ 1 →
       z = E' + t • (F' - E') →
       ∃ s : ℝ, 0 ≤ s ∧ s ≤ 1 ∧
-        sys.applyGroupElement g z = G + s • (F - G) := by
+        applyGroupElement sys g z = G + s • (F - G) := by
   sorry
 
 /-- Case 2: The sequence abab² maps segment F'G' to segment FE. -/
@@ -54,7 +54,7 @@ theorem case2_transformation :
     ∀ z : ℂ, ∃ t : ℝ, 0 ≤ t ∧ t ≤ 1 →
       z = F' + t • (G' - F') →
       ∃ s : ℝ, 0 ≤ s ∧ s ≤ 1 ∧
-        sys.applyGroupElement g z = F + s • (E - F) := by
+        applyGroupElement sys g z = F + s • (E - F) := by
   sorry
 
 /-- Case 3: The sequence abab⁻¹a⁻¹b⁻¹ maps segment G'E to segment E'G. -/
@@ -65,7 +65,7 @@ theorem case3_transformation :
     ∀ z : ℂ, ∃ t : ℝ, 0 ≤ t ∧ t ≤ 1 →
       z = G' + t • (E - G') →
       ∃ s : ℝ, 0 ≤ s ∧ s ≤ 1 ∧
-        sys.applyGroupElement g z = E' + s • (G - E') := by
+        applyGroupElement sys g z = E' + s • (G - E') := by
   sorry
 
 /-- All three transformations keep points within the disk intersection. -/
@@ -78,7 +78,7 @@ theorem transformations_stay_in_intersection :
     let g3 := FreeGroup.of 0 * FreeGroup.of 1 * FreeGroup.of 0 *
               (FreeGroup.of 1)⁻¹ * (FreeGroup.of 0)⁻¹ * (FreeGroup.of 1)⁻¹
     ∀ z ∈ sys.diskIntersection, ∀ g ∈ [g1, g2, g3],
-      sys.applyGroupElement g z ∈ sys.diskIntersection := by
+      applyGroupElement sys g z ∈ sys.diskIntersection := by
   sorry
 
 /-- The three operations allow arbitrary movement along E'E. -/
@@ -86,13 +86,13 @@ theorem can_move_arbitrarily_on_segment :
     let sys := GG5_critical
     ∀ ε > 0, ∀ target : ℂ,
       (∃ t : ℝ, 0 ≤ t ∧ t ≤ 1 ∧ target = E' + t • (E - E')) →
-      ∃ g : TwoDiskGroup, Complex.abs (sys.applyGroupElement g 0 - target) < ε := by
+      ∃ g : TwoDiskGroup, ‖applyGroupElement sys g 0 - target‖ < ε := by
   sorry
 
 /-- The origin has an infinite orbit. -/
 theorem origin_infinite_orbit :
     let sys := GG5_critical
-    Set.Infinite (sys.orbit 0) := by
+    Set.Infinite (orbit sys 0) := by
   sorry
 
 /-- Theorem 2: GG₅ is infinite at r = √(3 + φ). -/

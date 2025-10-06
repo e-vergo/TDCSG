@@ -20,6 +20,7 @@ introduced in the paper "Two-Disk Compound Symmetry Groups" by Hearn et al.
 -/
 
 open Complex
+open Classical
 
 /-- A two-disk system consists of two overlapping closed disks in the plane,
     centered at (-1, 0) and (1, 0), with specified radii and rotation counts.
@@ -61,14 +62,14 @@ def rightDisk : Set ℂ :=
   Metric.closedBall rightCenter sys.r₂
 
 /-- The angle of rotation for the left disk (clockwise, hence negative) -/
-def leftAngle : ℝ := -2 * Real.pi / sys.n₁
+noncomputable def leftAngle : ℝ := -2 * Real.pi / sys.n₁
 
 /-- The angle of rotation for the right disk (clockwise, hence negative) -/
-def rightAngle : ℝ := -2 * Real.pi / sys.n₂
+noncomputable def rightAngle : ℝ := -2 * Real.pi / sys.n₂
 
 /-- Left disk rotation as multiplication by a unit complex number.
     This rotates points around the left disk center. -/
-def leftRotation (z : ℂ) : ℂ :=
+noncomputable def leftRotation (z : ℂ) : ℂ :=
   if z ∈ sys.leftDisk then
     leftCenter + exp (I * sys.leftAngle) * (z - leftCenter)
   else
@@ -76,7 +77,7 @@ def leftRotation (z : ℂ) : ℂ :=
 
 /-- Right disk rotation as multiplication by a unit complex number.
     This rotates points around the right disk center. -/
-def rightRotation (z : ℂ) : ℂ :=
+noncomputable def rightRotation (z : ℂ) : ℂ :=
   if z ∈ sys.rightDisk then
     rightCenter + exp (I * sys.rightAngle) * (z - rightCenter)
   else

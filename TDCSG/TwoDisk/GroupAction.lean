@@ -30,27 +30,23 @@ variable (sys : TwoDiskSystem)
     and 1 represents the right rotation. -/
 abbrev TwoDiskGroup := FreeGroup (Fin 2)
 
-/-- Apply a group element (sequence of rotations) to a point in the plane. -/
-def applyGroupElement : TwoDiskGroup → ℂ → ℂ
-  | FreeGroup.of 0, z => sys.leftRotation z
-  | FreeGroup.of 1, z => sys.rightRotation z
-  | FreeGroup.of _, z => z  -- impossible case
-  | 1, z => z  -- identity
-  | g * h, z => sys.applyGroupElement h (sys.applyGroupElement g z)
-  | g⁻¹, z => sorry  -- inverse rotation (will implement)
+/-- Apply a group element (sequence of rotations) to a point in the plane.
+    TODO: Full implementation requires proper handling of FreeGroup structure. -/
+noncomputable def applyGroupElement (sys : TwoDiskSystem) (g : TwoDiskGroup) (z : ℂ) : ℂ :=
+  sorry
 
 /-- The orbit of a point under the group action is the set of all points
     reachable by applying group elements. -/
-def orbit (z : ℂ) : Set ℂ :=
-  {w | ∃ g : TwoDiskGroup, sys.applyGroupElement g z = w}
+def orbit (sys : TwoDiskSystem) (z : ℂ) : Set ℂ :=
+  {w | ∃ g : TwoDiskGroup, applyGroupElement sys g z = w}
 
 /-- A two-disk system has a finite group if all orbits are finite. -/
-def IsFiniteGroup : Prop :=
-  ∀ z : ℂ, Set.Finite (sys.orbit z)
+def IsFiniteGroup (sys : TwoDiskSystem) : Prop :=
+  ∀ z : ℂ, Set.Finite (orbit sys z)
 
 /-- A two-disk system has an infinite group if some orbit is infinite. -/
-def IsInfiniteGroup : Prop :=
-  ∃ z : ℂ, Set.Infinite (sys.orbit z)
+def IsInfiniteGroup (sys : TwoDiskSystem) : Prop :=
+  ∃ z : ℂ, Set.Infinite (orbit sys z)
 
 /-- Key lemma: If a point starts in the left disk, after left rotation
     it stays in the left disk. -/
@@ -79,14 +75,14 @@ lemma rightRotation_outside_rightDisk (z : ℂ) (hz : z ∉ sys.rightDisk) :
 /-- General lemma: Points that are moved by the group stay within the disk union.
     This is a fundamental property that applies throughout the formalization. -/
 theorem points_stay_in_union (z : ℂ) (g : TwoDiskGroup) :
-    sys.applyGroupElement g z ≠ z → sys.applyGroupElement g z ∈ sys.diskUnion := by
+    applyGroupElement sys g z ≠ z → applyGroupElement sys g z ∈ sys.diskUnion := by
   sorry
 
 /-- If a point is in the intersection and we apply a bounded sequence of moves,
     it can stay in the intersection. This is crucial for Theorem 2. -/
 theorem intersection_points_can_stay_bounded (z : ℂ) (hz : z ∈ sys.diskIntersection)
     (g : TwoDiskGroup) :
-    sys.applyGroupElement g z ∈ sys.diskUnion := by
+    applyGroupElement sys g z ∈ sys.diskUnion := by
   sorry
 
 end TwoDiskSystem
