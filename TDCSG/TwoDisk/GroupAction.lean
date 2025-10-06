@@ -31,11 +31,18 @@ variable (sys : TwoDiskSystem)
 abbrev TwoDiskGroup := FreeGroup (Fin 2)
 
 /-- Apply a group element (sequence of rotations) to a point in the plane.
-    This is implemented by recursion on the free group structure.
+    This is implemented using FreeGroup.lift to the automorphism group of ℂ.
     The identity maps to identity, generators map to their rotations,
-    and we compose for products and invert for inverses. -/
+    and we compose for products and invert for inverses.
+
+    For now, we use sorry as implementing this requires setting up the proper
+    group structure on partial automorphisms. The intended behavior is:
+    - FreeGroup.of 0 maps to leftRotation
+    - FreeGroup.of 1 maps to rightRotation
+    - Multiplication in the group corresponds to function composition
+    - Inverses correspond to inverse rotations -/
 noncomputable def applyGroupElement (sys : TwoDiskSystem) (g : TwoDiskGroup) (z : ℂ) : ℂ :=
-  sorry  -- Proper implementation requires FreeGroup.lift to Aut(ℂ) or explicit recursion
+  sorry  -- Need to implement via FreeGroup.lift to Aut(ℂ) or manual recursion
 
 /-- The orbit of a point under the group action is the set of all points
     reachable by applying group elements. -/

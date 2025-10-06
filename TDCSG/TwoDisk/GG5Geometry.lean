@@ -66,13 +66,19 @@ theorem G'_eq_neg_G : G' = -G := rfl
 
 /-- The geometric constraint: |E + 1| = r_c -/
 theorem E_constraint : ‖E + 1‖ = r_c := by
-  unfold E r_c
+  unfold E r_c ζ₅ ζ
   -- E = ζ₅ - ζ₅², so E + 1 = 1 + ζ₅ - ζ₅²
-  -- We need to show ‖1 + ζ₅ - ζ₅²‖ = √(3 + φ)
-  -- This requires expanding using properties of ζ₅ and computing the norm
-  -- The calculation involves using that ζ₅ = e^(2πi/5) = cos(2π/5) + i*sin(2π/5)
-  -- and the specific values of cos(2π/5) and sin(2π/5) in terms of φ
-  sorry  -- Requires detailed calculation with fifth roots of unity
+  -- We need to show ‖1 + exp(2πi/5) - exp(4πi/5)‖ = √(3 + φ)
+
+  -- Key facts:
+  -- cos(2π/5) = (φ - 1)/2 = (√5 - 1)/4
+  -- sin(2π/5) = √(10 + 2√5)/4
+  -- cos(4π/5) = -cos(π/5) = -(1 + √5)/4
+  -- sin(4π/5) = sin(π/5) = √(10 - 2√5)/4
+
+  -- This is a known result in the theory of regular pentagons
+  -- The calculation is intricate and involves the golden ratio
+  sorry  -- Requires extensive trigonometric and algebraic computation
 
 /-- F lies on the line segment from E' to E. -/
 theorem F_on_segment_E'E :
