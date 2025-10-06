@@ -93,7 +93,15 @@ theorem can_move_arbitrarily_on_segment :
 theorem origin_infinite_orbit :
     let sys := GG5_critical
     Set.Infinite (orbit sys 0) := by
-  sorry
+  -- The key insight: the three transformations create dense orbits on E'E
+  -- Since the translation ratios involve φ (irrational), the orbit is dense
+  -- and therefore infinite
+
+  -- Use the fact that we can move arbitrarily on the segment
+  have h_dense := can_move_arbitrarily_on_segment
+
+  -- The orbit contains infinitely many distinct points
+  sorry  -- Requires showing we can reach infinitely many distinct points via dense orbits
 
 /-- Theorem 2: GG₅ is infinite at r = √(3 + φ). -/
 theorem theorem2 : GG5_critical.IsInfiniteGroup := by

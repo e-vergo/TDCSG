@@ -31,16 +31,22 @@ def IsTranslation (f : ℂ → ℂ) (v : ℂ) : Prop :=
     Points at (-1, 0) are moved but net rotation is 0. -/
 theorem a_inv_b_is_translation_in_intersection (h : sys.r₁ ≥ 2 ∧ sys.r₂ ≥ 2) :
     ∃ v : ℂ, ∀ z ∈ sys.diskIntersection,
-      applyGroupElement sys (FreeGroup.of 0)⁻¹ (applyGroupElement sys (FreeGroup.of 1) z) = z + v := by
-  sorry
+      applyGroupElement sys ((FreeGroup.of 0)⁻¹ * FreeGroup.of 1) z = z + v := by
+  -- The sequence a⁻¹b applies right rotation followed by inverse left rotation
+  -- For points in the intersection, this creates a translation
+  -- The translation vector v depends on the rotation angles
+  sorry  -- This requires expanding the group element application and algebraic simplification
 
 /-- For equal radii and rotation counts, a⁻¹b represents one side of a regular n-gon
     of circumradius 2. -/
 theorem translation_forms_ngon_side (h : sys.n₁ = sys.n₂) (hr : sys.r₁ = sys.r₂) :
     ∃ v : ℂ, ‖v‖ = 2 * Real.sin (Real.pi / sys.n₁) ∧
       ∀ z ∈ sys.diskIntersection,
-        applyGroupElement sys (FreeGroup.of 0)⁻¹ (applyGroupElement sys (FreeGroup.of 1) z) = z + v := by
-  sorry
+        applyGroupElement sys ((FreeGroup.of 0)⁻¹ * FreeGroup.of 1) z = z + v := by
+  -- When n₁ = n₂ and r₁ = r₂, the translation forms a regular n-gon side
+  -- The distance between disk centers is 2, and rotation angles are 2π/n
+  -- The translation vector connects two vertices of a regular n-gon
+  sorry  -- This requires showing the chord length formula and translation property
 
 /-- For n > 5, we can construct arbitrarily small translations by taking
     successive polygon vertices. -/

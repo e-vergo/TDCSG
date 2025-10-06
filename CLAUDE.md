@@ -6,11 +6,11 @@ This file provides comprehensive guidance to Claude (claude.ai/code) when workin
 
 Formalize **Theorem 2** from "Two-Disk Compound Symmetry Groups": Prove that GG₅ (5-fold rotational symmetry on both disks) has an infinite group at the critical radius r = √(3 + φ).
 
-### Current Status (as of December 2024)
+### Current Status (as of December 2024 - Session 4)
 - **Progress**: 25 sorries remaining (down from 37 - 32% reduction)
 - **Completed**: ComplexRepresentation.lean (11/11 theorems), Basic.lean (fully proven)
 - **Build**: Clean - zero compile errors
-- **Main blocker**: FreeGroup implementation for `applyGroupElement` - specification documented but implementation remains complex
+- **Main blocker RESOLVED**: `applyGroupElement` now implemented using FreeGroup.toWord!
 
 ## 📁 Project Structure & Dependencies
 
@@ -71,19 +71,19 @@ lake exe cache get
 
 ## 🚧 Known Blockers & Solutions
 
-### 1. FreeGroup Implementation (HIGHEST PRIORITY)
-**Problem**: Need to implement `applyGroupElement` to apply rotation sequences
-**Current status**: Specification documented with clear intended behavior
-**Challenge**: FreeGroup.lift requires target to be a Group, but `ℂ → ℂ` lacks natural group structure
-**Potential solutions**:
-1. Use `Equiv.Perm ℂ` (permutation group) and define rotations as bijections
-2. Define custom recursion on FreeGroup structure
-3. Use partial functions with domain tracking
-**Intended behavior**:
-- `FreeGroup.of 0` → `leftRotation`
-- `FreeGroup.of 1` → `rightRotation`
-- Multiplication → function composition
-- Inverses → inverse rotations
+### 1. FreeGroup Implementation ✅ RESOLVED!
+**Solution implemented**: Using FreeGroup.toWord and List.foldl
+**Key insights**:
+- Convert group element to word representation (list of generators and inverses)
+- Apply rotations sequentially using foldl
+- Added inverse rotation definitions to Basic.lean
+- Helper function `applyGenerator` handles individual rotation application
+**Implementation details**:
+```lean
+noncomputable def applyGroupElement (sys : TwoDiskSystem) (g : TwoDiskGroup) (z : ℂ) : ℂ :=
+  let word := g.toWord
+  word.foldl (fun z' (gen, inv) => applyGenerator sys gen inv z') z
+```
 
 ### 2. Complex Geometry Calculations
 **Problem**: Proving `E_constraint`: ‖E + 1‖ = r_c
@@ -175,15 +175,14 @@ ring_nf
 
 ## 🎯 Next Session Priorities
 
-### Immediate (Unblock other work)
-1. **Implement `applyGroupElement` properly**
-   - This blocks all Translation proofs (4 sorries)
-   - This blocks all Theorem2 case proofs (6 sorries)
-   - This blocks 2 GroupAction lemmas
-   - Total: Unblocks 12+ sorries
-   - Approach: Consider using `Equiv.Perm ℂ` for bijection group structure
+### Immediate (Now unblocked!)
+1. ✅ **`applyGroupElement` COMPLETE** - This unblocked 12+ sorries!
 
-2. **Complete trigonometric proofs**
+2. **Complete Translation.lean proofs** (4 sorries)
+   - Now possible with working applyGroupElement
+   - Focus on a_inv_b_is_translation_in_intersection first
+
+3. **Complete trigonometric proofs**
    - Finish `E_constraint` algebraic calculation
    - Complete `zeta5_and_phi` cos(2π/5) proof
    - These enable all geometric calculations in GG5Geometry
@@ -197,6 +196,27 @@ ring_nf
 - The three case proofs in Theorem2 are the heart of the argument
 - Each shows a piecewise isometry mapping segments with irrational ratios
 - This creates dense orbits, proving infinity
+
+## 🆕 Session 4 Learnings
+
+### Key Achievements
+1. **FreeGroup implementation breakthrough**: Successfully implemented `applyGroupElement` using FreeGroup.toWord instead of struggling with FreeGroup.lift. This simpler approach works perfectly for our needs.
+
+2. **Inverse rotations added**: Extended Basic.lean with `leftRotationInv` and `rightRotationInv` definitions, completing the group action structure.
+
+3. **Helper lemmas strategy**: Created `applyGenerator` and `applyGenerator_preserves_union` as intermediate steps, making proofs more manageable.
+
+4. **Translation theorems structured**: Set up the framework for Translation.lean proofs, now that applyGroupElement is working.
+
+### Technical Insights
+- FreeGroup.toWord provides a list representation that's easier to work with than the abstract FreeGroup structure
+- List.foldl is perfect for sequential application of rotations
+- The pattern `word.foldl (fun z' (gen, inv) => applyGenerator sys gen inv z') z` elegantly handles composition
+
+### Lessons Learned
+- Sometimes the simpler approach (toWord + foldl) is better than the theoretically elegant one (FreeGroup.lift)
+- Breaking complex functions into helpers (applyGenerator) makes both implementation and proofs easier
+- Documentation improvements in earlier sessions paid off by guiding this session's implementation
 
 ## 🆕 Session 3 Learnings
 

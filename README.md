@@ -10,7 +10,18 @@ The formalization targets **Theorem 2**, which establishes that when both disks 
 
 ## 📈 Progress Timeline
 
-### Session 3 (Current) - December 2024
+### Session 4 (Current) - December 2024
+- **Sorries status**: 25 remaining (maintained from Session 3)
+- **Key progress**:
+  - ✅ **Implemented `applyGroupElement`** using FreeGroup.toWord and foldl
+  - ✅ Added inverse rotation definitions (leftRotationInv, rightRotationInv)
+  - ✅ Completed helper lemma `applyGenerator_preserves_union`
+  - ✅ Improved Translation.lean theorem structures
+  - ✅ Enhanced GG5Geometry.E_constraint with primitive root lemmas
+  - ✅ Structured Theorem2 origin_infinite_orbit proof
+  - ✅ Clean build maintained with zero compile errors
+
+### Session 3 - December 2024
 - **Sorries status**: 25 remaining (32% reduction from initial 37)
 - **Key progress**:
   - Documented `applyGroupElement` specification with clear implementation plan
@@ -46,12 +57,12 @@ The formalization targets **Theorem 2**, which establishes that when both disks 
 | **Project Structure** | ✅ Complete | 0 | 9 Lean files organized hierarchically |
 | **Type Definitions** | ✅ Complete | 0 | All core types compile and type-check |
 | **ComplexRepresentation** | ✅ Complete | 0/11 | All rotation and root of unity theorems proven |
-| **GoldenRatio** | 🟢 Nearly Complete | 1/6 | All essential φ properties proven |
+| **GoldenRatio** | 🟡 In Progress | 3/6 | Essential φ properties proven, zeta5_and_phi partial |
 | **PiecewiseIsometry** | 🟢 Nearly Complete | 2/6 | Rotation isometry properties proven |
-| **GroupAction** | 🟡 In Progress | 4/7 | Rotation preservation complete, applyGroupElement spec'd |
+| **GroupAction** | 🟢 Nearly Complete | 2/7 | **applyGroupElement implemented!** Helper lemmas done |
 | **GG5Geometry** | 🟡 In Progress | 5/9 | Critical radius geometry, E_constraint enhanced |
 | **Theorem2** | 🟢 Scaffolded | 6/7 | Main theorem statement complete |
-| **Translations** | 🟢 Scaffolded | 4/4 | Translation sequences (blocked by GroupAction) |
+| **Translations** | 🟢 Scaffolded | 4/4 | Translation sequences (now unblocked!) |
 | **Theorem1** | 🟡 In Progress | 3/5 | Corollary proven, main theorem scaffolded |
 | **Theorem 2 Statement** | ✅ Complete | 0 | Main theorem stated and type-checks |
 

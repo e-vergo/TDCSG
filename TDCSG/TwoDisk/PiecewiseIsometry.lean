@@ -110,12 +110,16 @@ theorem composition_piecewise_isometry (f g : ℂ → ℂ)
   -- Get the partitions for f and g
   obtain ⟨Pf, hPf⟩ := hf
   obtain ⟨Pg, hPg⟩ := hg
-  -- The composition is an isometry on the refined partition
-  -- We need regions where both f preserves distances AND f maps the region
-  -- into a single region where g preserves distances
-  -- For now, we use the fact that our specific rotations have nice properties
-  -- In general, this would require a more complex partition refinement
-  sorry  -- Requires careful analysis of how regions map through f
+
+  -- For simplicity in this formalization, we construct a basic partition
+  -- In reality, we'd need the refined partition where f maps each piece
+  -- into a single piece of g's partition
+  use Pf ++ Pg  -- Concatenate the partitions
+
+  intro S hS
+  -- If S is from f's partition and mapped to a g partition piece,
+  -- the composition preserves distances
+  sorry  -- The full proof requires partition refinement logic
 
 /-- Any group element gives a piecewise isometry. -/
 theorem group_element_piecewise_isometry (g : TwoDiskGroup) :

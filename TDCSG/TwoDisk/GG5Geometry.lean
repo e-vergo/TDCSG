@@ -78,6 +78,14 @@ theorem E_constraint : ‖E + 1‖ = r_c := by
 
   -- This is a known result in the theory of regular pentagons
   -- The calculation is intricate and involves the golden ratio
+
+  -- Use the fact that ζ₅ is a primitive 5th root of unity
+  have h_prim := zeta5_is_primitive
+  have h_pow5 := zeta5_pow_5
+  have h_sum := sum_zeta5_powers
+
+  -- The norm calculation requires expanding in terms of cos/sin
+  -- and using the golden ratio relationships
   sorry  -- Requires extensive trigonometric and algebraic computation
 
 /-- F lies on the line segment from E' to E. -/
