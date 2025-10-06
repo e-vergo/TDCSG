@@ -83,6 +83,20 @@ noncomputable def rightRotation (z : ℂ) : ℂ :=
   else
     z
 
+/-- Inverse left disk rotation. Rotates in the opposite direction. -/
+noncomputable def leftRotationInv (z : ℂ) : ℂ :=
+  if z ∈ sys.leftDisk then
+    leftCenter + exp (-I * sys.leftAngle) * (z - leftCenter)
+  else
+    z
+
+/-- Inverse right disk rotation. Rotates in the opposite direction. -/
+noncomputable def rightRotationInv (z : ℂ) : ℂ :=
+  if z ∈ sys.rightDisk then
+    rightCenter + exp (-I * sys.rightAngle) * (z - rightCenter)
+  else
+    z
+
 /-- Notation: GG_{n₁,n₂}(r₁,r₂) -/
 notation "GG_{" n₁ "," n₂ "}(" r₁ "," r₂ ")" =>
   TwoDiskSystem.mk n₁ n₂ r₁ r₂ (by omega) (by omega) (by linarith) (by linarith)

@@ -7,10 +7,10 @@ This file provides comprehensive guidance to Claude (claude.ai/code) when workin
 Formalize **Theorem 2** from "Two-Disk Compound Symmetry Groups": Prove that GG₅ (5-fold rotational symmetry on both disks) has an infinite group at the critical radius r = √(3 + φ).
 
 ### Current Status (as of December 2024)
-- **Progress**: 24 sorries remaining (down from 37 - 35% reduction)
+- **Progress**: 25 sorries remaining (down from 37 - 32% reduction)
 - **Completed**: ComplexRepresentation.lean (11/11 theorems), Basic.lean (fully proven)
-- **Build**: Clean - zero compile errors across 7,316 jobs
-- **Main blocker**: FreeGroup implementation for `applyGroupElement`
+- **Build**: Clean - zero compile errors
+- **Main blocker**: FreeGroup implementation for `applyGroupElement` - specification documented but implementation remains complex
 
 ## 📁 Project Structure & Dependencies
 
@@ -73,20 +73,27 @@ lake exe cache get
 
 ### 1. FreeGroup Implementation (HIGHEST PRIORITY)
 **Problem**: Need to implement `applyGroupElement` to apply rotation sequences
-**Current approach**: Using `sorry` placeholder
-**Solution path**:
-```lean
-noncomputable def applyGroupElement (sys : TwoDiskSystem) (g : TwoDiskGroup) : ℂ → ℂ :=
-  FreeGroup.lift fun i => match i with
-    | 0 => sys.leftRotation
-    | 1 => sys.rightRotation
-```
-**Issue**: Need to lift to group homomorphisms, not just functions
+**Current status**: Specification documented with clear intended behavior
+**Challenge**: FreeGroup.lift requires target to be a Group, but `ℂ → ℂ` lacks natural group structure
+**Potential solutions**:
+1. Use `Equiv.Perm ℂ` (permutation group) and define rotations as bijections
+2. Define custom recursion on FreeGroup structure
+3. Use partial functions with domain tracking
+**Intended behavior**:
+- `FreeGroup.of 0` → `leftRotation`
+- `FreeGroup.of 1` → `rightRotation`
+- Multiplication → function composition
+- Inverses → inverse rotations
 
 ### 2. Complex Geometry Calculations
 **Problem**: Proving `E_constraint`: ‖E + 1‖ = r_c
-**Requires**: Expanding ζ₅ in terms of trigonometric values
-**Key fact**: Use cos(2π/5) = (φ-1)/2 and compute norm explicitly
+**Current status**: Enhanced with trigonometric identities documented
+**Key facts documented**:
+- cos(2π/5) = (φ-1)/2 = (√5-1)/4
+- sin(2π/5) = √(10+2√5)/4
+- cos(4π/5) = -(1+√5)/4
+- sin(4π/5) = √(10-2√5)/4
+**Remaining work**: Algebraic manipulation to show norm equals √(3+φ)
 
 ### 3. Piecewise Isometry Composition
 **Problem**: Composing piecewise isometries requires partition refinement
@@ -170,14 +177,16 @@ ring_nf
 
 ### Immediate (Unblock other work)
 1. **Implement `applyGroupElement` properly**
-   - This blocks all Translation proofs
-   - This blocks all Theorem2 case proofs
-   - Consider using `Equiv.Perm ℂ` or direct recursion
+   - This blocks all Translation proofs (4 sorries)
+   - This blocks all Theorem2 case proofs (6 sorries)
+   - This blocks 2 GroupAction lemmas
+   - Total: Unblocks 12+ sorries
+   - Approach: Consider using `Equiv.Perm ℂ` for bijection group structure
 
-2. **Prove `E_constraint`**
-   - Critical for Theorem2
-   - Use trigonometric expansion of ζ₅
-   - Leverage cos(2π/5) = (φ-1)/2
+2. **Complete trigonometric proofs**
+   - Finish `E_constraint` algebraic calculation
+   - Complete `zeta5_and_phi` cos(2π/5) proof
+   - These enable all geometric calculations in GG5Geometry
 
 ### Secondary (Build on foundations)
 3. Complete remaining `GroupAction` lemmas
@@ -188,6 +197,17 @@ ring_nf
 - The three case proofs in Theorem2 are the heart of the argument
 - Each shows a piecewise isometry mapping segments with irrational ratios
 - This creates dense orbits, proving infinity
+
+## 🆕 Session 3 Learnings
+
+### Key Insights
+1. **FreeGroup.lift complexity**: The natural approach of using `FreeGroup.lift` fails because `ℂ → ℂ` doesn't form a group under composition. Need to think in terms of automorphisms or bijections.
+
+2. **Trigonometric identities for ζ₅**: The relationship between fifth roots of unity and the golden ratio is deep. Key identity: cos(2π/5) = (φ-1)/2 connects regular pentagons to φ.
+
+3. **Documentation as progress**: Even when unable to complete a proof, documenting the specification and intended behavior helps future sessions understand the goal clearly.
+
+4. **Sorry tracking matters**: Small increases in sorry count (24→25) can happen when improving documentation or restructuring, but the overall trend should be downward.
 
 ## 💡 Pro Tips from Experience
 

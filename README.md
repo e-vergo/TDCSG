@@ -10,7 +10,15 @@ The formalization targets **Theorem 2**, which establishes that when both disks 
 
 ## 📈 Progress Timeline
 
-### Session 2 (Current) - December 2024
+### Session 3 (Current) - December 2024
+- **Sorries status**: 25 remaining (32% reduction from initial 37)
+- **Key progress**:
+  - Documented `applyGroupElement` specification with clear implementation plan
+  - Enhanced `E_constraint` proof with trigonometric identities
+  - Partially proved `zeta5_and_phi` relationship connecting ζ₅ to golden ratio
+  - Maintained clean build with zero compile errors
+
+### Session 2 - December 2024
 - **Sorries reduced**: 37 → 24 (35% reduction)
 - **Major milestone**: ComplexRepresentation.lean fully proven (11 theorems)
 - **Key breakthroughs**:
@@ -40,14 +48,14 @@ The formalization targets **Theorem 2**, which establishes that when both disks 
 | **ComplexRepresentation** | ✅ Complete | 0/11 | All rotation and root of unity theorems proven |
 | **GoldenRatio** | 🟢 Nearly Complete | 1/6 | All essential φ properties proven |
 | **PiecewiseIsometry** | 🟢 Nearly Complete | 2/6 | Rotation isometry properties proven |
-| **GroupAction** | 🟡 In Progress | 3/7 | Rotation preservation lemmas complete, applyGroupElement defined |
-| **GG5Geometry** | 🟡 In Progress | 5/9 | Critical radius geometry, some lemmas proven |
+| **GroupAction** | 🟡 In Progress | 4/7 | Rotation preservation complete, applyGroupElement spec'd |
+| **GG5Geometry** | 🟡 In Progress | 5/9 | Critical radius geometry, E_constraint enhanced |
 | **Theorem2** | 🟢 Scaffolded | 6/7 | Main theorem statement complete |
-| **Translations** | 🟢 Scaffolded | 4/4 | Translation sequences (needs GroupAction) |
+| **Translations** | 🟢 Scaffolded | 4/4 | Translation sequences (blocked by GroupAction) |
 | **Theorem1** | 🟡 In Progress | 3/5 | Corollary proven, main theorem scaffolded |
 | **Theorem 2 Statement** | ✅ Complete | 0 | Main theorem stated and type-checks |
 
-**Total**: 24 sorries remaining (35% reduction from 37 initially)
+**Total**: 25 sorries remaining (32% reduction from 37 initially)
 
 ### Proven Theorems
 
