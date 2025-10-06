@@ -1,0 +1,63 @@
+import TDCSG.TwoDisk.PiecewiseIsometry
+
+/-!
+# Translations in Two-Disk Systems
+
+This file proves that certain sequences in two-disk systems act as translations,
+which is crucial for proving Theorem 1.
+
+## Main results
+
+* `a_inv_b_is_translation`: The sequence a⁻¹b acts as a translation
+* `translations_form_polygon`: Translations form sides of a regular n-gon
+* `arbitrarily_small_translations`: For n ≥ 5, can construct arbitrarily small translations
+
+## References
+
+* Theorem 1 proof in "Two-Disk Compound Symmetry Groups"
+-/
+
+open Complex
+
+namespace TwoDiskSystem
+
+variable (sys : TwoDiskSystem)
+
+/-- A function is a translation if it shifts all points by a constant vector. -/
+def IsTranslation (f : ℂ → ℂ) (v : ℂ) : Prop :=
+  ∀ z : ℂ, f z = z + v
+
+/-- The sequence a⁻¹b represents a translation for points in the disk intersection.
+    Points at (-1, 0) are moved but net rotation is 0. -/
+theorem a_inv_b_is_translation_in_intersection (h : sys.r₁ ≥ 2 ∧ sys.r₂ ≥ 2) :
+    ∃ v : ℂ, ∀ z ∈ sys.diskIntersection,
+      sys.applyGroupElement (FreeGroup.of 0)⁻¹ (sys.applyGroupElement (FreeGroup.of 1) z) = z + v := by
+  sorry
+
+/-- For equal radii and rotation counts, a⁻¹b represents one side of a regular n-gon
+    of circumradius 2. -/
+theorem translation_forms_ngon_side (h : sys.n₁ = sys.n₂) (hr : sys.r₁ = sys.r₂) :
+    ∃ v : ℂ, Complex.abs v = 2 * Real.sin (Real.pi / sys.n₁) ∧
+      ∀ z ∈ sys.diskIntersection,
+        sys.applyGroupElement (FreeGroup.of 0)⁻¹ (sys.applyGroupElement (FreeGroup.of 1) z) = z + v := by
+  sorry
+
+/-- For n > 5, we can construct arbitrarily small translations by taking
+    successive polygon vertices. -/
+theorem arbitrarily_small_translations_large_n (h : sys.n₁ = sys.n₂) (hn : sys.n₁ > 5)
+    (hr : sys.r₁ ≥ 4 ∧ sys.r₂ ≥ 4) :
+    ∀ ε > 0, ∃ (g : TwoDiskGroup) (v : ℂ),
+      Complex.abs v < ε ∧ Complex.abs v > 0 ∧
+      ∀ z ∈ sys.diskIntersection, sys.applyGroupElement g z = z + v := by
+  sorry
+
+/-- For n = 5, we can construct arbitrarily small translations using
+    pentagram construction. -/
+theorem arbitrarily_small_translations_n5 (h : sys.n₁ = 5 ∧ sys.n₂ = 5)
+    (hr : sys.r₁ ≥ 4 ∧ sys.r₂ ≥ 4) :
+    ∀ ε > 0, ∃ (g : TwoDiskGroup) (v : ℂ),
+      Complex.abs v < ε ∧ Complex.abs v > 0 ∧
+      ∀ z ∈ sys.diskIntersection, sys.applyGroupElement g z = z + v := by
+  sorry
+
+end TwoDiskSystem

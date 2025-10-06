@@ -4,14 +4,24 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-TDCSG is a Lean 4 project for formalizing mathematics papers, built with mathlib.
+TDCSG is a Lean 4 project for formalizing mathematics papers, built with mathlib. Currently formalizing "Two-Disk Compound Symmetry Groups" by Hearn et al., with a focus on Theorem 2.
 
 ## Project Structure
 
 - `TDCSG.lean` - Root module that imports all library modules
-- `TDCSG/` - Source directory for formalization work
+- `TDCSG/TwoDisk/` - Formalization of two-disk compound symmetry groups
+  - `Basic.lean` - Core definitions (TwoDiskSystem, rotations, disks)
+  - `GroupAction.lean` - Group actions, orbits, finiteness
+  - `PiecewiseIsometry.lean` - Piecewise isometry properties
+  - `Translations.lean` - Translation sequences and polygon construction
+  - `Theorem1.lean` - Characterization of infinite groups
+  - `ComplexRepresentation.lean` - Complex plane and roots of unity
+  - `GoldenRatio.lean` - Golden ratio properties
+  - `GG5Geometry.lean` - GG₅ specific geometry at critical radius
+  - `Theorem2.lean` - Main result: GG₅ is infinite at r = √(3 + φ)
 - `lakefile.lean` - Lake build configuration (Lean's build system)
 - `lean-toolchain` - Specifies the Lean version to use
+- `two-disk_compound_symmetry_groups.tex` - Source paper being formalized
 
 ## Common Commands
 
