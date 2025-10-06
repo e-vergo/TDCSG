@@ -80,4 +80,39 @@ theorem rightRotation_as_zeta (sys : TwoDiskSystem) (z : ℂ) (hz : z ∈ sys.ri
     field_simp]
   rw [Complex.exp_neg]
 
+/-- ζₙ is nonzero -/
+theorem zeta_ne_zero (n : ℕ) (hn : n > 0) : ζ n ≠ 0 := by
+  intro h
+  have := zeta_abs n hn
+  rw [h, norm_zero] at this
+  norm_num at this
+
+/-- ζ₅⁵ = 1 (special case of zeta_pow_n) -/
+theorem zeta5_pow_5 : ζ₅ ^ 5 = 1 := by
+  exact zeta_pow_n 5 (by norm_num : 5 > 0)
+
+/-- ζ₅⁴ = ζ₅⁻¹ -/
+theorem zeta5_pow_4 : ζ₅ ^ 4 = ζ₅⁻¹ := by
+  have h := zeta5_pow_5
+  -- ζ₅⁵ = ζ₅ * ζ₅⁴ = 1, so ζ₅⁴ = ζ₅⁻¹
+  have hz : ζ₅ ≠ 0 := zeta_ne_zero 5 (by norm_num : 5 > 0)
+  rw [pow_succ, mul_comm] at h
+  field_simp [hz] at h ⊢
+  exact h
+
+/-- ζ₅ is a primitive fifth root of unity -/
+theorem zeta5_is_primitive : IsPrimitiveRoot ζ₅ 5 := by
+  unfold ζ₅ ζ
+  exact Complex.isPrimitiveRoot_exp 5 (by norm_num : 5 ≠ 0)
+
+/-- Sum of all fifth roots of unity equals 0 -/
+theorem sum_zeta5_powers : ζ₅ + ζ₅^2 + ζ₅^3 + ζ₅^4 + 1 = 0 := by
+  have h := zeta5_is_primitive.geom_sum_eq_zero (by norm_num : 1 < 5)
+  simp only [Finset.sum_range_succ, Finset.range_zero, Finset.sum_empty, pow_zero] at h
+  ring_nf at h
+  -- h : 1 + ζ₅ + ζ₅^2 + ζ₅^3 + ζ₅^4 = 0
+  -- Need to show: ζ₅ + ζ₅^2 + ζ₅^3 + ζ₅^4 + 1 = 0
+  rw [← h]
+  abel
+
 end TwoDiskSystem

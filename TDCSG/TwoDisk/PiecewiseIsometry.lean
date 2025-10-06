@@ -110,16 +110,12 @@ theorem composition_piecewise_isometry (f g : ℂ → ℂ)
   -- Get the partitions for f and g
   obtain ⟨Pf, hPf⟩ := hf
   obtain ⟨Pg, hPg⟩ := hg
-  -- The composition is an isometry on the product partition
-  -- For simplicity, use the same partition as f (could be refined)
-  use Pf
-  intro S hS
-  intros z hz w hw
-  simp only [Function.comp_apply]
-  -- Since f is an isometry on S, we have ‖f z - f w‖ = ‖z - w‖
-  have hf_iso := hPf S hS z hz w hw
-  -- We need more structure to complete this proof
-  sorry  -- This requires showing g preserves distances where f maps to
+  -- The composition is an isometry on the refined partition
+  -- We need regions where both f preserves distances AND f maps the region
+  -- into a single region where g preserves distances
+  -- For now, we use the fact that our specific rotations have nice properties
+  -- In general, this would require a more complex partition refinement
+  sorry  -- Requires careful analysis of how regions map through f
 
 /-- Any group element gives a piecewise isometry. -/
 theorem group_element_piecewise_isometry (g : TwoDiskGroup) :

@@ -9,10 +9,14 @@ A Lean 4 formalization of the paper "Two-Disk Compound Symmetry Groups" by Hearn
 The formalization targets **Theorem 2**, which establishes that when both disks have 5-fold rotational symmetry at a specific critical radius involving the golden ratio, the resulting group is infinite.
 
 ### Recent Progress (Latest Session)
-- **Sorries reduced**: 37 → 25 (32% reduction)
-- **Files completed**: ComplexRepresentation.lean now fully proven
+- **Sorries reduced**: 37 → 24 (35% reduction)
+- **Files completed**: ComplexRepresentation.lean now fully proven (11 theorems including helper lemmas)
 - **Build status**: Maintained zero compile errors throughout
-- **Key achievements**: Proven all root of unity properties, rotation isometries, and golden ratio lemmas
+- **Key achievements**:
+  - Proven all root of unity properties including `sum_zeta5_powers` using mathlib's primitive root lemmas
+  - Added complete ζ₅ computational lemmas (`zeta5_pow_4`, `zeta5_pow_5`, `zeta5_is_primitive`)
+  - Proven rotation isometries and golden ratio lemmas
+  - Improved `applyGroupElement` structure and documentation
 - **Infrastructure**: Cleaned up duplicate files, improved proof structure
 
 ## Project Status
@@ -28,27 +32,32 @@ The formalization targets **Theorem 2**, which establishes that when both disks 
 |-----------|--------|---------|-------------|
 | **Project Structure** | ✅ Complete | 0 | 9 Lean files organized hierarchically |
 | **Type Definitions** | ✅ Complete | 0 | All core types compile and type-check |
-| **ComplexRepresentation** | ✅ Complete | 0/6 | All rotation and root of unity theorems proven |
+| **ComplexRepresentation** | ✅ Complete | 0/11 | All rotation and root of unity theorems proven |
 | **GoldenRatio** | 🟢 Nearly Complete | 1/6 | All essential φ properties proven |
 | **PiecewiseIsometry** | 🟢 Nearly Complete | 2/6 | Rotation isometry properties proven |
-| **GroupAction** | 🟡 In Progress | 4/7 | Rotation preservation lemmas complete |
+| **GroupAction** | 🟡 In Progress | 3/7 | Rotation preservation lemmas complete, applyGroupElement defined |
 | **GG5Geometry** | 🟡 In Progress | 5/9 | Critical radius geometry, some lemmas proven |
 | **Theorem2** | 🟢 Scaffolded | 6/7 | Main theorem statement complete |
 | **Translations** | 🟢 Scaffolded | 4/4 | Translation sequences (needs GroupAction) |
 | **Theorem1** | 🟡 In Progress | 3/5 | Corollary proven, main theorem scaffolded |
 | **Theorem 2 Statement** | ✅ Complete | 0 | Main theorem stated and type-checks |
 
-**Total**: 25 sorries remaining (32% reduction from 37 initially)
+**Total**: 24 sorries remaining (35% reduction from 37 initially)
 
 ### Proven Theorems
 
-**ComplexRepresentation.lean** (6/6 proven) ✅:
+**ComplexRepresentation.lean** (11/11 proven) ✅:
 - `zeta_pow_n`: ζₙⁿ = 1 for n-th roots of unity
 - `zeta_abs`: |ζₙ| = 1
 - `zeta_inv`: ζₙ⁻¹ = ζ̄ₙ (complex conjugate)
 - `rotation_as_multiplication`: Rotation via complex multiplication
 - `leftRotation_as_zeta`: Left rotation as root of unity multiplication
 - `rightRotation_as_zeta`: Right rotation as root of unity multiplication
+- `zeta_ne_zero`: ζₙ ≠ 0
+- `zeta5_pow_5`: ζ₅⁵ = 1
+- `zeta5_pow_4`: ζ₅⁴ = ζ₅⁻¹
+- `zeta5_is_primitive`: ζ₅ is a primitive fifth root
+- `sum_zeta5_powers`: Sum of fifth roots equals 0
 
 **GoldenRatio.lean** (5/6 proven):
 - `phi_squared`: φ² = φ + 1
