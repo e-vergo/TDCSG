@@ -47,7 +47,13 @@ theorem theorem1 (sys : TwoDiskSystem) :
       sys'.r₁ = r ∧ sys'.r₂ = r ∧
       sys'.IsInfiniteGroup) ↔
     Nat.lcm sys.n₁ sys.n₂ ∉ ({2, 3, 4, 6} : Set ℕ) := by
-  sorry
+  constructor
+  · -- Forward direction: If there exists an infinite system, then lcm ∉ {2,3,4,6}
+    intro ⟨r, hr, sys', h_n1, h_n2, h_r1, h_r2, h_inf⟩
+    -- This is the necessity direction - would need crystallographic restriction
+    sorry
+  · -- Reverse direction: If lcm ∉ {2,3,4,6}, then there exists an infinite system
+    exact theorem1_sufficiency sys
 
 /-- Corollary: GG_5 has infinite members for some radius. -/
 theorem GG5_has_infinite_member :
@@ -55,6 +61,23 @@ theorem GG5_has_infinite_member :
       sys.n₁ = 5 ∧ sys.n₂ = 5 ∧
       sys.r₁ = r ∧ sys.r₂ = r ∧
       sys.IsInfiniteGroup := by
-  sorry
+  -- Create a system with n₁ = n₂ = 5
+  let sys0 : TwoDiskSystem := {
+    n₁ := 5
+    n₂ := 5
+    r₁ := 1  -- dummy radius
+    r₂ := 1  -- dummy radius
+    n₁_pos := by norm_num
+    n₂_pos := by norm_num
+    r₁_pos := by norm_num
+    r₂_pos := by norm_num
+  }
+  -- lcm(5, 5) = 5 ∉ {2, 3, 4, 6}
+  have h_lcm : Nat.lcm 5 5 ∉ ({2, 3, 4, 6} : Set ℕ)
+  · simp only [Nat.lcm_self, Set.mem_insert_iff, Set.mem_singleton_iff]
+    norm_num
+  -- Apply theorem1_sufficiency
+  obtain ⟨r, hr_pos, sys', h_n1, h_n2, h_r1, h_r2, h_inf⟩ := theorem1_sufficiency sys0 h_lcm
+  use r, hr_pos, sys'
 
 end TwoDiskSystem

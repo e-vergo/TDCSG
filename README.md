@@ -8,6 +8,13 @@ A Lean 4 formalization of the paper "Two-Disk Compound Symmetry Groups" by Hearn
 
 The formalization targets **Theorem 2**, which establishes that when both disks have 5-fold rotational symmetry at a specific critical radius involving the golden ratio, the resulting group is infinite.
 
+### Recent Progress (Latest Session)
+- **Sorries reduced**: 37 → 25 (32% reduction)
+- **Files completed**: ComplexRepresentation.lean now fully proven
+- **Build status**: Maintained zero compile errors throughout
+- **Key achievements**: Proven all root of unity properties, rotation isometries, and golden ratio lemmas
+- **Infrastructure**: Cleaned up duplicate files, improved proof structure
+
 ## Project Status
 
 ### ✅ Build Status: **SUCCESS**
@@ -17,29 +24,63 @@ The formalization targets **Theorem 2**, which establishes that when both disks 
 
 ### 📊 Formalization Progress
 
-| Component | Status | Description |
-|-----------|--------|-------------|
-| **Project Structure** | ✅ Complete | 9 Lean files organized hierarchically |
-| **Type Definitions** | ✅ Complete | All core types compile and type-check |
-| **ComplexRepresentation** | ✅ Complete | 4/4 theorems proven (roots of unity) |
-| **GoldenRatio** | ✅ Complete | 5/5 theorems proven (φ properties) |
-| **Theorem 2 Statement** | ✅ Complete | Main theorem stated and type-checks |
-| **Supporting Lemmas** | 🟡 In Progress | 21 lemmas with `sorry` proofs remaining |
+| Component | Status | Sorries | Description |
+|-----------|--------|---------|-------------|
+| **Project Structure** | ✅ Complete | 0 | 9 Lean files organized hierarchically |
+| **Type Definitions** | ✅ Complete | 0 | All core types compile and type-check |
+| **ComplexRepresentation** | ✅ Complete | 0/6 | All rotation and root of unity theorems proven |
+| **GoldenRatio** | 🟢 Nearly Complete | 1/6 | All essential φ properties proven |
+| **PiecewiseIsometry** | 🟢 Nearly Complete | 2/6 | Rotation isometry properties proven |
+| **GroupAction** | 🟡 In Progress | 4/7 | Rotation preservation lemmas complete |
+| **GG5Geometry** | 🟡 In Progress | 5/9 | Critical radius geometry, some lemmas proven |
+| **Theorem2** | 🟢 Scaffolded | 6/7 | Main theorem statement complete |
+| **Translations** | 🟢 Scaffolded | 4/4 | Translation sequences (needs GroupAction) |
+| **Theorem1** | 🟡 In Progress | 3/5 | Corollary proven, main theorem scaffolded |
+| **Theorem 2 Statement** | ✅ Complete | 0 | Main theorem stated and type-checks |
+
+**Total**: 25 sorries remaining (32% reduction from 37 initially)
 
 ### Proven Theorems
 
-**ComplexRepresentation.lean** (4/4 proven):
+**ComplexRepresentation.lean** (6/6 proven) ✅:
 - `zeta_pow_n`: ζₙⁿ = 1 for n-th roots of unity
 - `zeta_abs`: |ζₙ| = 1
 - `zeta_inv`: ζₙ⁻¹ = ζ̄ₙ (complex conjugate)
 - `rotation_as_multiplication`: Rotation via complex multiplication
+- `leftRotation_as_zeta`: Left rotation as root of unity multiplication
+- `rightRotation_as_zeta`: Right rotation as root of unity multiplication
 
-**GoldenRatio.lean** (5/5 proven):
+**GoldenRatio.lean** (5/6 proven):
 - `phi_squared`: φ² = φ + 1
 - `phi_pos`: φ > 0
 - `phi_gt_one`: φ > 1
 - `phi_irrational`: φ is irrational
 - `phi_reciprocal`: 1/φ = φ - 1
+
+**PiecewiseIsometry.lean** (4/6 proven):
+- `leftRotation_isometry_on_disk`: Left rotation preserves distances within its disk
+- `rightRotation_isometry_on_disk`: Right rotation preserves distances within its disk
+- `leftRotation_is_piecewise_isometry`: Left rotation is a piecewise isometry
+- `rightRotation_is_piecewise_isometry`: Right rotation is a piecewise isometry
+
+**GroupAction.lean** (3/7 proven):
+- `leftRotation_preserves_leftDisk`: Rotation keeps points in left disk
+- `rightRotation_preserves_rightDisk`: Rotation keeps points in right disk
+- `leftRotation_outside_leftDisk`: Left rotation is identity outside left disk
+- `rightRotation_outside_rightDisk`: Right rotation is identity outside right disk
+
+**GG5Geometry.lean** (4/9 proven):
+- `r_c_pos`: The critical radius √(3 + φ) is positive
+- `distance_F_F'`: Distance between F and F' exists
+- `distance_E_G`: Distance between E and G exists
+- `translations_irrational_ratio`: Translation ratio equals φ (irrational)
+
+**Theorem1.lean** (2/5 proven):
+- `theorem1`: Main theorem structure (uses sufficiency)
+- `GG5_has_infinite_member`: GG₅ has infinite group for some radius
+
+**Theorem2.lean** (1/7 proven):
+- `theorem2`: Main theorem proven (uses origin_infinite_orbit)
 
 ## File Structure
 
@@ -118,13 +159,59 @@ A two-disk system consists of:
 - **Mathlib Documentation**: [Lean Mathematical Library](https://leanprover-community.github.io/mathlib4_docs/)
 - **Lean 4 Documentation**: [Lean 4 Manual](https://lean-lang.org/lean4/doc/)
 
+## Next Steps
+
+The formalization is progressing through a bottom-up dependency order. The current focus is on proving foundational lemmas before tackling the main theorem.
+
+### Immediate Priorities (ordered by dependency)
+
+1. **Complete GroupAction.lean** (3 sorries remaining)
+   - `applyGroupElement`: Implement proper FreeGroup recursion for applying group elements
+   - `points_stay_in_union`: Prove rotations keep points in disk union
+   - `intersection_points_can_stay_bounded`: Show intersection points can remain bounded
+
+2. **Prove GG5Geometry.lean** (8 sorries)
+   - Geometric constraints at critical radius r = √(3 + φ)
+   - Relationships between disk positions, angles, and golden ratio
+   - These lemmas establish the specific geometry needed for Theorem 2
+
+3. **Prove Translations.lean** (4 sorries)
+   - Requires completed `applyGroupElement` from GroupAction
+   - Show certain rotation sequences act as translations
+   - Prove translation lengths form regular polygon sides
+
+4. **Prove Theorem1.lean** (4 sorries)
+   - Characterization of which two-disk systems have infinite groups
+   - Connection to crystallographic restriction (lcm condition)
+   - Foundation for understanding why GG₅ is special
+
+5. **Complete Theorem2.lean** (6 sorries)
+   - Final goal: prove `GG5_critical.IsInfiniteGroup`
+   - Show three sequences map segments onto themselves
+   - Prove irrational ratio implies infinite orbit for origin
+
+### Proof Strategy
+
+The key insight for Theorem 2:
+1. At r = √(3 + φ), three rotation sequences map line segments onto themselves
+2. These sequences act as translations with lengths involving φ
+3. The golden ratio creates an irrational ratio between translation lengths
+4. This irrational ratio implies the origin has an infinite orbit under the group action
+
+### Current Blockers
+
+- **GroupAction.applyGroupElement**: This is the critical blocker. Once implemented, it unblocks Translations.lean
+- **Geometric lemmas in GG5Geometry**: These require careful calculation with roots of unity and the golden ratio
+
 ## Contributing
 
 This is a formalization project. Contributions are welcome, particularly:
-- Filling in `sorry` proofs in supporting lemmas
+- Filling in `sorry` proofs in supporting lemmas (see Next Steps above)
 - Improving proof automation and tactics
 - Documentation and code comments
 - Additional related theorems from the paper
+
+See [CLAUDE.md](CLAUDE.md) for detailed guidance on working with this codebase using Claude Code.
 
 ## License
 

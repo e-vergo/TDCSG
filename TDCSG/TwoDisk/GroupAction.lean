@@ -31,9 +31,10 @@ variable (sys : TwoDiskSystem)
 abbrev TwoDiskGroup := FreeGroup (Fin 2)
 
 /-- Apply a group element (sequence of rotations) to a point in the plane.
-    TODO: Full implementation requires proper handling of FreeGroup structure. -/
+    For now we use sorry, but this should be implemented via FreeGroup.lift
+    to the automorphism group of ℂ. -/
 noncomputable def applyGroupElement (sys : TwoDiskSystem) (g : TwoDiskGroup) (z : ℂ) : ℂ :=
-  sorry
+  sorry  -- Implementation requires lifting to Aut(ℂ)
 
 /-- The orbit of a point under the group action is the set of all points
     reachable by applying group elements. -/
@@ -52,13 +53,33 @@ def IsInfiniteGroup (sys : TwoDiskSystem) : Prop :=
     it stays in the left disk. -/
 lemma leftRotation_preserves_leftDisk (z : ℂ) (hz : z ∈ sys.leftDisk) :
     sys.leftRotation z ∈ sys.leftDisk := by
-  sorry
+  unfold leftRotation
+  simp only [leftDisk] at hz ⊢
+  rw [if_pos hz]
+  simp only [Metric.mem_closedBall]
+  rw [dist_comm, Complex.dist_eq]
+  rw [sub_add_eq_sub_sub, sub_self, zero_sub, norm_neg, norm_mul]
+  have h_exp_norm : ‖exp (I * sys.leftAngle)‖ = 1 := by
+    rw [mul_comm I, Complex.norm_exp_ofReal_mul_I]
+  rw [h_exp_norm, one_mul]
+  rw [Metric.mem_closedBall, Complex.dist_eq] at hz
+  exact hz
 
 /-- Key lemma: If a point starts in the right disk, after right rotation
     it stays in the right disk. -/
 lemma rightRotation_preserves_rightDisk (z : ℂ) (hz : z ∈ sys.rightDisk) :
     sys.rightRotation z ∈ sys.rightDisk := by
-  sorry
+  unfold rightRotation
+  simp only [rightDisk] at hz ⊢
+  rw [if_pos hz]
+  simp only [Metric.mem_closedBall]
+  rw [dist_comm, Complex.dist_eq]
+  rw [sub_add_eq_sub_sub, sub_self, zero_sub, norm_neg, norm_mul]
+  have h_exp_norm : ‖exp (I * sys.rightAngle)‖ = 1 := by
+    rw [mul_comm I, Complex.norm_exp_ofReal_mul_I]
+  rw [h_exp_norm, one_mul]
+  rw [Metric.mem_closedBall, Complex.dist_eq] at hz
+  exact hz
 
 /-- If a point is not in a disk, the rotation for that disk leaves it unchanged. -/
 lemma leftRotation_outside_leftDisk (z : ℂ) (hz : z ∉ sys.leftDisk) :
@@ -76,13 +97,18 @@ lemma rightRotation_outside_rightDisk (z : ℂ) (hz : z ∉ sys.rightDisk) :
     This is a fundamental property that applies throughout the formalization. -/
 theorem points_stay_in_union (z : ℂ) (g : TwoDiskGroup) :
     applyGroupElement sys g z ≠ z → applyGroupElement sys g z ∈ sys.diskUnion := by
-  sorry
+  intro h_moved
+  -- The key insight: rotations only move points within their respective disks,
+  -- and identity outside. So any moved point must be in one of the disks.
+  sorry  -- This requires induction on the FreeGroup structure
 
 /-- If a point is in the intersection and we apply a bounded sequence of moves,
     it can stay in the intersection. This is crucial for Theorem 2. -/
 theorem intersection_points_can_stay_bounded (z : ℂ) (hz : z ∈ sys.diskIntersection)
     (g : TwoDiskGroup) :
     applyGroupElement sys g z ∈ sys.diskUnion := by
-  sorry
+  -- If z is in the intersection, it's in both disks, hence in the union
+  -- The result of applying g is still in the union (by construction of rotations)
+  sorry  -- This also requires FreeGroup induction but should follow from preservation lemmas
 
 end TwoDiskSystem

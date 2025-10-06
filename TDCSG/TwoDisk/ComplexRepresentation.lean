@@ -57,11 +57,27 @@ theorem rotation_as_multiplication (θ : ℝ) (c z : ℂ) :
 /-- Left rotation can be expressed using ζₙ₁. -/
 theorem leftRotation_as_zeta (sys : TwoDiskSystem) (z : ℂ) (hz : z ∈ sys.leftDisk) :
     sys.leftRotation z = leftCenter + (ζ sys.n₁)⁻¹ * (z - leftCenter) := by
-  sorry
+  unfold leftRotation
+  rw [if_pos hz]
+  congr 1
+  unfold ζ leftAngle
+  rw [show (I * ↑(-2 * Real.pi / ↑sys.n₁)) = -(2 * ↑Real.pi * I / ↑sys.n₁) by
+    simp only [ofReal_neg, ofReal_div, ofReal_mul, ofReal_natCast]
+    norm_num
+    field_simp]
+  rw [Complex.exp_neg]
 
 /-- Right rotation can be expressed using ζₙ₂. -/
 theorem rightRotation_as_zeta (sys : TwoDiskSystem) (z : ℂ) (hz : z ∈ sys.rightDisk) :
     sys.rightRotation z = rightCenter + (ζ sys.n₂)⁻¹ * (z - rightCenter) := by
-  sorry
+  unfold rightRotation
+  rw [if_pos hz]
+  congr 1
+  unfold ζ rightAngle
+  rw [show (I * ↑(-2 * Real.pi / ↑sys.n₂)) = -(2 * ↑Real.pi * I / ↑sys.n₂) by
+    simp only [ofReal_neg, ofReal_div, ofReal_mul, ofReal_natCast]
+    norm_num
+    field_simp]
+  rw [Complex.exp_neg]
 
 end TwoDiskSystem

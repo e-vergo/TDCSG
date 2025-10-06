@@ -27,6 +27,13 @@ namespace TwoDiskSystem
 /-- The critical radius for GG₅: r_c = √(3 + φ) -/
 noncomputable def r_c : ℝ := Real.sqrt (3 + φ)
 
+/-- The critical radius is positive -/
+theorem r_c_pos : r_c > 0 := by
+  unfold r_c
+  apply Real.sqrt_pos.mpr
+  have h := phi_gt_one
+  linarith
+
 /-- The key point E = ζ₅ - ζ₅² -/
 noncomputable def E : ℂ := ζ₅ - ζ₅ ^ 2
 
@@ -52,11 +59,17 @@ theorem E_constraint : ‖E + 1‖ = r_c := by
 /-- F lies on the line segment from E' to E. -/
 theorem F_on_segment_E'E :
     ∃ t : ℝ, 0 < t ∧ t < 1 ∧ F = E' + t • (E - E') := by
+  -- This requires computing the specific value of t
+  -- F = 1 - ζ₅ + ζ₅² - ζ₅³, E = ζ₅ - ζ₅², E' = -E
+  -- The proof would involve showing F is a convex combination of E' and E
   sorry
 
 /-- G lies on the line segment from E' to E. -/
 theorem G_on_segment_E'E :
     ∃ t : ℝ, 0 < t ∧ t < 1 ∧ G = E' + t • (E - E') := by
+  -- G = 2*F - E by definition
+  -- This requires showing that G lies between E' and E
+  -- Would need specific calculations with ζ₅
   sorry
 
 /-- The ordering on the line: E', F', G, F, G', E (or similar). -/
@@ -74,16 +87,17 @@ theorem distance_ratio_phi :
 /-- The distance |F - F'|. -/
 theorem distance_F_F' :
     ∃ d : ℝ, ‖F - F'‖ = d := by
-  sorry
+  use ‖F - F'‖
 
 /-- The distance |E - G|. -/
 theorem distance_E_G :
     ∃ d : ℝ, ‖E - G‖ = d := by
-  sorry
+  use ‖E - G‖
 
 /-- The two translation distances are not rationally related to the total length. -/
 theorem translations_irrational_ratio :
     Irrational (‖E - E'‖ / ‖F - F'‖) := by
-  sorry
+  rw [distance_ratio_phi]
+  exact phi_irrational
 
 end TwoDiskSystem

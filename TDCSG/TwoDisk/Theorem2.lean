@@ -32,8 +32,8 @@ noncomputable def GG5_critical : TwoDiskSystem where
   r₂ := r_c
   n₁_pos := by norm_num
   n₂_pos := by norm_num
-  r₁_pos := by sorry  -- r_c > 0
-  r₂_pos := by sorry  -- r_c > 0
+  r₁_pos := r_c_pos
+  r₂_pos := r_c_pos
 
 /-- Case 1: The sequence a⁻²b⁻¹a⁻¹b⁻¹ maps segment E'F' to segment GF. -/
 theorem case1_transformation :

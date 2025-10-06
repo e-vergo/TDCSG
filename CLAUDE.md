@@ -321,3 +321,78 @@ Rebuild the Lean project and restart the Lean LSP server.
 ## License
 
 MIT License (see [LICENSE](LICENSE))
+
+## Best Practices for Lean 4 Formalization (Note to Future Claude)
+
+After working on this formalization project, here are key lessons learned:
+
+### 1. Build Management
+- **Always verify builds frequently** - Lean errors can cascade, so check `lake build` after major changes
+- **Watch for "No goals to be solved" errors** - These occur when you try to apply tactics after the goal is already complete. Common with `use` statements that auto-solve remaining goals
+- **Remove unnecessary `rfl` and `exact` statements** - If `use x` completes the proof, don't add more tactics after it
+
+### 2. Proof Development Strategy
+- **Start with low-hanging fruit** - Prove simple lemmas first (existence statements, positivity, basic properties)
+- **Use mathlib extensively** - Many properties are already proven (e.g., `goldenRatio_sq`, `phi_irrational`)
+- **Decompose complex proofs** - Break into helper lemmas rather than one monolithic proof
+- **Document computational proofs** - When a proof requires specific calculations (e.g., with ζ₅), add comments explaining what computation is needed
+
+### 3. Common Patterns That Work
+```lean
+-- For positivity proofs
+theorem foo_pos : foo > 0 := by
+  unfold foo
+  apply Real.sqrt_pos.mpr  -- or other positivity lemmas
+  linarith  -- often solves arithmetic goals
+
+-- For existence proofs
+theorem exists_foo : ∃ x, P x := by
+  use witness_value
+  -- proof that P witness_value holds
+
+-- For using existing theorems
+theorem bar : Q := by
+  rw [existing_theorem]  -- rewrite using known equality
+  exact another_theorem  -- or apply known result
+```
+
+### 4. FreeGroup and Group Actions
+- **FreeGroup is tricky** - Use `FreeGroup.lift` to map generators to group homomorphisms
+- **Avoid complex recursion initially** - Start with `sorry` for `applyGroupElement` and prove properties assuming it exists
+- **Document the intended implementation** - Even if using `sorry`, explain what the implementation should do
+
+### 5. Debugging Tips
+- **Use `mcp__lean-lsp__lean_goal` frequently** - Check the goal state at each line to understand what's happening
+- **Read error messages carefully** - "Did not find occurrence" often means you need `simp` or to unfold definitions
+- **Check for typos in tactic names** - `norm_num` not `norm_nums`, `linarith` not `linearith`
+- **For multiplication order issues** - Use `mul_comm` or `rw [mul_comm a b]` to flip arguments
+
+### 6. File Organization
+- **Remove duplicate files immediately** - macOS creates "Filename 2.lean" copies that break builds
+- **Keep files focused** - Each file should have a clear mathematical purpose
+- **Import only what's needed** - Don't import all of Mathlib if you only need specific modules
+
+### 7. Working with Complex Numbers
+- **Norm of exponential** - `‖exp (I * θ)‖ = 1` via `Complex.norm_exp_ofReal_mul_I`
+- **Rotation formulas** - Express as `center + exp(I * angle) * (point - center)`
+- **Watch multiplication order** - Complex multiplication isn't always commutative with mixed types
+
+### 8. Managing Sorries
+- **Track sorry count** - Use `grep -h sorry TDCSG/TwoDisk/*.lean | wc -l` to monitor progress
+- **Prioritize by dependency** - Prove foundational lemmas before high-level theorems
+- **Document why sorries remain** - Add comments explaining what's blocking completion
+
+### 9. Effective Use of Tools
+- **Don't overuse search tools** - Rate limits exist (3 requests/30s), so batch searches when possible
+- **Prefer local tools** - Use `Glob` and `Grep` instead of repeated `lean_loogle` calls
+- **Build once, check many** - After `lake build`, use `lean_diagnostic_messages` to check multiple files
+
+### 10. Progress Tracking
+- **Use TodoWrite liberally** - Track what you've completed and what's next
+- **Update README regularly** - Document progress for future sessions
+- **Celebrate small wins** - Each proven lemma is progress, even simple ones
+
+### Key Insight
+The most important lesson: **Lean formalization is incremental**. You don't need to prove everything at once. Build a scaffold with `sorry`, then systematically replace them with proofs. This project went from 37 sorries to 25, and each reduction made the structure clearer and the remaining work more apparent.
+
+Remember: The goal isn't just to eliminate sorries, but to build a clear, maintainable formalization that others (including future you) can understand and extend.
