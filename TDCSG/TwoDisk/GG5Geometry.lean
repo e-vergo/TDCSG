@@ -68,60 +68,76 @@ theorem G'_eq_neg_G : G' = -G := rfl
 theorem E_constraint : ‖E + 1‖ = r_c := by
   unfold E r_c
   -- E = ζ₅ - ζ₅², so E + 1 = 1 + ζ₅ - ζ₅²
+  -- Strategy: compute ‖1 + ζ₅ - ζ₅²‖² and show it equals 3 + φ
 
-  -- We can use the fact that for fifth roots of unity, there's a known formula
-  -- First, let's work with the polynomial identity
-  -- ζ₅ satisfies: ζ₅^5 = 1, so ζ₅^5 - 1 = 0
-  -- This factors as (ζ₅ - 1)(ζ₅^4 + ζ₅^3 + ζ₅^2 + ζ₅ + 1) = 0
-  -- Since ζ₅ ≠ 1, we have: ζ₅^4 + ζ₅^3 + ζ₅^2 + ζ₅ + 1 = 0
-
-  have h_sum := sum_zeta5_powers  -- 1 + ζ₅ + ζ₅² + ζ₅³ + ζ₅⁴ = 0
-
-  -- From this, we can derive: 1 + ζ₅ + ζ₅² = -(ζ₅³ + ζ₅⁴)
-  -- So: 1 + ζ₅ - ζ₅² = 2ζ₅ - (ζ₅³ + ζ₅⁴)
-
-  -- Using ζ₅^5 = 1, we have ζ₅⁴ = ζ₅⁻¹ and ζ₅³ = ζ₅⁻²
-  -- For a primitive 5th root of unity on the unit circle:
-  -- ζ₅⁻¹ = conj(ζ₅) and ζ₅⁻² = conj(ζ₅²)
-
-  -- The calculation involves showing that:
-  -- ‖1 + ζ₅ - ζ₅²‖² = (1 + ζ₅ - ζ₅²) * conj(1 + ζ₅ - ζ₅²)
-  -- = (1 + ζ₅ - ζ₅²) * (1 + ζ₅⁻¹ - ζ₅⁻²)
-  -- = (1 + ζ₅ - ζ₅²) * (1 + ζ₅⁴ - ζ₅³)
-
-  -- After expanding and using the minimal polynomial relations,
-  -- this simplifies to 3 + φ
-
-  -- The full calculation is classical but intricate
-  sorry  -- This requires detailed polynomial arithmetic with ζ₅
+  -- This is a detailed algebraic calculation
+  -- We'll use the fact that for roots of unity, conjugation = inversion
+  sorry
 
 /-- F lies on the line segment from E' to E. -/
 theorem F_on_segment_E'E :
     ∃ t : ℝ, 0 < t ∧ t < 1 ∧ F = E' + t • (E - E') := by
-  -- F = 1 - ζ₅ + ζ₅² - ζ₅³, E = ζ₅ - ζ₅², E' = -E = -(ζ₅ - ζ₅²) = -ζ₅ + ζ₅²
-  -- E - E' = (ζ₅ - ζ₅²) - (-ζ₅ + ζ₅²) = 2ζ₅ - 2ζ₅² = 2(ζ₅ - ζ₅²) = 2E
+  -- Strategy: We'll use the fact that E - E' = 2E, and express F in terms of E
+  -- From the sum of fifth roots: 1 + ζ₅ + ζ₅² + ζ₅³ + ζ₅⁴ = 0
 
-  -- If F = E' + t(E - E'), then:
-  -- F = (-ζ₅ + ζ₅²) + t(2ζ₅ - 2ζ₅²)
+  -- First, let's establish that E - E' = 2E
+  have h_diff : E - E' = 2 • E := by
+    unfold E E'
+    simp [two_smul]
+    ring
+
+  -- Now we need to show F can be written as E' + t•(2E) for some t ∈ (0,1)
+  -- F = 1 - ζ₅ + ζ₅² - ζ₅³
+  -- E' = -ζ₅ + ζ₅²
+  -- E = ζ₅ - ζ₅²
+
+  -- Let's try to find t such that F = E' + 2t•E
+  -- F = (-ζ₅ + ζ₅²) + 2t(ζ₅ - ζ₅²)
   -- F = -ζ₅ + ζ₅² + 2tζ₅ - 2tζ₅²
   -- F = (2t - 1)ζ₅ + (1 - 2t)ζ₅²
 
   -- But F = 1 - ζ₅ + ζ₅² - ζ₅³
-  -- We need to express this in the form above
+  -- We need to use sum_zeta5_powers: ζ₅ + ζ₅² + ζ₅³ + ζ₅⁴ + 1 = 0
+  -- to rewrite 1 in terms of ζ₅ powers
 
-  -- Using the sum of powers: 1 + ζ₅ + ζ₅² + ζ₅³ + ζ₅⁴ = 0
-  -- So: 1 = -(ζ₅ + ζ₅² + ζ₅³ + ζ₅⁴)
-
-  -- This is a geometric calculation that requires finding the specific t value
-  sorry  -- Requires solving for t from the geometric relationships
+  -- This requires detailed algebraic manipulation with the constraint
+  -- For now, we note this is a computational problem
+  sorry  -- Requires: (1) Expressing 1 and ζ₅³ using sum_zeta5_powers
+         --          (2) Collecting coefficients to solve for t
+         --          (3) Verifying t ∈ (0,1) numerically or via properties of φ
 
 /-- G lies on the line segment from E' to E. -/
 theorem G_on_segment_E'E :
     ∃ t : ℝ, 0 < t ∧ t < 1 ∧ G = E' + t • (E - E') := by
-  -- G = 2*F - E by definition
-  -- This requires showing that G lies between E' and E
-  -- Would need specific calculations with ζ₅
-  sorry
+  -- Strategy: Use G = 2F - E and the fact that F is on the segment
+  -- If F = E' + t_F • (E - E'), then we can express G similarly
+
+  -- From F_on_segment_E'E, we know F = E' + t_F • (E - E') for some t_F ∈ (0,1)
+  -- G = 2F - E
+  -- We showed earlier that E - E' = 2E, so E = E' + (1/2)•(E - E') wouldn't work...
+  -- Actually, E - E' = 2E means E' = E - 2E = -E, which is correct by definition
+
+  -- Let's work algebraically:
+  -- G = 2F - E
+  -- If F = E' + t_F•(E - E'), then:
+  -- G = 2(E' + t_F•(E - E')) - E
+  -- G = 2E' + 2t_F•(E - E') - E
+
+  -- We need to express -E in terms of E' and E
+  -- E' = -E, so E = -E'
+  -- E - E' = E - (-E) = 2E (confirmed earlier)
+  -- So E' = -E and E = -E'
+
+  -- Therefore: G = 2E' + 2t_F•(E - E') + E'  (since -E = E')
+  -- G = 3E' + 2t_F•(E - E')
+
+  -- Hmm, this doesn't have the right form. Let me reconsider...
+  -- Actually, if all points are collinear, then G being between E' and E
+  -- is a consequence of the specific values, which requires computation.
+
+  sorry  -- Requires: (1) Using F_on_segment_E'E to get t_F
+         --          (2) Computing t_G from G = 2F - E algebraically
+         --          (3) Showing 0 < t_G < 1 from properties of t_F and geometry
 
 /-- The ordering on the line: E', F', G, F, G', E (or similar). -/
 theorem ordering_on_line :

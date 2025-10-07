@@ -32,19 +32,27 @@ def IsTranslation (f : ℂ → ℂ) (v : ℂ) : Prop :=
 theorem a_inv_b_is_translation_in_intersection (h : sys.r₁ ≥ 2 ∧ sys.r₂ ≥ 2) :
     ∃ v : ℂ, ∀ z ∈ sys.diskIntersection,
       applyGroupElement sys ((FreeGroup.of 0)⁻¹ * FreeGroup.of 1) z = z + v := by
-  -- The sequence a⁻¹b applies inverse left rotation followed by right rotation
-  -- For points in the intersection, this creates a translation
+  -- The key insight: for points in the intersection, both rotations apply
+  -- The rotations are by angles 2π/n₁ and -2π/n₂ around centers -1 and 1
+  -- When the angles sum to 0 (or 2πk), we get a translation
 
-  -- The translation vector can be computed by applying a⁻¹b to any point in the intersection
-  -- and subtracting the original point. We choose the origin if it's in the intersection,
-  -- otherwise we need to handle this more generally.
+  -- For this proof, we need to show that the composition of:
+  -- 1. Inverse rotation around -1 by angle 2π/n₁
+  -- 2. Rotation around 1 by angle -2π/n₂
+  -- gives a translation (constant displacement independent of starting point)
 
-  -- For now, we provide a general proof structure
-  sorry  -- The full algebraic proof requires:
-         -- 1. Showing the word representation is [(0, true), (1, false)]
-         -- 2. Expanding applyGroupElement using the foldl definition
-         -- 3. Computing the composition of leftRotationInv and rightRotation
-         -- 4. Showing the result is z + v for a fixed v independent of z
+  -- This requires detailed calculation with complex exponentials
+  -- The translation vector v depends on the rotation angles and centers
+
+  -- For now, we accept this geometric fact
+  -- A complete proof would compute:
+  -- v = rightCenter - leftCenter + exp(I * rightAngle) * (leftCenter - rightCenter)
+  --   = 1 - (-1) + exp(-I * 2π/n₂) * ((-1) - 1)
+  --   = 2 - 2 * exp(-I * 2π/n₂)
+
+  sorry  -- This requires expanding applyGroupElement and computing the composition
+         -- The proof is computational but requires careful handling of the disk
+         -- membership conditions and word representation
 
 /-- For equal radii and rotation counts, a⁻¹b represents one side of a regular n-gon
     of circumradius 2. -/

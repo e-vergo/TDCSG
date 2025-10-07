@@ -102,69 +102,151 @@ theorem rightRotation_is_piecewise_isometry : IsPiecewiseIsometry sys.rightRotat
     | inr h' => -- S ∈ []
       cases h'
 
-/-- Composition of piecewise isometries is a piecewise isometry. -/
+/-- Composition of piecewise isometries is a piecewise isometry.
+
+    Note: This proof is simplified for our specific application where rotations
+    map disks to themselves. A fully general proof would require partition refinement. -/
 theorem composition_piecewise_isometry (f g : ℂ → ℂ)
     (hf : IsPiecewiseIsometry f) (hg : IsPiecewiseIsometry g) :
     IsPiecewiseIsometry (g ∘ f) := by
   unfold IsPiecewiseIsometry at hf hg ⊢
-  -- Get the partitions for f and g
   obtain ⟨Pf, hPf⟩ := hf
   obtain ⟨Pg, hPg⟩ := hg
 
-  -- The ideal refined partition would consist of sets S such that:
-  -- 1. f is an isometry on S (S ∈ Pf or a subset thereof)
-  -- 2. f(S) is contained in a single piece of g's partition
+  -- We create a refined partition: for each pair (Sf, Sg) in Pf × Pg,
+  -- include Sf ∩ f⁻¹(Sg) if it's nonempty
+  -- For simplicity, we'll use a direct approach suitable for disk rotations
 
-  -- For this formalization, we use both partitions and rely on the fact that
-  -- in our application, the rotations map regions appropriately
-  use Pf
+  -- For disk rotations, we can use the intersection-based partition
+  let refined_partition := Pf.flatMap (fun Sf => Pg.map (fun Sg => Sf ∩ {z | f z ∈ Sg}))
+  use refined_partition
 
-  intro S hS z hz w hw
-  -- On S, f preserves distances
-  have hf_iso : ‖f z - f w‖ = ‖z - w‖ := hPf S hS z hz w hw
-
-  -- For g to preserve distances on f(z) and f(w), they need to be in the same
-  -- piece of g's partition. In our application with disk rotations, when f is
-  -- a rotation on S (e.g., S = leftDisk), the image f(S) = S, so f(z), f(w) ∈ S.
-  -- If S is also in g's partition (or a subset), then g preserves distances there.
-
+  intro R hR z hz w hw
   simp only [Function.comp_apply]
 
-  -- The challenge is that we need to know which piece of Pg contains f(z) and f(w)
-  -- For our specific application:
-  -- - If S = leftDisk and f = leftRotation, then f(S) = leftDisk
-  -- - If S = rightDisk and f = rightRotation, then f(S) = rightDisk
-  -- - Outside the disks, rotations are identity
+  -- R is in the refined partition, so it's Sf ∩ f⁻¹(Sg) for some Sf ∈ Pf and Sg ∈ Pg
+  -- Unfold the flatMap and map to extract witnesses
+  rw [List.mem_flatMap] at hR
+  obtain ⟨Sf, hSf_mem, hR_in_map⟩ := hR
+  rw [List.mem_map] at hR_in_map
+  obtain ⟨Sg, hSg_mem, hR_def⟩ := hR_in_map
+  rw [← hR_def] at hz hw
 
-  -- We handle this by cases on whether f(z) and f(w) are in some piece of Pg
-  -- Since we know f preserves distances on S, and for our rotations,
-  -- f maps disk regions to themselves, this works out.
+  -- Now hz and hw say z, w ∈ Sf ∩ {z | f z ∈ Sg}
+  have hz_Sf : z ∈ Sf := hz.1
+  have hw_Sf : w ∈ Sf := hw.1
+  have hfz_Sg : f z ∈ Sg := by simpa using hz.2
+  have hfw_Sg : f w ∈ Sg := by simpa using hw.2
 
-  -- This is a simplification that works for our specific case of disk rotations
-  conv_rhs => rw [← hf_iso]
+  -- Apply both isometry properties
+  calc ‖g (f z) - g (f w)‖
+      = ‖f z - f w‖ := hPg Sg hSg_mem (f z) hfz_Sg (f w) hfw_Sg
+    _ = ‖z - w‖ := hPf Sf hSf_mem z hz_Sf w hw_Sf
 
-  -- Now we need: ‖g (f z) - g (f w)‖ = ‖f z - f w‖
-  -- This holds if f(z) and f(w) are in the same piece of g's partition
-  -- For disk rotations, this is true because rotations map disks to themselves
-  -- A complete proof would require showing this explicitly
+/-- The inverse left rotation is a piecewise isometry -/
+theorem leftRotationInv_is_piecewise_isometry : IsPiecewiseIsometry sys.leftRotationInv := by
+  unfold IsPiecewiseIsometry
+  use [sys.leftDisk, sys.leftDiskᶜ]
+  intro S hS
+  simp only [List.mem_cons] at hS
+  cases hS with
+  | inl h => -- S = leftDisk
+    rw [h]
+    intro z hz w hw
+    unfold leftRotationInv
+    rw [if_pos hz, if_pos hw]
+    rw [add_sub_add_left_eq_sub, ← mul_sub, norm_mul]
+    have h_exp_norm : ‖exp (-I * sys.leftAngle)‖ = 1 := by
+      rw [norm_exp]; simp
+    rw [h_exp_norm, one_mul]
+    simp [sub_sub]
+  | inr h => -- S in [leftDiskᶜ]
+    cases h with
+    | inl h' => -- S = leftDiskᶜ
+      rw [h']
+      intro z hz w hw
+      unfold leftRotationInv
+      rw [if_neg hz, if_neg hw]
+    | inr h' => -- S ∈ []
+      cases h'
 
-  -- For now, we accept this as an axiom of our simplified model
-  sorry  -- This requires detailed partition refinement or case analysis on disk membership
+/-- The inverse right rotation is a piecewise isometry -/
+theorem rightRotationInv_is_piecewise_isometry : IsPiecewiseIsometry sys.rightRotationInv := by
+  unfold IsPiecewiseIsometry
+  use [sys.rightDisk, sys.rightDiskᶜ]
+  intro S hS
+  simp only [List.mem_cons] at hS
+  cases hS with
+  | inl h => -- S = rightDisk
+    rw [h]
+    intro z hz w hw
+    unfold rightRotationInv
+    rw [if_pos hz, if_pos hw]
+    rw [add_sub_add_left_eq_sub, ← mul_sub, norm_mul]
+    have h_exp_norm : ‖exp (-I * sys.rightAngle)‖ = 1 := by
+      rw [norm_exp]; simp
+    rw [h_exp_norm, one_mul]
+    simp [sub_sub]
+  | inr h => -- S in [rightDiskᶜ]
+    cases h with
+    | inl h' => -- S = rightDiskᶜ
+      rw [h']
+      intro z hz w hw
+      unfold rightRotationInv
+      rw [if_neg hz, if_neg hw]
+    | inr h' => -- S ∈ []
+      cases h'
 
-/-- Any group element gives a piecewise isometry. -/
+/-- Each generator application is a piecewise isometry -/
+lemma applyGenerator_is_piecewise_isometry (gen : Fin 2) (inv : Bool) :
+    IsPiecewiseIsometry (applyGenerator sys gen inv) := by
+  match gen, inv with
+  | 0, false => exact leftRotation_is_piecewise_isometry sys
+  | 0, true => exact leftRotationInv_is_piecewise_isometry sys
+  | 1, false => exact rightRotation_is_piecewise_isometry sys
+  | 1, true => exact rightRotationInv_is_piecewise_isometry sys
+
+/-- Helper: foldl of piecewise isometries starting from a piecewise isometry is a piecewise isometry -/
+lemma foldl_preserves_piecewise_isometry (word : List (Fin 2 × Bool)) (f₀ : ℂ → ℂ)
+    (hf₀ : IsPiecewiseIsometry f₀) :
+    IsPiecewiseIsometry (fun z => word.foldl (fun z' p => applyGenerator sys p.1 p.2 z') (f₀ z)) := by
+  induction word generalizing f₀ with
+  | nil =>
+    -- Empty word, just return f₀
+    simp [List.foldl]
+    exact hf₀
+  | cons hd tl ih =>
+    -- Cons case: show composition preserves property
+    simp only [List.foldl]
+    -- After applying hd, we get a new function which is still piecewise isometry
+    have h_comp : IsPiecewiseIsometry ((applyGenerator sys hd.1 hd.2) ∘ f₀) := by
+      -- This is composition of two piecewise isometries
+      exact composition_piecewise_isometry f₀ (applyGenerator sys hd.1 hd.2) hf₀
+        (applyGenerator_is_piecewise_isometry sys hd.1 hd.2)
+    -- Apply induction hypothesis
+    exact ih ((applyGenerator sys hd.1 hd.2) ∘ f₀) h_comp
+
+/-- Any group element gives a piecewise isometry.
+
+    Proof: By induction on the word representation, using the fact that each generator
+    is a piecewise isometry and composition preserves piecewise isometry. -/
 theorem group_element_piecewise_isometry (g : TwoDiskGroup) :
     IsPiecewiseIsometry (applyGroupElement sys g) := by
-  -- This follows by induction on g using the fact that:
-  -- 1. Identity is a piecewise isometry (trivial)
-  -- 2. Generators (left/right rotations) are piecewise isometries (proven above)
-  -- 3. Composition and inverse preserve piecewise isometry
-
-  -- We'll use induction on the word representation
   unfold applyGroupElement
   let word := g.toWord
 
-  -- Due to the complexity of the proof with match statements,
-  -- we'll use our simplified composition theorem
-  sorry  -- This requires a careful handling of the match expression evaluation
+  -- The identity function is a piecewise isometry (trivial partition)
+  have h_id : IsPiecewiseIsometry (fun z => z) := by
+    unfold IsPiecewiseIsometry
+    use [Set.univ]
+    intro S hS
+    simp at hS
+    rw [hS]
+    intro z _ w _
+    rfl
+
+  -- Apply the foldl lemma starting from identity
+  have h := foldl_preserves_piecewise_isometry sys word id h_id
+  convert h using 2
 
 end TwoDiskSystem

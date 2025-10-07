@@ -6,11 +6,12 @@ This file provides comprehensive guidance to Claude (claude.ai/code) when workin
 
 Formalize **Theorem 2** from "Two-Disk Compound Symmetry Groups": Prove that GG₅ (5-fold rotational symmetry on both disks) has an infinite group at the critical radius r = √(3 + φ).
 
-### Current Status (as of January 2025 - Session 5)
-- **Progress**: 21 sorries remaining (down from 37 - 43% reduction)
-- **Completed**: Basic.lean, ComplexRepresentation.lean (11/11), **GoldenRatio.lean (6/6)**, **GroupAction.lean (7/7)**
+### Current Status (as of January 2025 - Session 7)
+- **Progress**: 19 sorries remaining (down from 37 - 49% reduction)
+- **Completed**: Basic.lean, ComplexRepresentation.lean (11/11), GoldenRatio.lean (6/6), GroupAction.lean (7/7), **PiecewiseIsometry.lean (6/6)** ✅
+- **New**: `group_element_piecewise_isometry` proven via foldl induction!
 - **Build**: Clean - zero compile errors
-- **Key milestones**: `zeta5_and_phi` proven!, `points_stay_in_union` and `intersection_points_can_stay_bounded` proven!
+- **Key milestones**: Successfully proved that all group elements are piecewise isometries using structural induction!
 
 ## 📁 Project Structure & Dependencies
 
@@ -19,9 +20,9 @@ Core Definitions (Basic.lean) ✅
     ↓
 Group Theory (GroupAction.lean) ✅
     ↓                    ↓
-Isometries              Translations (4 sorries)
-(PiecewiseIsometry.lean)      ↓
-2 sorries                 Theorem1.lean (3 sorries)
+Isometries              Translations (5 sorries)
+(PiecewiseIsometry.lean) ✅     ↓
+                         Theorem1.lean (3 sorries)
     ↓                          ↓
 Complex Analysis          Golden Ratio
 (ComplexRepresentation.lean) ✅  (GoldenRatio.lean) ✅
@@ -197,62 +198,124 @@ ring_nf
 - Each shows a piecewise isometry mapping segments with irrational ratios
 - This creates dense orbits, proving infinity
 
-## 🆕 Session 5 Learnings
+## 🎓 Key Learnings Across Sessions
 
-### Key Achievements
-1. **GoldenRatio.lean COMPLETE**: Successfully completed the `zeta5_and_phi` proof connecting ζ₅ = cos(2π/5) + i·sin(2π/5) where cos(2π/5) = (φ-1)/2. This was a major milestone requiring careful handling of complex coercions and the double angle formula.
+### Major Technical Breakthroughs
+1. **FreeGroup via toWord** (Session 4): Use `FreeGroup.toWord` + `List.foldl` instead of `FreeGroup.lift` for implementing group actions
+2. **Partition refinement** (Session 6): Compose piecewise isometries by refining partitions with `List.flatMap`
+3. **Foldl induction** (Session 7): Prove properties of foldl by generalizing over starting function, then apply to `id`
+4. **Complex coercions** (Session 5): Be explicit with `(5:ℕ)` vs `(5:ℂ)`, use `norm_cast` liberally
 
-2. **GroupAction.lean COMPLETE**: Finished all remaining theorems including:
-   - `points_stay_in_union`: Points moved by group elements stay in disk union
-   - `intersection_points_can_stay_bounded`: Points in intersection remain in union
-   - Used induction on word representations and the `suffices` pattern effectively
+### Critical Proof Patterns
+- **Helper lemma extraction**: Break complex proofs into reusable building blocks
+- **Suffices + induction**: Powerful for proving properties of word representations
+- **Convert tactic**: `convert h using n` can auto-solve by unifying at depth n
+- **Calc chains**: Make multi-step calculations explicit and checkable
 
-3. **Enhanced documentation across all files**: Added detailed proof strategies and mathematical insights to all remaining sorries, making future work much clearer.
+### Remaining Challenges (19 sorries)
+- **GG5Geometry (5)**: Complex norm calculations requiring ζ₅ expansion and φ arithmetic - computationally intensive
+- **Translations (5)**: Word expansion and composition calculations with FreeGroup elements
+- **Theorem2 (6)**: Geometric transformations depending on above foundations
+- **Theorem1 (3)**: Crystallographic restriction theory (paper notes "proof omitted")
 
-4. **Eliminated 4 sorries**: Reduced from 25 to 21 (16% reduction this session, 43% total from start).
+## ✅ Behaviors to EMBODY
 
-### Technical Insights
-- **Coercion handling**: When working with `/5`, need to be explicit about `(5:ℕ)` vs `(5:ℂ)` and use `norm_cast` liberally
-- **Double angle formula**: `Real.cos_two_mul` combined with `Real.cos_pi_div_five` gives cos(2π/5) = (φ-1)/2
-- **Induction pattern**: The `suffices` tactic followed by induction on lists is powerful for proving properties of `foldl`
-- **Type conversions**: `Complex.exp_mul_I` requires complex arguments, then use `norm_cast` to convert between Real and Complex
+These are winning patterns that lead to real progress:
 
-### Lessons Learned
-- Trust the existing infrastructure: `zeta5_and_phi` was achievable using mathlib's existing trigonometric theorems
-- Build incrementally: Proving smaller helper facts first (like the coercion equality) makes the main proof clearer
-- Documentation pays dividends: Detailed comments about what remains to be proven help maintain momentum across sessions
+### 1. **Make incremental progress**
+✅ **DO**: Break down proofs into smaller, achievable steps
+```lean
+-- GOOD: Build up the proof piece by piece
+theorem foo : P := by
+  have h1 : Q := by exact lemma1
+  have h2 : R := by
+    calc ...  -- Small calculation
+  -- Now combine h1 and h2
+  exact combine h1 h2
+```
+**Example from Session 6**: Proved `composition_piecewise_isometry` by first understanding partition structure, then building refined partition step-by-step
 
-## 🆕 Session 4 Learnings
+### 2. **Strategic pivoting**
+✅ **DO**: Recognize when a proof is too hard and pivot to achievable goals
+- If stuck on complex algebra for 15+ minutes, document what's needed and move on
+- Work on structural proofs that build infrastructure
+- Come back to hard problems when you have more tools
 
-### Key Achievements
-1. **FreeGroup implementation breakthrough**: Successfully implemented `applyGroupElement` using FreeGroup.toWord instead of struggling with FreeGroup.lift. This simpler approach works perfectly for our needs.
+**Example from Session 6**: Attempted `E_constraint` (very hard algebra), recognized difficulty, pivoted to `composition_piecewise_isometry` (structural proof), succeeded!
 
-2. **Inverse rotations added**: Extended Basic.lean with `leftRotationInv` and `rightRotationInv` definitions, completing the group action structure.
+### 3. **Use partition/case analysis effectively**
+✅ **DO**: Break complex goals into cases with clear structure
+```lean
+-- GOOD: Systematic case analysis
+cases h with
+| inl h_left =>
+  -- Handle left case completely
+  exact proof_for_left h_left
+| inr h_right =>
+  -- Handle right case completely
+  exact proof_for_right h_right
+```
+**Example from Session 6**: Partition refinement using `List.flatMap` to handle all combinations of pieces
 
-3. **Helper lemmas strategy**: Created `applyGenerator` and `applyGenerator_preserves_union` as intermediate steps, making proofs more manageable.
+### 4. **Document learning, not just TODOs**
+✅ **DO**: When leaving a sorry, explain WHY it's hard and WHAT'S needed
+```lean
+sorry  -- Requires: (1) expanding ζ₅ = cos(2π/5) + i·sin(2π/5)
+       --          (2) computing ‖1 + ζ₅ - ζ₅²‖² = (expr) * conj(expr)
+       --          (3) using ζ₅⁵ = 1 to reduce powers
+       --          (4) algebraic simplification to show result = 3 + φ
+       -- Challenge: Complex coercion handling with norm calculations
+```
 
-4. **Translation theorems structured**: Set up the framework for Translation.lean proofs, now that applyGroupElement is working.
+### 5. **Extract helper lemmas**
+✅ **DO**: Break complex proofs into reusable helper lemmas
+```lean
+-- GOOD: Create building blocks
+lemma helper1 : ... := by ...
+lemma helper2 : ... := by ...
 
-### Technical Insights
-- FreeGroup.toWord provides a list representation that's easier to work with than the abstract FreeGroup structure
-- List.foldl is perfect for sequential application of rotations
-- The pattern `word.foldl (fun z' (gen, inv) => applyGenerator sys gen inv z') z` elegantly handles composition
+theorem main : ... := by
+  have h1 := helper1
+  have h2 := helper2
+  -- Combine helpers
+```
+**Example from Session 4**: `applyGenerator` and `applyGenerator_preserves_union` made complex proofs manageable
 
-### Lessons Learned
-- Sometimes the simpler approach (toWord + foldl) is better than the theoretically elegant one (FreeGroup.lift)
-- Breaking complex functions into helpers (applyGenerator) makes both implementation and proofs easier
-- Documentation improvements in earlier sessions paid off by guiding this session's implementation
+### 6. **Check diagnostics frequently**
+✅ **DO**: Run `lean_diagnostic_messages` after every significant edit
+- Catch errors early before they compound
+- Verify tactics worked as expected
+- Ensure type conversions succeeded
 
-## 🆕 Session 3 Learnings
+### 7. **Use calc chains for clarity**
+✅ **DO**: Express multi-step calculations explicitly
+```lean
+calc ‖g (f z) - g (f w)‖
+    = ‖f z - f w‖ := by apply h_isometry
+  _ = ‖z - w‖ := by apply h_isometry2
+```
+**Example from Session 6**: Clean proof of composition using calc chain
 
-### Key Insights
-1. **FreeGroup.lift complexity**: The natural approach of using `FreeGroup.lift` fails because `ℂ → ℂ` doesn't form a group under composition. Need to think in terms of automorphisms or bijections.
+### 8. **Trust mathlib, but verify**
+✅ **DO**: Search mathlib first, but check the types match
+- Use `lean_loogle` to find relevant theorems
+- Use `#check` to verify theorem statements
+- Use `lean_hover_info` to understand what theorems do
 
-2. **Trigonometric identities for ζ₅**: The relationship between fifth roots of unity and the golden ratio is deep. Key identity: cos(2π/5) = (φ-1)/2 connects regular pentagons to φ.
+### 9. **Track progress metrics**
+✅ **DO**: Regularly check sorry count and celebrate wins
+- Note sorry count at session start
+- Check progress periodically
+- Update CLAUDE.md with new learnings
+- Commit after eliminating sorries
 
-3. **Documentation as progress**: Even when unable to complete a proof, documenting the specification and intended behavior helps future sessions understand the goal clearly.
+**Example**: Session 6 reduced sorries from 21 → 20 (46% total reduction from 37)
 
-4. **Sorry tracking matters**: Small increases in sorry count (24→25) can happen when improving documentation or restructuring, but the overall trend should be downward.
+### 10. **Build from bottom up**
+✅ **DO**: Respect the dependency structure
+- Prove foundational lemmas before using them
+- Don't try to prove Theorem2 before GG5Geometry is complete
+- Work through the dependency graph systematically
 
 ## ⚠️ Behaviors to AVOID
 
@@ -370,6 +433,36 @@ sorry  -- Requires: (1) showing word for g is [(0,true), (1,false)]
        --          (3) algebraic simplification of the composition
        --          (4) proving independence from z (translation property)
 ```
+
+### 9. **Forcing through impossible proofs** (NEW from Session 6)
+❌ **DON'T**: Keep trying the same hard proof for hours without progress
+- If a proof requires extensive algebraic manipulation you can't see how to do, it's probably too hard right now
+- If you're stuck on complex norm calculations with ζ₅ for 30+ minutes, pivot
+- If match expressions won't reduce and you can't make headway, accept it's a technical limitation
+
+✅ **DO**: Recognize blockers and work around them strategically
+```lean
+-- GOOD: Document the challenge and move on
+theorem hard_algebra : ... := by
+  sorry  -- This requires computing ‖1 + ζ₅ - ζ₅²‖² which involves:
+         -- (1) Converting to (expr) * conj(expr)
+         -- (2) Using ζ₅⁻¹ = conj(ζ₅) for roots of unity
+         -- (3) Expanding product and reducing using ζ₅⁵ = 1
+         -- (4) Showing result equals 3 + φ through algebraic manipulation
+         -- Challenge: Complex coercion handling makes this very technical
+         -- Strategy: Come back when we have more supporting lemmas
+```
+
+### 10. **Using wrong Lean 4 APIs** (NEW from Session 6)
+❌ **DON'T**: Use Lean 3 or incorrect function names
+- `List.bind` doesn't exist in Lean 4 → use `List.flatMap`
+- `Complex.conj` doesn't exist → use `starRingEnd ℂ` or `conj`
+- Check actual mathlib names before assuming
+
+✅ **DO**: Verify function names and use hover/search
+- Use `lean_hover_info` to check what's available
+- Use autocomplete to find correct names
+- Search mathlib docs when unsure
 
 ## 💡 Pro Tips from Experience
 
