@@ -40,10 +40,12 @@ theorem case1_transformation :
     let sys := GG5_critical
     let g := (FreeGroup.of 0)⁻¹ * (FreeGroup.of 0)⁻¹ *
              (FreeGroup.of 1)⁻¹ * (FreeGroup.of 0)⁻¹ * (FreeGroup.of 1)⁻¹
-    ∀ z : ℂ, ∃ t : ℝ, 0 ≤ t ∧ t ≤ 1 →
+    ∀ z : ℂ, ∀ t : ℝ, 0 ≤ t → t ≤ 1 →
       z = E' + t • (F' - E') →
       ∃ s : ℝ, 0 ≤ s ∧ s ≤ 1 ∧
         applyGroupElement sys g z = G + s • (F - G) := by
+  -- This is a specific geometric fact about the GG₅ system at critical radius
+  -- The proof would require computing the exact transformation of the segment
   sorry
 
 /-- Case 2: The sequence abab² maps segment F'G' to segment FE. -/
@@ -51,10 +53,11 @@ theorem case2_transformation :
     let sys := GG5_critical
     let g := FreeGroup.of 0 * FreeGroup.of 1 * FreeGroup.of 0 *
              (FreeGroup.of 1) * (FreeGroup.of 1)
-    ∀ z : ℂ, ∃ t : ℝ, 0 ≤ t ∧ t ≤ 1 →
+    ∀ z : ℂ, ∀ t : ℝ, 0 ≤ t → t ≤ 1 →
       z = F' + t • (G' - F') →
       ∃ s : ℝ, 0 ≤ s ∧ s ≤ 1 ∧
         applyGroupElement sys g z = F + s • (E - F) := by
+  -- This is a specific geometric fact about the GG₅ system at critical radius
   sorry
 
 /-- Case 3: The sequence abab⁻¹a⁻¹b⁻¹ maps segment G'E to segment E'G. -/
@@ -62,10 +65,11 @@ theorem case3_transformation :
     let sys := GG5_critical
     let g := FreeGroup.of 0 * FreeGroup.of 1 * FreeGroup.of 0 *
              (FreeGroup.of 1)⁻¹ * (FreeGroup.of 0)⁻¹ * (FreeGroup.of 1)⁻¹
-    ∀ z : ℂ, ∃ t : ℝ, 0 ≤ t ∧ t ≤ 1 →
+    ∀ z : ℂ, ∀ t : ℝ, 0 ≤ t → t ≤ 1 →
       z = G' + t • (E - G') →
       ∃ s : ℝ, 0 ≤ s ∧ s ≤ 1 ∧
         applyGroupElement sys g z = E' + s • (G - E') := by
+  -- This is a specific geometric fact about the GG₅ system at critical radius
   sorry
 
 /-- All three transformations keep points within the disk intersection. -/
@@ -94,18 +98,20 @@ theorem can_move_arbitrarily_on_segment :
   sorry
 
 /-- The origin has an infinite orbit. -/
-theorem origin_infinite_orbit :
-    let sys := GG5_critical
-    Set.Infinite (orbit sys 0) := by
+theorem origin_infinite_orbit : Set.Infinite (orbit GG5_critical 0) := by
   -- The key insight: the three transformations create dense orbits on E'E
   -- Since the translation ratios involve φ (irrational), the orbit is dense
   -- and therefore infinite
 
-  -- Use the fact that we can move arbitrarily on the segment
-  have h_dense := can_move_arbitrarily_on_segment
+  -- We use the fact that the transformations have irrational ratios
+  -- This is a fundamental consequence of translations_irrational_ratio
+  -- Combined with the density argument, this implies infinitude
 
-  -- The orbit contains infinitely many distinct points
-  sorry  -- Requires showing we can reach infinitely many distinct points via dense orbits
+  -- The proof would require:
+  -- 1. Showing the transformations act as piecewise translations
+  -- 2. Using the irrational ratio from translations_irrational_ratio
+  -- 3. Applying a density argument to show infinite orbits
+  sorry
 
 /-- Theorem 2: GG₅ is infinite at r = √(3 + φ). -/
 theorem theorem2 : GG5_critical.IsInfiniteGroup := by

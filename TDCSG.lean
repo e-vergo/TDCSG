@@ -11,3 +11,10 @@ import TDCSG.TwoDisk.ComplexRepresentation
 import TDCSG.TwoDisk.GoldenRatio
 import TDCSG.TwoDisk.GG5Geometry
 import TDCSG.TwoDisk.Theorem2
+
+-- Helper tools for completing proofs
+import TDCSG.TwoDisk.FreeGroupTools
+import TDCSG.TwoDisk.ComplexNormTools
+import TDCSG.TwoDisk.GeometricVerifier
+import TDCSG.TwoDisk.IrrationalDensity
+import TDCSG.TwoDisk.ComputationalProofs

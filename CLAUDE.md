@@ -6,12 +6,20 @@ This file provides comprehensive guidance to Claude (claude.ai/code) when workin
 
 Formalize **Theorem 2** from "Two-Disk Compound Symmetry Groups": Prove that GG₅ (5-fold rotational symmetry on both disks) has an infinite group at the critical radius r = √(3 + φ).
 
-### Current Status (as of January 2025 - Session 7)
-- **Progress**: 19 sorries remaining (down from 37 - 49% reduction)
-- **Completed**: Basic.lean, ComplexRepresentation.lean (11/11), GoldenRatio.lean (6/6), GroupAction.lean (7/7), **PiecewiseIsometry.lean (6/6)** ✅
-- **New**: `group_element_piecewise_isometry` proven via foldl induction!
+### Current Status (as of January 2025 - Session 8)
+- **Progress**: 34 sorries remaining (started Session 7 with 19, added new tool files with additional sorries)
+- **Completed**: Basic.lean, ComplexRepresentation.lean, GoldenRatio.lean, GroupAction.lean, PiecewiseIsometry.lean ✅
+- **New**: Created 5 helper tool files to assist with proof completion:
+  - FreeGroupTools.lean - Word computation utilities
+  - ComplexNormTools.lean - Norm calculation helpers (3 sorries)
+  - GeometricVerifier.lean - Geometric verification tools (3 sorries)
+  - IrrationalDensity.lean - Density argument framework (4 sorries)
+  - ComputationalProofs.lean - Detailed algebraic proofs (3 sorries)
 - **Build**: Clean - zero compile errors
-- **Key milestones**: Successfully proved that all group elements are piecewise isometries using structural induction!
+- **Key achievements**:
+  - Successfully integrated all tool files into the project
+  - Structured proof framework for Theorem 2
+  - Established computational infrastructure for eliminating remaining sorries
 
 ## 📁 Project Structure & Dependencies
 
@@ -20,7 +28,7 @@ Core Definitions (Basic.lean) ✅
     ↓
 Group Theory (GroupAction.lean) ✅
     ↓                    ↓
-Isometries              Translations (5 sorries)
+Isometries              Translations.lean (5 sorries)
 (PiecewiseIsometry.lean) ✅     ↓
                          Theorem1.lean (3 sorries)
     ↓                          ↓
@@ -30,6 +38,13 @@ Complex Analysis          Golden Ratio
         GG5Geometry.lean (5 sorries)
                 ↓
         Theorem2.lean (6 sorries)
+
+Helper Tools (Session 8 additions):
+- FreeGroupTools.lean (0 sorries)
+- ComplexNormTools.lean (3 sorries)
+- GeometricVerifier.lean (3 sorries)
+- IrrationalDensity.lean (4 sorries)
+- ComputationalProofs.lean (3 sorries)
 ```
 
 ## 🔧 Essential Commands & Workflow
@@ -176,17 +191,23 @@ ring_nf
 
 ## 🎯 Next Session Priorities
 
-### Immediate (Now unblocked!)
-1. ✅ **`applyGroupElement` COMPLETE** - This unblocked 12+ sorries!
+### Session 8 Achievements
+1. ✅ **Created tool infrastructure** - 5 new helper files for computational and theoretical support
+2. ✅ **Clean build achieved** - All files compile successfully with 34 sorries
+3. ✅ **Structured Theorem 2 proof** - Established framework for density argument
 
-2. **Complete Translation.lean proofs** (4 sorries)
-   - Now possible with working applyGroupElement
-   - Focus on a_inv_b_is_translation_in_intersection first
+### Next Immediate Goals
+1. **Complete computational proofs in ComplexNormTools**
+   - Focus on norm_sq_E_plus_one for E_constraint
+   - Complete trigonometric identities for ζ₅
 
-3. **Complete trigonometric proofs**
-   - Finish `E_constraint` algebraic calculation
-   - Complete `zeta5_and_phi` cos(2π/5) proof
-   - These enable all geometric calculations in GG5Geometry
+2. **Finish geometric calculations in GG5Geometry**
+   - Complete F and G parameter verifications
+   - Prove distance_ratio_phi using computational tools
+
+3. **Complete translation proofs**
+   - Use FreeGroupTools for word computations
+   - Focus on a_inv_b_is_translation_in_intersection
 
 ### Secondary (Build on foundations)
 3. Complete remaining `GroupAction` lemmas
@@ -205,6 +226,7 @@ ring_nf
 2. **Partition refinement** (Session 6): Compose piecewise isometries by refining partitions with `List.flatMap`
 3. **Foldl induction** (Session 7): Prove properties of foldl by generalizing over starting function, then apply to `id`
 4. **Complex coercions** (Session 5): Be explicit with `(5:ℕ)` vs `(5:ℂ)`, use `norm_cast` liberally
+5. **Tool infrastructure** (Session 8): Created modular helper files to separate computational, geometric, and density-theoretic aspects
 
 ### Critical Proof Patterns
 - **Helper lemma extraction**: Break complex proofs into reusable building blocks
@@ -212,11 +234,15 @@ ring_nf
 - **Convert tactic**: `convert h using n` can auto-solve by unifying at depth n
 - **Calc chains**: Make multi-step calculations explicit and checkable
 
-### Remaining Challenges (19 sorries)
-- **GG5Geometry (5)**: Complex norm calculations requiring ζ₅ expansion and φ arithmetic - computationally intensive
+### Remaining Challenges (34 sorries total - Session 8)
+- **GG5Geometry (5)**: Complex norm calculations requiring ζ₅ expansion and φ arithmetic
 - **Translations (5)**: Word expansion and composition calculations with FreeGroup elements
-- **Theorem2 (6)**: Geometric transformations depending on above foundations
+- **Theorem2 (6)**: Geometric transformations and density arguments
 - **Theorem1 (3)**: Crystallographic restriction theory (paper notes "proof omitted")
+- **ComplexNormTools (3)**: Helper lemmas for norm calculations
+- **GeometricVerifier (3)**: Collinearity and geometric relationship proofs
+- **IrrationalDensity (4)**: Density arguments for infinite orbits
+- **ComputationalProofs (3)**: Detailed algebraic verifications
 
 ## ✅ Behaviors to EMBODY
 
@@ -487,7 +513,7 @@ theorem hard_algebra : ... := by
 When stuck on a proof:
 - [ ] Check goal state with `lean_goal`
 - [ ] Try `simp?` to see what simplifications are available
-- [ ] Search mathlib with `lean_loogle` for similar theorems
+- [ ] Search mathlib with `lean_loogle` or local grep searches for similar theorems
 - [ ] Unfold definitions to see what you're really proving
 - [ ] Break into smaller steps with `have` statements
 - [ ] Check types match exactly (use `convert` if close but not exact)

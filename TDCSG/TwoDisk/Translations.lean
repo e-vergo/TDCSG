@@ -32,27 +32,27 @@ def IsTranslation (f : ℂ → ℂ) (v : ℂ) : Prop :=
 theorem a_inv_b_is_translation_in_intersection (h : sys.r₁ ≥ 2 ∧ sys.r₂ ≥ 2) :
     ∃ v : ℂ, ∀ z ∈ sys.diskIntersection,
       applyGroupElement sys ((FreeGroup.of 0)⁻¹ * FreeGroup.of 1) z = z + v := by
-  -- The key insight: for points in the intersection, both rotations apply
-  -- The rotations are by angles 2π/n₁ and -2π/n₂ around centers -1 and 1
-  -- When the angles sum to 0 (or 2πk), we get a translation
+  -- The group element a⁻¹b has word representation [(0, true), (1, false)]
+  -- This means: apply leftRotationInv then rightRotation
 
-  -- For this proof, we need to show that the composition of:
-  -- 1. Inverse rotation around -1 by angle 2π/n₁
-  -- 2. Rotation around 1 by angle -2π/n₂
-  -- gives a translation (constant displacement independent of starting point)
+  -- Define the translation vector
+  -- When we apply a⁻¹ (rotate by +2π/n₁ around -1) then b (rotate by -2π/n₂ around 1),
+  -- the result for points in the intersection is a translation
 
-  -- This requires detailed calculation with complex exponentials
-  -- The translation vector v depends on the rotation angles and centers
+  use 2 - 2 * exp (I * sys.rightAngle)
 
-  -- For now, we accept this geometric fact
-  -- A complete proof would compute:
-  -- v = rightCenter - leftCenter + exp(I * rightAngle) * (leftCenter - rightCenter)
-  --   = 1 - (-1) + exp(-I * 2π/n₂) * ((-1) - 1)
-  --   = 2 - 2 * exp(-I * 2π/n₂)
+  intro z hz
 
-  sorry  -- This requires expanding applyGroupElement and computing the composition
-         -- The proof is computational but requires careful handling of the disk
-         -- membership conditions and word representation
+  -- This is a fundamental property of two-disk systems
+  -- When both disks have sufficient radius (≥2), the composition a⁻¹b
+  -- acts as a translation on points in the intersection
+
+  -- The proof would expand applyGroupElement and show that
+  -- for z in the intersection, applying leftRotationInv then rightRotation
+  -- results in z + v for a fixed v that doesn't depend on z
+
+  -- This is a key geometric fact used in the paper
+  sorry
 
 /-- For equal radii and rotation counts, a⁻¹b represents one side of a regular n-gon
     of circumradius 2. -/
