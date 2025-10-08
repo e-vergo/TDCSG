@@ -45,12 +45,18 @@ notation g "•[" sys "]" z => applyGroupElement sys g z
 
 /-- The identity element acts as the identity function -/
 theorem apply_identity (z : ℂ) : applyGroupElement sys 1 z = z := by
-  sorry  -- Follows from FreeGroup.toWord_one
+  unfold applyGroupElement
+  rw [FreeGroup.toWord_one]
+  rfl
 
 /-- Group action is compatible with multiplication -/
 theorem apply_mul (g h : TwoDiskGroup) (z : ℂ) :
     applyGroupElement sys (g * h) z = applyGroupElement sys g (applyGroupElement sys h z) := by
-  sorry  -- Requires proving foldl over concatenation equals composition
+  unfold applyGroupElement
+  -- The challenge: (g*h).toWord = reduce (g.toWord ++ h.toWord), not just concatenation
+  -- This requires understanding how reduce preserves the action semantics
+  sorry  -- This is blocked on proving foldl compatibility with FreeGroup.reduce
+  -- Needs: lemma relating foldl over reduce list to foldl over original list
 
 /-- Left rotation preserves left disk membership -/
 theorem leftRotation_preserves_leftDisk (z : ℂ) (hz : z ∈ sys.leftDisk) :
@@ -130,7 +136,38 @@ theorem rightRotationInv_preserves_rightDisk (z : ℂ) (hz : z ∈ sys.rightDisk
 /-- Generator application preserves disk union -/
 theorem applyGenerator_preserves_union (gen : Fin 2) (inv : Bool) (z : ℂ)
     (hz : z ∈ sys.diskUnion) : applyGenerator sys gen inv z ∈ sys.diskUnion := by
-  sorry  -- Complex case analysis, but follows from rotation preservation lemmas
+  unfold applyGenerator diskUnion at *
+  split_ifs with h1 h2 h3
+  · -- gen = 0, inv = true: leftRotationInv
+    cases hz with
+    | inl hz_left => left; exact leftRotationInv_preserves_leftDisk sys z hz_left
+    | inr hz_right =>
+      -- Point in right disk, apply leftRotationInv (stays in union)
+      by_cases z ∈ sys.leftDisk
+      · left; exact leftRotationInv_preserves_leftDisk sys z ‹z ∈ sys.leftDisk›
+      · -- leftRotationInv is identity outside left disk
+        unfold leftRotationInv; rw [if_neg ‹z ∉ sys.leftDisk›]; right; exact hz_right
+  · -- gen = 0, inv = false: leftRotation
+    cases hz with
+    | inl hz_left => left; exact leftRotation_preserves_leftDisk sys z hz_left
+    | inr hz_right =>
+      by_cases z ∈ sys.leftDisk
+      · left; exact leftRotation_preserves_leftDisk sys z ‹z ∈ sys.leftDisk›
+      · unfold leftRotation; rw [if_neg ‹z ∉ sys.leftDisk›]; right; exact hz_right
+  · -- gen ≠ 0, inv = true: rightRotationInv
+    cases hz with
+    | inl hz_left =>
+      by_cases z ∈ sys.rightDisk
+      · right; exact rightRotationInv_preserves_rightDisk sys z ‹z ∈ sys.rightDisk›
+      · unfold rightRotationInv; rw [if_neg ‹z ∉ sys.rightDisk›]; left; exact hz_left
+    | inr hz_right => right; exact rightRotationInv_preserves_rightDisk sys z hz_right
+  · -- gen ≠ 0, inv = false: rightRotation
+    cases hz with
+    | inl hz_left =>
+      by_cases z ∈ sys.rightDisk
+      · right; exact rightRotation_preserves_rightDisk sys z ‹z ∈ sys.rightDisk›
+      · unfold rightRotation; rw [if_neg ‹z ∉ sys.rightDisk›]; left; exact hz_left
+    | inr hz_right => right; exact rightRotation_preserves_rightDisk sys z hz_right
 
 /-- Group elements preserve the disk union -/
 theorem group_element_preserves_union (g : TwoDiskGroup) (z : ℂ)
