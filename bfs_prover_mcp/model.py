@@ -48,7 +48,7 @@ class BFSProverModel:
         proof_state: str,
         num_suggestions: int = 5,
         temperature: float = 0.7,
-        max_tokens: int = 128,
+        max_tokens: int = 128*16,
     ) -> List[str]:
         """Generate tactic suggestions for a proof state."""
         if self.model is None:
@@ -57,20 +57,38 @@ class BFSProverModel:
         # Format prompt for BFS-Prover
         prompt = format_bfs_prover_prompt(proof_state)
 
-        tactics = []
-        for _ in range(num_suggestions):
-            output = self.model(
-                prompt,
-                max_tokens=max_tokens,
-                temperature=temperature,
-                stop=["<|endoftext|>", "\n\n", "[PROOF STATE]"],
-                echo=False,
-            )
+        # Check prompt length (rough estimate: 1 token ≈ 4 chars)
+        estimated_tokens = len(prompt) // 4
+        if estimated_tokens + max_tokens > self.n_ctx:
+            # Truncate proof state to fit context
+            max_state_chars = (self.n_ctx - max_tokens - 100) * 4  # Leave buffer
+            if len(proof_state) > max_state_chars:
+                proof_state = proof_state[:max_state_chars] + "\n..."
+                prompt = format_bfs_prover_prompt(proof_state)
 
-            raw_tactic = output["choices"][0]["text"]
-            tactic = extract_tactic(raw_tactic)
-            if tactic:
-                tactics.append(tactic)
+        tactics = []
+        for i in range(num_suggestions):
+            try:
+                output = self.model(
+                    prompt,
+                    max_tokens=max_tokens,
+                    temperature=temperature,
+                    stop=["<|endoftext|>", "\n\n", "[PROOF STATE]"],
+                    echo=False,
+                )
+
+                raw_tactic = output["choices"][0]["text"]
+                tactic = extract_tactic(raw_tactic)
+                if tactic:
+                    tactics.append(tactic)
+            except Exception as e:
+                # Log error and continue to next generation
+                print(f"Warning: Failed to generate tactic {i+1}/{num_suggestions}: {e}")
+                # Reset model state by reloading
+                if "llama_decode" in str(e):
+                    print("Detected llama_decode error, resetting model...")
+                    self.model.reset()
+                continue
 
         return tactics
 

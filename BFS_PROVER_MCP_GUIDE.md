@@ -251,6 +251,37 @@ Based on real testing across different proof types:
 3. Re-register server if needed: `claude mcp add ...`
 4. Check `.claude.json` has correct server configuration
 
+### llama_decode Error (-3)
+
+**Symptom**: Error message `llama_decode returned -3` when calling `suggest_tactics`
+
+**Root Cause**:
+- Proof state too long for model's context window (4096 tokens)
+- Special characters causing tokenization issues
+- Model state corrupted from previous error
+
+**Solutions**:
+✅ **FIXED** (January 2025): Updated `bfs_prover_mcp/model.py` with:
+1. Automatic context length checking and proof state truncation
+2. Try-except error handling with graceful degradation
+3. Automatic model state reset on llama_decode errors
+4. Returns partial results instead of crashing
+
+**How to apply the fix**:
+1. Code changes already in `bfs_prover_mcp/model.py`
+2. Restart Claude Code or kill MCP server process:
+   ```bash
+   pkill -f "bfs_prover_mcp.server"
+   ```
+3. Next tool call will auto-start server with new code
+4. Test with: `.venv/bin/python test_bfs_prover.py`
+
+**Expected behavior after fix**:
+- Long proof states automatically truncated
+- Errors caught and logged (check terminal output)
+- Returns as many tactics as possible (0-N) instead of crashing
+- Model automatically resets on corruption
+
 ## Testing Results
 
 ### Test Suite Summary

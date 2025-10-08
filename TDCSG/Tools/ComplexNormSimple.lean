@@ -23,9 +23,13 @@ lemma zeta5_conj : starRingEnd ℂ TwoDiskSystem.ζ₅ = TwoDiskSystem.ζ₅^4 :
 /-- Norm squared of E + 1 equals 3 + φ -/
 lemma norm_sq_E_plus_one :
     normSq ((1 : ℂ) + TwoDiskSystem.ζ₅ - TwoDiskSystem.ζ₅^2) = 3 + goldenRatio := by
-  -- normSq z = (re z)^2 + (im z)^2
+  -- Strategy: Expand real and imaginary parts, then compute
   rw [normSq_apply]
-  -- Need to expand (1 + ζ₅ - ζ₅²)(conj: 1 + ζ₅⁴ - ζ₅³) and reduce using ζ₅⁵ = 1
+  -- First, expand the real and imaginary parts using linearity
+  simp only [add_re, sub_re, one_re, pow_succ, pow_zero, mul_re, add_im, sub_im, one_im, mul_im]
+  -- Simplify zeros and ones
+  simp only [mul_zero, zero_mul, add_zero, zero_add, one_mul, mul_one, zero_sub, sub_zero]
+  -- Now we have expressions in terms of ζ₅.re and ζ₅.im
   sorry
 
 /-- Helper: Simplify powers of ζ₅ using ζ₅⁵ = 1 -/
