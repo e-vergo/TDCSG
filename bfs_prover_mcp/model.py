@@ -16,7 +16,7 @@ class BFSProverModel:
         self,
         model_path: str | Path,
         n_ctx: int = 4096,
-        n_gpu_layers: int = -1,  # -1 = all layers on GPU
+        n_gpu_layers: int = 0,  # CPU only (Metal has issues with llama_decode -3)
         verbose: bool = False,
     ):
         self.model_path = Path(model_path)
@@ -39,7 +39,8 @@ class BFSProverModel:
             n_ctx=self.n_ctx,
             n_gpu_layers=self.n_gpu_layers,
             verbose=self.verbose,
-            n_threads=4,  # Adjust based on CPU cores
+            n_threads=8,  # More threads for CPU mode
+            n_batch=512,  # Reasonable batch size
         )
         self.load_time = time.time() - start
 
@@ -105,7 +106,7 @@ class BFSProverModel:
             "model_loaded": self.model is not None,
             "context_length": self.n_ctx,
             "memory_usage_gb": round(memory_info.rss / 1e9, 2),
-            "backend": "metal" if self.n_gpu_layers != 0 else "cpu",
+            "backend": "cpu" if self.n_gpu_layers == 0 else "gpu",
             "uptime_seconds": round(time.time() - self.start_time, 2),
         }
 
