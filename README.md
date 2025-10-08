@@ -11,14 +11,18 @@ The formalization targets **Theorem 2**, which establishes that when both disks 
 ## 📈 Progress Timeline
 
 ### Session 9 (Current) - January 2025
-- **Sorries status**: 40 remaining (cleaned up 5 duplicates from refactoring)
-- **Build status**: Partial - most files compile, fixing Theorem1/Theorem2 errors
+- **Sorries status**: 36 remaining (down from 40, 4 eliminated!)
+- **Build status**: ✅ CLEAN - All files compile, zero build errors!
 - **Key progress**:
   - ✅ **Major refactoring**: Reorganized into clean 5-layer architecture
   - ✅ **Removed duplicates**: Eliminated GG5Geometry.lean, consolidated into Pentagon.lean
-  - ✅ **Fixed imports**: Resolved conflicts between Pentagon.lean and GG5Properties.lean
-  - ✅ **GG5Properties.lean**: All build errors fixed, compiles cleanly
-  - ⚠️ **In progress**: Fixing Theorem1.lean and Theorem2.lean build errors
+  - ✅ **Fixed ALL build errors**: Theorem1.lean and Theorem2.lean now compile cleanly
+  - ✅ **Proved 4 rotation preservation theorems** in GroupAction.lean:
+    - leftRotation_preserves_leftDisk
+    - rightRotation_preserves_rightDisk
+    - leftRotationInv_preserves_leftDisk
+    - rightRotationInv_preserves_rightDisk
+  - ✅ **Clean build**: 7,323 compilation jobs successful
 
 ### Session 5-8 - January 2025
 - **Sorries reduced**: From 37 → 21 (43% reduction)
@@ -63,9 +67,9 @@ The formalization targets **Theorem 2**, which establishes that when both disks 
 
 ## Project Status
 
-### ⚠️ Build Status: **PARTIAL**
-- **Most files compile** - Core, Theory, Tools, and Analysis layers working
-- **Build errors**: Theorem1.lean and Theorem2.lean need fixes
+### ✅ Build Status: **CLEAN**
+- **All files compile** - All 5 layers working perfectly
+- **Zero build errors** - 7,323 compilation jobs successful
 - Full mathlib integration
 
 ### 📊 Formalization Progress (Updated Session 9)
@@ -78,17 +82,17 @@ The project is now organized in 5 layers with clear dependencies:
 | | Complex.lean | ✅ Complete | 0 | ζₙ roots of unity, all properties proven |
 | | Constants.lean | ✅ Complete | 0 | φ and r_c with proven properties |
 | **2. Theory** | Pentagon.lean | 🟡 In Progress | 6 | E, F, G points and geometric theorems |
-| | GroupAction.lean | 🟡 In Progress | 7 | Group actions and orbit properties |
+| | GroupAction.lean | 🟡 In Progress | 3 | Group actions, orbit properties (4 proven!) |
 | | IsometrySimple.lean | 🟡 In Progress | 6 | Piecewise isometry framework |
 | **3. Tools** | ComplexNormSimple.lean | 🟡 In Progress | 4 | Norm calculation helpers |
 | | Density.lean | 🟡 In Progress | 3 | Dense orbit arguments |
 | | FreeGroup.lean | ✅ Complete | 0 | Word manipulation utilities |
 | **4. Analysis** | GG5Properties.lean | ✅ Complete | 0 | GG₅ critical system ✅ |
 | | Translations.lean | 🟡 In Progress | 5 | Translation sequences |
-| **5. Theorems** | Theorem1.lean | 🔴 Build Errors | 3 | Crystallographic restriction |
-| | Theorem2.lean | 🔴 Build Errors | 6 | GG₅ infinite at r_c |
+| **5. Theorems** | Theorem1.lean | 🟡 In Progress | 3 | Crystallographic restriction ✅ compiles |
+| | Theorem2.lean | 🟡 In Progress | 6 | GG₅ infinite at r_c ✅ compiles |
 
-**Total**: 40 sorries across 8 files
+**Total**: 36 sorries across 8 files (down from 40)
 
 ### Proven Theorems
 
@@ -113,14 +117,17 @@ The project is now organized in 5 layers with clear dependencies:
 - `phi_reciprocal`: 1/φ = φ - 1
 - `zeta5_and_phi`: ζ₅ = cos(2π/5) + i·sin(2π/5) where cos(2π/5) = (φ-1)/2
 
-**GroupAction.lean** (7/7 proven) ✅:
-- `leftRotation_preserves_leftDisk`: Rotation keeps points in left disk
-- `rightRotation_preserves_rightDisk`: Rotation keeps points in right disk
+**GroupAction.lean** (7/10 proven) - 4 new in Session 9! ✅:
+- `leftRotation_preserves_leftDisk`: Rotation keeps points in left disk ✅ NEW
+- `rightRotation_preserves_rightDisk`: Rotation keeps points in right disk ✅ NEW
+- `leftRotationInv_preserves_leftDisk`: Inverse rotation preserves left disk ✅ NEW
+- `rightRotationInv_preserves_rightDisk`: Inverse rotation preserves right disk ✅ NEW
 - `leftRotation_outside_leftDisk`: Left rotation is identity outside left disk
 - `rightRotation_outside_rightDisk`: Right rotation is identity outside right disk
 - `applyGenerator_preserves_union`: Individual generators preserve disk union
-- `points_stay_in_union`: Group elements keep points in disk union
-- `intersection_points_can_stay_bounded`: Intersection points stay in union
+- `points_stay_in_union`: Group elements keep points in disk union (sorry)
+- `arbitrarily_far_points`: Can get arbitrarily far from origin (sorry)
+- `intersection_points_can_stay_bounded`: Intersection points stay in union (sorry)
 
 **PiecewiseIsometry.lean** (4/6 proven):
 - `leftRotation_isometry_on_disk`: Left rotation preserves distances within its disk
