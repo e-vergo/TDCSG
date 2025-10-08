@@ -19,7 +19,7 @@ open scoped goldenRatio
 namespace GG5Properties
 
 /-- The critical GG₅ system -/
-def GG5_critical : TwoDiskSystem :=
+noncomputable def GG5_critical : TwoDiskSystem :=
   { n₁ := 5
     n₂ := 5
     r₁ := r_c
@@ -33,25 +33,18 @@ def GG5_critical : TwoDiskSystem :=
 theorem critical_overlap :
     GG5_critical.diskIntersection.Nonempty := by
   use 0
-  unfold diskIntersection leftDisk rightDisk
-  simp [Metric.mem_closedBall, leftCenter, rightCenter]
+  unfold diskIntersection leftDisk rightDisk GG5_critical
+  simp only [Metric.mem_closedBall, leftCenter, rightCenter, Set.mem_inter_iff]
+  -- Goal: ‖0 - (-1)‖ ≤ r_c ∧ ‖0 - 1‖ ≤ r_c
+  have h : (1 : ℝ) ≤ r_c := by
+    unfold r_c
+    rw [Real.one_le_sqrt]
+    linarith [one_lt_goldenRatio]
   constructor
-  · calc ‖(0 : ℂ) - (-1)‖ = ‖(1 : ℂ)‖ := by ring_nf
-      _ = 1 := norm_one
-      _ < r_c := by
-        unfold r_c
-        have : 1 < Real.sqrt (3 + goldenRatio) := by
-          rw [one_lt_sqrt (by linarith [goldenRatio_pos] : 0 ≤ 3 + goldenRatio)]
-          linarith [one_lt_goldenRatio]
-        linarith
-  · calc ‖(0 : ℂ) - 1‖ = ‖(-1 : ℂ)‖ := by ring_nf
-      _ = 1 := by simp
-      _ < r_c := by
-        unfold r_c
-        have : 1 < Real.sqrt (3 + goldenRatio) := by
-          rw [one_lt_sqrt (by linarith [goldenRatio_pos] : 0 ≤ 3 + goldenRatio)]
-          linarith [one_lt_goldenRatio]
-        linarith
+  · calc ‖(0 : ℂ) - (-1)‖ = 1 := by ring_nf; exact norm_one
+      _ ≤ r_c := h
+  · calc ‖(0 : ℂ) - 1‖ = 1 := by ring_nf; norm_num
+      _ ≤ r_c := h
 
 /-- The point E lies on the boundary of the left disk -/
 theorem E_on_left_boundary :
@@ -70,11 +63,9 @@ theorem G_from_E_F : G = 2 * F - E := G_def
 
 /-- The collinearity of E', F, G, E -/
 theorem collinear_E_F_G :
-    ∃ (a b : ℝ), 0 < a ∧ a < 1 ∧ 0 < b ∧ b < 1 ∧ a < b ∧
-    F = E' + a • (E - E') ∧
-    G = E' + b • (E - E') := by
-  obtain ⟨t_F, t_G, h1, h2, h3, h4, h5⟩ := ordering_on_line
-  exact ⟨t_F, t_G, h1, h2, h3, h4, h5⟩
+    ∃ t_F t_G : ℝ, 0 < t_F ∧ t_F < t_G ∧ t_G < 1 ∧
+    F = E' + t_F • (E - E') ∧
+    G = E' + t_G • (E - E') := ordering_on_line
 
 /-- The golden ratio appears in distance ratios -/
 theorem golden_ratio_in_geometry :
