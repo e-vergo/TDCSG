@@ -45,6 +45,13 @@ Before doing **anything else**, read these four files to understand the project:
 - What works well and what doesn't
 - Performance metrics and best practices
 
+### 5. **[bfs_prover_mcp/README.md](bfs_prover_mcp/README.md)** - MCP Integration (Optional but Recommended)
+**Read this for native MCP tool usage**:
+- How to use `mcp__bfs-prover__*` tools directly
+- Cleaner workflow than bash client
+- Complete examples with MCP tools
+- Troubleshooting MCP connection issues
+
 ## ⚡ Quick Start After Reading
 
 Once you've read the above files:
@@ -110,8 +117,9 @@ After reading the files, you should understand:
 ## 🔧 Available Tools
 
 You have access to:
-- **Lean LSP MCP tools**: `lean_goal`, `lean_diagnostic_messages`, `lean_multi_attempt`, `lean_loogle`, `lean_leansearch`, etc.
-- **BFS-Prover tactic daemon**: Local LLM for generating Lean tactics
+- **Lean LSP MCP tools**: `mcp__lean-lsp__lean_goal`, `mcp__lean-lsp__lean_diagnostic_messages`, `mcp__lean-lsp__lean_multi_attempt`, `mcp__lean-lsp__lean_loogle`, `mcp__lean-lsp__lean_leansearch`, etc.
+- **BFS-Prover MCP tools** (NEW!): `mcp__bfs-prover__bfs_suggest_tactics`, `mcp__bfs-prover__bfs_daemon_status`
+- **BFS-Prover tactic daemon**: Local LLM for generating Lean tactics (also available via bash client)
 - **Standard file tools**: Read, Edit, Write, Grep, Glob, Bash
 - **Git tools**: For commits and tracking changes
 

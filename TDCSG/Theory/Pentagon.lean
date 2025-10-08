@@ -72,7 +72,7 @@ theorem F_on_segment_E'E :
     have h_sqrt : 0 < Real.sqrt 5 := Real.sqrt_pos.mpr (by norm_num : (0 : ℝ) < 5)
     linarith
   · -- Show F = E' + ((3 - √5)/4) • (E - E')
-    sorry  -- Computational proof
+    sorry  -- Computational proof: unfold E' E F, expand scalar mult, verify algebraically
 
 /-- G lies on the line segment from E' to E. -/
 theorem G_on_segment_E'E :

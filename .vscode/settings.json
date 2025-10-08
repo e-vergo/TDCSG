@@ -1,0 +1,28 @@
+{
+  "mcp.servers": {
+    "bfs-prover": {
+      "type": "stdio",
+      "command": "/Users/eric/Documents/GitHub/TDCSG/.venv/bin/python",
+      "args": ["-m", "bfs_prover_mcp.server"],
+      "env": {
+        "TACTIC_SERVER_HOST": "localhost",
+        "TACTIC_SERVER_PORT": "5678",
+        "TACTIC_SERVER_TIMEOUT": "30",
+        "PYTHONPATH": "/Users/eric/Documents/GitHub/TDCSG"
+      }
+    }
+  },
+  "claudeCode.mcpServers": {
+    "bfs-prover": {
+      "type": "stdio",
+      "command": "/Users/eric/Documents/GitHub/TDCSG/.venv/bin/python",
+      "args": ["-m", "bfs_prover_mcp.server"],
+      "env": {
+        "TACTIC_SERVER_HOST": "localhost",
+        "TACTIC_SERVER_PORT": "5678",
+        "TACTIC_SERVER_TIMEOUT": "30",
+        "PYTHONPATH": "/Users/eric/Documents/GitHub/TDCSG"
+      }
+    }
+  }
+}

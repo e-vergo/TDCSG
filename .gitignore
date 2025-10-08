@@ -2,6 +2,7 @@
 
 # BFS-Prover model (large, not committed)
 /BFS-Prover-V2-7B/
+/BFS-Prover-V2-32B-GGUF/
 
 # Python cache
 __pycache__/

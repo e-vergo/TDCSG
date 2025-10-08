@@ -13,29 +13,20 @@ open scoped goldenRatio
 
 namespace ComplexNormTools
 
-/-- Norm squared of E + 1 equals 3 + φ -/
-lemma norm_sq_E_plus_one :
-    normSq ((1 : ℂ) + TwoDiskSystem.ζ₅ - TwoDiskSystem.ζ₅^2) = 3 + goldenRatio := by
-  -- normSq z = z * conj(z) = (re z)^2 + (im z)^2
-  rw [normSq_apply]
-  -- Expand: (1 + ζ₅ - ζ₅²) * conj(1 + ζ₅ - ζ₅²)
-  -- Using conj(ζ₅) = ζ₅⁴ and conj(ζ₅²) = ζ₅³
-  have conj_z5 : conj TwoDiskSystem.ζ₅ = TwoDiskSystem.ζ₅^4 := zeta5_conj
-  have conj_z5_sq : conj (TwoDiskSystem.ζ₅^2) = TwoDiskSystem.ζ₅^3 := by
-    rw [map_pow, conj_z5, ← pow_mul]
-    norm_num
-  simp only [map_sub, map_add, map_one, conj_z5, conj_z5_sq]
-  -- Now expand: (1 + ζ₅ - ζ₅²)(1 + ζ₅⁴ - ζ₅³)
-  ring_nf
-  -- This should give us a polynomial in ζ₅ that we can reduce using ζ₅⁵ = 1
-  sorry  -- Need to expand and reduce using ζ₅⁵ = 1 and sum_zeta5_powers
-
 /-- Helper: ζ₅ conjugate is ζ₅⁴ -/
 lemma zeta5_conj : starRingEnd ℂ TwoDiskSystem.ζ₅ = TwoDiskSystem.ζ₅^4 := by
   rw [show TwoDiskSystem.ζ₅ = TwoDiskSystem.ζ 5 from rfl]
   rw [← TwoDiskSystem.zeta_inv 5 (by norm_num : (5 : ℕ) > 0)]
   rw [show TwoDiskSystem.ζ 5 = TwoDiskSystem.ζ₅ from rfl]
   exact TwoDiskSystem.zeta5_pow_4.symm
+
+/-- Norm squared of E + 1 equals 3 + φ -/
+lemma norm_sq_E_plus_one :
+    normSq ((1 : ℂ) + TwoDiskSystem.ζ₅ - TwoDiskSystem.ζ₅^2) = 3 + goldenRatio := by
+  -- normSq z = (re z)^2 + (im z)^2
+  rw [normSq_apply]
+  -- Need to expand (1 + ζ₅ - ζ₅²)(conj: 1 + ζ₅⁴ - ζ₅³) and reduce using ζ₅⁵ = 1
+  sorry
 
 /-- Helper: Simplify powers of ζ₅ using ζ₅⁵ = 1 -/
 lemma zeta5_pow_reduce (n : ℕ) :

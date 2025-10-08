@@ -568,24 +568,75 @@ theorem hard_algebra : ... := by
 
 You have access to a local LLM trained specifically for Lean4 tactic generation! **This is your superpower - use it aggressively!**
 
+### 🚀 MCP Integration (New!)
+
+BFS-Prover is now available as native MCP tools in Claude Code:
+- **`mcp__bfs-prover__bfs_suggest_tactics`** - Generate tactic suggestions from proof states
+- **`mcp__bfs-prover__bfs_daemon_status`** - Check if daemon is running
+
+**Benefits of MCP tools:**
+- Native integration (no bash commands needed)
+- Consistent error handling
+- Formatted output with helpful suggestions
+- Type-safe parameters
+
+See [bfs_prover_mcp/README.md](bfs_prover_mcp/README.md) for full MCP documentation.
+
 ### ⚡ Quick Start - DO THIS FIRST EVERY SESSION!
 
 **1. Start the daemon (FIRST THING!):**
 ```bash
 ./tactic_server.sh start  # Loads 14GB model, takes ~15s first time
 ```
-**Status check:**
+**Status check (two options):**
 ```bash
-./tactic_server.sh status  # Verify it's running
+# Option 1: Use MCP tool (recommended)
+mcp__bfs-prover__bfs_daemon_status()
+
+# Option 2: Use bash
+bash("./tactic_server.sh status")
 ```
 
-**Generate tactics for a sorry:**
+**Generate tactics for a sorry (two options):**
+
+**Option A: MCP Tools (Recommended - Native Integration)**
+```python
+# 1. Check daemon status
+status = mcp__bfs-prover__bfs_daemon_status()
+
+# 2. Get proof state
+goal = mcp__lean-lsp__lean_goal(file, line, column)
+
+# 3. Ask BFS-Prover for suggestions (~2s)
+result = mcp__bfs-prover__bfs_suggest_tactics(
+    proof_state=goal,
+    num_suggestions=10,
+    temperature=0.7
+)
+
+# 4. Extract tactics from formatted result
+# Result format: "1. tactic1\n2. tactic2\n..."
+lines = result.split('\n')
+tactics = []
+for line in lines:
+    if line and line[0].isdigit():
+        parts = line.split('. ', 1)
+        if len(parts) == 2:
+            tactics.append(parts[1])
+
+# 5. Test all suggestions automatically
+results = mcp__lean-lsp__lean_multi_attempt(file, line, tactics)
+
+# 6. Pick the best and apply
+```
+
+**Option B: Bash Client (Alternative)**
 ```bash
 # 1. Get proof state
 goal = mcp__lean-lsp__lean_goal(file, line, column)
 
 # 2. Ask BFS-Prover for suggestions (~2s)
-result = bash(".venv/bin/python3 tactic_query.py --state '" + goal + "' --num 5")
+result = bash(".venv/bin/python3 tactic_query.py --state '" + goal + "' --num 10 --temp 0.7")
 tactics = result.stdout.strip().split("\n")
 
 # 3. Test all suggestions automatically
@@ -633,11 +684,23 @@ results = mcp__lean-lsp__lean_multi_attempt(file, line, tactics)
 **For EVERY sorry you encounter:**
 
 1. **Get the proof state:**
-   ```bash
+   ```python
    goal_state = mcp__lean-lsp__lean_goal(file_path, line_number, column)
    ```
 
-2. **Ask BFS-Prover (generate 5-10 tactics):**
+2. **Ask BFS-Prover (generate 5-10 tactics) - MCP Tool (Recommended):**
+   ```python
+   result = mcp__bfs-prover__bfs_suggest_tactics(
+       proof_state=goal_state,
+       num_suggestions=10,
+       temperature=0.7
+   )
+   # Extract tactics from "1. tactic\n2. tactic\n..." format
+   lines = result.split('\n')
+   tactics = [line.split('. ', 1)[1] for line in lines if line and line[0].isdigit() and '. ' in line]
+   ```
+
+   **Alternative: Bash Client:**
    ```bash
    result = bash(".venv/bin/python3 tactic_query.py --state '" + goal_state + "' --num 10 --temp 0.7")
    tactics = result.stdout.strip().split("\n")
@@ -779,16 +842,22 @@ When stuck on a proof:
 - Theorems proven per session
 - Dependencies unblocked
 
-### Session Template - BFS-Prover Workflow
+### Session Template - BFS-Prover MCP Workflow
 When starting a new session:
 1. **START BFS DAEMON FIRST!** - `./tactic_server.sh start`
-2. Check current sorry count - `grep -c "sorry" TDCSG/**/*.lean | grep -v ":0$"`
-3. Run `lake build` to verify clean state
-4. Review this CLAUDE.md for context
-5. Pick highest-priority unblocked work
-6. **For each sorry: Get goal → Ask BFS → Test tactics → Apply best**
-7. Update this file with new learnings
-8. **Stop daemon when done** - `./tactic_server.sh stop`
+2. **Verify MCP connection** - `mcp__bfs-prover__bfs_daemon_status()`
+3. Check current sorry count - `grep -c "sorry" TDCSG/**/*.lean | grep -v ":0$"`
+4. Run `lake build` to verify clean state
+5. Review this CLAUDE.md for context
+6. Pick highest-priority unblocked work
+7. **For each sorry: Use MCP workflow**
+   - Get goal: `mcp__lean-lsp__lean_goal(file, line, col)`
+   - Ask BFS: `mcp__bfs-prover__bfs_suggest_tactics(goal, num_suggestions=10)`
+   - Extract tactics from numbered list format
+   - Test tactics: `mcp__lean-lsp__lean_multi_attempt(file, line, tactics)`
+   - Apply best tactic with `Edit`
+8. Update this file with new learnings
+9. **Stop daemon when done** - `./tactic_server.sh stop`
 
 ## 🎉 Celebrate Wins
 
