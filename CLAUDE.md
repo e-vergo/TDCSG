@@ -6,59 +6,73 @@ This file provides comprehensive guidance to Claude (claude.ai/code) when workin
 
 Formalize **Theorem 2** from "Two-Disk Compound Symmetry Groups": Prove that GG₅ (5-fold rotational symmetry on both disks) has an infinite group at the critical radius r = √(3 + φ).
 
-### Current Status (as of January 2025 - Session 8)
-- **Progress**: 34 sorries remaining (started Session 7 with 19, added new tool files with additional sorries)
-- **Completed**: Basic.lean, ComplexRepresentation.lean, GoldenRatio.lean, GroupAction.lean, PiecewiseIsometry.lean ✅
-- **New**: Created 5 helper tool files to assist with proof completion:
-  - FreeGroupTools.lean - Word computation utilities
-  - ComplexNormTools.lean - Norm calculation helpers (3 sorries)
-  - GeometricVerifier.lean - Geometric verification tools (3 sorries)
-  - IrrationalDensity.lean - Density argument framework (4 sorries)
-  - ComputationalProofs.lean - Detailed algebraic proofs (3 sorries)
-- **Build**: Clean - zero compile errors
-- **Key achievements**:
-  - Successfully integrated all tool files into the project
-  - Structured proof framework for Theorem 2
-  - Established computational infrastructure for eliminating remaining sorries
+### Current Status (as of January 2025 - Session 9)
+- **Progress**: 40 sorries remaining (cleaned up 5 duplicate definitions)
+- **Build**: Partial - Most files compile, Theorem1.lean and Theorem2.lean have errors
+- **Project Structure**: Significantly refactored into modular layers
+  - Layer 1: Core (Basic.lean, Complex.lean, Constants.lean)
+  - Layer 2: Theory (Pentagon.lean, GroupAction.lean, IsometrySimple.lean)
+  - Layer 3: Tools (ComplexNormSimple.lean, Density.lean, FreeGroup.lean)
+  - Layer 4: Analysis (GG5Properties.lean, Translations.lean)
+  - Layer 5: Theorems (Theorem1.lean, Theorem2.lean)
+- **Key achievements (Session 9)**:
+  - ✅ Removed duplicate GG5Geometry.lean (consolidated into Pentagon.lean)
+  - ✅ Fixed import conflicts and build errors in GG5Properties.lean
+  - ✅ Simplified project structure with clear separation of concerns
+  - ⚠️ Need to fix: Theorem1.lean and Theorem2.lean build errors
 
-## 📁 Project Structure & Dependencies
+## 📁 Project Structure & Dependencies (Updated Session 9)
+
+The project has been refactored into a clean 5-layer architecture:
 
 ```
-Core Definitions (Basic.lean) ✅
-    ↓
-Group Theory (GroupAction.lean) ✅
-    ↓                    ↓
-Isometries              Translations.lean (5 sorries)
-(PiecewiseIsometry.lean) ✅     ↓
-                         Theorem1.lean (3 sorries)
-    ↓                          ↓
-Complex Analysis          Golden Ratio
-(ComplexRepresentation.lean) ✅  (GoldenRatio.lean) ✅
-    ↓                          ↓
-        GG5Geometry.lean (5 sorries)
-                ↓
-        Theorem2.lean (6 sorries)
+Layer 1: Core (Foundation)
+├── Basic.lean - TwoDiskSystem type, disk definitions, rotations
+├── Complex.lean - ζₙ roots of unity, rotation as complex multiplication
+└── Constants.lean - φ (golden ratio), r_c (critical radius), φ properties
 
-Helper Tools (Session 8 additions):
-- FreeGroupTools.lean (0 sorries)
-- ComplexNormTools.lean (3 sorries)
-- GeometricVerifier.lean (3 sorries)
-- IrrationalDensity.lean (4 sorries)
-- ComputationalProofs.lean (3 sorries)
+Layer 2: Theory (Mathematical Framework)
+├── Pentagon.lean - E, F, G points, segment theorems (6 sorries)
+├── GroupAction.lean - Group actions, orbit properties (7 sorries)
+└── IsometrySimple.lean - Piecewise isometry properties (6 sorries)
+
+Layer 3: Tools (Computational Support)
+├── ComplexNormSimple.lean - Norm calculations (4 sorries)
+├── Density.lean - Dense orbit arguments (3 sorries)
+└── FreeGroup.lean - Word manipulation utilities
+
+Layer 4: Analysis (Domain-Specific)
+├── GG5Properties.lean - GG₅ critical system properties ✅
+└── Translations.lean - Translation sequences (5 sorries)
+
+Layer 5: Theorems (Main Results)
+├── Theorem1.lean - Crystallographic restriction (3 sorries, build errors)
+└── Theorem2.lean - GG₅ is infinite at r_c (6 sorries, build errors)
 ```
+
+**Total: 40 sorries across 8 files**
+
+**Key File Locations:**
+- E, F, G definitions: `TDCSG/Theory/Pentagon.lean` (authoritative)
+- r_c definition: `TDCSG/Core/Constants.lean`
+- ζ₅ definition: `TDCSG/Core/Complex.lean`
+- GG5_critical system: `TDCSG/Analysis/GG5Properties.lean`
 
 ## 🔧 Essential Commands & Workflow
 
 ### Quick Status Check
 ```bash
-# Check sorry count
-grep -c "sorry" TDCSG/TwoDisk/*.lean | grep -v ":0$"
+# Check sorry count across all files
+echo "=== Sorry Count ===" && grep -c "sorry" TDCSG/**/*.lean | grep -v ":0$" && echo "Total:" && grep -n "sorry" TDCSG/**/*.lean | wc -l
 
 # Build project
 lake build
 
 # Get mathlib cache (do this after lake update!)
 lake exe cache get
+
+# Check for build errors
+lake build 2>&1 | grep "error:" | head -20
 ```
 
 ### Development Cycle

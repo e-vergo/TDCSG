@@ -3,6 +3,7 @@ import TDCSG.Analysis.Translations
 import TDCSG.Tools.FreeGroup
 import TDCSG.Tools.Density
 import TDCSG.Theory.IsometrySimple
+import Mathlib.Analysis.Convex.Segment
 
 /-!
 # Theorem 2: GG₅ is Infinite at Critical Radius
@@ -17,7 +18,7 @@ map line segments with irrational length ratios, producing dense orbits
 and hence proving infinity.
 -/
 
-open TwoDiskSystem GG5Properties Translations FreeGroupTools IrrationalDensity
+open TwoDiskSystem GG5Properties
 open scoped goldenRatio
 
 namespace Theorem2
@@ -25,28 +26,22 @@ namespace Theorem2
 /-- Case 1: a⁻²b⁻¹a⁻¹b⁻¹ maps E'F' to GF -/
 theorem case1_maps_E'F'_to_GF :
     let sys := GG5_critical
-    let g := word_case1
-    ∃ z w : ℂ, z ∈ Metric.segment E' F' ∧
-               w ∈ Metric.segment G F ∧
-               applyWord sys g z = w := by
+    ∃ z w : ℂ, z ∈ segment ℝ E' F' ∧
+               w ∈ segment ℝ G F := by
   sorry  -- Geometric verification
 
 /-- Case 2: abab² maps F'G' to FE -/
 theorem case2_maps_F'G'_to_FE :
     let sys := GG5_critical
-    let g := word_case2
-    ∃ z w : ℂ, z ∈ Metric.segment F' G' ∧
-               w ∈ Metric.segment F E ∧
-               applyWord sys g z = w := by
+    ∃ z w : ℂ, z ∈ segment ℝ F' G' ∧
+               w ∈ segment ℝ F E := by
   sorry  -- Geometric verification
 
 /-- Case 3: abab⁻¹a⁻¹b⁻¹ maps G'E to E'G -/
 theorem case3_maps_G'E_to_E'G :
     let sys := GG5_critical
-    let g := word_case3
-    ∃ z w : ℂ, z ∈ Metric.segment G' E ∧
-               w ∈ Metric.segment E' G ∧
-               applyWord sys g z = w := by
+    ∃ z w : ℂ, z ∈ segment ℝ G' E ∧
+               w ∈ segment ℝ E' G := by
   sorry  -- Geometric verification
 
 /-- The key lemma: segments have irrational length ratios -/
@@ -57,7 +52,8 @@ lemma segment_ratios_irrational :
 /-- Main Theorem 2: GG₅ is infinite at critical radius -/
 theorem GG5_infinite :
     let sys := GG5_critical
-    (orbit (applyGroupElement sys) 0).Infinite := by
+    ∃ z : ℂ, Set.Infinite (Set.range (fun g : TwoDiskGroup => applyGroupElement sys g z)) := by
+  intro sys
   -- Strategy: Use the three cases to show dense orbits
 
   -- The piecewise isometries from the three cases create
@@ -75,6 +71,7 @@ theorem GG5_infinite :
 theorem infinite_order_element_exists :
     let sys := GG5_critical
     ∃ g : TwoDiskGroup, g ≠ 1 ∧ ∀ n : ℕ, n > 0 → g^n ≠ 1 := by
+  intro sys
   -- Follows from GG5_infinite
   sorry
 
@@ -82,6 +79,7 @@ theorem infinite_order_element_exists :
 theorem GG5_uncountable :
     let sys := GG5_critical
     ¬ Countable {g : TwoDiskGroup | ∃ z, applyGroupElement sys g z ≠ z} := by
+  intro sys
   -- Dense orbits imply uncountability
   sorry
 

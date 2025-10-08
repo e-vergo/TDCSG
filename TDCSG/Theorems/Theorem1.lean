@@ -1,5 +1,6 @@
 import TDCSG.Theory.GroupAction
 import TDCSG.Theory.IsometrySimple
+import TDCSG.Core.Constants
 
 /-!
 # Theorem 1: Crystallographic Restriction
@@ -14,7 +15,8 @@ disks overlap and neither (n₁,n₂) nor (n₂,n₁) is in the set
 {(2,2), (2,3), (2,4), (2,5), (3,3)}.
 -/
 
-open TwoDiskSystem
+open TwoDiskSystem Real
+open scoped goldenRatio
 
 namespace Theorem1
 
@@ -51,23 +53,25 @@ theorem GG5_infinite_at_critical :
       r₂_pos := r_c_pos
     }
     ∃ g : TwoDiskGroup, g ≠ 1 ∧ ∀ n : ℕ, g^n ≠ 1 := by
+  intro sys
   -- Apply Theorem 1
-  rw [two_disk_infinite_iff]
+  rw [two_disk_infinite_iff sys]
   constructor
   · -- Show overlap at critical radius
     use 0
     unfold diskIntersection leftDisk rightDisk
-    simp [Metric.mem_closedBall, leftCenter, rightCenter]
-    constructor <;> {
-      norm_num
+    simp only [Metric.mem_closedBall, leftCenter, rightCenter, Set.mem_inter_iff, sys]
+    have h_bound : (1 : ℝ) ≤ r_c := by
       unfold r_c
-      have : 1 < Real.sqrt (3 + goldenRatio) := by
-        rw [Real.one_lt_sqrt (by linarith [goldenRatio_pos] : 0 ≤ 3 + goldenRatio)]
-        linarith [one_lt_goldenRatio]
-      linarith
-    }
+      rw [Real.one_le_sqrt]
+      linarith [one_lt_goldenRatio]
+    constructor
+    · calc ‖(0 : ℂ) - (-1)‖ = 1 := by ring_nf; norm_num
+        _ ≤ r_c := h_bound
+    · calc ‖(0 : ℂ) - 1‖ = 1 := by ring_nf; norm_num
+        _ ≤ r_c := h_bound
   · -- (5,5) is not in FinitePairs
-    unfold FinitePairs
-    simp
+    simp only [FinitePairs, sys]
+    decide
 
 end Theorem1
