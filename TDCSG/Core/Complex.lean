@@ -1,10 +1,10 @@
-import TDCSG.TwoDisk.Theorem1
+import TDCSG.Core.Basic
 
 /-!
 # Complex Plane Representation
 
 This file sets up the complex plane representation and roots of unity
-needed for Theorem 2.
+needed for the two-disk system formalization.
 
 ## Main definitions
 
