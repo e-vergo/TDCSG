@@ -55,22 +55,77 @@ theorem apply_mul (g h : TwoDiskGroup) (z : ℂ) :
 /-- Left rotation preserves left disk membership -/
 theorem leftRotation_preserves_leftDisk (z : ℂ) (hz : z ∈ sys.leftDisk) :
     sys.leftRotation z ∈ sys.leftDisk := by
-  sorry  -- Rotation preserves distances, follows from norm_exp_ofReal_mul_I
+  unfold leftDisk leftRotation
+  rw [if_pos hz]
+  simp only [Metric.mem_closedBall, leftCenter, Complex.dist_eq]
+  -- Rotation preserves distances from the center
+  have : ‖(-1 : ℂ) + Complex.exp (Complex.I * ↑sys.leftAngle) * (z - -1) - -1‖ =
+         ‖Complex.exp (Complex.I * ↑sys.leftAngle) * (z - -1)‖ := by
+    congr 1; ring
+  rw [this, norm_mul]
+  -- ‖exp(I * θ)‖ = 1 for imaginary arguments
+  have h_exp : ‖Complex.exp (Complex.I * ↑sys.leftAngle)‖ = 1 := by
+    rw [Complex.norm_exp]
+    simp only [Complex.mul_re, Complex.I_re, Complex.I_im, Complex.ofReal_re, Complex.ofReal_im]
+    ring_nf
+    norm_num
+  rw [h_exp, one_mul]
+  -- Now goal is ‖z - (-1)‖ ≤ r₁, which is exactly hz
+  exact hz
 
 /-- Right rotation preserves right disk membership -/
 theorem rightRotation_preserves_rightDisk (z : ℂ) (hz : z ∈ sys.rightDisk) :
     sys.rightRotation z ∈ sys.rightDisk := by
-  sorry  -- Rotation preserves distances, follows from norm_exp_ofReal_mul_I
+  unfold rightDisk rightRotation
+  rw [if_pos hz]
+  simp only [Metric.mem_closedBall, rightCenter, Complex.dist_eq]
+  have : ‖(1 : ℂ) + Complex.exp (Complex.I * ↑sys.rightAngle) * (z - 1) - 1‖ =
+         ‖Complex.exp (Complex.I * ↑sys.rightAngle) * (z - 1)‖ := by
+    congr 1; ring
+  rw [this, norm_mul]
+  have h_exp : ‖Complex.exp (Complex.I * ↑sys.rightAngle)‖ = 1 := by
+    rw [Complex.norm_exp]
+    simp only [Complex.mul_re, Complex.I_re, Complex.I_im, Complex.ofReal_re, Complex.ofReal_im]
+    ring_nf
+    norm_num
+  rw [h_exp, one_mul]
+  exact hz
 
 /-- Inverse left rotation preserves left disk membership -/
 theorem leftRotationInv_preserves_leftDisk (z : ℂ) (hz : z ∈ sys.leftDisk) :
     sys.leftRotationInv z ∈ sys.leftDisk := by
-  sorry  -- Rotation preserves distances, follows from norm_exp_ofReal_mul_I
+  unfold leftDisk leftRotationInv
+  rw [if_pos hz]
+  simp only [Metric.mem_closedBall, leftCenter, Complex.dist_eq]
+  have : ‖(-1 : ℂ) + Complex.exp (-Complex.I * ↑sys.leftAngle) * (z - -1) - -1‖ =
+         ‖Complex.exp (-Complex.I * ↑sys.leftAngle) * (z - -1)‖ := by
+    congr 1; ring
+  rw [this, norm_mul]
+  have h_exp : ‖Complex.exp (-Complex.I * ↑sys.leftAngle)‖ = 1 := by
+    rw [Complex.norm_exp]
+    simp only [Complex.neg_re, Complex.mul_re, Complex.I_re, Complex.I_im, Complex.ofReal_re, Complex.ofReal_im]
+    ring_nf
+    norm_num
+  rw [h_exp, one_mul]
+  exact hz
 
 /-- Inverse right rotation preserves right disk membership -/
 theorem rightRotationInv_preserves_rightDisk (z : ℂ) (hz : z ∈ sys.rightDisk) :
     sys.rightRotationInv z ∈ sys.rightDisk := by
-  sorry  -- Rotation preserves distances, follows from norm_exp_ofReal_mul_I
+  unfold rightDisk rightRotationInv
+  rw [if_pos hz]
+  simp only [Metric.mem_closedBall, rightCenter, Complex.dist_eq]
+  have : ‖(1 : ℂ) + Complex.exp (-Complex.I * ↑sys.rightAngle) * (z - 1) - 1‖ =
+         ‖Complex.exp (-Complex.I * ↑sys.rightAngle) * (z - 1)‖ := by
+    congr 1; ring
+  rw [this, norm_mul]
+  have h_exp : ‖Complex.exp (-Complex.I * ↑sys.rightAngle)‖ = 1 := by
+    rw [Complex.norm_exp]
+    simp only [Complex.neg_re, Complex.mul_re, Complex.I_re, Complex.I_im, Complex.ofReal_re, Complex.ofReal_im]
+    ring_nf
+    norm_num
+  rw [h_exp, one_mul]
+  exact hz
 
 /-- Generator application preserves disk union -/
 theorem applyGenerator_preserves_union (gen : Fin 2) (inv : Bool) (z : ℂ)
