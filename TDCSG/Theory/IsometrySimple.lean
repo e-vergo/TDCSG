@@ -31,22 +31,136 @@ structure PiecewiseIsometry where
 /-- Left rotation is a piecewise isometry -/
 theorem leftRotation_piecewise_isometry :
     ∃ pi : PiecewiseIsometry, pi.f = sys.leftRotation := by
-  sorry  -- Follows from rotation preserving distances on each disk
+  use {
+    f := sys.leftRotation
+    pieces := [sys.leftDisk, sys.leftDiskᶜ]
+    isometry_on_pieces := by
+      intro p hp z hz w hw
+      simp only [List.mem_cons, List.mem_singleton] at hp
+      cases hp with
+      | inl hp_left =>
+        -- p = leftDisk: rotation preserves distance
+        rw [hp_left] at hz hw
+        unfold leftRotation
+        simp only [if_pos hz, if_pos hw, leftCenter]
+        have : (-1 : ℂ) + Complex.exp (Complex.I * ↑sys.leftAngle) * (z - -1) -
+               ((-1) + Complex.exp (Complex.I * ↑sys.leftAngle) * (w - -1)) =
+               Complex.exp (Complex.I * ↑sys.leftAngle) * (z - w) := by ring
+        rw [this, norm_mul]
+        have h_exp : ‖Complex.exp (Complex.I * ↑sys.leftAngle)‖ = 1 := by
+          rw [Complex.norm_exp]
+          simp only [Complex.mul_re, Complex.I_re, Complex.I_im, Complex.ofReal_re, Complex.ofReal_im]
+          ring_nf; norm_num
+        rw [h_exp]; simp
+      | inr hp_right =>
+        -- p = leftDiskᶜ: rotation is identity
+        cases hp_right with
+        | inl hp_eq =>
+          rw [hp_eq] at hz hw
+          unfold leftRotation
+          rw [if_neg hz, if_neg hw]
+        | inr hp_nil =>
+          simp only [List.not_mem_nil] at hp_nil
+  }
 
 /-- Right rotation is a piecewise isometry -/
 theorem rightRotation_piecewise_isometry :
     ∃ pi : PiecewiseIsometry, pi.f = sys.rightRotation := by
-  sorry  -- Follows from rotation preserving distances on each disk
+  use {
+    f := sys.rightRotation
+    pieces := [sys.rightDisk, sys.rightDiskᶜ]
+    isometry_on_pieces := by
+      intro p hp z hz w hw
+      simp only [List.mem_cons, List.mem_singleton] at hp
+      cases hp with
+      | inl hp_left =>
+        rw [hp_left] at hz hw
+        unfold rightRotation
+        simp only [if_pos hz, if_pos hw, rightCenter]
+        have : (1 : ℂ) + Complex.exp (Complex.I * ↑sys.rightAngle) * (z - 1) -
+               ((1) + Complex.exp (Complex.I * ↑sys.rightAngle) * (w - 1)) =
+               Complex.exp (Complex.I * ↑sys.rightAngle) * (z - w) := by ring
+        rw [this, norm_mul]
+        have h_exp : ‖Complex.exp (Complex.I * ↑sys.rightAngle)‖ = 1 := by
+          rw [Complex.norm_exp]
+          simp only [Complex.mul_re, Complex.I_re, Complex.I_im, Complex.ofReal_re, Complex.ofReal_im]
+          ring_nf; norm_num
+        rw [h_exp]; simp
+      | inr hp_right =>
+        cases hp_right with
+        | inl hp_eq =>
+          rw [hp_eq] at hz hw
+          unfold rightRotation
+          rw [if_neg hz, if_neg hw]
+        | inr hp_nil =>
+          simp only [List.not_mem_nil] at hp_nil
+  }
 
 /-- Left inverse rotation is a piecewise isometry -/
 theorem leftRotationInv_piecewise_isometry :
     ∃ pi : PiecewiseIsometry, pi.f = sys.leftRotationInv := by
-  sorry  -- Follows from rotation preserving distances on each disk
+  use {
+    f := sys.leftRotationInv
+    pieces := [sys.leftDisk, sys.leftDiskᶜ]
+    isometry_on_pieces := by
+      intro p hp z hz w hw
+      simp only [List.mem_cons, List.mem_singleton] at hp
+      cases hp with
+      | inl hp_left =>
+        rw [hp_left] at hz hw
+        unfold leftRotationInv
+        simp only [if_pos hz, if_pos hw, leftCenter]
+        have : (-1 : ℂ) + Complex.exp (-Complex.I * ↑sys.leftAngle) * (z - -1) -
+               ((-1) + Complex.exp (-Complex.I * ↑sys.leftAngle) * (w - -1)) =
+               Complex.exp (-Complex.I * ↑sys.leftAngle) * (z - w) := by ring
+        rw [this, norm_mul]
+        have h_exp : ‖Complex.exp (-Complex.I * ↑sys.leftAngle)‖ = 1 := by
+          rw [Complex.norm_exp]
+          simp only [Complex.neg_re, Complex.mul_re, Complex.I_re, Complex.I_im, Complex.ofReal_re, Complex.ofReal_im]
+          ring_nf; norm_num
+        rw [h_exp]; simp
+      | inr hp_right =>
+        cases hp_right with
+        | inl hp_eq =>
+          rw [hp_eq] at hz hw
+          unfold leftRotationInv
+          rw [if_neg hz, if_neg hw]
+        | inr hp_nil =>
+          simp only [List.not_mem_nil] at hp_nil
+  }
 
 /-- Right inverse rotation is a piecewise isometry -/
 theorem rightRotationInv_piecewise_isometry :
     ∃ pi : PiecewiseIsometry, pi.f = sys.rightRotationInv := by
-  sorry  -- Follows from rotation preserving distances on each disk
+  use {
+    f := sys.rightRotationInv
+    pieces := [sys.rightDisk, sys.rightDiskᶜ]
+    isometry_on_pieces := by
+      intro p hp z hz w hw
+      simp only [List.mem_cons, List.mem_singleton] at hp
+      cases hp with
+      | inl hp_left =>
+        rw [hp_left] at hz hw
+        unfold rightRotationInv
+        simp only [if_pos hz, if_pos hw, rightCenter]
+        have : (1 : ℂ) + Complex.exp (-Complex.I * ↑sys.rightAngle) * (z - 1) -
+               ((1) + Complex.exp (-Complex.I * ↑sys.rightAngle) * (w - 1)) =
+               Complex.exp (-Complex.I * ↑sys.rightAngle) * (z - w) := by ring
+        rw [this, norm_mul]
+        have h_exp : ‖Complex.exp (-Complex.I * ↑sys.rightAngle)‖ = 1 := by
+          rw [Complex.norm_exp]
+          simp only [Complex.neg_re, Complex.mul_re, Complex.I_re, Complex.I_im, Complex.ofReal_re, Complex.ofReal_im]
+          ring_nf; norm_num
+        rw [h_exp]; simp
+      | inr hp_right =>
+        cases hp_right with
+        | inl hp_eq =>
+          rw [hp_eq] at hz hw
+          unfold rightRotationInv
+          rw [if_neg hz, if_neg hw]
+        | inr hp_nil =>
+          simp only [List.not_mem_nil] at hp_nil
+  }
 
 /-- Apply a generator is a piecewise isometry -/
 lemma applyGenerator_piecewise_isometry (gen : Fin 2) (inv : Bool) :
