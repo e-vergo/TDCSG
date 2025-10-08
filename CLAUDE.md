@@ -6,52 +6,57 @@ This file provides comprehensive guidance to Claude (claude.ai/code) when workin
 
 Formalize **Theorem 2** from "Two-Disk Compound Symmetry Groups": Prove that GG₅ (5-fold rotational symmetry on both disks) has an infinite group at the critical radius r = √(3 + φ).
 
-### Current Status (as of January 2025 - Session 9)
-- **Progress**: 36 sorries remaining (down from 40, 4 eliminated!)
+### Current Status (as of January 2025 - Session 10)
+- **Progress**: 27 sorries remaining (down from 36, 9 eliminated! 🎉)
 - **Build**: ✅ CLEAN - All files compile, zero build errors!
+- **Total Reduction**: 57% from project start (63 → 27 sorries)
 - **Project Structure**: Refactored into clean 5-layer architecture
-  - Layer 1: Core (Basic.lean, Complex.lean, Constants.lean)
-  - Layer 2: Theory (Pentagon.lean, GroupAction.lean, IsometrySimple.lean)
-  - Layer 3: Tools (ComplexNormSimple.lean, Density.lean, FreeGroup.lean)
-  - Layer 4: Analysis (GG5Properties.lean, Translations.lean)
+  - Layer 1: Core (Basic.lean, Complex.lean, Constants.lean) - ✅ ALL COMPLETE
+  - Layer 2: Theory (Pentagon.lean, GroupAction.lean 90%, IsometrySimple.lean 83%)
+  - Layer 3: Tools (ComplexNormSimple.lean, Density.lean, FreeGroup.lean ✅)
+  - Layer 4: Analysis (GG5Properties.lean ✅, Translations.lean)
   - Layer 5: Theorems (Theorem1.lean, Theorem2.lean)
-- **Key achievements (Session 9)**:
-  - ✅ Removed duplicate GG5Geometry.lean (consolidated into Pentagon.lean)
-  - ✅ Fixed ALL build errors - Theorem1.lean and Theorem2.lean now compile
-  - ✅ Proved 4 rotation preservation theorems in GroupAction.lean (40 → 36 sorries)
-  - ✅ Used systematic pattern: unfold → if_pos → show ‖exp(iθ)‖ = 1
-  - ✅ Clean build: 7,323 compilation jobs successful
+- **Key achievements (Session 10)**:
+  - ✅ **BREAKTHROUGH:** Eliminated 9 sorries (36 → 27, 25% reduction!)
+  - ✅ Broke through <30 sorries barrier
+  - ✅ Discovered piecewise isometry pattern (applied 4x)
+  - ✅ Proved all rotation piecewise isometry theorems
+  - ✅ Completed modular arithmetic helpers (zeta5_conj, zeta5_pow_reduce)
+  - ✅ GroupAction.lean: 9/10 proven (90% complete!)
+  - ✅ IsometrySimple.lean: 5/6 proven (83% complete!)
+  - ✅ Leveraged BFS-Prover aggressively with great success
 
-## 📁 Project Structure & Dependencies (Updated Session 9)
+## 📁 Project Structure & Dependencies (Updated Session 10)
 
 The project has been refactored into a clean 5-layer architecture:
 
 ```
-Layer 1: Core (Foundation)
-├── Basic.lean - TwoDiskSystem type, disk definitions, rotations
-├── Complex.lean - ζₙ roots of unity, rotation as complex multiplication
-└── Constants.lean - φ (golden ratio), r_c (critical radius), φ properties
+Layer 1: Core (Foundation) - ✅ ALL COMPLETE!
+├── Basic.lean - TwoDiskSystem type, disk definitions, rotations ✅
+├── Complex.lean - ζₙ roots of unity, rotation as complex multiplication ✅
+└── Constants.lean - φ (golden ratio), r_c (critical radius), φ properties ✅
 
 Layer 2: Theory (Mathematical Framework)
 ├── Pentagon.lean - E, F, G points, segment theorems (6 sorries)
-├── GroupAction.lean - Group actions, orbit properties (7 sorries)
-└── IsometrySimple.lean - Piecewise isometry properties (6 sorries)
+├── GroupAction.lean - Group actions, orbit properties (1 sorry) 🔥 9/10 PROVEN!
+└── IsometrySimple.lean - Piecewise isometry properties (1 sorry) 🔥 5/6 PROVEN!
 
 Layer 3: Tools (Computational Support)
-├── ComplexNormSimple.lean - Norm calculations (4 sorries)
+├── ComplexNormSimple.lean - Norm calculations (2 sorries) 🔥 2 proven!
 ├── Density.lean - Dense orbit arguments (3 sorries)
-└── FreeGroup.lean - Word manipulation utilities
+└── FreeGroup.lean - Word manipulation utilities ✅
 
 Layer 4: Analysis (Domain-Specific)
 ├── GG5Properties.lean - GG₅ critical system properties ✅
 └── Translations.lean - Translation sequences (5 sorries)
 
 Layer 5: Theorems (Main Results)
-├── Theorem1.lean - Crystallographic restriction (3 sorries, build errors)
-└── Theorem2.lean - GG₅ is infinite at r_c (6 sorries, build errors)
+├── Theorem1.lean - Crystallographic restriction (3 sorries) ✅ compiles!
+└── Theorem2.lean - GG₅ is infinite at r_c (6 sorries) ✅ compiles!
 ```
 
-**Total: 36 sorries across 8 files** (down from 40 at session start)
+**Total: 27 sorries across 8 files** (down from 36 at Session 10 start!)
+**🎉 57% total reduction from project start (63 → 27 sorries)**
 
 **Key File Locations:**
 - E, F, G definitions: `TDCSG/Theory/Pentagon.lean` (authoritative)
@@ -225,28 +230,45 @@ This pattern worked for all 4 theorems:
 - leftRotationInv_preserves_leftDisk ✅
 - rightRotationInv_preserves_rightDisk ✅
 
-### Next Immediate Goals
-1. **Complete computational proofs in ComplexNormTools**
-   - Focus on norm_sq_E_plus_one for E_constraint
-   - Complete trigonometric identities for ζ₅
+### Session 11 Priorities (After Session 10 Achievements)
 
-2. **Finish geometric calculations in GG5Geometry**
-   - Complete F and G parameter verifications
-   - Prove distance_ratio_phi using computational tools
+**Immediate Next Goals (High-value targets):**
+1. **Pentagon.lean geometry (6 sorries)** - Critical for Theorem 2
+   - E_constraint: Use norm_sq_E_plus_one helper when complete
+   - F_on_segment_E'E, G_on_segment_E'E: Computational ζ₅ proofs
+   - ordering_on_line: Combine F and G segment proofs
+   - distance_ratio_phi: Use completed norm calculations
 
-3. **Complete translation proofs**
-   - Use FreeGroupTools for word computations
-   - Focus on a_inv_b_is_translation_in_intersection
+2. **Complete ComplexNormSimple.lean (2 sorries)** - Enables Pentagon proofs
+   - norm_sq_E_plus_one: Expand (1+ζ₅-ζ₅²)(1+ζ₅⁴-ζ₅³) using zeta5_pow_reduce
+   - zeta5_im: Trigonometric identity sin(2π/5) = √(10+2√5)/4
 
-### Secondary (Build on foundations)
-3. Complete remaining `GroupAction` lemmas
-4. Finish `PiecewiseIsometry` composition
-5. Prove translation lemmas once `applyGroupElement` works
+3. **Translations.lean (5 sorries)** - Required for Theorem 2
+   - a_inv_b_is_translation_in_intersection: Use applyGroupElement
+   - translation_forms_ngon_side: Geometric property
+   - Small translation constructions for n=5 and n>5
 
-### Strategic (Understanding the big picture)
-- The three case proofs in Theorem2 are the heart of the argument
-- Each shows a piecewise isometry mapping segments with irrational ratios
-- This creates dense orbits, proving infinity
+**Strategic (Medium priority):**
+4. **Resolve remaining blockers (2 sorries)**
+   - apply_mul (GroupAction): Needs FreeGroup.reduce lemma or workaround
+   - group_element_piecewise_isometry (IsometrySimple): Composition via partition refinement
+
+5. **Density.lean (3 sorries)** - Dense orbit framework
+   - Diophantine approximation theorems
+   - Irrational ratio density arguments
+
+**Final Push (Once foundations complete):**
+6. **Theorem2.lean (6 sorries)** - The main goal!
+   - Three case transformations (geometric computations)
+   - transformations_stay_in_intersection
+   - can_move_arbitrarily_on_segment
+   - origin_infinite_orbit (uses all above)
+
+7. **Theorem1.lean (3 sorries)** - Crystallographic restriction
+   - theorem1_sufficiency and theorem1_necessity
+   - Forward direction (contrapositive)
+
+**Session 10 created momentum - Pentagon is now the critical path!**
 
 ## 🎓 Key Learnings Across Sessions
 
@@ -256,6 +278,9 @@ This pattern worked for all 4 theorems:
 3. **Foldl induction** (Session 7): Prove properties of foldl by generalizing over starting function, then apply to `id`
 4. **Complex coercions** (Session 5): Be explicit with `(5:ℕ)` vs `(5:ℂ)`, use `norm_cast` liberally
 5. **Tool infrastructure** (Session 8): Created modular helper files to separate computational, geometric, and density-theoretic aspects
+6. **Piecewise isometry pattern** (Session 10): Discovered reusable proof structure for all rotation piecewise isometry theorems - apply same pattern 4x!
+7. **Modular arithmetic for roots** (Session 10): Power reduction via division algorithm: ζ₅^n = ζ₅^(n%5) using ζ₅⁵=1
+8. **Conjugate via primitive root** (Session 10): conj(ζ₅) = ζ₅⁻¹ = ζ₅⁴ using primitive root theory
 
 ### Critical Proof Patterns
 - **Helper lemma extraction**: Break complex proofs into reusable building blocks
@@ -263,17 +288,17 @@ This pattern worked for all 4 theorems:
 - **Convert tactic**: `convert h using n` can auto-solve by unifying at depth n
 - **Calc chains**: Make multi-step calculations explicit and checkable
 
-### Remaining Challenges (36 sorries total - Session 9)
-- **Pentagon (6)**: E, F, G geometric properties (formerly GG5Geometry)
-- **GroupAction (3)**: Orbit unboundedness proofs (down from 7 - eliminated 4!)
-- **IsometrySimple (6)**: Piecewise isometry framework
-- **ComplexNormSimple (4)**: Norm calculation helpers
+### Remaining Challenges (27 sorries total - Session 10)
+- **Pentagon (6)**: E, F, G geometric properties (computational ζ₅ proofs)
+- **GroupAction (1)**: apply_mul blocker (FreeGroup.reduce) - 🔥 90% complete!
+- **IsometrySimple (1)**: group_element_piecewise_isometry (partition refinement) - 🔥 83% complete!
+- **ComplexNormSimple (2)**: norm_sq_E_plus_one, zeta5_im (polynomial reduction)
 - **Density (3)**: Dense orbit arguments
 - **Translations (5)**: Translation sequences
 - **Theorem1 (3)**: Crystallographic restriction (build errors fixed!)
 - **Theorem2 (6)**: GG₅ infinite at r_c (build errors fixed!)
 
-**Session 9 Progress:** Eliminated 4 rotation preservation sorries in GroupAction.lean!
+**Session 10 Progress:** Eliminated 9 sorries! (36 → 27, 25% reduction!) Discovered piecewise isometry pattern, completed GroupAction and IsometrySimple to >80%!
 
 ## ✅ Behaviors to EMBODY
 
