@@ -1,7 +1,6 @@
 {
   "mcpServers": {
     "lean-lsp": {
-      "type": "stdio",
       "command": "uvx",
       "args": [
         "lean-lsp-mcp"
@@ -9,14 +8,10 @@
       "env": {}
     },
     "bfs_prover": {
-      "type": "stdio",
       "command": "/Users/eric/Documents/GitHub/TDCSG/bfs_prover_mcp_server.sh",
       "args": [],
       "env": {
-        "TACTIC_SERVER_HOST": "localhost",
-        "TACTIC_SERVER_PORT": "5678",
-        "TACTIC_SERVER_TIMEOUT": "30",
-        "PYTHONPATH": "/Users/eric/Documents/GitHub/TDCSG"
+        "BFS_PROVER_MODEL_PATH": "/Users/eric/Documents/GitHub/TDCSG/BFS-Prover-V2-32B-GGUF/BFS-Prover-V2-32B.Q6_K.gguf"
       }
     }
   }

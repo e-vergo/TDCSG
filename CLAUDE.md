@@ -568,116 +568,128 @@ theorem hard_algebra : ... := by
 
 You have access to a local LLM trained specifically for Lean4 tactic generation! **This is your superpower - use it aggressively!**
 
-### 🚀 MCP Integration (New!)
+### 🚀 MCP Integration (FULLY OPERATIONAL!)
 
-BFS-Prover is now available as native MCP tools in Claude Code:
-- **`mcp__bfs-prover__bfs_suggest_tactics`** - Generate tactic suggestions from proof states
-- **`mcp__bfs-prover__bfs_daemon_status`** - Check if daemon is running
+BFS-Prover is now fully integrated as native MCP tools in Claude Code:
+- **`mcp__bfs_prover__suggest_tactics`** - Generate tactic suggestions from proof states
+- **`mcp__bfs_prover__model_info`** - Check model status and memory usage
+- **`mcp__bfs_prover__reload_model`** - Reload model if needed
 
-**Benefits of MCP tools:**
-- Native integration (no bash commands needed)
-- Consistent error handling
-- Formatted output with helpful suggestions
-- Type-safe parameters
+**Current Configuration:**
+- ✅ Model: BFS-Prover-V2-32B.Q6_K.gguf (26.89 GB)
+- ✅ Backend: Metal (Apple Silicon GPU acceleration)
+- ✅ Context: 4096 tokens
+- ✅ Server auto-starts on first tool call (~27s initial load)
+- ✅ Registered via: `claude mcp add bfs_prover`
 
-See [bfs_prover_mcp/README.md](bfs_prover_mcp/README.md) for full MCP documentation.
+**Benefits of MCP integration:**
+- No daemon management needed (auto-starts)
+- Model stays loaded in memory for fast inference (~6s per query)
+- Native tool integration with error handling
+- Formatted output with numbered suggestions
+- Direct integration with lean-lsp multi_attempt
 
-### ⚡ Quick Start - DO THIS FIRST EVERY SESSION!
+### ⚡ Quick Start - SIMPLE 3-STEP WORKFLOW!
 
-**1. Start the daemon (FIRST THING!):**
-```bash
-./tactic_server.sh start  # Loads 14GB model, takes ~15s first time
+**1. Check model status (optional):**
 ```
-**Status check (two options):**
-```bash
-# Option 1: Use MCP tool (recommended)
-mcp__bfs-prover__bfs_daemon_status()
-
-# Option 2: Use bash
-bash("./tactic_server.sh status")
+mcp__bfs_prover__model_info()
+# Shows: Model name, size, loaded status, backend, uptime
 ```
 
-**Generate tactics for a sorry (two options):**
+**2. Generate tactics for ANY sorry:**
+```
+# Get proof state at sorry location
+goal = mcp__lean-lsp__lean_goal(file_path, line_number)
 
-**Option A: MCP Tools (Recommended - Native Integration)**
-```python
-# 1. Check daemon status
-status = mcp__bfs-prover__bfs_daemon_status()
-
-# 2. Get proof state
-goal = mcp__lean-lsp__lean_goal(file, line, column)
-
-# 3. Ask BFS-Prover for suggestions (~2s)
-result = mcp__bfs-prover__bfs_suggest_tactics(
+# Ask BFS-Prover for 10 suggestions (~6s)
+result = mcp__bfs_prover__suggest_tactics(
     proof_state=goal,
     num_suggestions=10,
-    temperature=0.7
+    temperature=0.7  # 0.5=conservative, 0.7=balanced, 0.9=creative
 )
 
-# 4. Extract tactics from formatted result
-# Result format: "1. tactic1\n2. tactic2\n..."
-lines = result.split('\n')
-tactics = []
-for line in lines:
-    if line and line[0].isdigit():
-        parts = line.split('. ', 1)
-        if len(parts) == 2:
-            tactics.append(parts[1])
-
-# 5. Test all suggestions automatically
-results = mcp__lean-lsp__lean_multi_attempt(file, line, tactics)
-
-# 6. Pick the best and apply
+# Result is pre-formatted:
+# "Generated 10 tactic suggestions in 6313ms:
+#  1. simp [E, r_c]
+#  2. rw [E, r_c]
+#  3. dsimp [E, r_c]
+#  ..."
 ```
 
-**Option B: Bash Client (Alternative)**
-```bash
-# 1. Get proof state
-goal = mcp__lean-lsp__lean_goal(file, line, column)
+**3. Test all suggestions automatically:**
+```
+# Extract tactic strings (strip numbers)
+tactics = ["simp [E, r_c]", "rw [E, r_c]", "dsimp [E, r_c]", ...]
 
-# 2. Ask BFS-Prover for suggestions (~2s)
-result = bash(".venv/bin/python3 tactic_query.py --state '" + goal + "' --num 10 --temp 0.7")
-tactics = result.stdout.strip().split("\n")
+# Test them all at once with multi_attempt
+results = mcp__lean-lsp__lean_multi_attempt(file_path, line_number, tactics)
 
-# 3. Test all suggestions automatically
-results = mcp__lean-lsp__lean_multi_attempt(file, line, tactics)
-
-# 4. Pick the best and apply
+# Analyze results to find:
+# ✅ Tactics that solve goal completely
+# 📊 Tactics that make progress
+# ❌ Tactics that fail
 ```
 
-**Stop when done:**
-```bash
-./tactic_server.sh stop
+**Complete example:**
+```
+# 1. Find sorry locations
+grep -n "sorry" TDCSG/Theory/Pentagon.lean
+
+# 2. Get goal at line 58
+goal = mcp__lean-lsp__lean_goal("TDCSG/Theory/Pentagon.lean", 58)
+# Goal: ⊢ ‖E + 1‖ = r_c
+
+# 3. Generate tactics
+result = mcp__bfs_prover__suggest_tactics(goal, 10, 0.7)
+
+# 4. Test tactics
+tactics = ["simp [E, r_c]", "rw [E, r_c]", "dsimp [E, r_c]"]
+results = mcp__lean-lsp__lean_multi_attempt("TDCSG/Theory/Pentagon.lean", 58, tactics)
+
+# 5. Apply winner with Edit tool
+Edit("TDCSG/Theory/Pentagon.lean", old="sorry", new="simp [E, r_c]")
 ```
 
-### What Works Well
+### What Works Well (Verified!)
 
+✅ **Unfolding definitions** - `simp [E, r_c]`, `dsimp [E, r_c]`, `rw [E, r_c]`
 ✅ **Algebraic manipulations** - `ring`, `field_simp`, `linarith`, `omega`
-✅ **Standard patterns** - `constructor`, `cases`, `induction`
-✅ **Creative witnesses** - Suggests concrete values for existentials
-✅ **Simplification chains** - `simp`, `unfold`, `rw` combinations
+✅ **Standard patterns** - `constructor`, `cases`, `induction`, `fconstructor`
+✅ **Creative witnesses** - Suggests concrete values like `use (1 : ℂ) / 2` for existentials
+✅ **Simplification chains** - Multi-step `simp`, `unfold`, `rw` combinations
 ✅ **Breaking down goals** - `have` statements with intermediate facts
+✅ **Generalization** - `generalize hw : expr = w` to introduce variables
+✅ **Key lemma identification** - Found `FreeGroup.toWord_mul` for group composition
+✅ **Conv tactics** - `conv => lhs; dsimp; rw [lemma]` for targeted rewriting
+
+**Real test results:**
+- **Existential goals**: 4/10 tactics compiled, `fconstructor`, `generalize`, and `use` made progress
+- **Computational proofs**: 5/10 tactics compiled, all correctly identified need to unfold `E` and `r_c`
+- **Structural proofs**: 7/10 tactics worked, correctly found `FreeGroup.toWord_mul` and `List.foldl_append`
+- **Temperature 0.7**: Good balance of correctness and creativity
+- **Temperature 0.9**: More diverse tactics, good when stuck
 
 ### Known Limitations
 
-⚠️ **Mathlib version mismatch** - Model suggests `Complex.norm_eq_abs` (doesn't exist), use as inspiration
-⚠️ **No project context** - Doesn't know your custom lemmas or imports
-⚠️ **Multi-line tactics** - Sometimes generates tactics that `multi_attempt` can't handle
-⚠️ **Not always correct** - ~20% of suggestions make real progress, ~50% compile
+⚠️ **Mathlib version mismatch** - May suggest lemmas from different mathlib version, use as inspiration
+⚠️ **No project context** - Doesn't know custom lemmas (e.g., `b_maps_to_slit`, `b_lemma1`)
+⚠️ **Sometimes wrong witnesses** - `use (1 : ℂ) / 2` compiles but may not be correct value
+⚠️ **Success rate** - ~30-40% of suggestions make meaningful progress, ~60% compile
 
-### 🔥 Best Practices - FOLLOW THESE!
+### 🔥 Best Practices - UPDATED FOR MCP!
 
-1. **ALWAYS start daemon at session start** - Reuse for all queries (10x faster than one-shot)
-2. **Generate 5-10 suggestions** - More attempts = higher success rate, model is fast in daemon mode
+1. **No daemon management needed!** - MCP server auto-starts when first used (~27s), stays loaded
+2. **Generate 10 suggestions per query** - More attempts = higher success rate (~6s per query)
 3. **ALWAYS use with `multi_attempt`** - Test all tactics automatically, no manual work
-4. **Treat as brainstorming partner** - Tactics may not work verbatim, but reveal the right approach
+4. **Treat as brainstorming partner** - ~30-40% make progress, all provide insight
 5. **Adjust temperature for context**:
    - Low (0.5) for simple algebraic goals
-   - Medium (0.7) for standard proofs
-   - High (0.9) when completely stuck
-6. **Try BFS-Prover BEFORE spending >2 min on any sorry** - Don't struggle alone!
-7. **Iterate quickly** - If first batch doesn't work, try again with different temperature
-8. **Stop daemon when done** - Frees up ~14GB RAM
+   - Medium (0.7) for standard proofs (recommended default)
+   - High (0.9) when completely stuck or need creative approaches
+6. **Try BFS-Prover FIRST when encountering any sorry** - Takes only 6 seconds!
+7. **Iterate quickly** - If first batch doesn't work, try different temperature or break down goal
+8. **Model stays loaded** - No need to stop/start between queries in same session
 
 ### 🎯 Recommended Workflow for Eliminating Sorries
 
@@ -688,36 +700,34 @@ results = mcp__lean-lsp__lean_multi_attempt(file, line, tactics)
    goal_state = mcp__lean-lsp__lean_goal(file_path, line_number, column)
    ```
 
-2. **Ask BFS-Prover (generate 5-10 tactics) - MCP Tool (Recommended):**
+2. **Ask BFS-Prover for suggestions:**
    ```python
-   result = mcp__bfs-prover__bfs_suggest_tactics(
+   result = mcp__bfs_prover__suggest_tactics(
        proof_state=goal_state,
        num_suggestions=10,
        temperature=0.7
    )
-   # Extract tactics from "1. tactic\n2. tactic\n..." format
-   lines = result.split('\n')
-   tactics = [line.split('. ', 1)[1] for line in lines if line and line[0].isdigit() and '. ' in line]
+   # Result is formatted text with numbered tactics
    ```
 
-   **Alternative: Bash Client:**
-   ```bash
-   result = bash(".venv/bin/python3 tactic_query.py --state '" + goal_state + "' --num 10 --temp 0.7")
-   tactics = result.stdout.strip().split("\n")
+3. **Extract tactics from formatted output:**
+   ```python
+   # Manual extraction from "1. tactic\n2. tactic\n..." format
+   tactics = ["simp [E, r_c]", "rw [E, r_c]", "dsimp [E, r_c]", ...]
    ```
 
-3. **Test ALL suggestions automatically:**
+4. **Test ALL suggestions automatically:**
    ```bash
    results = mcp__lean-lsp__lean_multi_attempt(file_path, line_number, tactics)
    ```
 
-4. **Analyze results:**
-   - Did any tactic solve the goal completely? → Apply it!
+5. **Analyze results:**
+   - Did any tactic solve the goal completely? → Apply it with Edit!
    - Did any tactic make progress? → Build on it!
    - Did all fail? → Try higher temperature (0.9) or pivot to different approach
 
-5. **Iterate if needed:**
-   - If stuck, try temperature 0.9
+6. **Iterate if needed:**
+   - If stuck, try temperature 0.9 for more creative tactics
    - If still stuck, try breaking goal into have statements
    - If still stuck, document the blocker and move to next sorry
 

@@ -1,81 +1,114 @@
-#!/usr/bin/env python3
-"""
-BFS-Prover MCP Server
-
-Model Context Protocol server exposing BFS-Prover tactic generation as tools.
-Follows the architecture specified in mcp_spec.txt.
-"""
+"""BFS-Prover MCP Server - Main entry point."""
 
 import asyncio
+import logging
 import os
-from typing import Any, Sequence
+from pathlib import Path
+from typing import Any, Optional, Sequence
 
 from mcp.server import Server
 from mcp.types import Tool, TextContent
 import mcp.server.stdio
+from pydantic import BaseModel, Field
 
-from .client import DaemonClient
+from .model import BFSProverModel
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Input models for validation
+class SuggestTacticsInput(BaseModel):
+    proof_state: str = Field(..., description="Lean proof state")
+    num_suggestions: int = Field(5, ge=1, le=20)
+    temperature: float = Field(0.7, ge=0.0, le=2.0)
+    max_tokens: int = Field(128, ge=16, le=512)
 
 
-# Initialize MCP server
+class ReloadModelInput(BaseModel):
+    model_path: Optional[str] = None
+
+
+# Global model instance
+_model: Optional[BFSProverModel] = None
+
+
+def get_model() -> BFSProverModel:
+    """Get the global model instance."""
+    if _model is None:
+        raise RuntimeError("Model not initialized")
+    return _model
+
+
+async def initialize_model(model_path: str | Path) -> None:
+    """Initialize the model at server startup."""
+    global _model
+
+    logger.info(f"Loading BFS-Prover model from {model_path}")
+    _model = BFSProverModel(model_path=model_path)
+
+    # Load in thread pool to avoid blocking
+    loop = asyncio.get_event_loop()
+    await loop.run_in_executor(None, _model.load)
+
+    logger.info(f"Model loaded in {_model.load_time:.2f}s")
+
+
+# MCP Server
 app = Server("bfs-prover-mcp")
-
-# Initialize daemon client
-client = DaemonClient(
-    host=os.getenv("TACTIC_SERVER_HOST", "localhost"),
-    port=int(os.getenv("TACTIC_SERVER_PORT", "5678")),
-    timeout=int(os.getenv("TACTIC_SERVER_TIMEOUT", "30"))
-)
 
 
 @app.list_tools()
 async def list_tools() -> list[Tool]:
-    """List available tools."""
+    """List available MCP tools."""
     return [
         Tool(
-            name="bfs_suggest_tactics",
-            description="Generate Lean 4 tactic suggestions for a proof state using BFS-Prover",
+            name="suggest_tactics",
+            description="Generate Lean 4 tactic suggestions for a proof state",
             inputSchema={
                 "type": "object",
                 "properties": {
                     "proof_state": {
                         "type": "string",
-                        "description": "The proof state from lean_goal tool"
+                        "description": "Lean proof state with hypotheses and goals",
                     },
                     "num_suggestions": {
                         "type": "integer",
-                        "description": "Number of tactic suggestions to generate (1-10)",
+                        "description": "Number of tactics to generate (1-20)",
                         "default": 5,
-                        "minimum": 1,
-                        "maximum": 10
                     },
                     "temperature": {
                         "type": "number",
-                        "description": "Sampling temperature (0.0-1.0, higher = more creative)",
+                        "description": "Sampling temperature (0.0-2.0)",
                         "default": 0.7,
-                        "minimum": 0.0,
-                        "maximum": 1.0
                     },
                     "max_tokens": {
                         "type": "integer",
-                        "description": "Maximum tokens per tactic (16-512)",
+                        "description": "Max tokens per tactic (16-512)",
                         "default": 128,
-                        "minimum": 16,
-                        "maximum": 512
-                    }
+                    },
                 },
-                "required": ["proof_state"]
-            }
+                "required": ["proof_state"],
+            },
         ),
         Tool(
-            name="bfs_daemon_status",
-            description="Check if the BFS-Prover daemon is running and responsive",
+            name="model_info",
+            description="Get information about the loaded model",
+            inputSchema={"type": "object", "properties": {}},
+        ),
+        Tool(
+            name="reload_model",
+            description="Reload the model (use after errors or to switch models)",
             inputSchema={
                 "type": "object",
-                "properties": {},
-                "required": []
-            }
-        )
+                "properties": {
+                    "model_path": {
+                        "type": "string",
+                        "description": "Optional new model path",
+                    }
+                },
+            },
+        ),
     ]
 
 
@@ -83,207 +116,88 @@ async def list_tools() -> list[Tool]:
 async def call_tool(name: str, arguments: Any) -> Sequence[TextContent]:
     """Handle tool calls."""
 
-    if name == "bfs_daemon_status":
-        try:
-            status = client.get_daemon_status()
-            return [
-                TextContent(
-                    type="text",
-                    text=format_status_response(status)
-                )
-            ]
-        except Exception as e:
-            return [
-                TextContent(
-                    type="text",
-                    text=format_error_response(
-                        "error",
-                        str(e),
-                        "Check if daemon is running with './tactic_server.sh status'"
-                    )
-                )
-            ]
+    if name == "suggest_tactics":
+        # Validate input
+        input_data = SuggestTacticsInput(**arguments)
 
-    elif name == "bfs_suggest_tactics":
-        proof_state = arguments.get("proof_state", "")
-        num_suggestions = arguments.get("num_suggestions", 5)
-        temperature = arguments.get("temperature", 0.7)
-        max_tokens = arguments.get("max_tokens", 128)
+        # Generate tactics in thread pool
+        model = get_model()
+        loop = asyncio.get_event_loop()
 
-        # Validate inputs
-        if not proof_state or not proof_state.strip():
-            return [
-                TextContent(
-                    type="text",
-                    text=format_error_response(
-                        "invalid_input",
-                        "Proof state cannot be empty",
-                        "Use mcp__lean-lsp__lean_goal to get a proof state first"
-                    )
-                )
-            ]
+        start_time = loop.time()
+        tactics = await loop.run_in_executor(
+            None,
+            model.generate_tactics,
+            input_data.proof_state,
+            input_data.num_suggestions,
+            input_data.temperature,
+            input_data.max_tokens,
+        )
+        generation_time = (loop.time() - start_time) * 1000
 
-        if not (1 <= num_suggestions <= 10):
-            return [
-                TextContent(
-                    type="text",
-                    text=format_error_response(
-                        "invalid_input",
-                        f"num_suggestions must be between 1 and 10, got {num_suggestions}",
-                        "Use a value between 1 and 10"
-                    )
-                )
-            ]
+        # Format response as simple numbered list
+        response_lines = [
+            f"Generated {len(tactics)} tactic suggestions in {generation_time:.0f}ms:",
+            "",
+        ]
+        for i, tactic in enumerate(tactics, 1):
+            response_lines.append(f"{i}. {tactic}")
 
-        if not (0.0 <= temperature <= 1.0):
-            return [
-                TextContent(
-                    type="text",
-                    text=format_error_response(
-                        "invalid_input",
-                        f"temperature must be between 0.0 and 1.0, got {temperature}",
-                        "Use a value between 0.0 (deterministic) and 1.0 (creative)"
-                    )
-                )
-            ]
+        response_lines.append("")
+        response_lines.append(
+            "💡 Test these with mcp__lean_lsp__lean_multi_attempt to see which ones work!"
+        )
 
-        if not (16 <= max_tokens <= 512):
-            return [
-                TextContent(
-                    type="text",
-                    text=format_error_response(
-                        "invalid_input",
-                        f"max_tokens must be between 16 and 512, got {max_tokens}",
-                        "Use a value between 16 and 512"
-                    )
-                )
-            ]
+        return [TextContent(type="text", text="\n".join(response_lines))]
 
-        try:
-            result = client.generate_tactics(
-                proof_state=proof_state,
-                num_suggestions=num_suggestions,
-                temperature=temperature,
-                max_tokens=max_tokens
-            )
+    elif name == "model_info":
+        model = get_model()
+        info = model.get_info()
 
-            return [
-                TextContent(
-                    type="text",
-                    text=format_tactics_response(result)
-                )
-            ]
-
-        except ConnectionRefusedError as e:
-            return [
-                TextContent(
-                    type="text",
-                    text=format_error_response(
-                        "daemon_not_running",
-                        str(e),
-                        "Run './tactic_server.sh start' to start the daemon"
-                    )
-                )
-            ]
-        except TimeoutError as e:
-            return [
-                TextContent(
-                    type="text",
-                    text=format_error_response(
-                        "timeout",
-                        str(e),
-                        "Try './tactic_server.sh restart' to restart the daemon"
-                    )
-                )
-            ]
-        except ValueError as e:
-            return [
-                TextContent(
-                    type="text",
-                    text=format_error_response(
-                        "invalid_input",
-                        str(e),
-                        "Check that all parameters are within valid ranges"
-                    )
-                )
-            ]
-        except Exception as e:
-            return [
-                TextContent(
-                    type="text",
-                    text=format_error_response(
-                        "unknown_error",
-                        str(e),
-                        "Check '.tactic_server.log' for details or restart daemon"
-                    )
-                )
-            ]
-
-    else:
-        return [
-            TextContent(
-                type="text",
-                text=f"Unknown tool: {name}"
-            )
+        # Format info nicely
+        lines = [
+            "BFS-Prover Model Info:",
+            f"  Model: {info['model_name']}",
+            f"  Size: {info['model_size_gb']:.2f} GB",
+            f"  Loaded: {info['model_loaded']}",
+            f"  Context: {info['context_length']} tokens",
+            f"  Memory: {info['memory_usage_gb']:.2f} GB",
+            f"  Backend: {info['backend']}",
+            f"  Uptime: {info['uptime_seconds']:.0f}s",
         ]
 
+        return [TextContent(type="text", text="\n".join(lines))]
 
-def format_status_response(status: dict) -> str:
-    """Format daemon status response."""
-    lines = [
-        "BFS-Prover Daemon Status:",
-        f"  Status: {status['status']}",
-        f"  Port: {status['port']}",
-        f"  PID: {status.get('pid', 'N/A')}",
-        f"  Model Loaded: {status.get('model_loaded', False)}"
-    ]
+    elif name == "reload_model":
+        input_data = ReloadModelInput(**arguments)
+        model = get_model()
 
-    if status['status'] == 'stopped':
-        lines.append("")
-        lines.append("ℹ To start: ./tactic_server.sh start")
-    elif status['status'] == 'unresponsive':
-        lines.append("")
-        lines.append("⚠ Daemon may be stuck. Try: ./tactic_server.sh restart")
+        loop = asyncio.get_event_loop()
+        load_time = await loop.run_in_executor(
+            None, model.reload, Path(input_data.model_path) if input_data.model_path else None
+        )
 
-    return "\n".join(lines)
+        result = f"✓ Model reloaded successfully in {load_time:.2f}s"
 
+        return [TextContent(type="text", text=result)]
 
-def format_tactics_response(result: dict) -> str:
-    """Format tactics generation response."""
-    tactics = result.get('tactics', [])
-    elapsed = result.get('time', 0)
-
-    lines = [
-        f"Generated {len(tactics)} tactic suggestions in {elapsed:.1f}s:",
-        ""
-    ]
-
-    for i, tactic in enumerate(tactics, 1):
-        lines.append(f"{i}. {tactic}")
-
-    lines.append("")
-    lines.append("💡 Test these with lean_multi_attempt to see which ones work!")
-
-    return "\n".join(lines)
-
-
-def format_error_response(error_type: str, message: str, suggestion: str) -> str:
-    """Format error response with helpful suggestions."""
-    return f"""Error: {error_type}
-
-{message}
-
-Suggestion: {suggestion}"""
+    else:
+        raise ValueError(f"Unknown tool: {name}")
 
 
 async def main():
-    """Run the MCP server."""
+    """Main entry point for the MCP server."""
+    # Get model path from environment or default
+    model_path = os.getenv(
+        "BFS_PROVER_MODEL_PATH", "./models/BFS-Prover-V2-32B-GGUF/model.gguf"
+    )
+
+    # Initialize model
+    await initialize_model(model_path)
+
+    # Run server
     async with mcp.server.stdio.stdio_server() as (read_stream, write_stream):
-        await app.run(
-            read_stream,
-            write_stream,
-            app.create_initialization_options()
-        )
+        await app.run(read_stream, write_stream, app.create_initialization_options())
 
 
 if __name__ == "__main__":

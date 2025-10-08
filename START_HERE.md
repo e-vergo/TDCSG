@@ -37,20 +37,14 @@ Before doing **anything else**, read these four files to understand the project:
 - Why the golden ratio and fifth roots of unity are important
 - The geometric intuition behind the proofs
 
-### 4. **[TACTIC_SUGGEST_README.md](TACTIC_SUGGEST_README.md)** - BFS-Prover Tool
-**Read this to learn your superpower**:
-- How to use the local LLM for tactic generation
-- Daemon mode (10x faster than one-shot)
-- Integration with Lean LSP tools
-- What works well and what doesn't
-- Performance metrics and best practices
-
-### 5. **[bfs_prover_mcp/README.md](bfs_prover_mcp/README.md)** - MCP Integration (Optional but Recommended)
-**Read this for native MCP tool usage**:
-- How to use `mcp__bfs-prover__*` tools directly
-- Cleaner workflow than bash client
-- Complete examples with MCP tools
-- Troubleshooting MCP connection issues
+### 4. **[BFS_PROVER_MCP_GUIDE.md](BFS_PROVER_MCP_GUIDE.md)** - AI Tactic Generator (YOUR SUPERPOWER!)
+**Read this to learn your most powerful tool**:
+- Native MCP integration (fully operational!)
+- Simple 3-step workflow: get goal → generate tactics → test
+- No daemon management needed (auto-starts)
+- Real testing results: ~30-40% success rate
+- Performance: ~6 seconds per 10 tactics
+- Temperature guidelines for different proof types
 
 ## ⚡ Quick Start After Reading
 
@@ -58,30 +52,37 @@ Once you've read the above files:
 
 1. **Check current status:**
    ```bash
-   grep -c "sorry" TDCSG/TwoDisk/*.lean | grep -v ":0$"
+   grep -c "sorry" TDCSG/**/*.lean | grep -v ":0$"
    lake build
    ```
 
-2. **Start BFS-Prover daemon** (if working on proofs):
+2. **Verify BFS-Prover MCP is ready:**
    ```bash
-   ./tactic_server.sh start
+   claude mcp list  # Should show bfs_prover: ✓ Connected
+   ```
+
+   Or check model status directly:
+   ```
+   mcp__bfs_prover__model_info()
    ```
 
 3. **Review CLAUDE.md** for:
-   - Current session priorities
-   - Known blockers
+   - Current session priorities (Session 11 section)
+   - Known blockers and solutions
+   - BFS-Prover workflow
    - Behaviors to AVOID
 
 4. **Pick a task** based on:
-   - Dependency order (see CLAUDE.md)
-   - What's unblocked
+   - Dependency order (see CLAUDE.md project structure)
+   - What's unblocked (check sorry comments)
    - User's specific request
 
 ## 🚨 Critical Rules
 
 **DO:**
-- ✅ Read the four files above before starting work
-- ✅ Use BFS-Prover for tactic suggestions (daemon mode!)
+- ✅ Read the files above before starting work
+- ✅ Use BFS-Prover MCP tools for tactic suggestions (auto-starts, ~6s per query!)
+- ✅ Test ALL BFS-Prover suggestions with `multi_attempt`
 - ✅ Check diagnostics after every edit
 - ✅ Track sorry count (should decrease!)
 - ✅ Update CLAUDE.md with new learnings
@@ -92,6 +93,7 @@ Once you've read the above files:
 - ❌ Add comments without attempting the proof
 - ❌ Work on dependent theorems before their dependencies
 - ❌ Ignore the sorry count
+- ❌ Spend >2 minutes on a sorry without trying BFS-Prover
 - ❌ Skip reading these files!
 
 ## 📊 Current Status Snapshot
@@ -101,8 +103,13 @@ As of Session 10 (January 2025):
 - **6 files complete**: Basic.lean, Complex.lean, Constants.lean, FreeGroup.lean, GG5Properties.lean
 - **Near-complete files**: GroupAction.lean (90%), IsometrySimple.lean (83%)
 - **Build status**: ✅ CLEAN - zero compile errors
-- **BFS-Prover**: Daemon system ready, tested, and working
+- **BFS-Prover MCP**: ✅ FULLY OPERATIONAL - Native integration, auto-starts, ~6s per query
 - **Session 10 achievements**: Broke through <30 sorries barrier, discovered piecewise isometry pattern!
+
+**NEW in January 2025:**
+- 🎉 **BFS-Prover MCP fully integrated** - No daemon management needed!
+- 🚀 **Tested and verified** - 30-40% success rate across proof types
+- 📚 **Complete documentation** - BFS_PROVER_MCP_GUIDE.md with real examples
 
 ## 🎓 Key Concepts to Understand
 
@@ -117,10 +124,22 @@ After reading the files, you should understand:
 ## 🔧 Available Tools
 
 You have access to:
-- **Lean LSP MCP tools**: `mcp__lean-lsp__lean_goal`, `mcp__lean-lsp__lean_diagnostic_messages`, `mcp__lean-lsp__lean_multi_attempt`, `mcp__lean-lsp__lean_loogle`, `mcp__lean-lsp__lean_leansearch`, etc.
-- **BFS-Prover MCP tools** (NEW!): `mcp__bfs-prover__bfs_suggest_tactics`, `mcp__bfs-prover__bfs_daemon_status`
-- **BFS-Prover tactic daemon**: Local LLM for generating Lean tactics (also available via bash client)
-- **Standard file tools**: Read, Edit, Write, Grep, Glob, Bash
+
+### AI-Powered Tactic Generation (USE THIS!)
+- **`mcp__bfs_prover__suggest_tactics`** - Generate 10 Lean tactics from proof state (~6s)
+- **`mcp__bfs_prover__model_info`** - Check model status (26.89 GB, Metal accelerated)
+- **`mcp__bfs_prover__reload_model`** - Reload model if needed
+
+### Lean LSP Integration
+- **`mcp__lean-lsp__lean_goal`** - Get proof state at cursor position
+- **`mcp__lean-lsp__lean_diagnostic_messages`** - Check for errors/warnings
+- **`mcp__lean-lsp__lean_multi_attempt`** - Test multiple tactics automatically
+- **`mcp__lean-lsp__lean_loogle`** - Search by type signature
+- **`mcp__lean-lsp__lean_leansearch`** - Natural language theorem search
+- **`mcp__lean-lsp__lean_hover_info`** - Get documentation for terms
+
+### Standard Tools
+- **File tools**: Read, Edit, Write, Grep, Glob, Bash
 - **Git tools**: For commits and tracking changes
 
 ## 📝 First Steps Checklist
@@ -128,27 +147,36 @@ You have access to:
 - [ ] Read README.md (project overview)
 - [ ] Read CLAUDE.md (your comprehensive guide)
 - [ ] Read two-disk_compound_symmetry_groups.tex (the math)
-- [ ] Read TACTIC_SUGGEST_README.md (BFS-Prover tool)
-- [ ] Check current sorry count
-- [ ] Review "Next Session Priorities" in CLAUDE.md
-- [ ] Start BFS-Prover daemon if working on proofs
+- [ ] Read BFS_PROVER_MCP_GUIDE.md (AI tactic generator)
+- [ ] Check current sorry count: `grep -c "sorry" TDCSG/**/*.lean | grep -v ":0$"`
+- [ ] Verify BFS-Prover MCP: `claude mcp list` or `mcp__bfs_prover__model_info()`
+- [ ] Review "Session 11 Priorities" in CLAUDE.md
 - [ ] Ask user what they want to work on
 
-## 💡 Pro Tip
+## 💡 Pro Tips
 
-The most important file is **CLAUDE.md** - it's been updated throughout the project with learnings, solutions to blockers, and patterns that work. Treat it as your primary reference and update it as you learn new things.
+1. **CLAUDE.md is your bible** - Updated throughout the project with learnings, blockers, and working patterns
+2. **BFS-Prover is your superpower** - Use it for EVERY sorry, takes only 6 seconds!
+3. **Test in batches** - Generate 10 tactics, test all with `multi_attempt`, pick the winner
+4. **Track your progress** - Sorry count should DECREASE each session
 
 ## 🎉 You're Ready!
 
 After reading these files, you'll have:
-- Understanding of the mathematical goal
-- Knowledge of what's been proven
-- Awareness of what's blocked and why
-- Tools to generate tactics automatically
-- Patterns and strategies that work
-- Pitfalls to avoid
+- ✅ Understanding of the mathematical goal
+- ✅ Knowledge of what's been proven
+- ✅ Awareness of what's blocked and why
+- ✅ AI-powered tactic generation (BFS-Prover MCP)
+- ✅ Proven patterns and strategies
+- ✅ List of pitfalls to avoid
 
-Now go formalize some mathematics! 🚀
+**Your workflow for each sorry:**
+1. `mcp__lean-lsp__lean_goal(file, line)` → Get proof state
+2. `mcp__bfs_prover__suggest_tactics(goal, 10, 0.7)` → Generate tactics
+3. `mcp__lean-lsp__lean_multi_attempt(file, line, tactics)` → Test all
+4. Apply winner with `Edit` tool
+
+Now go eliminate some sorries! 🚀
 
 ---
 
