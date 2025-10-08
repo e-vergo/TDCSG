@@ -20,12 +20,18 @@ lemma norm_sq_E_plus_one :
 
 /-- Helper: ζ₅ conjugate is ζ₅⁴ -/
 lemma zeta5_conj : starRingEnd ℂ TwoDiskSystem.ζ₅ = TwoDiskSystem.ζ₅^4 := by
-  sorry  -- Follows from zeta_inv and zeta5_pow_4
+  rw [show TwoDiskSystem.ζ₅ = TwoDiskSystem.ζ 5 from rfl]
+  rw [← TwoDiskSystem.zeta_inv 5 (by norm_num : (5 : ℕ) > 0)]
+  rw [show TwoDiskSystem.ζ 5 = TwoDiskSystem.ζ₅ from rfl]
+  exact TwoDiskSystem.zeta5_pow_4.symm
 
 /-- Helper: Simplify powers of ζ₅ using ζ₅⁵ = 1 -/
 lemma zeta5_pow_reduce (n : ℕ) :
     TwoDiskSystem.ζ₅^n = TwoDiskSystem.ζ₅^(n % 5) := by
-  sorry  -- Modular arithmetic
+  conv_lhs => rw [← Nat.div_add_mod n 5]
+  rw [pow_add, pow_mul]
+  rw [TwoDiskSystem.zeta5_pow_5]
+  simp
 
 /-- Helper: Real part of ζ₅ -/
 lemma zeta5_re : TwoDiskSystem.ζ₅.re = (Real.sqrt 5 - 1) / 4 := by

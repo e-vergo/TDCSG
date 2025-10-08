@@ -165,11 +165,33 @@ theorem rightRotationInv_piecewise_isometry :
 /-- Apply a generator is a piecewise isometry -/
 lemma applyGenerator_piecewise_isometry (gen : Fin 2) (inv : Bool) :
     ∃ pi : PiecewiseIsometry, pi.f = applyGenerator sys gen inv := by
-  sorry  -- Follows from rotation piecewise isometry lemmas
+  fin_cases gen <;> cases inv
+  · -- gen = 0, inv = false (leftRotation)
+    unfold applyGenerator
+    simp only [↓reduceIte]
+    exact leftRotation_piecewise_isometry sys
+  · -- gen = 0, inv = true (leftRotationInv)
+    unfold applyGenerator
+    simp only [↓reduceIte]
+    exact leftRotationInv_piecewise_isometry sys
+  · -- gen = 1, inv = false (rightRotation)
+    unfold applyGenerator
+    simp only [↓reduceIte]
+    exact rightRotation_piecewise_isometry sys
+  · -- gen = 1, inv = true (rightRotationInv)
+    unfold applyGenerator
+    simp only [↓reduceIte]
+    exact rightRotationInv_piecewise_isometry sys
 
 /-- All group elements are piecewise isometries -/
 theorem group_element_piecewise_isometry (g : TwoDiskGroup) :
     ∃ pi : PiecewiseIsometry, pi.f = applyGroupElement sys g := by
-  sorry  -- Follows by induction on word representation
+  -- This requires proving that composition of piecewise isometries is a piecewise isometry
+  -- Challenge: Need to refine partitions when composing
+  -- Strategy: Induction on word representation
+  --   Base: g = 1 → identity is piecewise isometry with partition [Set.univ]
+  --   Step: g = g' * generator → compose piecewise isometries
+  --     Need: composition_piecewise_isometry lemma
+  sorry  -- Blocked on composition of piecewise isometries
 
 end TwoDiskSystem
