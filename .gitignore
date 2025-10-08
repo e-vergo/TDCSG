@@ -1,1 +1,15 @@
 /.lake
+
+# BFS-Prover model (large, not committed)
+/BFS-Prover-V2-7B/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Tactic server runtime files
+.tactic_server.pid
+.tactic_server.log
+
+# macOS
+.DS_Store

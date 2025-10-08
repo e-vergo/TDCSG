@@ -389,10 +389,113 @@ sorry  -- Requires: (1) showing word for g is [(0,true), (1,false)]
 
 8. **Parallel progress**: Work on independent lemmas simultaneously when blocked on hard problems.
 
+## 🤖 BFS-Prover: AI Tactic Generation
+
+You have access to a local LLM trained specifically for Lean4 tactic generation!
+
+### Quick Start
+
+**Start the daemon (once per session):**
+```bash
+./tactic_server.sh start  # Loads 14GB model, takes ~15s first time
+```
+
+**Generate tactics for a sorry:**
+```bash
+# 1. Get proof state
+goal = mcp__lean-lsp__lean_goal(file, line, column)
+
+# 2. Ask BFS-Prover for suggestions (~2s)
+result = bash(".venv/bin/python3 tactic_query.py --state '" + goal + "' --num 5")
+tactics = result.stdout.strip().split("\n")
+
+# 3. Test all suggestions automatically
+results = mcp__lean-lsp__lean_multi_attempt(file, line, tactics)
+
+# 4. Pick the best and apply
+```
+
+**Stop when done:**
+```bash
+./tactic_server.sh stop
+```
+
+### What Works Well
+
+✅ **Algebraic manipulations** - `ring`, `field_simp`, `linarith`, `omega`
+✅ **Standard patterns** - `constructor`, `cases`, `induction`
+✅ **Creative witnesses** - Suggests concrete values for existentials
+✅ **Simplification chains** - `simp`, `unfold`, `rw` combinations
+✅ **Breaking down goals** - `have` statements with intermediate facts
+
+### Known Limitations
+
+⚠️ **Mathlib version mismatch** - Model suggests `Complex.norm_eq_abs` (doesn't exist), use as inspiration
+⚠️ **No project context** - Doesn't know your custom lemmas or imports
+⚠️ **Multi-line tactics** - Sometimes generates tactics that `multi_attempt` can't handle
+⚠️ **Not always correct** - ~20% of suggestions make real progress, ~50% compile
+
+### Best Practices
+
+1. **Start daemon at session start** - Reuse for all queries (10x faster than one-shot)
+2. **Generate 5+ suggestions** - More attempts = higher success rate
+3. **Use with `multi_attempt`** - Test all tactics automatically
+4. **Treat as brainstorming** - Tactics may not work verbatim, but show the right approach
+5. **Adjust temperature** - Low (0.5) for simple goals, high (0.9) when stuck
+6. **Stop daemon when done** - Frees up ~14GB RAM
+
+### Example Success Story
+
+**Proof:** `G_on_segment_E'E` (proving ∃ t, 0 < t ∧ t < 1 ∧ G = E' + t • (E - E'))
+
+**BFS-Prover suggestions:**
+1. `use ((G - E') / (E - E')).re` ✅ **Perfect witness!**
+2. `have E_sub_E' : E - E' = 2 * E := by unfold E'; ring` ✅ **Proved automatically!**
+3. `constructor` ✅ **Split conjunction correctly!**
+
+**Result:** Structured the proof and made concrete progress!
+
+### Performance
+
+- **Daemon mode**: 2-5s per query (recommended)
+- **One-shot mode**: 15-20s per query (model reloads each time)
+- **Model size**: ~14GB RAM
+- **Best for**: Standard mathlib-style proofs, algebraic goals
+
+### When to Use
+
+**Good candidates:**
+- Standard algebraic/arithmetic proofs
+- Induction proofs over lists/nats
+- Goals stuck needing a creative approach
+- Existential proofs needing concrete witnesses
+
+**Skip for:**
+- Custom domain-specific lemmas
+- Proofs requiring specific project imports
+- Complex multi-step geometric arguments
+- Goals with unusual custom structures
+
+### Troubleshooting
+
+```bash
+# Check if daemon is running
+./tactic_server.sh status
+
+# View daemon logs
+./tactic_server.sh logs
+
+# Restart if slow
+./tactic_server.sh restart
+```
+
+See [TACTIC_SUGGEST_README.md](TACTIC_SUGGEST_README.md) for full documentation.
+
 ## 🔍 Debugging Checklist
 
 When stuck on a proof:
 - [ ] Check goal state with `lean_goal`
+- [ ] **Try BFS-Prover** for tactic suggestions (if daemon running)
 - [ ] Try `simp?` to see what simplifications are available
 - [ ] Search mathlib with `lean_loogle` for similar theorems
 - [ ] Unfold definitions to see what you're really proving

@@ -121,7 +121,21 @@ theorem G_on_segment_E'E :
   -- G = 2*F - E by definition
   -- This requires showing that G lies between E' and E
   -- Would need specific calculations with ζ₅
-  sorry
+
+  -- BFS-Prover suggestion: use the real part of (G - E') / (E - E')
+  use ((G - E') / (E - E')).re
+
+  -- BFS-Prover suggestion: establish E - E' = 2*E
+  have E_sub_E' : E - E' = 2 * E := by unfold E'; ring
+
+  constructor
+  · sorry  -- 0 < ((G - E') / (E - E')).re
+  constructor
+  · sorry  -- ((G - E') / (E - E')).re < 1
+  · -- This requires showing the algebraic identity holds
+    have : (G - E') / (E - E') = ((G - E') / (E - E')).re + ((G - E') / (E - E')).im * I := by
+      sorry
+    sorry
 
 /-- The ordering on the line: E', F', G, F, G', E (or similar). -/
 theorem ordering_on_line :
