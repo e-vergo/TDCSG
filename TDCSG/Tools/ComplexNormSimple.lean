@@ -16,7 +16,19 @@ namespace ComplexNormTools
 /-- Norm squared of E + 1 equals 3 + φ -/
 lemma norm_sq_E_plus_one :
     normSq ((1 : ℂ) + TwoDiskSystem.ζ₅ - TwoDiskSystem.ζ₅^2) = 3 + goldenRatio := by
-  sorry  -- Computational proof
+  -- normSq z = z * conj(z) = (re z)^2 + (im z)^2
+  rw [normSq_apply]
+  -- Expand: (1 + ζ₅ - ζ₅²) * conj(1 + ζ₅ - ζ₅²)
+  -- Using conj(ζ₅) = ζ₅⁴ and conj(ζ₅²) = ζ₅³
+  have conj_z5 : conj TwoDiskSystem.ζ₅ = TwoDiskSystem.ζ₅^4 := zeta5_conj
+  have conj_z5_sq : conj (TwoDiskSystem.ζ₅^2) = TwoDiskSystem.ζ₅^3 := by
+    rw [map_pow, conj_z5, ← pow_mul]
+    norm_num
+  simp only [map_sub, map_add, map_one, conj_z5, conj_z5_sq]
+  -- Now expand: (1 + ζ₅ - ζ₅²)(1 + ζ₅⁴ - ζ₅³)
+  ring_nf
+  -- This should give us a polynomial in ζ₅ that we can reduce using ζ₅⁵ = 1
+  sorry  -- Need to expand and reduce using ζ₅⁵ = 1 and sum_zeta5_powers
 
 /-- Helper: ζ₅ conjugate is ζ₅⁴ -/
 lemma zeta5_conj : starRingEnd ℂ TwoDiskSystem.ζ₅ = TwoDiskSystem.ζ₅^4 := by
@@ -46,6 +58,14 @@ lemma zeta5_re : TwoDiskSystem.ζ₅.re = (Real.sqrt 5 - 1) / 4 := by
 
 /-- Helper: Imaginary part of ζ₅ -/
 lemma zeta5_im : TwoDiskSystem.ζ₅.im = Real.sqrt (10 + 2 * Real.sqrt 5) / 4 := by
-  sorry  -- Trigonometric calculation
+  have h := TwoDiskSystem.zeta5_and_phi
+  obtain ⟨re, im, h1, h2⟩ := h
+  rw [h1]
+  simp only [add_im, ofReal_im, mul_im, I_re, I_im, ofReal_re]
+  norm_num
+  -- Now need to show: im = Real.sqrt (10 + 2 * Real.sqrt 5) / 4
+  -- We have im = sin(2π/5)
+  -- Need trigonometric identity: sin(2π/5) = sqrt(10 + 2*sqrt(5))/4
+  sorry  -- Requires trigonometric identity sin(2π/5) = sqrt(10 + 2*sqrt(5))/4
 
 end ComplexNormTools
