@@ -6,13 +6,6 @@
         "lean-lsp-mcp"
       ],
       "env": {}
-    },
-    "bfs_prover": {
-      "command": "/Users/eric/Documents/GitHub/TDCSG/bfs_prover_mcp_server.sh",
-      "args": [],
-      "env": {
-        "BFS_PROVER_MODEL_PATH": "/Users/eric/Documents/GitHub/TDCSG/BFS-Prover-V2-32B-GGUF/BFS-Prover-V2-32B.Q6_K.gguf"
-      }
     }
   }
 }
