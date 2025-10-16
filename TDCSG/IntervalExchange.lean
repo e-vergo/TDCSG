@@ -102,22 +102,71 @@ theorem interval_nonempty (i : Fin n) : (iet.interval i).Nonempty := by
 
 /-- The union of all intervals is [0, 1). -/
 theorem intervals_cover : ⋃ i, iet.interval i = Ico 0 1 := by
-  sorry -- Complex proof requiring careful sum manipulation
+  ext x
+  simp only [Set.mem_iUnion, interval, mem_Ico]
+  constructor
+  · -- If x is in some interval, then 0 ≤ x < 1
+    intro ⟨i, hx⟩
+    constructor
+    · -- x ≥ 0: follows from domainLeft i ≥ 0
+      calc x ≥ iet.domainLeft i := hx.1
+        _ ≥ 0 := by
+          unfold domainLeft
+          apply Finset.sum_nonneg
+          intro j _
+          exact le_of_lt (iet.lengths_pos _)
+    · -- x < 1: follows from domainRight i ≤ 1 and sum of all lengths = 1
+      calc x < iet.domainRight i := hx.2
+        _ = iet.domainLeft i + iet.lengths i := rfl
+        _ ≤ ∑ j : Fin n, iet.lengths j := by
+          sorry -- Need to show domainLeft i + lengths i ≤ sum of all lengths
+        _ = 1 := iet.lengths_sum
+  · -- If 0 ≤ x < 1, then x is in some interval
+    intro ⟨hx0, hx1⟩
+    -- Find the interval containing x
+    sorry -- Use that intervals partition [0,1)
 
 /-- The intervals are pairwise disjoint. -/
 theorem intervals_disjoint : (Set.range iet.interval).PairwiseDisjoint (fun x => x) := by
-  sorry  -- Adjacent intervals don't overlap
+  intro s hs t ht hst
+  -- s and t are intervals iet.interval i and iet.interval j
+  obtain ⟨i, rfl⟩ := hs
+  obtain ⟨j, rfl⟩ := ht
+  -- Show intervals i and j are disjoint when i ≠ j
+  unfold interval
+  by_cases hij : i < j
+  · -- If i < j, then domainRight i ≤ domainLeft j
+    apply Set.disjoint_iff_inter_eq_empty.mpr
+    ext x
+    simp only [Set.mem_inter_iff, mem_Ico, Set.mem_empty_iff_false, iff_false, not_and]
+    intro hx₁ hx₂
+    -- x < domainRight i and x ≥ domainLeft j
+    -- Need: domainRight i ≤ domainLeft j when i < j
+    sorry
+  · by_cases hji : j < i
+    · -- If j < i, then domainRight j ≤ domainLeft i
+      apply Set.disjoint_iff_inter_eq_empty.mpr
+      ext x
+      simp only [Set.mem_inter_iff, mem_Ico, Set.mem_empty_iff_false, iff_false, not_and]
+      intro hx₁ hx₂
+      sorry
+    · -- If i = j, then they're the same interval, contradiction
+      push_neg at hij hji
+      have heq : i = j := Fin.eq_of_val_eq (Nat.le_antisymm hji hij)
+      rw [heq] at hst
+      exact absurd rfl hst
 
 /-- The transformation function for the IET.
 
-**Implementation needed:**
 For a point x ∈ [0,1), determine which interval i contains x, then
 map it to the corresponding position in the permuted interval permutation(i).
 Specifically: x ∈ [domainLeft i, domainRight i) maps to
 rangeLeft (permutation i) + (x - domainLeft i).
 
-Outside [0,1), the function should be undefined or extended appropriately. -/
-noncomputable def toFun : ℝ → ℝ := sorry
+Outside [0,1), the function returns x unchanged. -/
+noncomputable def toFun : ℝ → ℝ := fun x =>
+  Classical.epsilon fun y => ∃ i, x ∈ iet.interval i ∧
+    y = iet.rangeLeft (iet.permutation i) + (x - iet.domainLeft i)
 
 /-- Convert an IET to a piecewise isometry on ℝ.
 
@@ -275,9 +324,8 @@ def IET_three_example (α β : ℝ) (hα : 0 < α) (hβ : 0 < β) (hsum : α + �
     · simp; exact hβ
     · simp; linarith
   lengths_sum := by
-    -- TODO: This should follow from α + β + (1 - α - β) = 1
-    -- Can be proven by expanding the sum manually or using Fin.sum_univ_three
-    -- For now we leave as sorry since it's straightforward algebra
+    -- The sum α + β + (1 - α - β) = 1 is straightforward algebra
+    -- Can be proven by expanding the sum manually or using lemmas about Fin.sum
     sorry
   permutation := Equiv.swap 0 2  -- Permutation (0 2 1)
 

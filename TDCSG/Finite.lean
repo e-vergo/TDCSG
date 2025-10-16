@@ -210,7 +210,14 @@ def comp (f g : FinitePiecewiseIsometry α) : FinitePiecewiseIsometry α where
     · exact (f.partition_finite.prod g.partition_finite).image (fun (s, t) => s ∩ t)
     · intro u hu
       -- Show u is in the image
-      sorry  -- This is true but requires careful type manipulation
+      -- hu tells us u ∈ {u | ∃ s ∈ g.partition, ∃ t ∈ f.partition, u = s ∩ t ∧ (s ∩ t).Nonempty}
+      simp only [Set.mem_setOf_eq] at hu
+      obtain ⟨s, hs, t, ht, hu_eq, _⟩ := hu
+      rw [Set.mem_image]
+      use (t, s)
+      constructor
+      · exact Set.mem_prod.mpr ⟨ht, hs⟩
+      · simp [hu_eq, Set.inter_comm]
 
 /-- The number of pieces in a composition is bounded by the product of the numbers of pieces. -/
 theorem card_comp_le (f g : FinitePiecewiseIsometry α) :
@@ -218,9 +225,11 @@ theorem card_comp_le (f g : FinitePiecewiseIsometry α) :
   -- The refined partition has at most |f.partition| * |g.partition| pieces
   -- Each piece in the refined partition is an intersection s ∩ t where s ∈ g.partition, t ∈ f.partition
   -- So there are at most |g.partition| * |f.partition| such pieces
-  unfold card
-  -- The composition's partition is finite and has cardinality at most the product
-  sorry  -- This requires showing the partition is a subset of the product, which is technical
+  unfold card comp
+  -- The key insight: composition partition ⊆ product partition image
+  -- From partition_finite, we know the partition is finite
+  -- We need to bound its cardinality by the product
+  sorry  -- Requires technical lemmas about Set.Finite.toFinset cardinality for products
 
 end Composition
 
@@ -246,7 +255,10 @@ theorem card_iterate_le (f : FinitePiecewiseIsometry α) (n : ℕ) :
   | zero =>
     -- Base case: iterate 0 has 1 piece, f.card ^ 0 = 1
     unfold iterate card
-    sorry  -- This is true but requires unfolding the definition further
+    simp only [pow_zero]
+    -- The singleton finset {Set.univ} has cardinality 1
+    show (Finset.finite_toSet {Set.univ}).toFinset.card ≤ 1
+    simp [Finset.finite_toSet, Finset.card_singleton]
   | succ n ih =>
     -- Inductive step: use card_comp_le
     calc (iterate f (n + 1)).card

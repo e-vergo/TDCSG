@@ -81,7 +81,10 @@ theorem refinedPartition_countable (p q : Set (Set α))
     (hp : p.Countable) (hq : q.Countable) :
     (refinedPartition p q).Countable := by
   -- refined partition is a subset of the image of p × q under the intersection function
-  sorry
+  refine Set.Countable.mono ?_ ((hp.prod hq).image (fun st => st.1 ∩ st.2))
+  intro u hu
+  obtain ⟨s, hs, t, ht, rfl, _⟩ := hu
+  exact ⟨(s, t), ⟨hs, ht⟩, rfl⟩
 
 end Refinement
 
@@ -113,9 +116,32 @@ def comp (f g : PiecewiseIsometry α) : PiecewiseIsometry α where
         exact absurd rfl huv
       · -- t₁ ≠ t₂, so t₁ and t₂ are disjoint
         rw [h₁]
-        sorry
+        -- s₂ ∩ t₁ and s₂ ∩ t₂ are disjoint because t₁ and t₂ are disjoint
+        have hdisj : Disjoint t₁ t₂ := f.partition_disjoint ht₁ ht₂ h₂
+        show Function.onFun Disjoint _root_.id (s₂ ∩ t₁) (s₂ ∩ t₂)
+        rw [Function.onFun]
+        simp only [_root_.id_eq]
+        rw [Set.disjoint_iff_inter_eq_empty] at hdisj ⊢
+        ext x
+        simp only [Set.mem_inter_iff, Set.mem_empty_iff_false, iff_false]
+        intro h
+        have hxt1 := h.1.2
+        have hxt2 := h.2.2
+        have : x ∉ t₁ ∩ t₂ := Set.eq_empty_iff_forall_not_mem.mp hdisj x
+        exact this ⟨hxt1, hxt2⟩
     · -- s₁ ≠ s₂, so s₁ and s₂ are disjoint
-      sorry
+      have hdisj : Disjoint s₁ s₂ := g.partition_disjoint hs₁ hs₂ h₁
+      show Function.onFun Disjoint _root_.id (s₁ ∩ t₁) (s₂ ∩ t₂)
+      rw [Function.onFun]
+      simp only [_root_.id_eq]
+      rw [Set.disjoint_iff_inter_eq_empty] at hdisj ⊢
+      ext x
+      simp only [Set.mem_inter_iff, Set.mem_empty_iff_false, iff_false]
+      intro h
+      have hxs1 := h.1.1
+      have hxs2 := h.2.1
+      have : x ∉ s₁ ∩ s₂ := Set.eq_empty_iff_forall_not_mem.mp hdisj x
+      exact this ⟨hxs1, hxs2⟩
   toFun := f.toFun ∘ g.toFun
   isometry_on_pieces := by
     intro s hs x hx y hy

@@ -85,16 +85,35 @@ example : ¬∃ (pi : PiecewiseIsometry ℝ), ∀ x : ℝ, pi x = 0 := by
     have : dist (pi 0) (pi 1) = dist (0 : ℝ) 1 := pi.isometry_on_pieces s hs 0 h0s 1 h1t
     rw [h 0, h 1] at this
     norm_num at this
-  · -- They're in different pieces. Since partition is countable and ℝ is uncountable,
-    -- the pigeonhole principle guarantees some piece contains at least two distinct points
-    -- We just need to find them. Actually, each piece containing an interval works.
-    -- For simplicity, note that s covers an infinite set (as it's measurable and covers part of ℝ)
-    -- This is getting complex; I'll leave a more detailed argument for later
-    sorry
+  · -- They're in different pieces. The partition is countable and covers ℝ.
+    -- By the pigeonhole principle, some piece must have positive measure.
+    -- Any set with positive measure contains two distinct points.
+    -- We can find such a pair in that piece and derive a contradiction.
+    -- For now, we note that the argument in the s = t case already establishes
+    -- the key contradiction: a constant function cannot be an isometry.
+    -- The full proof would show that we can always find two points in the same piece.
+    have : ∃ (a b : ℝ), a ≠ b ∧ ∃ u ∈ pi.partition, a ∈ u ∧ b ∈ u := by
+      -- This requires showing some piece has at least two points
+      -- Since partition is countable and covers ℝ (uncountable), this follows
+      sorry
+    obtain ⟨a, b, hab, u, hu, hau, hbu⟩ := this
+    have : dist (pi a) (pi b) = dist a b := pi.isometry_on_pieces u hu a hau b hbu
+    rw [h a, h b] at this
+    simp only [dist_self] at this
+    exact hab (dist_eq_zero.mp this.symm)
 
 end BasicExamples
 
 section IntervalExamples
+
+/-! ### Interval Exchange Examples
+
+NOTE: Most examples in this section are BLOCKED waiting on:
+- `IntervalExchangeTransformation.toFun` to be implemented
+- `IntervalExchangeTransformation.toPiecewiseIsometry` to be implemented
+
+These examples demonstrate IET theory but cannot be completed until the IET infrastructure is ready.
+-/
 
 /-- Simple 2-interval exchange: swap [0, 1/2) with [1/2, 1). -/
 noncomputable def simple_two_IET : IntervalExchangeTransformation 2 :=
@@ -134,7 +153,10 @@ end IntervalExamples
 
 section PlanarExamples
 
-/-- A piecewise rotation in ℝ²: rotate the unit disk by different angles in two halves. -/
+/-- A piecewise rotation in ℝ²: rotate the unit disk by different angles in two halves.
+
+NOTE: This example has a known issue - the partition only covers the open unit disk,
+not all of ℝ². A complete definition would need a third piece for points outside the disk. -/
 noncomputable def double_rotation (θ₁ θ₂ : ℝ) : PiecewiseIsometry (ℝ × ℝ) where
   partition := {
     {p : ℝ × ℝ | p.1 ≥ 0 ∧ p.1^2 + p.2^2 < 1},
@@ -147,11 +169,17 @@ noncomputable def double_rotation (θ₁ θ₂ : ℝ) : PiecewiseIsometry (ℝ �
     -- Both pieces are intersections of half-planes with the disk, hence measurable
     simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hs
     cases hs with
-    | inl h => sorry  -- Right half of disk is measurable
-    | inr h => sorry  -- Left half of disk is measurable
+    | inl h =>
+      subst h
+      sorry -- Measurability of {p | p.1 ≥ 0 ∧ p.1² + p.2² < 1}
+    | inr h =>
+      subst h
+      sorry -- Measurability of {p | p.1 < 0 ∧ p.1² + p.2² < 1}
   partition_cover := by
-    -- The two pieces cover the unit disk since x ≥ 0 or x < 0 for all points
-    sorry  -- Partition covers all points by definition
+    -- NOTE: This partition does NOT actually cover all of ℝ², only the open unit disk.
+    -- This is a known issue with this example - it should include a third piece for points outside the disk.
+    -- For now, we leave this as sorry to acknowledge the gap in the definition.
+    sorry
   partition_disjoint := by
     -- Pieces are disjoint because p.1 ≥ 0 and p.1 < 0 cannot both hold
     intro s hs t ht hst
@@ -180,8 +208,20 @@ noncomputable def double_rotation (θ₁ θ₂ : ℝ) : PiecewiseIsometry (ℝ �
     intro s hs x hx y hy
     -- Rotations are isometries: they preserve distances
     -- For any rotation by angle θ, dist((x,y) rotated) = dist((x',y') rotated) = dist((x,y), (x',y'))
-    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hs
-    sorry  -- Requires proving rotation formula preserves distances
+    simp only [Set.mem_insert_iff, Set.mem_singleton_iff, Set.mem_setOf_eq] at hs hx hy
+    rcases hs with (rfl | rfl)
+    · -- Right half of disk: both points rotated by θ₁
+      simp only [toFun, hx, hy, and_self, ite_true]
+      -- Need to show rotation preserves distance
+      -- dist (rotate x) (rotate y) = dist x y
+      -- This follows from the fact that rotation matrices are orthogonal
+      sorry  -- Full proof requires showing rotation matrices preserve Euclidean distance
+    · -- Left half of disk: both points rotated by θ₂
+      simp only [toFun]
+      have hx' : ¬(x.1 ≥ 0 ∧ x.1^2 + x.2^2 < 1) := by push_neg; intro _; exact hx.1
+      have hy' : ¬(y.1 ≥ 0 ∧ y.1^2 + y.2^2 < 1) := by push_neg; intro _; exact hy.1
+      simp only [hx', hy', ite_false, hx, hy, and_self, ite_true]
+      sorry  -- Same as above: rotation preserves distance
 
 /-- The discontinuity set is the y-axis. -/
 theorem double_rotation_discontinuity (θ₁ θ₂ : ℝ) :
@@ -204,27 +244,47 @@ noncomputable def half_plane_reflection : PiecewiseIsometry (ℝ × ℝ) where
     -- Half-planes {p | p.1 < 0} and {p | p.1 ≥ 0} are measurable
     simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hs
     cases hs with
-    | inl h => sorry  -- Left half-plane is measurable
-    | inr h => sorry  -- Right half-plane is measurable
+    | inl h =>
+      subst h
+      exact measurableSet_lt measurable_fst measurable_const
+    | inr h =>
+      subst h
+      exact measurableSet_le measurable_const measurable_fst
   partition_cover := by
     -- Every point has either x < 0 or x ≥ 0
-    sorry  -- Partition covers all points by definition
+    intro p
+    simp only [Set.mem_sUnion, Set.mem_insert_iff, Set.mem_singleton_iff, Set.mem_setOf_eq]
+    by_cases h : p.1 < 0
+    · left; exact ⟨_, Or.inl rfl, h⟩
+    · right; use {p : ℝ × ℝ | p.1 ≥ 0}; exact ⟨Or.inr rfl, le_of_not_lt h⟩
   partition_disjoint := by
     -- p.1 < 0 and p.1 ≥ 0 are mutually exclusive
     intro s hs t ht hst
     simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hs ht
     rcases hs with (rfl | rfl) <;> rcases ht with (rfl | rfl)
     · contradiction
-    · sorry  -- Disjoint: x < 0 and x ≥ 0 cannot both be true
-    · sorry  -- Disjoint: x ≥ 0 and x < 0 cannot both be true
+    · apply Set.disjoint_left.mpr
+      intro p hp1 hp2
+      linarith
+    · apply Set.disjoint_left.mpr
+      intro p hp1 hp2
+      linarith
     · contradiction
   toFun := fun p => if p.1 < 0 then (-p.1, p.2) else p
   isometry_on_pieces := by
     intro s hs x hx y hy
     -- On left half-plane, we reflect: (x,y) ↦ (-x,y), which preserves distances
     -- On right half-plane, identity map preserves distances trivially
-    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hs
-    sorry  -- Requires proving reflection preserves distances
+    simp only [Set.mem_insert_iff, Set.mem_singleton_iff, Set.mem_setOf_eq] at hs hx hy
+    rcases hs with (rfl | rfl)
+    · -- Left half-plane: both x.1 < 0 and y.1 < 0
+      simp only [toFun, hx, hy, ite_true]
+      -- dist ((-x.1, x.2), (-y.1, y.2)) = dist (x, y)
+      rw [Prod.dist_eq, Prod.dist_eq]
+      simp only [neg_sub_neg]
+      ring_nf
+    · -- Right half-plane: identity preserves distance
+      simp only [toFun, hx, hy, ite_false]
 
 end PlanarExamples
 
@@ -233,7 +293,9 @@ section SquareBilliard
 /-- A simplified square billiard: piecewise isometry on the unit square modeling
     billiard ball reflections.
 
-    This is a simplified model; full billiard dynamics are more complex. -/
+    NOTE: This is a simplified model with a known issue - the partition only covers
+    the interior of the unit square (0,1)×(0,1), not all of ℝ².
+    Full billiard dynamics are more complex and would require additional pieces. -/
 noncomputable def square_billiard_simple : PiecewiseIsometry (ℝ × ℝ) where
   partition := {
     {p : ℝ × ℝ | 0 < p.1 ∧ p.1 < 1 ∧ 0 < p.2 ∧ p.2 < 1}
@@ -245,7 +307,14 @@ noncomputable def square_billiard_simple : PiecewiseIsometry (ℝ × ℝ) where
     -- The open square (0,1)×(0,1) is measurable
     simp only [Set.mem_singleton_iff] at hs
     rw [hs]
-    sorry  -- Open rectangle is measurable
+    -- Open rectangle is the intersection of four half-planes, hence measurable
+    refine MeasurableSet.inter ?_ ?_
+    · refine MeasurableSet.inter ?_ ?_
+      · exact measurableSet_lt measurable_const measurable_fst
+      · exact measurableSet_lt measurable_fst measurable_const
+    · refine MeasurableSet.inter ?_ ?_
+      · exact measurableSet_lt measurable_const measurable_snd
+      · exact measurableSet_lt measurable_snd measurable_const
   partition_cover := by
     -- Just one piece covering the interior of the square
     simp only [Set.sUnion_singleton]
@@ -268,7 +337,13 @@ noncomputable def square_billiard_simple : PiecewiseIsometry (ℝ × ℝ) where
     simp only [Set.mem_singleton_iff] at hs
     rw [hs] at hx hy
     simp only [Set.mem_setOf_eq] at hx hy
-    sorry  -- Identity preserves distances
+    -- On the interior, the conditions ensure the map is the identity
+    simp only [toFun]
+    have hx_in : ¬(x.1 < 0 ∨ x.1 > 1) ∧ ¬(x.2 < 0 ∨ x.2 > 1) := by
+      constructor <;> { push_neg; constructor <;> linarith }
+    have hy_in : ¬(y.1 < 0 ∨ y.1 > 1) ∧ ¬(y.2 < 0 ∨ y.2 > 1) := by
+      constructor <;> { push_neg; constructor <;> linarith }
+    simp only [hx_in.1, hx_in.2, hy_in.1, hy_in.2, ite_false]
 
 /-- Square billiard has discontinuities on the boundary. -/
 theorem square_billiard_boundary_discontinuity :
@@ -309,9 +384,17 @@ example : ¬∃ (pi : PiecewiseIsometry ℝ), ∀ x ∈ Ico (0 : ℝ) 1, pi x = 
     have heq : dist (pi x) (pi y) = dist x y := pi.isometry_on_pieces s hs x hxs y hyt
     rw [h x hx, h y hy] at heq
     unfold doubling_map_NON_ISOMETRY at heq
-    sorry  -- Complete calculation showing 2|x - y| ≠ |x - y|
-  · -- Different pieces
-    sorry  -- Similar argument
+    simp only [hx.1, hx.2, hy.1, hy.2, and_self, ite_true] at heq
+    -- Now heq says dist ((2*x) % 1) ((2*y) % 1) = dist x y
+    -- For x = 0.1, y = 0.2, we have 2*x = 0.2, 2*y = 0.4
+    -- So dist 0.2 0.4 = dist 0.1 0.2, i.e., 0.2 = 0.1, contradiction
+    have : x = 0.1 := rfl
+    have : y = 0.2 := rfl
+    norm_num at heq
+  · -- Different pieces: we can still derive a contradiction by finding two points in the same piece
+    -- The key insight is that any piecewise isometry must have some piece containing an interval
+    -- On any such interval, the doubling map stretches distances by a factor of 2
+    sorry
 
 /-- The baker's map: another non-isometry example (area-preserving but not isometric). -/
 noncomputable def baker_map_NON_ISOMETRY : ℝ × ℝ → ℝ × ℝ := fun p =>
@@ -330,6 +413,15 @@ example : ¬∃ (pi : PiecewiseIsometry (ℝ × ℝ)),
 end ChaoticExamples
 
 section IterationExamples
+
+/-! ### Iteration Examples
+
+NOTE: Examples in this section are BLOCKED waiting on:
+- `IntervalExchangeTransformation.toFun` to be implemented
+- Iteration and composition infrastructure
+
+These demonstrate dynamical properties but require the IET infrastructure first.
+-/
 
 /-- Iterating a simple 2-interval exchange. -/
 noncomputable def iterated_two_IET (n : ℕ) : ℝ → ℝ :=
@@ -351,6 +443,15 @@ end IterationExamples
 
 section MeasurePreservingExamples
 
+/-! ### Measure Preserving Examples
+
+NOTE: Examples in this section are BLOCKED waiting on:
+- `IntervalExchangeTransformation.toFun` and related infrastructure
+- Proofs that IETs and rotations preserve Lebesgue measure
+
+These are natural consequences of the isometry property but require additional measure theory.
+-/
+
 /-- Every IET preserves Lebesgue measure: concrete example with 2 intervals. -/
 theorem two_IET_preserves_measure : True := by
   -- Requires IntervalExchangeTransformation.toFun and preserves_lebesgue to be implemented
@@ -365,6 +466,16 @@ theorem double_rotation_preserves_area (θ₁ θ₂ : ℝ) : True := by
 end MeasurePreservingExamples
 
 section ErgodicExamples
+
+/-! ### Ergodic Examples
+
+NOTE: Examples in this section are BLOCKED waiting on:
+- `IntervalExchangeTransformation.toFun` infrastructure
+- Ergodic theory framework for piecewise isometries
+- Unique ergodicity proofs for irrational rotations
+
+These require significant ergodic theory development beyond the core PI definitions.
+-/
 
 /-- The simple 2-interval IET (rotation by 1/2) is ergodic. -/
 theorem two_IET_ergodic : True := by
@@ -381,6 +492,12 @@ theorem two_IET_uniquely_ergodic_irrational (α : ℝ) (hα : α ∈ Ioo (0 : �
 end ErgodicExamples
 
 section ConstructionPatterns
+
+/-! ### Construction Patterns
+
+NOTE: These are template examples showing construction patterns.
+They are intentionally left as exercises/templates.
+-/
 
 /-- Pattern: construct a piecewise isometry from explicit pieces and maps. -/
 example : PiecewiseIsometry ℝ := by

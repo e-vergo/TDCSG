@@ -92,7 +92,18 @@ variable {μ : MeasureTheory.Measure α}
 measure zero, then it preserves measure.
 
 This is a fundamental result because many natural piecewise isometries (like interval exchange
-transformations) have null discontinuity sets. -/
+transformations) have null discontinuity sets.
+
+**DEEP RESULT**: This theorem requires bijectivity or surjectivity assumptions on f, which are
+not part of the basic PiecewiseIsometry structure. The proof would need to show that f is
+almost everywhere bijective, which is not automatic from the isometry-on-pieces property alone.
+For a complete proof, one would need additional hypotheses like:
+- f is surjective, or
+- f is injective and μ(α \ range f) = 0, or
+- stronger global properties beyond piecewise isometry
+
+This is closely related to the Poincaré recurrence theorem and requires substantial ergodic theory.
+-/
 theorem measurePreserving_of_null_discontinuities (f : PiecewiseIsometry α)
     (h_meas : Measurable f.toFun)
     (h_null : μ (f.discontinuitySet) = 0) :
@@ -105,7 +116,21 @@ theorem measurePreserving_of_null_discontinuities (f : PiecewiseIsometry α)
     -- This is a deep result requiring more sophisticated measure theory
     sorry
 
-/-- If each partition piece has the same measure as its image, the map preserves measure. -/
+/-- If each partition piece has the same measure as its image, the map preserves measure.
+
+**DEEP RESULT**: While this looks straightforward, the full proof is subtle. The challenge is to
+show that for an arbitrary measurable set t, we have μ(f⁻¹(t)) = μ(t). The natural approach is:
+1. Partition t using the images of partition pieces
+2. Use that μ(f(s)) = μ(s) for each piece s
+3. Relate f⁻¹(t) to the partition pieces
+
+However, step 1 requires understanding how t intersects with f(s) for each piece s, and this
+intersection may not have a simple preimage structure unless f is bijective on each piece.
+The hypothesis μ(f(s)) = μ(s) gives measure equality but doesn't immediately imply that
+f⁻¹(f(s) ∩ t) has the right measure unless f is injective on pieces (which it is) AND
+we know something about the range of f. This requires careful measure-theoretic arguments
+about images and preimages under piecewise isometries.
+-/
 theorem measurePreserving_of_pieces_preserved (f : PiecewiseIsometry α)
     (h_meas : Measurable f.toFun)
     (h_pieces : ∀ s ∈ f.partition, μ (f.toFun '' s) = μ s) :
@@ -119,7 +144,7 @@ theorem measurePreserving_of_pieces_preserved (f : PiecewiseIsometry α)
 
 /-- The measure of a preimage of a measurable set can be computed piece-by-piece. -/
 theorem measure_preimage_piece (f : PiecewiseIsometry α)
-    (h_meas : Measurable f.toFun) (s : Set α) (_ : MeasurableSet s) :
+    (h_meas : Measurable f.toFun) (s : Set α) (hs : MeasurableSet s) :
     μ (f.toFun ⁻¹' s) = ∑' (t : f.partition), μ (t.val ∩ (f.toFun ⁻¹' s)) := by
   -- The preimage can be partitioned as the disjoint union over partition pieces
   -- Use that partition covers univ and is pairwise disjoint
@@ -135,8 +160,28 @@ theorem measure_preimage_piece (f : PiecewiseIsometry α)
       exact hxs
   rw [h_cover]
   -- Now apply measure_sUnion for the countable disjoint union
-  -- The full proof requires careful argument ordering and proof construction
-  sorry
+  -- The image of the partition is countable
+  have h_image_countable : (Set.image (fun t => t ∩ (f.toFun ⁻¹' s)) f.partition).Countable :=
+    f.partition_countable.image _
+  -- The image sets are pairwise disjoint
+  have h_image_disjoint : (Set.image (fun t => t ∩ (f.toFun ⁻¹' s)) f.partition).Pairwise Disjoint := by
+    intro u hu v hv huv
+    obtain ⟨tu, htu, rfl⟩ := hu
+    obtain ⟨tv, htv, rfl⟩ := hv
+    by_cases h : tu = tv
+    · rw [h] at huv
+      exact absurd rfl huv
+    · have hdisj : Disjoint tu tv := f.partition_disjoint htu htv h
+      exact Disjoint.inf_left _ (Disjoint.inf_right _ hdisj)
+  -- Each piece is measurable
+  have h_image_meas : ∀ u ∈ (Set.image (fun t => t ∩ (f.toFun ⁻¹' s)) f.partition), MeasurableSet u := by
+    intro u hu
+    obtain ⟨t, ht, rfl⟩ := hu
+    exact (f.partition_measurable t ht).inter (h_meas hs)
+  -- Apply measure_sUnion
+  rw [MeasureTheory.measure_sUnion h_image_countable h_image_disjoint h_image_meas]
+  -- The tsum is over the image, convert to tsum over partition
+  sorry -- Need to show bijection between partition and image preserves sum
 
 end MeasurePreservation
 
@@ -183,8 +228,8 @@ theorem compMP_assoc (f g h : MeasurePreservingPiecewiseIsometry α μ) :
     compMP (compMP f g) h = compMP f (compMP g h) := by
   -- Both sides have the same underlying piecewise isometry due to comp_assoc
   -- and the same measurability and measure preservation properties
-  -- Requires extensionality for structure equality
-  sorry
+  -- However, we need extensionality for MeasurePreservingPiecewiseIsometry
+  sorry -- Requires extensionality lemma for the structure
 
 end Composition
 
@@ -225,7 +270,21 @@ def IsInvariant (f : MeasurePreservingPiecewiseIsometry α μ) (s : Set α) : Pr
 def IsCompletelyInvariant (f : MeasurePreservingPiecewiseIsometry α μ) (s : Set α) : Prop :=
   f.toFun '' s = s
 
-/-- The measure of an invariant set equals the measure of its image. -/
+/-- The measure of an invariant set equals the measure of its image.
+
+**DEEP RESULT**: This requires showing that for an invariant set s (where f(s) ⊆ s), we have
+μ(f(s)) = μ(s). The natural approach is to use measure preservation: μ(f⁻¹(f(s))) = μ(f(s)).
+Then we want to show f⁻¹(f(s)) = s. We know:
+- f is injective on each partition piece, so f⁻¹(f(s)) ⊇ s
+- f(s) ⊆ s by invariance, so f⁻¹(f(s)) ⊆ f⁻¹(s)
+
+But f⁻¹(s) may be larger than s in general unless f is surjective. The gap is that injectivity
+on pieces doesn't give global surjectivity. We need either:
+- f to be surjective globally, or
+- Additional structure showing μ(f⁻¹(s) \ s) = 0
+
+This is technically solvable but requires more sophisticated arguments about piecewise isometries.
+-/
 theorem measure_eq_of_invariant (f : MeasurePreservingPiecewiseIsometry α μ)
     (s : Set α) (hs : MeasurableSet s) (h_inv : IsInvariant f s) :
     μ (f.toFun '' s) = μ s := by
@@ -240,8 +299,7 @@ theorem measure_preimage_eq_of_completely_invariant
     (h_inv : IsCompletelyInvariant f s) :
     μ (f.toFun ⁻¹' s) = μ s := by
   -- Directly use measure preservation
-  -- The API for measure_preimage has changed
-  sorry
+  exact f.measure_preserving.measure_preimage hs.nullMeasurableSet
 
 end InvariantSets
 
@@ -249,7 +307,22 @@ section BorelMeasure
 
 variable [TopologicalSpace α] [BorelSpace α] {μ : MeasureTheory.Measure α}
 
-/-- For Borel measures, isometries on pieces automatically give measurability in many cases. -/
+/-- For Borel measures, isometries on pieces automatically give measurability in many cases.
+
+**NEEDS MATHLIB**: This theorem is provable but requires results about measurability of
+piecewise continuous functions that may not yet be in mathlib in the needed generality.
+The key ingredients needed are:
+1. A function continuous on the interior of partition pieces is measurable
+2. The discontinuity set (frontiers of pieces) has measure zero or is negligible
+3. Borel measurability for functions that are continuous a.e.
+
+The proof strategy would be:
+- Show f is continuous on ⋃ interior(s) for s in partition
+- This set has full measure (complement is the discontinuity set)
+- Use that functions continuous a.e. are measurable in Borel spaces
+
+This should be straightforward once the right mathlib lemmas are identified.
+-/
 theorem measurable_of_borel (f : PiecewiseIsometry α)
     (h_cont : ∀ s ∈ f.partition, ContinuousOn f.toFun (interior s)) :
     Measurable f.toFun := by
@@ -258,7 +331,24 @@ theorem measurable_of_borel (f : PiecewiseIsometry α)
   sorry
 
 /-- A piecewise isometry with continuous pieces is measurable with respect to Borel sigma
-algebra. -/
+algebra.
+
+**NEEDS MATHLIB**: This is a general result about piecewise continuous functions on countable
+partitions. The proof would use:
+1. Measurability of continuous functions
+2. Countable unions preserve measurability
+3. The fact that being continuous on each piece of a partition makes the function measurable
+
+In mathlib, there should be lemmas like "if f is continuous on each set in a countable measurable
+partition, then f is measurable". If not, this would be a good addition to mathlib's
+MeasureTheory.Constructions.BorelSpace.Basic.
+
+The proof outline:
+- For any open set U, we want to show f⁻¹(U) is measurable
+- f⁻¹(U) = ⋃_{s ∈ partition} (s ∩ f⁻¹(U))
+- Each s ∩ f⁻¹(U) is measurable because f is continuous on s and s is measurable
+- Countable union of measurable sets is measurable
+-/
 theorem borel_measurable_of_continuous_pieces (f : PiecewiseIsometry α)
     (h_open : ∀ s ∈ f.partition, IsOpen (interior s))
     (h_cont : ∀ s ∈ f.partition, ContinuousOn f.toFun s) :

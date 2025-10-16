@@ -102,38 +102,26 @@ theorem ergodic_iff_invariant_measure (f : MeasurePreservingPiecewiseIsometry α
     · constructor
       intro s hs hinv
       obtain h0 | h1 := h s hs hinv
-      · -- DEEP RESULT - Constructing EventuallyConst from measure zero
-        -- To prove: Filter.EventuallyConst s (MeasureTheory.ae μ)
-        -- This means: ∃ t, μ(t) = 0 and s is constant on tᶜ
-        --
-        -- Given: μ(s) = 0 and s is invariant (f⁻¹' s = s)
-        -- Need: Show s is a.e. constant (either a.e. empty or a.e. full)
-        --
-        -- MATHLIB STATUS: The connection between measure zero sets and EventuallyConst
-        -- in the a.e. filter requires showing that s =ᵐ[μ] ∅ or s =ᵐ[μ] univ.
-        -- For μ(s) = 0, we have s =ᵐ[μ] ∅, which should imply EventuallyConst.
-        --
-        -- RELEVANT LEMMAS:
-        -- - MeasureTheory.ae_eq_empty: s =ᵐ[μ] ∅ ↔ μ s = 0
-        -- - Filter.EventuallyConst definition needs unpacking
-        --
-        -- This requires deeper understanding of the EventuallyConst predicate in the
-        -- context of the almost-everywhere filter, which may not be directly available.
-        sorry
-      · -- DEEP RESULT - Constructing EventuallyConst from measure one
-        -- Similar to the μ(s) = 0 case, but now we have μ(s) = 1
-        --
-        -- Given: μ(s) = 1 (so μ(sᶜ) = 0) and s is invariant
-        -- Need: Show s is a.e. constant (specifically, a.e. equal to univ)
-        --
-        -- For probability measures with μ(s) = 1, we have s =ᵐ[μ] univ.
-        -- The EventuallyConst should follow from this, but the exact construction
-        -- depends on how PreErgodic.aeconst_set is defined in mathlib.
-        --
-        -- These two cases complete the backward direction of ergodic_iff_invariant_measure
-        -- and establish the equivalence between the measure-theoretic characterization
-        -- and the filter-theoretic characterization of ergodicity.
-        sorry
+      · -- μ(s) = 0 implies s is eventually constant (a.e. false)
+        -- Use Filter.eventuallyConst_pred: EventuallyConst s (ae μ) ↔ (∀ᵐ x, x ∈ s) ∨ (∀ᵐ x, x ∉ s)
+        rw [Filter.eventuallyConst_pred]
+        right
+        -- Show ∀ᵐ x ∂μ, x ∉ s, which follows from μ s = 0
+        exact MeasureTheory.measure_eq_zero_iff_ae_notMem.mp h0
+      · -- μ(s) = 1 implies s is eventually constant (a.e. true)
+        -- Use Filter.eventuallyConst_pred: EventuallyConst s (ae μ) ↔ (∀ᵐ x, x ∈ s) ∨ (∀ᵐ x, x ∉ s)
+        rw [Filter.eventuallyConst_pred]
+        left
+        -- Show ∀ᵐ x ∂μ, x ∈ s
+        -- Since μ(s) = 1 and μ is a probability measure, we have μ(sᶜ) = 0
+        have h_compl : μ sᶜ = 0 := by
+          rw [MeasureTheory.prob_compl_eq_zero_iff hs]
+          exact h1
+        -- Therefore ∀ᵐ x, x ∉ sᶜ, which means ∀ᵐ x, x ∈ s
+        have : ∀ᵐ x ∂μ, x ∉ sᶜ := MeasureTheory.measure_eq_zero_iff_ae_notMem.mp h_compl
+        filter_upwards [this] with x hx
+        simp only [Set.mem_compl_iff, not_not] at hx
+        exact hx
 
 /-- A piecewise isometry is ergodic if it is mixing (stronger condition). -/
 theorem ergodic_of_mixing (f : MeasurePreservingPiecewiseIsometry α μ)

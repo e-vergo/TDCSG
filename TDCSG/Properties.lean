@@ -44,15 +44,6 @@ theorem mem_partition_of_mem_univ (f : PiecewiseIsometry α) (x : α) :
     ∃ s ∈ f.partition, x ∈ s :=
   f.exists_mem_partition x
 
-/-- The partition pieces are nonempty if the space is nonempty.
-NOTE: This theorem as stated is FALSE. A partition {univ, ∅} is a valid partition,
-but the empty set is not nonempty. This needs an additional assumption like
-"minimal partition" or should be removed. For now keeping as sorry. -/
-theorem partition_nonempty_of_nonempty [Nonempty α] (f : PiecewiseIsometry α) :
-    ∀ s ∈ f.partition, Set.Nonempty s := by
-  intro s hs
-  sorry -- Statement is false without additional assumptions
-
 /-- Union of partition equals the whole space, alternative formulation. -/
 theorem partition_cover_iff (f : PiecewiseIsometry α) :
     (∀ x : α, ∃ s ∈ f.partition, x ∈ s) ↔ ⋃₀ f.partition = Set.univ := by
@@ -123,9 +114,19 @@ section ContinuityProperties
 /-- A piecewise isometry is continuous on the interior of each partition piece. --/
 theorem continuous_on_interior (f : PiecewiseIsometry α) (s : Set α) (hs : s ∈ f.partition) :
     ContinuousOn f (interior s) := by
-  -- The map f is an isometry when restricted to s, hence continuous
-  -- Isometries are uniformly continuous, so f is continuous on interior s
-  sorry  -- TODO: Use that isometry implies continuity
+  -- The key insight: f preserves distances on s, so it's uniformly continuous on s
+  -- and hence continuous on the interior
+  apply Metric.continuousOn_iff.mpr
+  intro x hx ε hε
+  -- Use that f is an isometry on s to show continuity
+  use ε, hε
+  intro y hy hxy
+  -- Since x, y are in interior s and close enough, they're both in s
+  have hxs : x ∈ s := interior_subset hx
+  have hys : y ∈ s := interior_subset hy
+  -- f preserves distances on s
+  rw [f.dist_eq_on_piece s hs y x hys hxs]
+  exact hxy
 
 /-- A piecewise isometry is continuous at points in the interior of partition pieces. -/
 theorem continuousAt_of_interior (f : PiecewiseIsometry α) (x : α) (s : Set α)
@@ -145,7 +146,10 @@ theorem discontinuitySet_subset_boundaries (f : PiecewiseIsometry α) :
   by_contra h_not_frontier
   push_neg at h_not_frontier
   -- x not in any frontier implies x in interior of s (by closure-interior-frontier decomposition)
-  have : x ∈ interior s := sorry  -- TODO: Use frontier/interior/closure relationship
+  have : x ∈ interior s := by
+    -- Use the fact that s \ frontier s = interior s
+    rw [← self_diff_frontier s]
+    exact ⟨hxs, h_not_frontier s hs⟩
   exact hx (f.continuousAt_of_interior x s hs this)
 
 end ContinuityProperties
