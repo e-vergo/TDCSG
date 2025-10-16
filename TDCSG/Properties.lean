@@ -44,11 +44,14 @@ theorem mem_partition_of_mem_univ (f : PiecewiseIsometry α) (x : α) :
     ∃ s ∈ f.partition, x ∈ s :=
   f.exists_mem_partition x
 
-/-- The partition pieces are nonempty if the space is nonempty. -/
+/-- The partition pieces are nonempty if the space is nonempty.
+NOTE: This theorem as stated is FALSE. A partition {univ, ∅} is a valid partition,
+but the empty set is not nonempty. This needs an additional assumption like
+"minimal partition" or should be removed. For now keeping as sorry. -/
 theorem partition_nonempty_of_nonempty [Nonempty α] (f : PiecewiseIsometry α) :
     ∀ s ∈ f.partition, Set.Nonempty s := by
   intro s hs
-  sorry  -- Use covering property to show each piece intersects the space
+  sorry -- Statement is false without additional assumptions
 
 /-- Union of partition equals the whole space, alternative formulation. -/
 theorem partition_cover_iff (f : PiecewiseIsometry α) :
@@ -108,35 +111,51 @@ theorem isometry_restrict_piece (f : PiecewiseIsometry α) (s : Set α) (hs : s 
     Isometry (s.restrict f) := by
   intro x y
   simp only [Set.restrict]
-  sorry  -- Need to connect dist and edist
+  -- Convert edist to dist and use isometry property on pieces
+  rw [edist_dist, edist_dist]
+  congr 1
+  exact f.dist_eq_on_piece s hs x y x.property y.property
 
 end IsometryProperties
 
 section ContinuityProperties
 
-/-- A piecewise isometry is continuous on the interior of each partition piece. -/
+/-- A piecewise isometry is continuous on the interior of each partition piece. --/
 theorem continuous_on_interior (f : PiecewiseIsometry α) (s : Set α) (hs : s ∈ f.partition) :
     ContinuousOn f (interior s) := by
-  sorry  -- Use isometry implies continuity on interior
+  -- The map f is an isometry when restricted to s, hence continuous
+  -- Isometries are uniformly continuous, so f is continuous on interior s
+  sorry  -- TODO: Use that isometry implies continuity
 
 /-- A piecewise isometry is continuous at points in the interior of partition pieces. -/
 theorem continuousAt_of_interior (f : PiecewiseIsometry α) (x : α) (s : Set α)
     (hs : s ∈ f.partition) (hx : x ∈ interior s) :
     ContinuousAt f x := by
-  sorry  -- Use continuous_on_interior
+  -- Use continuous_on_interior and the fact that interior is a neighborhood
+  have h_cont : ContinuousOn f (interior s) := f.continuous_on_interior s hs
+  exact h_cont.continuousAt (IsOpen.mem_nhds isOpen_interior hx)
 
-/-- The discontinuity set is contained in the union of partition boundaries. -/
+/-- The discontinuity set is contained in the union of partition boundaries. --/
 theorem discontinuitySet_subset_boundaries (f : PiecewiseIsometry α) :
     {x | ¬ContinuousAt f x} ⊆ f.discontinuitySet := by
-  sorry  -- Points in interior are continuous, so discontinuities are on boundaries
+  intro x hx
+  obtain ⟨s, hs, hxs⟩ := f.exists_mem_partition x
+  unfold discontinuitySet
+  simp only [Set.mem_iUnion]
+  by_contra h_not_frontier
+  push_neg at h_not_frontier
+  -- x not in any frontier implies x in interior of s (by closure-interior-frontier decomposition)
+  have : x ∈ interior s := sorry  -- TODO: Use frontier/interior/closure relationship
+  exact hx (f.continuousAt_of_interior x s hs this)
 
 end ContinuityProperties
 
 section ConstructorHelpers
 
 /-- Constructor for piecewise isometries from a set partition. -/
-def mk_of_set (partition : Set (Set α))
+def mk_of_set {partition : Set (Set α)}
     (h_meas : ∀ s ∈ partition, MeasurableSet s)
+    (h_countable : partition.Countable)
     (h_cover : ⋃₀ partition = Set.univ)
     (h_disj : partition.PairwiseDisjoint id)
     (f : α → α)
@@ -144,6 +163,7 @@ def mk_of_set (partition : Set (Set α))
     PiecewiseIsometry α where
   partition := partition
   partition_measurable := h_meas
+  partition_countable := h_countable
   partition_cover := h_cover
   partition_disjoint := h_disj
   toFun := f
@@ -165,6 +185,7 @@ def mk_two_pieces (s t : Set α)
     cases hu with
     | inl h => rw [h]; exact hs_meas
     | inr h => rw [h]; exact ht_meas
+  partition_countable := Set.to_countable {s, t}
   partition_cover := by
     simp only [Set.sUnion_insert, Set.sUnion_singleton]
     exact h_cover
@@ -201,7 +222,8 @@ theorem isometry_of_trivial_partition (f : PiecewiseIsometry α)
   have h_univ : Set.univ ∈ f.partition := by rw [h]; simp
   have : dist (f x) (f y) = dist x y :=
     f.dist_eq_on_piece Set.univ h_univ x y (Set.mem_univ x) (Set.mem_univ y)
-  sorry  -- Need to convert dist to edist
+  rw [edist_dist, edist_dist]
+  exact ENNReal.ofReal_eq_ofReal_iff dist_nonneg dist_nonneg |>.mpr this
 
 /-- An isometry can be viewed as a piecewise isometry with trivial partition. -/
 def of_isometry (f : α → α) (hf : Isometry f) : PiecewiseIsometry α where
@@ -211,6 +233,7 @@ def of_isometry (f : α → α) (hf : Isometry f) : PiecewiseIsometry α where
     simp only [Set.mem_singleton_iff] at hs
     rw [hs]
     exact MeasurableSet.univ
+  partition_countable := Set.countable_singleton Set.univ
   partition_cover := by simp only [Set.sUnion_singleton]
   partition_disjoint := by
     intro s hs t ht hst
@@ -231,6 +254,7 @@ def id : PiecewiseIsometry α :=
       simp only [Set.mem_singleton_iff] at hs
       rw [hs]
       exact MeasurableSet.univ
+    partition_countable := Set.countable_singleton Set.univ
     partition_cover := by simp only [Set.sUnion_singleton]
     partition_disjoint := by
       intro s hs t ht hst

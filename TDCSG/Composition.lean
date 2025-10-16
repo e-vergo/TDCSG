@@ -51,7 +51,7 @@ def refinedPartition (p q : Set (Set α)) : Set (Set α) :=
   {u | ∃ s ∈ p, ∃ t ∈ q, u = s ∩ t ∧ (s ∩ t).Nonempty}
 
 /-- Elements of the refined partition are measurable if both original partitions are measurable. -/
-theorem refinedPartition_measurable (p q : Set (Set α))
+theorem refinedPartition_measurable {α : Type u} [MeasurableSpace α] (p q : Set (Set α))
     (hp : ∀ s ∈ p, MeasurableSet s) (hq : ∀ t ∈ q, MeasurableSet t) :
     ∀ u ∈ refinedPartition p q, MeasurableSet u := by
   intro u hu
@@ -59,10 +59,29 @@ theorem refinedPartition_measurable (p q : Set (Set α))
   exact (hp s hs).inter (hq t ht)
 
 /-- The refined partition covers the same space as the original partitions. -/
-theorem refinedPartition_cover (p q : Set (Set α))
+theorem refinedPartition_cover {α : Type u} (p q : Set (Set α))
     (hp : ⋃₀ p = Set.univ) (hq : ⋃₀ q = Set.univ) :
     ⋃₀ refinedPartition p q = Set.univ := by
-  sorry  -- Show that union of intersections covers everything
+  ext x
+  simp only [Set.mem_sUnion, Set.mem_univ, iff_true]
+  -- x is in some s ∈ p and some t ∈ q
+  rw [Set.sUnion_eq_univ_iff] at hp hq
+  obtain ⟨s, hs, hxs⟩ := hp x
+  obtain ⟨t, ht, hxt⟩ := hq x
+  -- So x is in s ∩ t, which is in refinedPartition p q
+  use s ∩ t
+  constructor
+  · unfold refinedPartition
+    simp only [Set.mem_setOf_eq]
+    exact ⟨s, hs, t, ht, rfl, ⟨x, hxs, hxt⟩⟩
+  · exact ⟨hxs, hxt⟩
+
+/-- The refined partition is countable if both original partitions are countable. -/
+theorem refinedPartition_countable (p q : Set (Set α))
+    (hp : p.Countable) (hq : q.Countable) :
+    (refinedPartition p q).Countable := by
+  -- refined partition is a subset of the image of p × q under the intersection function
+  sorry
 
 end Refinement
 
@@ -76,15 +95,45 @@ def comp (f g : PiecewiseIsometry α) : PiecewiseIsometry α where
   partition := refinedPartition g.partition f.partition
   partition_measurable := refinedPartition_measurable g.partition f.partition
     g.partition_measurable f.partition_measurable
+  partition_countable := refinedPartition_countable g.partition f.partition
+    g.partition_countable f.partition_countable
   partition_cover := refinedPartition_cover g.partition f.partition
     g.partition_cover f.partition_cover
   partition_disjoint := by
     intro u hu v hv huv
-    sorry  -- Show refined partition is pairwise disjoint
+    -- u and v are intersections from refinedPartition
+    obtain ⟨s₁, hs₁, t₁, ht₁, rfl, _⟩ := hu
+    obtain ⟨s₂, hs₂, t₂, ht₂, rfl, _⟩ := hv
+    -- Must show s₁ ∩ t₁ and s₂ ∩ t₂ are disjoint
+    by_cases h₁ : s₁ = s₂
+    · -- If s₁ = s₂, then t₁ ≠ t₂
+      by_cases h₂ : t₁ = t₂
+      · -- If both equal, then u = v
+        rw [h₁, h₂] at huv
+        exact absurd rfl huv
+      · -- t₁ ≠ t₂, so t₁ and t₂ are disjoint
+        rw [h₁]
+        sorry
+    · -- s₁ ≠ s₂, so s₁ and s₂ are disjoint
+      sorry
   toFun := f.toFun ∘ g.toFun
   isometry_on_pieces := by
     intro s hs x hx y hy
-    sorry  -- Show composition preserves distances
+    -- s is an intersection from refinedPartition
+    obtain ⟨s_g, hs_g, s_f, hs_f, rfl, _⟩ := hs
+    simp only [Function.comp_apply]
+    -- Apply g first (isometric on s_g)
+    calc dist (f.toFun (g.toFun x)) (f.toFun (g.toFun y))
+        = dist (g.toFun x) (g.toFun y) := by
+          -- Need to show f preserves distance between g(x) and g(y)
+          -- Find pieces containing g(x) and g(y) in f's partition
+          obtain ⟨t, ht, hgx, hgy⟩ : ∃ t ∈ f.partition, g.toFun x ∈ t ∧ g.toFun y ∈ t := by
+            -- This requires that g maps s_g ∩ s_f into a single piece of f's partition
+            -- which is not guaranteed by the current structure
+            -- This is a fundamental gap in the composition definition
+            sorry
+          exact f.isometry_on_pieces t ht (g.toFun x) hgx (g.toFun y) hgy
+      _ = dist x y := g.isometry_on_pieces s_g hs_g x hx.1 y hy.1
 
 /-- Function application for composition. -/
 @[simp]
@@ -94,17 +143,24 @@ theorem comp_apply (f g : PiecewiseIsometry α) (x : α) :
 /-- Composition is associative. -/
 theorem comp_assoc (f g h : PiecewiseIsometry α) :
     (f.comp g).comp h = f.comp (g.comp h) := by
-  sorry  -- Show partitions and functions agree
+  -- Both sides have the same function
+  -- Partitions: need to show refinement is associative
+  -- Functions are definitionally equal
+  sorry
 
 /-- Left identity for composition. -/
 theorem comp_id_left (f : PiecewiseIsometry α) :
     id.comp f = f := by
-  sorry  -- Show composition with identity doesn't change the map
+  -- Partitions: refinedPartition f.partition {univ} = f.partition
+  -- Functions: id ∘ f = f
+  sorry
 
 /-- Right identity for composition. -/
 theorem comp_id_right (f : PiecewiseIsometry α) :
     f.comp id = f := by
-  sorry  -- Show composition with identity doesn't change the map
+  -- Partitions: refinedPartition {univ} f.partition = f.partition
+  -- Functions: f ∘ id = f
+  sorry
 
 end Composition
 
@@ -130,12 +186,16 @@ theorem iterate_zero_eq (f : PiecewiseIsometry α) :
 @[simp]
 theorem iterate_one (f : PiecewiseIsometry α) :
     iterate f 1 = f := by
-  sorry  -- unfold iterate then apply comp_id_right
+  rw [iterate_succ, iterate_zero_eq, comp_id_right]
 
 /-- Function application for iteration. -/
 theorem iterate_apply (f : PiecewiseIsometry α) (n : ℕ) (x : α) :
     (iterate f n) x = (f.toFun^[n]) x := by
-  sorry  -- Induction on n
+  induction n with
+  | zero => rfl
+  | succ n ih =>
+    rw [iterate_succ, comp_apply, ih]
+    simp [Function.iterate_succ_apply']
 
 /-- Iteration adds exponents. -/
 theorem iterate_add (f : PiecewiseIsometry α) (m n : ℕ) :
@@ -154,26 +214,35 @@ theorem iterate_isometry_on_pieces (f : PiecewiseIsometry α) (n : ℕ) (s : Set
 /-- The underlying function of an iterate is the composition of the underlying functions. -/
 theorem iterate_toFun (f : PiecewiseIsometry α) (n : ℕ) :
     (iterate f n).toFun = f.toFun^[n] := by
-  induction n with
-  | zero => rfl
-  | succ n ih =>
-    sorry  -- Need to show composition
+  ext x
+  exact iterate_apply f n x
 
 end Iteration
 
 section CompositionProperties
 
 /-- Composition preserves distance on refined pieces. -/
-theorem comp_dist_eq (f g : PiecewiseIsometry α) (x y : α) :
-    ∃ s ∈ (f.comp g).partition, x ∈ s ∧ y ∈ s →
-      dist ((f.comp g) x) ((f.comp g) y) = dist x y := by
-  sorry  -- Use isometry on pieces
+theorem comp_dist_eq (f g : PiecewiseIsometry α) (x y : α)
+    (h : ∃ s ∈ (f.comp g).partition, x ∈ s ∧ y ∈ s) :
+    dist ((f.comp g) x) ((f.comp g) y) = dist x y := by
+  obtain ⟨s, hs, hxs, hys⟩ := h
+  exact (f.comp g).isometry_on_pieces s hs x hxs y hys
 
 /-- The discontinuity set of a composition is contained in the union of discontinuity sets. -/
 theorem discontinuitySet_comp_subset (f g : PiecewiseIsometry α) :
     (f.comp g).discontinuitySet ⊆
       f.discontinuitySet ∪ (g.toFun ⁻¹' f.discontinuitySet) ∪ g.discontinuitySet := by
-  sorry  -- Discontinuities can only occur where either map has discontinuities
+  intro x hx
+  -- The discontinuity set is the union of frontiers of partition pieces
+  unfold discontinuitySet at hx ⊢
+  simp only [Set.mem_iUnion, Set.mem_union, Set.mem_preimage] at hx ⊢
+  -- hx says x is in the frontier of some piece of the refined partition
+  obtain ⟨s, hs, hx_frontier⟩ := hx
+  obtain ⟨s_g, hs_g, s_f, hs_f, rfl, _⟩ := hs
+  -- x is in frontier (s_g ∩ s_f)
+  -- frontier (s_g ∩ s_f) ⊆ frontier s_g ∪ frontier s_f
+  -- This is more complex than initially thought
+  sorry
 
 end CompositionProperties
 
@@ -182,13 +251,29 @@ section IterationProperties
 /-- The discontinuity set of an iterate grows with iteration. -/
 theorem discontinuitySet_iterate (f : PiecewiseIsometry α) (n : ℕ) :
     (iterate f n).discontinuitySet ⊆ ⋃ k < n, f.toFun^[k] ⁻¹' f.discontinuitySet := by
-  sorry  -- Discontinuities accumulate from each application
+  induction n with
+  | zero =>
+    -- iterate 0 = id, discontinuity set is empty or just frontiers of {univ}
+    intro x hx
+    -- id has partition {univ}, so discontinuity set is frontier univ = ∅
+    rw [iterate_zero_eq] at hx
+    unfold id discontinuitySet at hx
+    -- The discontinuity set should be empty for id
+    sorry
+  | succ n ih =>
+    -- iterate (n+1) = f.comp (iterate n)
+    intro x hx
+    rw [iterate_succ] at hx
+    have := discontinuitySet_comp_subset f (iterate f n) hx
+    sorry -- Need to decompose the composition discontinuity set bound
 
 /-- If f has finitely many discontinuities, so does each iterate (though possibly more). -/
 theorem iterate_finite_discontinuities (f : PiecewiseIsometry α) (n : ℕ)
     (hf : f.discontinuitySet.Finite) :
     (iterate f n).discontinuitySet.Finite := by
-  sorry  -- Use finiteness and union
+  -- The discontinuity set of iterate n is contained in a finite union of preimages
+  -- This requires bijectivity or other conditions to ensure preimages of finite sets are finite
+  sorry
 
 end IterationProperties
 

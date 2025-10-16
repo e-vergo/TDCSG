@@ -6,6 +6,7 @@ Authors: Eric Moffat
 import Mathlib.Topology.MetricSpace.Isometry
 import Mathlib.MeasureTheory.Measure.MeasureSpaceDef
 import Mathlib.Topology.Separation.Hausdorff
+import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
 
 /-!
 # Piecewise Isometries
@@ -34,6 +35,8 @@ structure PiecewiseIsometry (α : Type u) [MetricSpace α] [MeasurableSpace α] 
   partition : Set (Set α)
   /-- Each piece in the partition is measurable -/
   partition_measurable : ∀ s ∈ partition, MeasurableSet s
+  /-- The partition is countable -/
+  partition_countable : partition.Countable
   /-- The partition pieces cover the entire space -/
   partition_cover : ⋃₀ partition = Set.univ
   /-- The partition pieces are pairwise disjoint -/
@@ -57,10 +60,12 @@ def discontinuitySet (f : PiecewiseIsometry α) : Set α :=
   ⋃ s ∈ f.partition, frontier s
 
 /-- The discontinuity set of a piecewise isometry is measurable. -/
-theorem discontinuitySet_measurable [T2Space α] (f : PiecewiseIsometry α) :
-    MeasurableSet (f.discontinuitySet) := by
+theorem discontinuitySet_measurable [OpensMeasurableSpace α]
+    (f : PiecewiseIsometry α) : MeasurableSet (f.discontinuitySet) := by
   unfold discontinuitySet
-  sorry  -- Need countability or finite union assumption
+  apply MeasurableSet.biUnion f.partition_countable
+  intro s _
+  exact measurableSet_frontier
 
 /-- A piecewise isometry is isometric on each piece of its partition. -/
 theorem isometry_on (f : PiecewiseIsometry α) (s : Set α) (hs : s ∈ f.partition) :
@@ -95,6 +100,7 @@ end PiecewiseIsometry
 def IsPiecewiseIsometry {α : Type u} [MetricSpace α] [MeasurableSpace α] (f : α → α) : Prop :=
   ∃ (partition : Set (Set α)),
     (∀ s ∈ partition, MeasurableSet s) ∧
+    (partition.Countable) ∧
     (⋃₀ partition = Set.univ) ∧
     (partition.PairwiseDisjoint id) ∧
     (∀ s ∈ partition, ∀ x ∈ s, ∀ y ∈ s, dist (f x) (f y) = dist x y)
@@ -110,6 +116,8 @@ theorem of_isometry {α : Type u} [MetricSpace α] [MeasurableSpace α]
     simp only [Set.mem_singleton_iff] at hs
     rw [hs]
     exact MeasurableSet.univ
+  constructor
+  · exact Set.countable_singleton Set.univ
   constructor
   · simp only [Set.sUnion_singleton]
   constructor
@@ -130,10 +138,11 @@ theorem id {α : Type u} [MetricSpace α] [MeasurableSpace α] :
 theorem to_piecewise_isometry {α : Type u} [MetricSpace α] [MeasurableSpace α]
     {f : α → α} (hf : IsPiecewiseIsometry f) :
     ∃ (pi : PiecewiseIsometry α), pi.toFun = f := by
-  obtain ⟨partition, h_meas, h_cover, h_disj, h_iso⟩ := hf
+  obtain ⟨partition, h_meas, h_countable, h_cover, h_disj, h_iso⟩ := hf
   use {
     partition := partition
     partition_measurable := h_meas
+    partition_countable := h_countable
     partition_cover := h_cover
     partition_disjoint := h_disj
     toFun := f

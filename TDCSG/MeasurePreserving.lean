@@ -63,10 +63,6 @@ namespace MeasurePreservingPiecewiseIsometry
 
 variable {μ : MeasureTheory.Measure α}
 
-/-- Coercion to the underlying piecewise isometry. -/
-instance : Coe (MeasurePreservingPiecewiseIsometry α μ) (PiecewiseIsometry α) where
-  coe f := f.toPiecewiseIsometry
-
 /-- Allow function application notation. -/
 instance : CoeFun (MeasurePreservingPiecewiseIsometry α μ) (fun _ => α → α) where
   coe f := f.toFun
@@ -103,22 +99,44 @@ theorem measurePreserving_of_null_discontinuities (f : PiecewiseIsometry α)
     MeasureTheory.MeasurePreserving f.toFun μ μ := by
   constructor
   · exact h_meas
-  · sorry  -- Prove measure equation: μ (f ⁻¹' s) = μ s for measurable s
-          -- Strategy: use that f is isometric (hence bijective) on each piece,
-          -- and discontinuities have measure zero
+  · -- Need to prove: ∀ s, MeasurableSet s → μ (f ⁻¹' s) = μ s
+    -- This requires additional structure (e.g., f bijective, f surjective, etc.)
+    -- For piecewise isometries, this holds when f is almost everywhere bijective
+    -- This is a deep result requiring more sophisticated measure theory
+    sorry
 
 /-- If each partition piece has the same measure as its image, the map preserves measure. -/
 theorem measurePreserving_of_pieces_preserved (f : PiecewiseIsometry α)
     (h_meas : Measurable f.toFun)
     (h_pieces : ∀ s ∈ f.partition, μ (f.toFun '' s) = μ s) :
     MeasureTheory.MeasurePreserving f.toFun μ μ := by
-  sorry  -- Use piece-by-piece measure preservation
+  constructor
+  · exact h_meas
+  · -- Need to show μ (f ⁻¹' t) = μ t for all measurable t
+    -- Partition the preimage and use piece-by-piece preservation
+    -- The full proof requires showing that f maps pieces bijectively and using the partition
+    sorry
 
 /-- The measure of a preimage of a measurable set can be computed piece-by-piece. -/
 theorem measure_preimage_piece (f : PiecewiseIsometry α)
-    (h_meas : Measurable f.toFun) (s : Set α) (hs : MeasurableSet s) :
+    (h_meas : Measurable f.toFun) (s : Set α) (_ : MeasurableSet s) :
     μ (f.toFun ⁻¹' s) = ∑' (t : f.partition), μ (t.val ∩ (f.toFun ⁻¹' s)) := by
-  sorry  -- Partition the preimage and sum over pieces
+  -- The preimage can be partitioned as the disjoint union over partition pieces
+  -- Use that partition covers univ and is pairwise disjoint
+  have h_cover : f.toFun ⁻¹' s = ⋃₀ (Set.image (fun t => t ∩ (f.toFun ⁻¹' s)) f.partition) := by
+    ext x
+    simp only [Set.mem_preimage, Set.mem_sUnion, Set.mem_image]
+    constructor
+    · intro hx
+      obtain ⟨t, ht, hxt⟩ := f.exists_mem_partition x
+      use t ∩ (f.toFun ⁻¹' s), ⟨t, ht, rfl⟩
+      exact ⟨hxt, hx⟩
+    · intro ⟨_, ⟨t, ht, rfl⟩, hxt, hxs⟩
+      exact hxs
+  rw [h_cover]
+  -- Now apply measure_sUnion for the countable disjoint union
+  -- The full proof requires careful argument ordering and proof construction
+  sorry
 
 end MeasurePreservation
 
@@ -137,7 +155,7 @@ def toPiecewiseIsometry_of_measurePreserving (f : PiecewiseIsometry α)
   measure_preserving := h_mp
 
 /-- The identity as a measure-preserving piecewise isometry. -/
-def id : MeasurePreservingPiecewiseIsometry α μ where
+def idMeasurePreserving : MeasurePreservingPiecewiseIsometry α μ where
   toPiecewiseIsometry := PiecewiseIsometry.id
   measurable_toFun := measurable_id
   measure_preserving := MeasureTheory.MeasurePreserving.id μ
@@ -149,7 +167,7 @@ section Composition
 variable {μ : MeasureTheory.Measure α}
 
 /-- Composition of measure-preserving piecewise isometries preserves measure. -/
-def comp (f g : MeasurePreservingPiecewiseIsometry α μ) :
+def compMP (f g : MeasurePreservingPiecewiseIsometry α μ) :
     MeasurePreservingPiecewiseIsometry α μ where
   toPiecewiseIsometry := f.toPiecewiseIsometry.comp g.toPiecewiseIsometry
   measurable_toFun := f.measurable.comp g.measurable
@@ -157,13 +175,16 @@ def comp (f g : MeasurePreservingPiecewiseIsometry α μ) :
 
 /-- Function application for composition. -/
 @[simp]
-theorem comp_apply (f g : MeasurePreservingPiecewiseIsometry α μ) (x : α) :
-    (f.comp g) x = f (g x) := rfl
+theorem compMP_apply (f g : MeasurePreservingPiecewiseIsometry α μ) (x : α) :
+    (compMP f g).toFun x = f.toFun (g.toFun x) := rfl
 
 /-- Composition is associative. -/
-theorem comp_assoc (f g h : MeasurePreservingPiecewiseIsometry α μ) :
-    (f.comp g).comp h = f.comp (g.comp h) := by
-  sorry  -- Follows from composition associativity for piecewise isometries
+theorem compMP_assoc (f g h : MeasurePreservingPiecewiseIsometry α μ) :
+    compMP (compMP f g) h = compMP f (compMP g h) := by
+  -- Both sides have the same underlying piecewise isometry due to comp_assoc
+  -- and the same measurability and measure preservation properties
+  -- Requires extensionality for structure equality
+  sorry
 
 end Composition
 
@@ -172,28 +193,23 @@ section Iteration
 variable {μ : MeasureTheory.Measure α}
 
 /-- The nth iterate of a measure-preserving piecewise isometry. -/
-def iterate (f : MeasurePreservingPiecewiseIsometry α μ) (n : ℕ) :
-    MeasurePreservingPiecewiseIsometry α μ :=
-  match n with
-  | 0 => id
-  | n + 1 => f.comp (iterate f n)
-
-/-- Notation for iteration. -/
-notation:max f "^[" n "]" => iterate f n
+def iterateMP (f : MeasurePreservingPiecewiseIsometry α μ) : ℕ → MeasurePreservingPiecewiseIsometry α μ
+  | 0 => idMeasurePreserving
+  | n + 1 => compMP f (iterateMP f n)
 
 /-- Iterate at zero is identity. -/
 @[simp]
-theorem iterate_zero (f : MeasurePreservingPiecewiseIsometry α μ) :
-    f^[0] = id := rfl
+theorem iterateMP_zero (f : MeasurePreservingPiecewiseIsometry α μ) :
+    iterateMP f 0 = idMeasurePreserving := rfl
 
 /-- Iterate at successor. -/
-theorem iterate_succ (f : MeasurePreservingPiecewiseIsometry α μ) (n : ℕ) :
-    f^[n + 1] = f.comp (f^[n]) := rfl
+theorem iterateMP_succ (f : MeasurePreservingPiecewiseIsometry α μ) (n : ℕ) :
+    iterateMP f (n + 1) = compMP f (iterateMP f n) := rfl
 
 /-- Each iterate preserves measure. -/
-theorem iterate_preserves_measure (f : MeasurePreservingPiecewiseIsometry α μ) (n : ℕ) :
-    MeasureTheory.MeasurePreserving (f^[n]).toFun μ μ :=
-  (f^[n]).measure_preserving
+theorem iterateMP_preserves_measure (f : MeasurePreservingPiecewiseIsometry α μ) (n : ℕ) :
+    MeasureTheory.MeasurePreserving (iterateMP f n).toFun μ μ :=
+  (iterateMP f n).measure_preserving
 
 end Iteration
 
@@ -213,14 +229,19 @@ def IsCompletelyInvariant (f : MeasurePreservingPiecewiseIsometry α μ) (s : Se
 theorem measure_eq_of_invariant (f : MeasurePreservingPiecewiseIsometry α μ)
     (s : Set α) (hs : MeasurableSet s) (h_inv : IsInvariant f s) :
     μ (f.toFun '' s) = μ s := by
-  sorry  -- Use measure preservation
+  -- Use measure preservation: μ(f⁻¹(f(s))) = μ(f(s))
+  -- Since f is injective on pieces, f⁻¹(f(s)) = s
+  -- Requires complex reasoning about injectivity and preimages
+  sorry
 
 /-- A completely invariant measurable set has the same measure as its preimage. -/
 theorem measure_preimage_eq_of_completely_invariant
     (f : MeasurePreservingPiecewiseIsometry α μ) (s : Set α) (hs : MeasurableSet s)
     (h_inv : IsCompletelyInvariant f s) :
     μ (f.toFun ⁻¹' s) = μ s := by
-  sorry  -- Use measure preservation and complete invariance
+  -- Directly use measure preservation
+  -- The API for measure_preimage has changed
+  sorry
 
 end InvariantSets
 
@@ -232,7 +253,9 @@ variable [TopologicalSpace α] [BorelSpace α] {μ : MeasureTheory.Measure α}
 theorem measurable_of_borel (f : PiecewiseIsometry α)
     (h_cont : ∀ s ∈ f.partition, ContinuousOn f.toFun (interior s)) :
     Measurable f.toFun := by
-  sorry  -- Use continuity on pieces and null discontinuity set
+  -- For now, we admit this as it requires more sophisticated measure theory
+  -- The key idea: continuous on pieces with null discontinuity set implies measurable
+  sorry
 
 /-- A piecewise isometry with continuous pieces is measurable with respect to Borel sigma
 algebra. -/
@@ -240,7 +263,8 @@ theorem borel_measurable_of_continuous_pieces (f : PiecewiseIsometry α)
     (h_open : ∀ s ∈ f.partition, IsOpen (interior s))
     (h_cont : ∀ s ∈ f.partition, ContinuousOn f.toFun s) :
     Measurable f.toFun := by
-  sorry  -- Use piecewise continuity
+  -- Piecewise continuous functions on a countable partition are measurable
+  sorry
 
 end BorelMeasure
 
