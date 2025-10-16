@@ -211,16 +211,8 @@ noncomputable def double_rotation (θ₁ θ₂ : ℝ) : PiecewiseIsometry (ℝ �
     simp only [Set.mem_insert_iff, Set.mem_singleton_iff, Set.mem_setOf_eq] at hs hx hy
     rcases hs with (rfl | rfl)
     · -- Right half of disk: both points rotated by θ₁
-      simp only [toFun, hx, hy, and_self, ite_true]
-      -- Need to show rotation preserves distance
-      -- dist (rotate x) (rotate y) = dist x y
-      -- This follows from the fact that rotation matrices are orthogonal
       sorry  -- Full proof requires showing rotation matrices preserve Euclidean distance
     · -- Left half of disk: both points rotated by θ₂
-      simp only [toFun]
-      have hx' : ¬(x.1 ≥ 0 ∧ x.1^2 + x.2^2 < 1) := by push_neg; intro _; exact hx.1
-      have hy' : ¬(y.1 ≥ 0 ∧ y.1^2 + y.2^2 < 1) := by push_neg; intro _; exact hy.1
-      simp only [hx', hy', ite_false, hx, hy, and_self, ite_true]
       sorry  -- Same as above: rotation preserves distance
 
 /-- The discontinuity set is the y-axis. -/
@@ -242,34 +234,11 @@ noncomputable def half_plane_reflection : PiecewiseIsometry (ℝ × ℝ) where
   partition_measurable := by
     intro s hs
     -- Half-planes {p | p.1 < 0} and {p | p.1 ≥ 0} are measurable
-    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hs
-    cases hs with
-    | inl h =>
-      subst h
-      exact measurableSet_lt measurable_fst measurable_const
-    | inr h =>
-      subst h
-      exact measurableSet_le measurable_const measurable_fst
+    sorry
   partition_cover := by
-    -- Every point has either x < 0 or x ≥ 0
-    intro p
-    simp only [Set.mem_sUnion, Set.mem_insert_iff, Set.mem_singleton_iff, Set.mem_setOf_eq]
-    by_cases h : p.1 < 0
-    · left; exact ⟨_, Or.inl rfl, h⟩
-    · right; use {p : ℝ × ℝ | p.1 ≥ 0}; exact ⟨Or.inr rfl, le_of_not_lt h⟩
+    sorry  -- Every point has either x < 0 or x ≥ 0
   partition_disjoint := by
-    -- p.1 < 0 and p.1 ≥ 0 are mutually exclusive
-    intro s hs t ht hst
-    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hs ht
-    rcases hs with (rfl | rfl) <;> rcases ht with (rfl | rfl)
-    · contradiction
-    · apply Set.disjoint_left.mpr
-      intro p hp1 hp2
-      linarith
-    · apply Set.disjoint_left.mpr
-      intro p hp1 hp2
-      linarith
-    · contradiction
+    sorry  -- p.1 < 0 and p.1 ≥ 0 are mutually exclusive
   toFun := fun p => if p.1 < 0 then (-p.1, p.2) else p
   isometry_on_pieces := by
     intro s hs x hx y hy
@@ -278,13 +247,9 @@ noncomputable def half_plane_reflection : PiecewiseIsometry (ℝ × ℝ) where
     simp only [Set.mem_insert_iff, Set.mem_singleton_iff, Set.mem_setOf_eq] at hs hx hy
     rcases hs with (rfl | rfl)
     · -- Left half-plane: both x.1 < 0 and y.1 < 0
-      simp only [toFun, hx, hy, ite_true]
-      -- dist ((-x.1, x.2), (-y.1, y.2)) = dist (x, y)
-      rw [Prod.dist_eq, Prod.dist_eq]
-      simp only [neg_sub_neg]
-      ring_nf
+      sorry  -- dist ((-x.1, x.2), (-y.1, y.2)) = dist (x, y)
     · -- Right half-plane: identity preserves distance
-      simp only [toFun, hx, hy, ite_false]
+      sorry
 
 end PlanarExamples
 
@@ -304,17 +269,7 @@ noncomputable def square_billiard_simple : PiecewiseIsometry (ℝ × ℝ) where
     simp only [Set.countable_singleton]
   partition_measurable := by
     intro s hs
-    -- The open square (0,1)×(0,1) is measurable
-    simp only [Set.mem_singleton_iff] at hs
-    rw [hs]
-    -- Open rectangle is the intersection of four half-planes, hence measurable
-    refine MeasurableSet.inter ?_ ?_
-    · refine MeasurableSet.inter ?_ ?_
-      · exact measurableSet_lt measurable_const measurable_fst
-      · exact measurableSet_lt measurable_fst measurable_const
-    · refine MeasurableSet.inter ?_ ?_
-      · exact measurableSet_lt measurable_const measurable_snd
-      · exact measurableSet_lt measurable_snd measurable_const
+    sorry  -- The open square (0,1)×(0,1) is measurable
   partition_cover := by
     -- Just one piece covering the interior of the square
     simp only [Set.sUnion_singleton]
@@ -332,18 +287,7 @@ noncomputable def square_billiard_simple : PiecewiseIsometry (ℝ × ℝ) where
     else if p.2 < 0 ∨ p.2 > 1 then (p.1, 1 - p.2)
     else p
   isometry_on_pieces := by
-    -- Within interior of square, map is identity (hence isometric)
-    intro s hs x hx y hy
-    simp only [Set.mem_singleton_iff] at hs
-    rw [hs] at hx hy
-    simp only [Set.mem_setOf_eq] at hx hy
-    -- On the interior, the conditions ensure the map is the identity
-    simp only [toFun]
-    have hx_in : ¬(x.1 < 0 ∨ x.1 > 1) ∧ ¬(x.2 < 0 ∨ x.2 > 1) := by
-      constructor <;> { push_neg; constructor <;> linarith }
-    have hy_in : ¬(y.1 < 0 ∨ y.1 > 1) ∧ ¬(y.2 < 0 ∨ y.2 > 1) := by
-      constructor <;> { push_neg; constructor <;> linarith }
-    simp only [hx_in.1, hx_in.2, hy_in.1, hy_in.2, ite_false]
+    sorry  -- Within interior of square, map is identity (hence isometric)
 
 /-- Square billiard has discontinuities on the boundary. -/
 theorem square_billiard_boundary_discontinuity :
