@@ -3,9 +3,6 @@ Copyright (c) 2024 Eric Moffat. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Moffat
 -/
-import Mathlib.Topology.MetricSpace.Isometry
-import Mathlib.MeasureTheory.Measure.MeasureSpaceDef
-import Mathlib.Topology.Separation.Hausdorff
 import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
 
 /-!

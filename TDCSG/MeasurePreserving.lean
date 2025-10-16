@@ -145,7 +145,7 @@ theorem measurePreserving_of_pieces_preserved (f : PiecewiseIsometry α)
 /-- The measure of a preimage of a measurable set can be computed piece-by-piece. -/
 theorem measure_preimage_piece (f : PiecewiseIsometry α)
     (h_meas : Measurable f.toFun) (s : Set α) (hs : MeasurableSet s) :
-    μ (f.toFun ⁻¹' s) = ∑' (t : f.partition), μ (t.val ∩ (f.toFun ⁻¹' s)) := by
+    μ (f.toFun ⁻¹' s) = ∑' (t : ↑f.partition), μ (↑t ∩ (f.toFun ⁻¹' s)) := by
   -- The preimage can be partitioned as the disjoint union over partition pieces
   -- Use that partition covers univ and is pairwise disjoint
   have h_cover : f.toFun ⁻¹' s = ⋃₀ (Set.image (fun t => t ∩ (f.toFun ⁻¹' s)) f.partition) := by
@@ -180,8 +180,10 @@ theorem measure_preimage_piece (f : PiecewiseIsometry α)
     exact (f.partition_measurable t ht).inter (h_meas hs)
   -- Apply measure_sUnion
   rw [MeasureTheory.measure_sUnion h_image_countable h_image_disjoint h_image_meas]
-  -- The tsum is over the image, convert to tsum over partition
-  sorry -- Need to show bijection between partition and image preserves sum
+  -- The LHS sums over the image, RHS sums over the partition
+  -- Key: every partition element t contributes μ(t ∩ preimage) to both sums
+  -- On LHS it appears as one summand (if nonempty), on RHS as the t-indexed term
+  sorry -- PROVABLE via tsum reindexing (straightforward but needs the right lemma)
 
 end MeasurePreservation
 
@@ -226,10 +228,21 @@ theorem compMP_apply (f g : MeasurePreservingPiecewiseIsometry α μ) (x : α) :
 /-- Composition is associative. -/
 theorem compMP_assoc (f g h : MeasurePreservingPiecewiseIsometry α μ) :
     compMP (compMP f g) h = compMP f (compMP g h) := by
-  -- Both sides have the same underlying piecewise isometry due to comp_assoc
-  -- and the same measurability and measure preservation properties
-  -- However, we need extensionality for MeasurePreservingPiecewiseIsometry
-  sorry -- Requires extensionality lemma for the structure
+  -- Both sides compose the same underlying functions
+  -- The functions are definitionally equal: (f ∘ g) ∘ h = f ∘ (g ∘ h)
+  -- The partitions may differ (both are refinements of refinements)
+  -- But the measurability and measure-preservation follow from the function equality
+  -- We need to show structural equality of the extended structure
+
+  -- Actually, these are genuinely different as MeasurePreservingPiecewiseIsometry structures
+  -- because they have different underlying PiecewiseIsometry structures (different partitions)
+  -- They represent the same function but with different partition representations
+
+  -- For practical purposes, we might want to work with equivalence classes of
+  -- piecewise isometries up to partition refinement, but that's beyond the current setup
+
+  -- Mark as sorry since true extensionality requires rethinking the structure
+  sorry -- Need better extensionality principle or quotient by partition equivalence
 
 end Composition
 
@@ -288,10 +301,22 @@ This is technically solvable but requires more sophisticated arguments about pie
 theorem measure_eq_of_invariant (f : MeasurePreservingPiecewiseIsometry α μ)
     (s : Set α) (hs : MeasurableSet s) (h_inv : IsInvariant f s) :
     μ (f.toFun '' s) = μ s := by
-  -- Use measure preservation: μ(f⁻¹(f(s))) = μ(f(s))
-  -- Since f is injective on pieces, f⁻¹(f(s)) = s
-  -- Requires complex reasoning about injectivity and preimages
-  sorry
+  -- Use measure preservation: for measurable t, μ(f⁻¹(t)) = μ(t)
+  -- We want to show μ(f(s)) = μ(s)
+  -- By measure preservation: μ(f⁻¹(f(s))) = μ(f(s))
+  -- So it suffices to show μ(f⁻¹(f(s))) = μ(s)
+
+  -- f(s) ⊆ s by invariance, so f⁻¹(f(s)) ⊆ f⁻¹(s)
+  -- Also, s ⊆ f⁻¹(f(s)) always (for any function)
+  -- Therefore we need to show f⁻¹(s) ⊆ f⁻¹(f(s)), which requires... wait
+
+  -- Actually: x ∈ f⁻¹(f(s)) iff f(x) ∈ f(s) iff f(x) = f(y) for some y ∈ s
+  -- If f is injective, this means x = y, so x ∈ s
+  -- But f is only injective on pieces, not globally
+
+  -- The issue: without global injectivity or surjectivity, this is indeed hard
+  -- Let me mark this as requiring additional assumptions
+  sorry -- DEEP: Needs global injectivity or surjectivity of f, or measure-theoretic arguments
 
 /-- A completely invariant measurable set has the same measure as its preimage. -/
 theorem measure_preimage_eq_of_completely_invariant
@@ -326,9 +351,26 @@ This should be straightforward once the right mathlib lemmas are identified.
 theorem measurable_of_borel (f : PiecewiseIsometry α)
     (h_cont : ∀ s ∈ f.partition, ContinuousOn f.toFun (interior s)) :
     Measurable f.toFun := by
-  -- For now, we admit this as it requires more sophisticated measure theory
-  -- The key idea: continuous on pieces with null discontinuity set implies measurable
-  sorry
+  -- The function is continuous on interiors, use measurable_of_isOpen
+  apply measurable_of_isOpen
+  intro U hU
+  -- f⁻¹(U) = ⋃_{s ∈ partition} (s ∩ f⁻¹(U))
+  have : f.toFun ⁻¹' U = ⋃₀ (Set.image (fun s => s ∩ f.toFun ⁻¹' U) f.partition) := by
+    ext x
+    simp only [Set.mem_preimage, Set.mem_sUnion, Set.mem_image]
+    constructor
+    · intro hx
+      obtain ⟨s, hs, hxs⟩ := f.exists_mem_partition x
+      exact ⟨s ∩ f.toFun ⁻¹' U, ⟨s, hs, rfl⟩, ⟨hxs, hx⟩⟩
+    · intro ⟨_, ⟨s, hs, rfl⟩, hxs, hx⟩
+      exact hx
+  rw [this]
+  apply MeasurableSet.sUnion
+  · exact f.partition_countable.image _
+  · intro t ht
+    obtain ⟨s, hs, rfl⟩ := ht
+    -- s ∩ f⁻¹(U) is measurable (requires connecting continuity on s with measurability)
+    sorry
 
 /-- A piecewise isometry with continuous pieces is measurable with respect to Borel sigma
 algebra.
@@ -354,7 +396,27 @@ theorem borel_measurable_of_continuous_pieces (f : PiecewiseIsometry α)
     (h_cont : ∀ s ∈ f.partition, ContinuousOn f.toFun s) :
     Measurable f.toFun := by
   -- Piecewise continuous functions on a countable partition are measurable
-  sorry
+  -- Use measurable_of_isOpen: show f⁻¹(U) is measurable for all open U
+  apply measurable_of_isOpen
+  intro U hU
+  -- f⁻¹(U) = ⋃_{s ∈ partition} (s ∩ f⁻¹(U))
+  have : f.toFun ⁻¹' U = ⋃₀ (Set.image (fun s => s ∩ f.toFun ⁻¹' U) f.partition) := by
+    ext x
+    simp only [Set.mem_preimage, Set.mem_sUnion, Set.mem_image]
+    constructor
+    · intro hx
+      obtain ⟨s, hs, hxs⟩ := f.exists_mem_partition x
+      exact ⟨s ∩ f.toFun ⁻¹' U, ⟨s, hs, rfl⟩, ⟨hxs, hx⟩⟩
+    · intro ⟨_, ⟨s, hs, rfl⟩, hxs, hx⟩
+      exact hx
+  rw [this]
+  -- Each s ∩ f⁻¹(U) is measurable
+  apply MeasurableSet.sUnion
+  · exact f.partition_countable.image _
+  · intro t ht
+    obtain ⟨s, hs, rfl⟩ := ht
+    -- s ∩ f⁻¹(U) is measurable as intersection of measurable s with preimage
+    sorry
 
 end BorelMeasure
 

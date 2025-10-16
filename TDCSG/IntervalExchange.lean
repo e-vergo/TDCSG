@@ -119,12 +119,26 @@ theorem intervals_cover : ⋃ i, iet.interval i = Ico 0 1 := by
       calc x < iet.domainRight i := hx.2
         _ = iet.domainLeft i + iet.lengths i := rfl
         _ ≤ ∑ j : Fin n, iet.lengths j := by
-          sorry -- Need to show domainLeft i + lengths i ≤ sum of all lengths
+          -- domainLeft i is sum of lengths before i, adding lengths i gives partial sum up to i
+          -- This partial sum is ≤ total sum
+          sorry
         _ = 1 := iet.lengths_sum
   · -- If 0 ≤ x < 1, then x is in some interval
     intro ⟨hx0, hx1⟩
     -- Find the interval containing x
     sorry -- Use that intervals partition [0,1)
+
+/-- Helper lemma: domainRight i ≤ domainLeft j when i < j. -/
+lemma domainRight_le_domainLeft_of_lt {i j : Fin n} (hij : i < j) :
+    iet.domainRight i ≤ iet.domainLeft j := by
+  unfold domainRight domainLeft
+  -- domainRight i = (∑ k : Fin i.val, lengths k) + lengths i
+  -- domainLeft j = ∑ k : Fin j.val, lengths k
+  -- Since i < j, we have i.val < j.val, so Fin j.val includes all of Fin i.val plus more
+  -- The sum over Fin j.val includes lengths 0, ..., i.val-1, i.val, ..., j.val-1
+  -- The sum over Fin i.val is lengths 0, ..., i.val-1
+  -- So domainLeft j ≥ (sum over Fin i.val) + lengths i = domainRight i
+  sorry
 
 /-- The intervals are pairwise disjoint. -/
 theorem intervals_disjoint : (Set.range iet.interval).PairwiseDisjoint (fun x => x) := by
@@ -141,15 +155,19 @@ theorem intervals_disjoint : (Set.range iet.interval).PairwiseDisjoint (fun x =>
     simp only [Set.mem_inter_iff, mem_Ico, Set.mem_empty_iff_false, iff_false, not_and]
     intro hx₁ hx₂
     -- x < domainRight i and x ≥ domainLeft j
-    -- Need: domainRight i ≤ domainLeft j when i < j
-    sorry
+    -- But domainRight i ≤ domainLeft j when i < j, so x < domainLeft j and x ≥ domainLeft j
+    have h_le := iet.domainRight_le_domainLeft_of_lt hij
+    linarith
   · by_cases hji : j < i
     · -- If j < i, then domainRight j ≤ domainLeft i
       apply Set.disjoint_iff_inter_eq_empty.mpr
       ext x
       simp only [Set.mem_inter_iff, mem_Ico, Set.mem_empty_iff_false, iff_false, not_and]
       intro hx₁ hx₂
-      sorry
+      -- x < domainRight i and x ≥ domainLeft j, but also x ≥ domainLeft i and x < domainRight j
+      -- Since j < i, domainRight j ≤ domainLeft i
+      have h_le := iet.domainRight_le_domainLeft_of_lt hji
+      linarith
     · -- If i = j, then they're the same interval, contradiction
       push_neg at hij hji
       have heq : i = j := Fin.eq_of_val_eq (Nat.le_antisymm hji hij)
@@ -324,8 +342,6 @@ def IET_three_example (α β : ℝ) (hα : 0 < α) (hβ : 0 < β) (hsum : α + �
     · simp; exact hβ
     · simp; linarith
   lengths_sum := by
-    -- The sum α + β + (1 - α - β) = 1 is straightforward algebra
-    -- Can be proven by expanding the sum manually or using lemmas about Fin.sum
     sorry
   permutation := Equiv.swap 0 2  -- Permutation (0 2 1)
 
