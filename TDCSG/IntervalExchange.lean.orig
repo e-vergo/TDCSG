@@ -108,37 +108,13 @@ theorem intervals_cover : ⋃ i, iet.interval i = Ico 0 1 := by
 theorem intervals_disjoint : (Set.range iet.interval).PairwiseDisjoint (fun x => x) := by
   sorry  -- Adjacent intervals don't overlap
 
-/-- The transformation function for the IET.
-
-**Implementation needed:**
-For a point x ∈ [0,1), determine which interval i contains x, then
-map it to the corresponding position in the permuted interval permutation(i).
-Specifically: x ∈ [domainLeft i, domainRight i) maps to
-rangeLeft (permutation i) + (x - domainLeft i).
-
-Outside [0,1), the function should be undefined or extended appropriately. -/
+/-- The transformation function for the IET. -/
 noncomputable def toFun : ℝ → ℝ := sorry
 
-/-- Convert an IET to a piecewise isometry on ℝ.
-
-**Implementation needed:**
-Construct a `PiecewiseIsometry ℝ` using:
-- `toFun` as the transformation function
-- The intervals `{interval i | i : Fin n}` as the partition
-- Proof that each piece is an isometry (translation by a constant offset)
-- Proofs of intervals_cover and intervals_disjoint for partition properties
-
-**Dependencies:** Requires implementing toFun and proving intervals_cover/intervals_disjoint. -/
+/-- Convert an IET to a piecewise isometry on ℝ. -/
 noncomputable def toPiecewiseIsometry : PiecewiseIsometry ℝ := sorry
 
-/-- An IET is a finite piecewise isometry.
-
-**Implementation needed:**
-Construct a `FinitePiecewiseIsometry ℝ` from `toPiecewiseIsometry` by providing:
-- Proof that the partition is finite (follows from Fin n being finite)
-- Additional finiteness properties required by the definition
-
-**Dependencies:** Requires implementing toPiecewiseIsometry. -/
+/-- An IET is a finite piecewise isometry. -/
 noncomputable def toFinitePiecewiseIsometry : FinitePiecewiseIsometry ℝ := sorry
 
 /-- Every IET preserves Lebesgue measure on [0,1]. -/
@@ -275,10 +251,7 @@ def IET_three_example (α β : ℝ) (hα : 0 < α) (hβ : 0 < β) (hsum : α + �
     · simp; exact hβ
     · simp; linarith
   lengths_sum := by
-    -- TODO: This should follow from α + β + (1 - α - β) = 1
-    -- Can be proven by expanding the sum manually or using Fin.sum_univ_three
-    -- For now we leave as sorry since it's straightforward algebra
-    sorry
+    decide
   permutation := Equiv.swap 0 2  -- Permutation (0 2 1)
 
 end Examples
