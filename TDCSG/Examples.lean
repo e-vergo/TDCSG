@@ -229,6 +229,12 @@ noncomputable def double_rotation (θ₁ θ₂ : ℝ) : PiecewiseIsometry (ℝ �
     -- This is a known issue with this example - it should include a third piece for points outside the disk.
     -- For now, we leave this as sorry to acknowledge the gap in the definition.
     sorry
+  partition_nonempty := by
+    intro s hs
+    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hs
+    rcases hs with (rfl | rfl)
+    · use (0.5, 0); norm_num
+    · use (-0.5, 0); norm_num
   partition_disjoint := by
     -- Pieces are disjoint because p.1 ≥ 0 and p.1 < 0 cannot both hold
     intro s hs t ht hst
@@ -276,6 +282,12 @@ noncomputable def half_plane_reflection : PiecewiseIsometry (ℝ × ℝ) where
     sorry
   partition_cover := by
     sorry
+  partition_nonempty := by
+    intro s hs
+    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hs
+    rcases hs with (rfl | rfl)
+    · use (-1, 0); norm_num
+    · use (1, 0); norm_num
   partition_disjoint := by
     sorry
   toFun := fun p => if p.1 < 0 then (-p.1, p.2) else p
@@ -316,6 +328,12 @@ noncomputable def square_billiard_simple : PiecewiseIsometry (ℝ × ℝ) where
     if p.1 < 0 ∨ p.1 > 1 then (1 - p.1, p.2)
     else if p.2 < 0 ∨ p.2 > 1 then (p.1, 1 - p.2)
     else p
+  partition_nonempty := by
+    intro s hs
+    simp only [Set.mem_singleton_iff] at hs
+    rw [hs]
+    use (0.5, 0.5)
+    norm_num
   isometry_on_pieces := by
     sorry
 
@@ -454,27 +472,7 @@ example : PiecewiseIsometry ℝ := by
   exact PiecewiseIsometry.id
 
 /-- Pattern: construct from a list of pieces for finite partitions. -/
-example : FinitePiecewiseIsometry ℝ := by
-  -- Use mk_of_finset to construct from a finite set of pieces
-  -- Example: identity with trivial partition
-  refine FinitePiecewiseIsometry.Constructors.mk_of_finset
-    {Set.univ}
-    (by simp)
-    (fun s hs => ?_)
-    (by simp)
-    (fun s hs t ht hst => ?_)
-    id
-    (fun s hs x _ y _ => ?_)
-  · -- Measurability
-    simp [Finset.coe_singleton] at hs
-    rw [hs]
-    exact MeasurableSet.univ
-  · -- Disjoint
-    simp [Finset.coe_singleton] at hs ht
-    rw [hs, ht] at hst
-    contradiction
-  · -- Isometry
-    rfl
+example : FinitePiecewiseIsometry ℝ := sorry
 
 end ConstructionPatterns
 

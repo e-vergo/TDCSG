@@ -146,44 +146,33 @@ theorem measurePreserving_of_pieces_preserved (f : PiecewiseIsometry α)
 theorem measure_preimage_piece (f : PiecewiseIsometry α)
     (h_meas : Measurable f.toFun) (s : Set α) (hs : MeasurableSet s) :
     μ (f.toFun ⁻¹' s) = ∑' (t : ↑f.partition), μ (↑t ∩ (f.toFun ⁻¹' s)) := by
-  -- The preimage can be partitioned as the disjoint union over partition pieces
-  -- Use that partition covers univ and is pairwise disjoint
-  have h_cover : f.toFun ⁻¹' s = ⋃₀ (Set.image (fun t => t ∩ (f.toFun ⁻¹' s)) f.partition) := by
+  -- Express preimage as a union over partition pieces
+  have h_union : f.toFun ⁻¹' s = ⋃ (t : ↑f.partition), ↑t ∩ (f.toFun ⁻¹' s) := by
     ext x
-    simp only [Set.mem_preimage, Set.mem_sUnion, Set.mem_image]
+    simp only [Set.mem_preimage, Set.mem_iUnion, Set.mem_inter_iff, Subtype.exists]
     constructor
     · intro hx
       obtain ⟨t, ht, hxt⟩ := f.exists_mem_partition x
-      use t ∩ (f.toFun ⁻¹' s), ⟨t, ht, rfl⟩
-      exact ⟨hxt, hx⟩
-    · intro ⟨_, ⟨t, ht, rfl⟩, hxt, hxs⟩
-      exact hxs
-  rw [h_cover]
-  -- Now apply measure_sUnion for the countable disjoint union
-  -- The image of the partition is countable
-  have h_image_countable : (Set.image (fun t => t ∩ (f.toFun ⁻¹' s)) f.partition).Countable :=
-    f.partition_countable.image _
-  -- The image sets are pairwise disjoint
-  have h_image_disjoint : (Set.image (fun t => t ∩ (f.toFun ⁻¹' s)) f.partition).Pairwise Disjoint := by
-    intro u hu v hv huv
-    obtain ⟨tu, htu, rfl⟩ := hu
-    obtain ⟨tv, htv, rfl⟩ := hv
-    by_cases h : tu = tv
-    · rw [h] at huv
-      exact absurd rfl huv
-    · have hdisj : Disjoint tu tv := f.partition_disjoint htu htv h
-      exact Disjoint.inf_left _ (Disjoint.inf_right _ hdisj)
-  -- Each piece is measurable
-  have h_image_meas : ∀ u ∈ (Set.image (fun t => t ∩ (f.toFun ⁻¹' s)) f.partition), MeasurableSet u := by
-    intro u hu
-    obtain ⟨t, ht, rfl⟩ := hu
-    exact (f.partition_measurable t ht).inter (h_meas hs)
-  -- Apply measure_sUnion
-  rw [MeasureTheory.measure_sUnion h_image_countable h_image_disjoint h_image_meas]
-  -- The LHS sums over the image, RHS sums over the partition
-  -- Key: every partition element t contributes μ(t ∩ preimage) to both sums
-  -- On LHS it appears as one summand (if nonempty), on RHS as the t-indexed term
-  sorry -- PROVABLE via tsum reindexing (straightforward but needs the right lemma)
+      exact ⟨t, ht, hxt, hx⟩
+    · intro ⟨_, _, hxt, hx⟩
+      exact hx
+  conv_lhs => rw [h_union]
+  -- Use measure_iUnion for pairwise disjoint measurable sets
+  haveI : Countable (↑f.partition) := f.partition_countable.to_subtype
+  apply MeasureTheory.measure_iUnion
+  · -- Pairwise disjoint
+    intro i j hij
+    apply Set.disjoint_iff_inter_eq_empty.mpr
+    ext x
+    simp only [Set.mem_inter_iff, Set.mem_empty_iff_false, iff_false]
+    intro ⟨⟨hxi, _⟩, ⟨hxj, _⟩⟩
+    -- x ∈ i and x ∈ j but i ≠ j contradicts partition disjointness
+    have : (i : Set α) = (j : Set α) := f.unique_partition_piece x i j i.prop j.prop hxi hxj
+    exact hij (Subtype.ext this)
+  · -- Each piece is measurable
+    intro i
+    apply MeasurableSet.inter (f.partition_measurable i i.prop)
+    exact h_meas hs
 
 end MeasurePreservation
 
@@ -202,7 +191,7 @@ def toPiecewiseIsometry_of_measurePreserving (f : PiecewiseIsometry α)
   measure_preserving := h_mp
 
 /-- The identity as a measure-preserving piecewise isometry. -/
-def idMeasurePreserving : MeasurePreservingPiecewiseIsometry α μ where
+def idMeasurePreserving [Nonempty α] : MeasurePreservingPiecewiseIsometry α μ where
   toPiecewiseIsometry := PiecewiseIsometry.id
   measurable_toFun := measurable_id
   measure_preserving := MeasureTheory.MeasurePreserving.id μ
@@ -251,21 +240,21 @@ section Iteration
 variable {μ : MeasureTheory.Measure α}
 
 /-- The nth iterate of a measure-preserving piecewise isometry. -/
-def iterateMP (f : MeasurePreservingPiecewiseIsometry α μ) : ℕ → MeasurePreservingPiecewiseIsometry α μ
+def iterateMP [Nonempty α] (f : MeasurePreservingPiecewiseIsometry α μ) : ℕ → MeasurePreservingPiecewiseIsometry α μ
   | 0 => idMeasurePreserving
   | n + 1 => compMP f (iterateMP f n)
 
 /-- Iterate at zero is identity. -/
 @[simp]
-theorem iterateMP_zero (f : MeasurePreservingPiecewiseIsometry α μ) :
+theorem iterateMP_zero [Nonempty α] (f : MeasurePreservingPiecewiseIsometry α μ) :
     iterateMP f 0 = idMeasurePreserving := rfl
 
 /-- Iterate at successor. -/
-theorem iterateMP_succ (f : MeasurePreservingPiecewiseIsometry α μ) (n : ℕ) :
+theorem iterateMP_succ [Nonempty α] (f : MeasurePreservingPiecewiseIsometry α μ) (n : ℕ) :
     iterateMP f (n + 1) = compMP f (iterateMP f n) := rfl
 
 /-- Each iterate preserves measure. -/
-theorem iterateMP_preserves_measure (f : MeasurePreservingPiecewiseIsometry α μ) (n : ℕ) :
+theorem iterateMP_preserves_measure [Nonempty α] (f : MeasurePreservingPiecewiseIsometry α μ) (n : ℕ) :
     MeasureTheory.MeasurePreserving (iterateMP f n).toFun μ μ :=
   (iterateMP f n).measure_preserving
 
@@ -321,7 +310,7 @@ theorem measure_eq_of_invariant (f : MeasurePreservingPiecewiseIsometry α μ)
 /-- A completely invariant measurable set has the same measure as its preimage. -/
 theorem measure_preimage_eq_of_completely_invariant
     (f : MeasurePreservingPiecewiseIsometry α μ) (s : Set α) (hs : MeasurableSet s)
-    (h_inv : IsCompletelyInvariant f s) :
+    (_h_inv : IsCompletelyInvariant f s) :
     μ (f.toFun ⁻¹' s) = μ s := by
   -- Directly use measure preservation
   exact f.measure_preserving.measure_preimage hs.nullMeasurableSet

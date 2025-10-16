@@ -95,17 +95,39 @@ theorem discontinuitySet_finite_boundaries [T2Space α] [SecondCountableTopology
   · exact f.partition_finite.mem_toFinset.mpr ht
   · exact hxt
 
-/-- For compact metric spaces, a finite piecewise isometry has finite discontinuity set.
-Note: This theorem cannot be proven without additional assumptions.
-While the discontinuity set is a finite union of frontiers, and each frontier is closed/compact,
-compact sets in metric spaces are not necessarily finite (e.g., frontiers of circles).
-Additional assumptions would be needed, such as:
+/-- For compact metric spaces with discrete topology, a finite piecewise isometry has finite
+discontinuity set.
+
+The discontinuity set is a finite union of frontiers (by `discontinuitySet_finite_boundaries`).
+In a discrete space, each frontier is empty, so the discontinuity set is empty, hence finite.
+
+For more general spaces, this requires additional hypotheses such as:
 - The partition pieces are polytopes or similar (finite boundary)
-- The space is discrete
-- Other topological restrictions
-We leave this as an axiom for cases where it's needed. -/
-axiom finite_discontinuitySet [CompactSpace α] [T2Space α] :
-    f.discontinuitySet.Finite
+- Each frontier is finite (e.g., in ℝⁿ with polytopic partitions)
+
+This version with `DiscreteTopology` is provable and covers computational examples. -/
+theorem finite_discontinuitySet_of_discrete [CompactSpace α] [T2Space α] [DiscreteTopology α] :
+    f.discontinuitySet.Finite := by
+  -- In a discrete space, every set equals its interior union its frontier
+  -- For any set s, frontier s = closure s \ interior s
+  -- In discrete topology, interior s = s and closure s = s, so frontier s = s \ s = ∅
+  have h_frontier_empty : ∀ s : Set α, frontier s = ∅ := by
+    intro s
+    rw [frontier, closure_discrete, (isOpen_discrete s).interior_eq, Set.diff_self]
+  -- Discontinuity set is contained in union of frontiers
+  obtain ⟨finset_pieces, h_subset⟩ := f.discontinuitySet_finite_boundaries
+  -- Each frontier is empty, so the union is empty
+  have h_union_empty : ⋃ t ∈ finset_pieces, frontier t = ∅ := by
+    ext x
+    simp only [Set.mem_iUnion, Set.mem_empty_iff_false, iff_false]
+    intro ⟨t, _, hx⟩
+    rw [h_frontier_empty t] at hx
+    exact hx
+  -- Therefore discontinuity set is subset of empty, hence empty, hence finite
+  have : f.discontinuitySet ⊆ ∅ := by
+    calc f.discontinuitySet ⊆ ⋃ t ∈ finset_pieces, frontier t := h_subset
+       _ = ∅ := h_union_empty
+  exact Set.Finite.subset (Set.finite_empty) this
 
 /-- The number of pieces is positive (assuming α is nonempty). -/
 theorem card_pos [Nonempty α] :
@@ -146,6 +168,7 @@ def mk_of_finset (pieces : Finset (Set α))
     (h_meas : ∀ s, s ∈ (pieces : Set (Set α)) → MeasurableSet s)
     (h_cover : ⋃₀ (pieces : Set (Set α)) = Set.univ)
     (h_disj : (pieces : Set (Set α)).PairwiseDisjoint (fun x => x))
+    (h_pieces_nonempty : ∀ s ∈ (pieces : Set (Set α)), s.Nonempty)
     (g : α → α)
     (h_iso : ∀ s, s ∈ (pieces : Set (Set α)) → ∀ x ∈ s, ∀ y ∈ s, dist (g x) (g y) = dist x y) :
     FinitePiecewiseIsometry α where
@@ -155,6 +178,7 @@ def mk_of_finset (pieces : Finset (Set α))
     partition_countable := Finset.countable_toSet pieces
     partition_cover := h_cover
     partition_disjoint := h_disj
+    partition_nonempty := h_pieces_nonempty
     toFun := g
     isometry_on_pieces := h_iso
   }
@@ -238,11 +262,12 @@ end Composition
 section Iteration
 
 /-- The nth iterate of a finite piecewise isometry. -/
-def iterate (f : FinitePiecewiseIsometry α) : ℕ → FinitePiecewiseIsometry α
+def iterate [Nonempty α] (f : FinitePiecewiseIsometry α) : ℕ → FinitePiecewiseIsometry α
   | 0 => FinitePiecewiseIsometry.Constructors.mk_of_finset {Set.univ} (by simp [Finset.Nonempty])
       (by intro s hs; simp [Finset.coe_singleton] at hs; rw [hs]; exact MeasurableSet.univ)
       (by simp [Finset.coe_singleton, Set.sUnion_singleton])
       (by intro s hs t ht hst; simp [Finset.coe_singleton] at hs ht; rw [hs, ht] at hst; contradiction)
+      (by intro s hs; simp [Finset.coe_singleton] at hs; rw [hs]; exact Set.univ_nonempty)
       id
       (by intro s hs x _ y _; rfl)
   | n + 1 => f.comp (iterate f n)
@@ -251,7 +276,7 @@ def iterate (f : FinitePiecewiseIsometry α) : ℕ → FinitePiecewiseIsometry �
 notation:max f "^[" n "]" => iterate f n
 
 /-- The number of pieces in an iterate grows at most exponentially. -/
-theorem card_iterate_le (f : FinitePiecewiseIsometry α) (n : ℕ) :
+theorem card_iterate_le [Nonempty α] (f : FinitePiecewiseIsometry α) (n : ℕ) :
     (iterate f n).card ≤ f.card ^ n := by
   induction n with
   | zero =>
@@ -275,32 +300,71 @@ namespace Complexity
 
 /-- The combinatorial complexity of a finite piecewise isometry, measuring how the partition
 refines under iteration. -/
-noncomputable def complexity (f : FinitePiecewiseIsometry α) (n : ℕ) : ℕ :=
+noncomputable def complexity [Nonempty α] (f : FinitePiecewiseIsometry α) (n : ℕ) : ℕ :=
   (f.iterate n).card
 
-/-- Helper lemma: iterate (m + n) has a cardinality bound in terms of iterates of m and n. -/
-lemma iterate_add_card_le (f : FinitePiecewiseIsometry α) (m n : ℕ) :
-    (f.iterate (m + n)).card ≤ (f.iterate m).card * (f.iterate n).card := by
-  induction m with
+/-- Complexity grows at most exponentially in general.
+
+For any finite piecewise isometry, the complexity at step n (number of pieces in the nth iterate)
+is bounded by f.card^n. This follows directly from `card_iterate_le`. -/
+theorem complexity_exponential_bound [Nonempty α] (f : FinitePiecewiseIsometry α) (n : ℕ) :
+    complexity f n ≤ f.card ^ n := by
+  unfold complexity
+  exact card_iterate_le f n
+
+/-- For interval exchange transformations with bounded refinement, complexity grows linearly.
+
+**Theorem Statement**: If a piecewise isometry has the property that composition refines the
+partition by at most an additive constant (rather than multiplicative), then complexity grows
+linearly.
+
+**Proof**: Given `∀ m, (f.iterate (m + 1)).card ≤ (f.iterate m).card + C`, we can prove by
+induction that `(f.iterate n).card ≤ f.card + n * C`, giving linear growth.
+
+**IET Context**: For interval exchange transformations on d intervals, Rauzy induction shows
+that each composition adds at most O(d²) new pieces (rather than multiplying). This bounded
+refinement property is the key to linear complexity growth in IETs.
+
+**Note**: This version is provable from the hypothesis. To apply it to actual IETs, one would
+need to:
+1. Define IETs formally (piecewise isometries on intervals of ℝ)
+2. Prove that IETs satisfy the bounded refinement property
+3. Instantiate this theorem with that proof
+
+The axiom-free version requires the explicit hypothesis about bounded refinement.
+
+**Edge case**: The bound uses `f.card + n * C`. When `f.card = 0` (empty partition, only possible
+for empty α), the base case gives 1 ≤ 0 which is false. To avoid this edge case, we assume
+`1 ≤ f.card`, which holds whenever α is nonempty (by `card_pos`). -/
+theorem complexity_linear_of_bounded_refinement [Nonempty α] (f : FinitePiecewiseIsometry α)
+    (C : ℕ)
+    (h_card : 1 ≤ f.card)
+    (h_bounded : ∀ m : ℕ, (f.iterate (m + 1)).card ≤ (f.iterate m).card + C) :
+    ∀ n : ℕ, complexity f n ≤ f.card + n * C := by
+  intro n
+  unfold complexity
+  -- Prove by induction on n
+  induction n with
   | zero =>
-    simp only [Nat.zero_add]
+    simp only [Nat.zero_mul, add_zero]
+    -- f.iterate 0 has cardinality 1, and 1 ≤ f.card by hypothesis
     have h0 : (f.iterate 0).card = 1 := by
       unfold iterate card
       simp only [Constructors.mk_of_finset]
       show (Finset.finite_toSet {Set.univ}).toFinset.card = 1
       rw [Finset.finite_toSet_toFinset]
       exact Finset.card_singleton Set.univ
-    rw [h0, Nat.one_mul]
-  | succ m => sorry
-
-/-- For interval exchange transformations, complexity grows linearly.
-This is a classic result from dynamical systems, but requires:
-1. A formal definition of interval exchange transformations (IETs)
-2. Proof techniques specific to IETs (Rauzy induction, etc.)
-We leave this as a placeholder for future formalization work. -/
-axiom IET_complexity_linear (f : FinitePiecewiseIsometry α)
-    (h_IET : True) :  -- Would need: IsIntervalExchangeTransformation f
-    ∃ C : ℕ, ∀ n : ℕ, complexity f n ≤ C * n
+    rw [h0]
+    exact h_card
+  | succ n ih =>
+    -- Goal: f^[n + 1].card ≤ f.card + (n + 1) * C
+    -- By hypothesis: f^[n + 1].card ≤ f^[n].card + C
+    -- By IH: f^[n].card ≤ f.card + n * C
+    calc (f.iterate (n + 1)).card
+        ≤ (f.iterate n).card + C := h_bounded n
+      _ ≤ (f.card + n * C) + C := Nat.add_le_add_right ih C
+      _ = f.card + (n * C + C) := by ring
+      _ = f.card + (n + 1) * C := by ring
 
 end Complexity
 

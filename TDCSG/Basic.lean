@@ -38,6 +38,8 @@ structure PiecewiseIsometry (α : Type u) [MetricSpace α] [MeasurableSpace α] 
   partition_cover : ⋃₀ partition = Set.univ
   /-- The partition pieces are pairwise disjoint -/
   partition_disjoint : partition.PairwiseDisjoint id
+  /-- Each partition piece is nonempty -/
+  partition_nonempty : ∀ s ∈ partition, s.Nonempty
   /-- The underlying function -/
   toFun : α → α
   /-- The function is isometric when restricted to each piece -/
@@ -136,14 +138,29 @@ theorem to_piecewise_isometry {α : Type u} [MetricSpace α] [MeasurableSpace α
     {f : α → α} (hf : IsPiecewiseIsometry f) :
     ∃ (pi : PiecewiseIsometry α), pi.toFun = f := by
   obtain ⟨partition, h_meas, h_countable, h_cover, h_disj, h_iso⟩ := hf
+  -- Remove empty sets from the partition
+  let partition' := partition \ {∅}
   use {
-    partition := partition
-    partition_measurable := h_meas
-    partition_countable := h_countable
-    partition_cover := h_cover
-    partition_disjoint := h_disj
+    partition := partition'
+    partition_measurable := by
+      intro s hs
+      exact h_meas s hs.1
+    partition_countable := h_countable.mono Set.diff_subset
+    partition_cover := by
+      rw [Set.sUnion_diff_singleton_empty]
+      exact h_cover
+    partition_disjoint := by
+      intro s hs t ht hst
+      exact h_disj hs.1 ht.1 hst
+    partition_nonempty := by
+      intro s hs
+      -- s ∈ partition' means s ∈ partition and s ≠ ∅
+      rw [Set.mem_diff, Set.mem_singleton_iff] at hs
+      exact Set.nonempty_iff_ne_empty.mpr hs.2
     toFun := f
-    isometry_on_pieces := h_iso
+    isometry_on_pieces := by
+      intro s hs x hxs y hys
+      exact h_iso s hs.1 x hxs y hys
   }
 
 end IsPiecewiseIsometry

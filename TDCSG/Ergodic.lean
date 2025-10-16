@@ -129,7 +129,64 @@ theorem ergodic_of_mixing (f : MeasurePreservingPiecewiseIsometry α μ)
       Filter.Tendsto (fun n => μ (f.toFun^[n] ⁻¹' s ∩ t)) Filter.atTop
         (nhds (μ s * μ t))) :
     Ergodic f.toFun μ := by
-  sorry
+  -- Construct ergodic from measure-preserving + preergodic
+  constructor
+  · -- Measure-preserving
+    exact f.measure_preserving
+  · -- PreErgodic: for any invariant set, it's eventually constant a.e.
+    constructor
+    intro s hs hinv
+    rw [Filter.eventuallyConst_pred]
+    -- For an invariant set s, we have f^n ⁻¹' s = s for all n
+    -- So the mixing condition gives: μ(s ∩ t) → μ(s) * μ(t) as n → ∞
+    -- But since f^n ⁻¹' s = s, we have μ(s ∩ t) = μ(s) * μ(t) for all t
+    -- This forces μ(s) ∈ {0, 1}
+    by_cases h : μ s = 0
+    · -- If μ(s) = 0, then ∀ᵐ x, x ∉ s
+      right
+      exact MeasureTheory.measure_eq_zero_iff_ae_notMem.mp h
+    · -- If μ(s) ≠ 0, we'll show μ(s) = 1
+      left
+      -- Use the mixing property with t = sᶜ
+      have h_mix := h_mixing s sᶜ hs hs.compl
+      -- Since s is invariant: f^n ⁻¹' s = s for all n
+      have hinv_n : ∀ n, f.toFun^[n] ⁻¹' s = s := by
+        intro n
+        induction n with
+        | zero => rfl
+        | succ n ih =>
+          show (f.toFun^[n + 1]) ⁻¹' s = s
+          rw [Function.iterate_succ]
+          rw [Set.preimage_comp, ih, hinv]
+      -- Therefore μ(s ∩ sᶜ) = μ(s) * μ(sᶜ)
+      -- The mixing property says μ(f^n⁻¹(s) ∩ sᶜ) → μ(s) * μ(sᶜ)
+      -- But f^n⁻¹(s) = s, so μ(s ∩ sᶜ) = μ(s) * μ(sᶜ)
+      have h_eq : μ (s ∩ sᶜ) = μ s * μ sᶜ := by
+        have : ∀ n, f.toFun^[n] ⁻¹' s ∩ sᶜ = s ∩ sᶜ := fun n => by rw [hinv_n]
+        -- The sequence is constant, so its limit equals the constant value
+        -- h_mix : μ(f^n⁻¹(s) ∩ sᶜ) → μ(s) * μ(sᶜ)
+        -- The constant sequence s ∩ sᶜ also converges to s ∩ sᶜ
+        have h_const : Filter.Tendsto (fun n : ℕ => μ (s ∩ sᶜ)) Filter.atTop (nhds (μ (s ∩ sᶜ))) :=
+          tendsto_const_nhds
+        -- Since f^n⁻¹(s) ∩ sᶜ = s ∩ sᶜ for all n, the two sequences are equal
+        have h_eq : (fun n => μ (f.toFun^[n] ⁻¹' s ∩ sᶜ)) = fun n => μ (s ∩ sᶜ) := by
+          funext n; rw [this]
+        rw [h_eq] at h_mix
+        -- Both sequences have the same limit, so μ(s ∩ sᶜ) = μ(s) * μ(sᶜ)
+        -- Use uniqueness of limits in Hausdorff spaces
+        exact tendsto_nhds_unique h_const h_mix
+      -- But s ∩ sᶜ = ∅, so μ(s ∩ sᶜ) = 0
+      have h_empty : μ (s ∩ sᶜ) = 0 := by simp
+      -- Therefore μ(s) * μ(sᶜ) = 0
+      rw [h_empty] at h_eq
+      -- Since μ(s) ≠ 0, we must have μ(sᶜ) = 0
+      have h_prod_zero : μ s * μ sᶜ = 0 := h_eq.symm
+      have : μ sᶜ = 0 := (mul_eq_zero.mp h_prod_zero).resolve_left h
+      -- Therefore ∀ᵐ x, x ∉ sᶜ, which means ∀ᵐ x, x ∈ s
+      have : ∀ᵐ x ∂μ, x ∉ sᶜ := MeasureTheory.measure_eq_zero_iff_ae_notMem.mp this
+      filter_upwards [this] with x hx
+      simp only [Set.mem_compl_iff, not_not] at hx
+      exact hx
 
 /-- Ergodicity can be characterized by irreducibility of the partition dynamics. -/
 theorem ergodic_iff_irreducible (f : MeasurePreservingPiecewiseIsometry α μ)
@@ -154,18 +211,28 @@ def IsUniquelyErgodic (f : PiecewiseIsometry α) (μ : MeasureTheory.Measure α)
 
 /-- For interval exchange transformations (finite partition), unique ergodicity is generic.
 
-The irrationality condition h_irrat is intentionally left as True for now, as the proper
-formalization would require:
-1. A type for IET parameter spaces (length vectors and permutations)
-2. A measure on this parameter space
-3. Formalization of "generic" (full measure set) in this space
-4. The specific Diophantine conditions (Keane's condition or Rauzy class irreducibility)
+MASUR-VEECH THEOREM: This theorem states that for a generic set of IET parameters
+(in the sense of Lebesgue measure on the parameter space), the system is uniquely ergodic.
 
-This is marked as an axiom to document the theorem statement without the full machinery. -/
-axiom uniquely_ergodic_of_irrational_data (f : PiecewiseIsometry α)
+We state this as a theorem with explicit hypotheses about the "generic" property.
+The hypothesis h_generic represents the condition that the IET parameters satisfy
+appropriate Diophantine/irrationality conditions (e.g., Keane's condition or
+irreducibility of the Rauzy class).
+
+A full proof would require:
+1. Formalizing the IET parameter space (length vectors and permutations)
+2. Defining Lebesgue measure on this space
+3. Formalizing Rauzy-Veech induction
+4. Developing the Kontsevich-Zorich cocycle theory
+5. Applying ergodic theory of the Teichmüller flow
+
+For now, we provide this as a theorem with an explicit "generic" hypothesis. -/
+theorem uniquely_ergodic_of_irrational_data (f : PiecewiseIsometry α)
     (h_finite : f.partition.Finite)
-    (h_irrat : True) :
-    ∃ μ : MeasureTheory.Measure α, IsUniquelyErgodic f μ
+    (h_generic : True)  -- Represents "generic" IET parameters with appropriate irrationality conditions
+    :
+    ∃ μ : MeasureTheory.Measure α, IsUniquelyErgodic f μ := by
+  sorry -- DEEP: Requires Teichmüller theory, Rauzy-Veech induction, etc.
 /-
 MASUR-VEECH THEOREM - One of the deepest results in the theory of IETs
 
@@ -229,36 +296,51 @@ structure MinimalPiecewiseIsometry (α : Type u)
 
 KEANE'S THEOREM: A minimal interval exchange transformation is uniquely ergodic.
 
-This is marked as an axiom as the proof requires substantial development including:
-- Birkhoff ergodic theorem
-- Ergodic decomposition theory
-- Weak-* topology on probability measures
-- Krylov-Bogolyubov theorem
+This theorem can be proved using:
+1. Birkhoff ergodic theorem (available in Mathlib)
+2. Ergodic decomposition theory
+3. Weak-* compactness of probability measures
+4. The fact that minimality gives uniqueness of ergodic decomposition
 
-See references:
+The key ingredients needed from Mathlib:
+- Birkhoff ergodic theorem: `MeasureTheory.ergodic_birkhoff_sum`
+- Ergodic decomposition (not yet in Mathlib as of 2025)
+- Krylov-Bogolyubov theorem (existence of invariant measures)
+
+References:
 - Keane, "Interval Exchange Transformations", 1975
 - Katok & Hasselblatt, "Introduction to the Modern Theory of Dynamical Systems", §4.5 -/
-axiom minimal_implies_uniquely_ergodic (f : MinimalPiecewiseIsometry α μ)
+theorem minimal_implies_uniquely_ergodic (f : MinimalPiecewiseIsometry α μ)
     [MeasureTheory.IsProbabilityMeasure μ]
     (h_finite : f.toPiecewiseIsometry.partition.Finite) :
-    IsUniquelyErgodic f.toPiecewiseIsometry μ
+    IsUniquelyErgodic f.toPiecewiseIsometry μ := by
+  sorry -- Requires Birkhoff ergodic theorem + ergodic decomposition (not yet in Mathlib)
 
 /-- A minimal system is ergodic with respect to any invariant measure.
 
 This is a fundamental theorem connecting topological dynamics (minimality = all orbits dense)
 with ergodic theory (invariant sets have measure 0 or 1).
 
-The proof requires connecting measure-theoretic properties with topological density,
-which needs substantial development of the interaction between Baire category, Borel sets,
-and invariant measure theory.
+PROOF STRATEGY:
+1. Take an invariant measurable set s with μ(s) > 0
+2. Use minimality: for any x ∈ s, the orbit {f^n(x) : n ∈ ℕ} is dense
+3. By regularity of the measure and Baire category theorem, s must have interior
+4. Since orbits are dense, they must intersect both s and sᶜ frequently
+5. Using measure preservation and invariance, this forces μ(s) = 1
+
+The proof requires:
+- Interaction between Baire category and measure (Borel spaces, regularity)
+- Poincaré recurrence theorem (available in Mathlib)
+- Properties of dense orbits in metric spaces
 
 References:
 - Walters, "An Introduction to Ergodic Theory", Theorem 6.11
 - Furstenberg, "Recurrence in Ergodic Theory and Combinatorial Number Theory"
 - Katok & Hasselblatt, "Introduction to Modern Dynamical Systems", Prop 4.1.18 -/
-axiom ergodic_of_minimal (f : MinimalPiecewiseIsometry α μ)
+theorem ergodic_of_minimal (f : MinimalPiecewiseIsometry α μ)
     [MeasureTheory.IsProbabilityMeasure μ] :
-    Ergodic f.toFun μ
+    Ergodic f.toFun μ := by
+  sorry -- Requires connecting topological density with measure theory via Baire category
 
 end Minimality
 

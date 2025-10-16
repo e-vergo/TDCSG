@@ -162,6 +162,7 @@ def mk_of_set {partition : Set (Set α)}
     (h_countable : partition.Countable)
     (h_cover : ⋃₀ partition = Set.univ)
     (h_disj : partition.PairwiseDisjoint id)
+    (h_nonempty : ∀ s ∈ partition, s.Nonempty)
     (f : α → α)
     (h_iso : ∀ s ∈ partition, ∀ x ∈ s, ∀ y ∈ s, dist (f x) (f y) = dist x y) :
     PiecewiseIsometry α where
@@ -170,12 +171,14 @@ def mk_of_set {partition : Set (Set α)}
   partition_countable := h_countable
   partition_cover := h_cover
   partition_disjoint := h_disj
+  partition_nonempty := h_nonempty
   toFun := f
   isometry_on_pieces := h_iso
 
 /-- Constructor for piecewise isometries from two pieces. -/
 def mk_two_pieces (s t : Set α)
     (hs_meas : MeasurableSet s) (ht_meas : MeasurableSet t)
+    (hs_nonempty : s.Nonempty) (ht_nonempty : t.Nonempty)
     (h_disj : Disjoint s t)
     (h_cover : s ∪ t = Set.univ)
     (f : α → α)
@@ -193,6 +196,12 @@ def mk_two_pieces (s t : Set α)
   partition_cover := by
     simp only [Set.sUnion_insert, Set.sUnion_singleton]
     exact h_cover
+  partition_nonempty := by
+    intro u hu
+    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hu
+    cases hu with
+    | inl h => rw [h]; exact hs_nonempty
+    | inr h => rw [h]; exact ht_nonempty
   partition_disjoint := by
     intro u hu v hv huv
     simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hu hv
@@ -230,7 +239,7 @@ theorem isometry_of_trivial_partition (f : PiecewiseIsometry α)
   exact ENNReal.ofReal_eq_ofReal_iff dist_nonneg dist_nonneg |>.mpr this
 
 /-- An isometry can be viewed as a piecewise isometry with trivial partition. -/
-def of_isometry (f : α → α) (hf : Isometry f) : PiecewiseIsometry α where
+def of_isometry (f : α → α) [Nonempty α] (hf : Isometry f) : PiecewiseIsometry α where
   partition := {Set.univ}
   partition_measurable := by
     intro s hs
@@ -239,6 +248,11 @@ def of_isometry (f : α → α) (hf : Isometry f) : PiecewiseIsometry α where
     exact MeasurableSet.univ
   partition_countable := Set.countable_singleton Set.univ
   partition_cover := by simp only [Set.sUnion_singleton]
+  partition_nonempty := by
+    intro s hs
+    simp only [Set.mem_singleton_iff] at hs
+    rw [hs]
+    exact Set.univ_nonempty
   partition_disjoint := by
     intro s hs t ht hst
     simp only [Set.mem_singleton_iff] at hs ht
@@ -251,7 +265,7 @@ def of_isometry (f : α → α) (hf : Isometry f) : PiecewiseIsometry α where
     exact hf.dist_eq x y
 
 /-- The identity map as a piecewise isometry. -/
-def id : PiecewiseIsometry α :=
+def id [Nonempty α] : PiecewiseIsometry α :=
   { partition := {Set.univ}
     partition_measurable := by
       intro s hs
@@ -265,6 +279,11 @@ def id : PiecewiseIsometry α :=
       simp only [Set.mem_singleton_iff] at hs ht
       rw [hs, ht] at hst
       exact absurd rfl hst
+    partition_nonempty := by
+      intro s hs
+      simp only [Set.mem_singleton_iff] at hs
+      rw [hs]
+      exact Set.univ_nonempty
     toFun := _root_.id
     isometry_on_pieces := by
       intro s hs x _ y _
