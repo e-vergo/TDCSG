@@ -366,7 +366,10 @@ noncomputable def half_plane_reflection : PiecewiseIsometry (ℝ × ℝ) where
       have hx_if : (if x.1 < 0 then (-x.1, x.2) else x) = (-x.1, x.2) := by simp [hx]
       have hy_if : (if y.1 < 0 then (-y.1, y.2) else y) = (-y.1, y.2) := by simp [hy]
       rw [hx_if, hy_if]
-      sorry
+      -- Reflection across y-axis: (x, y) ↦ (-x, y) preserves distances
+      -- Need: dist (-x.1, x.2) (-y.1, y.2) = dist x y
+      -- Both sides use the max metric on ℝ × ℝ
+      simp only [Prod.dist_eq, Real.dist_eq, neg_sub_neg, abs_sub_comm]
     · -- Piece: {p | p.1 ≥ 0}, map: p ↦ p (identity)
       simp only [Set.mem_setOf_eq] at hx hy
       have hx_if : (if x.1 < 0 then (-x.1, x.2) else x) = x := by simp [show ¬x.1 < 0 from not_lt.mpr hx]
@@ -395,7 +398,12 @@ noncomputable def square_billiard_simple : PiecewiseIsometry (ℝ × ℝ) where
     rw [hs]
     -- {p | 0 < p.1 ∧ p.1 < 1 ∧ 0 < p.2 ∧ p.2 < 1} is the open square (0,1)×(0,1)
     show MeasurableSet {p : ℝ × ℝ | 0 < p.1 ∧ p.1 < 1 ∧ 0 < p.2 ∧ p.2 < 1}
-    sorry
+    -- This is the product of two open intervals, hence measurable
+    have : {p : ℝ × ℝ | 0 < p.1 ∧ p.1 < 1 ∧ 0 < p.2 ∧ p.2 < 1} =
+           Set.Ioo 0 1 ×ˢ Set.Ioo 0 1 := by
+      ext p; simp [Set.Ioo, Set.prod]; tauto
+    rw [this]
+    exact isOpen_Ioo.prod isOpen_Ioo |>.measurableSet
   partition_cover := by
     -- Just one piece covering the interior of the square
     simp only [Set.sUnion_singleton]
@@ -443,7 +451,59 @@ noncomputable def doubling_map_NON_ISOMETRY : ℝ → ℝ := fun x =>
 
 /-- The doubling map is NOT a piecewise isometry (fails distance preservation). -/
 example : ¬∃ (pi : PiecewiseIsometry ℝ), ∀ x ∈ Ico (0 : ℝ) 1, pi x = doubling_map_NON_ISOMETRY x := by
-  sorry
+  /- PROOF STRATEGY:
+     The doubling map x ↦ 2x mod 1 stretches distances by factor 2 on [0, 1/2).
+     The interval [0.1, 0.2] is uncountable but the partition is countable.
+     By pigeonhole, some partition piece contains two distinct points from [0.1, 0.2].
+     For those points, the doubling map multiplies distance by 2, contradicting isometry.
+  -/
+  intro ⟨pi, h⟩
+  -- Consider the interval [0.1, 0.2]. This contains uncountably many points.
+  -- Since pi.partition is countable, some piece must contain ≥2 points from this interval.
+  have : ∃ u ∈ pi.partition, ∃ a b, a ≠ b ∧ a ∈ Icc 0.1 0.2 ∧ b ∈ Icc 0.1 0.2 ∧ a ∈ u ∧ b ∈ u := by
+    by_contra h_contra
+    push_neg at h_contra
+    -- h_contra: every partition piece contains at most one point from [0.1, 0.2]
+    -- This implies [0.1, 0.2] is at most countable, contradiction
+    have : Set.Countable (Icc (0.1 : ℝ) 0.2) := by
+      have cover : Icc (0.1 : ℝ) 0.2 ⊆ ⋃₀ pi.partition := by
+        rw [pi.partition_cover]; exact subset_univ _
+      have each_sub : ∀ s ∈ pi.partition, Set.Subsingleton (s ∩ Icc (0.1 : ℝ) 0.2) := by
+        intro s hs a ⟨has, ha⟩ b ⟨hbs, hb⟩
+        by_contra hab
+        exact h_contra s hs a b hab ha hb has hbs
+      rw [← Set.sUnion_inter_eq_of_subset _ cover]
+      exact Set.Countable.sUnion pi.partition_countable (fun s hs => Set.Subsingleton.countable (each_sub s hs))
+    exact Set.not_countable_Icc (by norm_num : (0.1 : ℝ) < 0.2) this
+  obtain ⟨u, hu, a, b, hab, ha, hb, hau, hbu⟩ := this
+  -- Both a, b ∈ [0.1, 0.2] ⊆ [0, 1)
+  have ha_ico : a ∈ Ico (0 : ℝ) 1 := ⟨by linarith [ha.1], by linarith [ha.2]⟩
+  have hb_ico : b ∈ Ico (0 : ℝ) 1 := ⟨by linarith [hb.1], by linarith [hb.2]⟩
+  -- Compute doubling_map values: for x ∈ [0.1, 0.2], we have 2x ∈ [0.2, 0.4] ⊆ [0, 1)
+  -- So (2x) % 1 = 2x
+  have ha_double : doubling_map_NON_ISOMETRY a = 2 * a := by
+    unfold doubling_map_NON_ISOMETRY
+    rw [if_pos ha_ico]
+    have h1 : 2 * a < 1 := by linarith [ha.2]
+    have h2 : 0 ≤ 2 * a := by linarith [ha.1]
+    simp [Real.instModReal, Int.fmod, Int.floor_eq_zero_iff]
+    constructor <;> linarith
+  have hb_double : doubling_map_NON_ISOMETRY b = 2 * b := by
+    unfold doubling_map_NON_ISOMETRY
+    rw [if_pos hb_ico]
+    have h1 : 2 * b < 1 := by linarith [hb.2]
+    have h2 : 0 ≤ 2 * b := by linarith [hb.1]
+    simp [Real.instModReal, Int.fmod, Int.floor_eq_zero_iff]
+    constructor <;> linarith
+  -- Apply isometry property on piece u
+  have iso : dist (pi a) (pi b) = dist a b := pi.isometry_on_pieces u hu a hau b hbu
+  rw [h a ha_ico, h b hb_ico, ha_double, hb_double] at iso
+  -- But dist (2a) (2b) = 2 * dist a b
+  have : dist (2 * a) (2 * b) = 2 * dist a b := by
+    simp only [Real.dist_eq]; ring_nf; rw [abs_mul, abs_two]; ring
+  rw [this] at iso
+  -- So 2 * dist a b = dist a b, implying dist a b = 0, contradicting a ≠ b
+  exact hab (dist_eq_zero.mp (by linarith : dist a b = 0))
 
 /-- The baker's map: another non-isometry example (area-preserving but not isometric). -/
 noncomputable def baker_map_NON_ISOMETRY : ℝ × ℝ → ℝ × ℝ := fun p =>

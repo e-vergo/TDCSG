@@ -273,6 +273,31 @@ REQUIRED MATHLIB ADDITIONS:
     This direction genuinely requires formalization not yet in Mathlib:
       - Conservative.ae_mem_imp_frequently_image_mem is close but works a.e., not for sets
       - Need measure-theoretic version of "visiting infinitely often" as invariant set
+
+    Attempt 3 [2025-10-16]: Direct approach using Conservative
+    Strategy: Contrapositive - assume ∀n, μ(f^n⁻¹(s) ∩ t) = 0 and derive contradiction
+    Approach:
+      1. Since μ(f^n⁻¹(s) ∩ t) = 0 for all n, we have μ((⋃n f^n⁻¹(s)) ∩ t) = 0
+      2. Therefore μ(t \ (⋃n f^n⁻¹(s))) = μ(t) > 0
+      3. This set B = {x ∈ t : ∀n, f^n(x) ∉ s} has positive measure
+      4. But f is conservative (measure-preserving on probability space)
+      5. Should be able to show this contradicts ergodicity + μ(s) > 0
+
+    Gap: Need to connect "B has positive measure and orbits avoid s" with ergodicity
+      - Intuitively: if μ(B) > 0 and μ(s) > 0, ergodicity should force intersection
+      - But ergodicity only applies to INVARIANT sets
+      - B is not obviously invariant (f(B) need not be subset of B)
+      - Would need: "if B avoids all forward iterates of s, then B^c contains invariant set"
+      - This is essentially the same Poincaré recurrence issue as Attempts 1-2
+
+    MATHLIB INFRASTRUCTURE NEEDED:
+      1. Theorem: For ergodic measure-preserving f and sets s,t with μ(s),μ(t) > 0,
+         the set {x ∈ t : ∃n, f^n(x) ∈ s} has positive measure
+      2. This would follow from connecting:
+         - Ergodicity (invariant sets are trivial)
+         - Conservative property (points return to neighborhoods)
+         - Measure-theoretic recurrence (visiting sets infinitely often)
+      3. Current Mathlib has pieces but not the full connection
     -/
     sorry
   · -- Backward: Irreducible → Ergodic

@@ -155,18 +155,27 @@ section Measurability
 
 MATHEMATICAL JUSTIFICATION:
 - f is an isometry (hence continuous) when restricted to each piece s ∈ partition
-- For any open set U, we have f⁻¹(U) = ⋃_{s ∈ partition} (f⁻¹(U) ∩ s)
-- Each f⁻¹(U) ∩ s is measurable because:
-  * s is measurable (by partition_measurable)
-  * f is continuous on s (by isometry_on_pieces)
-  * U is open (by assumption)
-  * Under OpensMeasurableSpace, continuous functions on measurable sets have measurable preimages
+- For any measurable set U, we have f⁻¹(U) = ⋃_{s ∈ partition} (f⁻¹(U) ∩ s)
+- Each s is measurable by partition_measurable
+- Challenge: showing f⁻¹(U) ∩ s is measurable for each s
 
 BLOCKING ISSUE: Requires a Mathlib lemma of the form:
-  "If f : α → β is continuous on a measurable set s, and U is open, then f⁻¹(U) ∩ s is measurable"
-This is a standard result in measure theory but may need to be added to Mathlib. -/
+  "If f : α → β is continuous on a measurable set s, and U is measurable, then f⁻¹(U) ∩ s is measurable"
+This is a standard result in measure theory but may need to be added to Mathlib.
+
+Alternatively, may require BorelSpace α instead of just OpensMeasurableSpace α. -/
 theorem piecewiseIsometry_measurable [OpensMeasurableSpace α] (f : PiecewiseIsometry α) :
     Measurable f.toFun := by
+  /- PROOF ATTEMPT HISTORY
+
+  Attempt 1 [2025-10-16]:
+  Strategy: Decompose f⁻¹(U) = ⋃_{s ∈ partition} (f⁻¹(U) ∩ s), apply MeasurableSet.biUnion
+  Failure: Cannot show f⁻¹(U) ∩ s is measurable without stronger lemmas
+  Lesson: Need Mathlib support for measurability of restrictions or stronger type class
+
+  CURRENT STATUS: Blocked on Mathlib infrastructure.
+  This theorem is essential for composition to be well-defined.
+  -/
   sorry
 
 end Measurability
@@ -217,22 +226,22 @@ def comp [OpensMeasurableSpace α] (f g : PiecewiseIsometry α) : PiecewiseIsome
 theorem comp_apply [OpensMeasurableSpace α] (f g : PiecewiseIsometry α) (x : α) :
     (f.comp g) x = f (g x) := rfl
 
-/-- Extensionality lemma for PiecewiseIsometry equality.
+/-! ### Note on Extensionality
 
-ARCHITECTURAL ISSUE: This theorem statement is INCORRECT as formulated.
-Two PiecewiseIsometry values are equal iff ALL fields match, including partition.
-Having the same underlying function is NOT sufficient for equality of structures.
+This structure does NOT have function extensionality in the usual sense.
+Two PiecewiseIsometry values are equal iff ALL fields match, including the partition.
+Having the same underlying function is NOT sufficient for structural equality.
 
-RESOLUTION OPTIONS:
-1. Remove this theorem entirely (structures have built-in equality)
-2. Reformulate as a setoid/equivalence relation on PiecewiseIsometry
-3. Prove a weaker "function agreement" lemma without claiming structural equality
+Example: The identity function can be represented with partition {univ} or with
+any other partition where it's isometric on each piece.
 
-For now, this is marked sorry to indicate it cannot be proven as stated. -/
-@[ext]
-theorem ext {f g : PiecewiseIsometry α}
-    (h_fun : ∀ x, f x = g x) : f = g := by
-  sorry  -- CANNOT BE PROVEN: Requires partition equality, not just function equality
+For reasoning about functional equality without structural equality, use:
+- Function.funext_iff for the underlying functions
+- Or define a separate equivalence relation / setoid
+
+The @[ext] attribute is deliberately NOT used here because it would claim an
+unprovable theorem. Lean's default structural equality is the correct notion.
+-/
 
 /-- Composition is associative. -/
 theorem comp_assoc [OpensMeasurableSpace α] (f g h : PiecewiseIsometry α) :
@@ -331,7 +340,139 @@ theorem comp_dist_eq [OpensMeasurableSpace α] (f g : PiecewiseIsometry α) (x y
 theorem discontinuitySet_comp_subset [OpensMeasurableSpace α] (f g : PiecewiseIsometry α) :
     (f.comp g).discontinuitySet ⊆
       f.discontinuitySet ∪ (g.toFun ⁻¹' f.discontinuitySet) ∪ g.discontinuitySet := by
-  sorry
+  -- discontinuitySet = union of frontiers of partition pieces
+  -- Goal: show frontier of any piece of (f.comp g).partition is in the RHS
+  intro x hx
+  unfold discontinuitySet at hx ⊢
+  simp only [Set.mem_iUnion, Set.mem_union] at hx ⊢
+  -- hx: x is in frontier of some piece of (f.comp g).partition
+  obtain ⟨u, hu_partition, hx_frontier⟩ := hx
+
+  -- The composition partition is refined: u = s ∩ (g⁻¹' t) for some s ∈ g.partition, t ∈ f.partition
+  unfold comp refinedPartitionPreimage at hu_partition
+  simp only [Set.mem_setOf_eq] at hu_partition
+  obtain ⟨s, hs_g, t, ht_f, hu_eq, _⟩ := hu_partition
+  rw [hu_eq] at hx_frontier
+
+  -- Key: frontier(s ∩ g⁻¹' t) ⊆ (frontier s ∩ closure(g⁻¹' t)) ∪ (closure s ∩ frontier(g⁻¹' t))
+  have key := frontier_inter_subset s (g.toFun ⁻¹' t)
+  have hx_key : x ∈ frontier s ∩ closure (g.toFun ⁻¹' t) ∪ closure s ∩ frontier (g.toFun ⁻¹' t) :=
+    key hx_frontier
+
+  cases hx_key with
+  | inl hx_left =>
+    -- x ∈ frontier s ∩ closure (g⁻¹' t)
+    -- Then x ∈ frontier s, so x ∈ g.discontinuitySet
+    right
+    exact ⟨s, hs_g, hx_left.1⟩
+  | inr hx_right =>
+    -- x ∈ closure s ∩ frontier (g⁻¹' t)
+    -- Then x ∈ frontier (g⁻¹' t)
+    -- Case analysis: is x in interior of s, or on frontier of s?
+    by_cases hx_interior : x ∈ interior s
+    · -- x is in interior of s, where g is continuous
+      -- Use: frontier (g⁻¹' t) ⊆ g⁻¹' (frontier t) on interior of s
+      -- Since g is continuous on interior s and x ∈ interior s ∩ frontier (g⁻¹' t),
+      -- we have g(x) ∈ frontier t
+      have hgx_frontier : g.toFun x ∈ frontier t := by
+        -- Strategy: Show g(x) ∈ closure t and g(x) ∉ interior t
+        rw [frontier, Set.mem_diff]
+        constructor
+        · -- g(x) ∈ closure t
+          -- x ∈ frontier (g⁻¹ t) means x ∈ closure (g⁻¹ t)
+          have hx_closure : x ∈ closure (g.toFun ⁻¹' t) := hx_right.2.1
+          -- g continuous within s at x (isometry on s implies continuity)
+          have g_cont_within : ContinuousWithinAt g.toFun s x := by
+            refine Metric.continuousWithinAt_iff.mpr ?_
+            intro ε hε
+            use ε, hε
+            intro y hy_s hy_dist
+            have hx_s : x ∈ s := interior_subset hx_interior
+            calc dist (g.toFun y) (g.toFun x)
+                = dist y x := g.isometry_on_pieces s hs_g y hy_s x hx_s
+              _ < ε := hy_dist
+          -- Apply continuity: x ∈ closure (g⁻¹ t ∩ s) implies g(x) ∈ closure (g(g⁻¹ t ∩ s))
+          have hx_closure_inter : x ∈ closure (g.toFun ⁻¹' t ∩ s) := by
+            -- x ∈ closure (g⁻¹ t) and x ∈ closure s, and s is in the partition (hence closed? No, not necessarily)
+            -- Better: x ∈ interior s ⊆ s, and x ∈ closure (g⁻¹ t)
+            -- We want to show x ∈ closure (g⁻¹ t ∩ s)
+            -- Use: closure A ∩ B ⊆ closure (A ∩ B) when B is closed
+            -- But s might not be closed. Instead, use directly:
+            have hx_s : x ∈ s := interior_subset hx_interior
+            -- x ∈ s ∩ closure (g⁻¹ t) ⊆ closure (g⁻¹ t ∩ s) if s is open
+            -- Actually, x ∈ interior s means there's a neighborhood U ⊆ s with x ∈ U
+            -- and x ∈ closure (g⁻¹ t) means every neighborhood of x intersects g⁻¹ t
+            -- So U ∩ g⁻¹ t is nonempty, and U ∩ g⁻¹ t ⊆ s ∩ g⁻¹ t
+            -- Hence x ∈ closure (s ∩ g⁻¹ t) = closure (g⁻¹ t ∩ s)
+            rw [mem_closure_iff_nhds]
+            intro U hU
+            rw [mem_closure_iff_nhds] at hx_closure
+            -- Need to show U ∩ (g⁻¹ t ∩ s) is nonempty
+            -- We have x ∈ interior s, so there exists V open with x ∈ V ⊆ s
+            -- Then U ∩ V is a neighborhood of x
+            -- Since x ∈ closure (g⁻¹ t), we have (U ∩ V) ∩ g⁻¹ t nonempty
+            -- And (U ∩ V) ∩ g⁻¹ t ⊆ U ∩ (g⁻¹ t ∩ s)
+            obtain ⟨V, hV_subset, hV_open, hxV⟩ := mem_interior.mp hx_interior
+            have hUV : U ∩ V ∈ nhds x := Filter.inter_mem hU (hV_open.mem_nhds hxV)
+            have hUVt : (U ∩ V ∩ g.toFun ⁻¹' t).Nonempty :=
+              hx_closure (U ∩ V) hUV
+            -- Now show U ∩ (g⁻¹ t ∩ s) is nonempty using hUVt
+            obtain ⟨y, hy⟩ := hUVt
+            simp [Set.mem_inter_iff] at hy
+            use y
+            simp [Set.mem_inter_iff]
+            exact ⟨hy.1.1, hy.2, hV_subset hy.1.2⟩
+          -- Need g continuous within (g⁻¹ t ∩ s) at x
+          have g_cont_within_inter : ContinuousWithinAt g.toFun (g.toFun ⁻¹' t ∩ s) x := by
+            apply ContinuousWithinAt.mono g_cont_within
+            exact Set.inter_subset_right
+          have : g.toFun x ∈ closure (g.toFun '' (g.toFun ⁻¹' t ∩ s)) :=
+            ContinuousWithinAt.mem_closure_image g_cont_within_inter hx_closure_inter
+          refine closure_mono ?_ this
+          -- g '' (g⁻¹ t ∩ s) ⊆ t
+          intro y hy
+          obtain ⟨z, ⟨hz_preimage, hz_s⟩, rfl⟩ := hy
+          exact hz_preimage
+        · -- g(x) ∉ interior t
+          have hx_not_int : x ∉ interior (g.toFun ⁻¹' t) := hx_right.2.2
+          intro hgx_int
+          -- If g(x) ∈ interior t, use continuity to get x ∈ interior (g⁻¹ t)
+          have g_cont_within : ContinuousWithinAt g.toFun s x := by
+            refine Metric.continuousWithinAt_iff.mpr ?_
+            intro ε hε
+            use ε, hε
+            intro y hy_s hy_dist
+            have hx_s : x ∈ s := interior_subset hx_interior
+            calc dist (g.toFun y) (g.toFun x)
+                = dist y x := g.isometry_on_pieces s hs_g y hy_s x hx_s
+              _ < ε := hy_dist
+          -- interior t is open and contains g(x)
+          have : g.toFun ⁻¹' interior t ∈ nhdsWithin x s := by
+            apply g_cont_within
+            exact isOpen_interior.mem_nhds hgx_int
+          -- Since x ∈ interior s, nhdsWithin x s = nhds x locally
+          have hx_nhds : nhdsWithin x s = nhds x := by
+            exact nhdsWithin_eq_nhds.mpr (mem_interior_iff_mem_nhds.mp hx_interior)
+          rw [hx_nhds] at this
+          -- So g⁻¹(interior t) is a neighborhood of x
+          -- This means x ∈ interior (g⁻¹(interior t)) ⊆ interior (g⁻¹ t)
+          have : x ∈ interior (g.toFun ⁻¹' interior t) := mem_interior_iff_mem_nhds.mpr this
+          have : x ∈ interior (g.toFun ⁻¹' t) := by
+            refine interior_mono ?_ this
+            exact Set.preimage_mono interior_subset
+          exact hx_not_int this
+      left
+      right
+      rw [Set.mem_preimage, Set.mem_iUnion]
+      use t
+      rw [Set.mem_iUnion]
+      exact ⟨ht_f, hgx_frontier⟩
+    · -- x is not in interior of s, so x ∈ frontier s (since x ∈ closure s)
+      have hx_frontier_s : x ∈ frontier s := by
+        rw [frontier, Set.mem_diff]
+        exact ⟨hx_right.1, hx_interior⟩
+      right
+      exact ⟨s, hs_g, hx_frontier_s⟩
 
 end CompositionProperties
 
@@ -354,8 +495,29 @@ theorem discontinuitySet_iterate [Nonempty α] [OpensMeasurableSpace α] (f : Pi
     exact absurd hx_frontier (Set.notMem_empty x)
   | succ n ih =>
     -- iterate (n+1) = f.comp (iterate n)
-    -- This needs the discontinuitySet_comp_subset theorem to be completed
-    sorry
+    rw [iterate_succ]
+    intro x hx
+    -- Apply discontinuitySet_comp_subset
+    have h_comp := discontinuitySet_comp_subset f (iterate f n)
+    have hx_in : x ∈ f.discontinuitySet ∪ ((iterate f n).toFun ⁻¹' f.discontinuitySet) ∪
+                     (iterate f n).discontinuitySet := h_comp hx
+    simp only [Set.mem_union] at hx_in
+    simp only [Set.mem_iUnion]
+    rcases hx_in with (hx_f | hx_preimage) | hx_iterate_n
+    · -- x ∈ f.discontinuitySet = f^[0]⁻¹(f.discontinuitySet)
+      use 0, Nat.zero_lt_succ n
+      simp [Function.iterate_zero, Set.preimage_id]
+      exact hx_f
+    · -- x ∈ (iterate f n)⁻¹(f.discontinuitySet) = f^[n]⁻¹(f.discontinuitySet)
+      use n, Nat.lt_succ_self n
+      rw [iterate_toFun] at hx_preimage
+      exact hx_preimage
+    · -- x ∈ (iterate f n).discontinuitySet
+      -- By IH, x ∈ ⋃ k < n, f^[k]⁻¹(f.discontinuitySet)
+      have hx_union := ih hx_iterate_n
+      simp only [Set.mem_iUnion] at hx_union
+      obtain ⟨k, hk_lt, hx_k⟩ := hx_union
+      use k, Nat.lt_trans hk_lt (Nat.lt_succ_self n)
 
 /-- If f has finitely many discontinuities, so does each iterate (though possibly more). -/
 theorem iterate_finite_discontinuities [Nonempty α] [OpensMeasurableSpace α] (f : PiecewiseIsometry α) (n : ℕ)

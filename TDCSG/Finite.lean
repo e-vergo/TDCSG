@@ -193,7 +193,7 @@ namespace FinitePiecewiseIsometry
 section Composition
 
 /-- Composition of finite piecewise isometries has a finite partition. -/
-def comp [OpensMeasurableSpace α] (f g : FinitePiecewiseIsometry α) : FinitePiecewiseIsometry α where
+def comp [OpensMeasurableSpace α] [BorelSpace α] (f g : FinitePiecewiseIsometry α) : FinitePiecewiseIsometry α where
   toPiecewiseIsometry := PiecewiseIsometry.comp f.toPiecewiseIsometry g.toPiecewiseIsometry
   partition_finite := by
     -- The refined partition is a subset of the image of f.partition × g.partition
@@ -213,7 +213,7 @@ def comp [OpensMeasurableSpace α] (f g : FinitePiecewiseIsometry α) : FinitePi
       · simp [hu_eq]
 
 /-- The number of pieces in a composition is bounded by the product of the numbers of pieces. -/
-theorem card_comp_le [OpensMeasurableSpace α] (f g : FinitePiecewiseIsometry α) :
+theorem card_comp_le [OpensMeasurableSpace α] [BorelSpace α] (f g : FinitePiecewiseIsometry α) :
     (f.comp g).card ≤ f.card * g.card := by
   -- The refined partition has at most |f.partition| * |g.partition| pieces
   unfold card comp
@@ -263,7 +263,7 @@ end Composition
 section Iteration
 
 /-- The nth iterate of a finite piecewise isometry. -/
-def iterate [Nonempty α] [OpensMeasurableSpace α] (f : FinitePiecewiseIsometry α) : ℕ → FinitePiecewiseIsometry α
+def iterate [Nonempty α] [OpensMeasurableSpace α] [BorelSpace α] (f : FinitePiecewiseIsometry α) : ℕ → FinitePiecewiseIsometry α
   | 0 => FinitePiecewiseIsometry.Constructors.mk_of_finset {Set.univ} (by simp [Finset.Nonempty])
       (by intro s hs; simp [Finset.coe_singleton] at hs; rw [hs]; exact MeasurableSet.univ)
       (by simp [Finset.coe_singleton, Set.sUnion_singleton])
@@ -277,7 +277,7 @@ def iterate [Nonempty α] [OpensMeasurableSpace α] (f : FinitePiecewiseIsometry
 notation:max f "^[" n "]" => iterate f n
 
 /-- The number of pieces in an iterate grows at most exponentially. -/
-theorem card_iterate_le [Nonempty α] [OpensMeasurableSpace α] (f : FinitePiecewiseIsometry α) (n : ℕ) :
+theorem card_iterate_le [Nonempty α] [OpensMeasurableSpace α] [BorelSpace α] (f : FinitePiecewiseIsometry α) (n : ℕ) :
     (iterate f n).card ≤ f.card ^ n := by
   induction n with
   | zero =>
@@ -301,14 +301,14 @@ namespace Complexity
 
 /-- The combinatorial complexity of a finite piecewise isometry, measuring how the partition
 refines under iteration. -/
-noncomputable def complexity [Nonempty α] [OpensMeasurableSpace α] (f : FinitePiecewiseIsometry α) (n : ℕ) : ℕ :=
+noncomputable def complexity [Nonempty α] [OpensMeasurableSpace α] [BorelSpace α] (f : FinitePiecewiseIsometry α) (n : ℕ) : ℕ :=
   (f.iterate n).card
 
 /-- Complexity grows at most exponentially in general.
 
 For any finite piecewise isometry, the complexity at step n (number of pieces in the nth iterate)
 is bounded by f.card^n. This follows directly from `card_iterate_le`. -/
-theorem complexity_exponential_bound [Nonempty α] [OpensMeasurableSpace α] (f : FinitePiecewiseIsometry α) (n : ℕ) :
+theorem complexity_exponential_bound [Nonempty α] [OpensMeasurableSpace α] [BorelSpace α] (f : FinitePiecewiseIsometry α) (n : ℕ) :
     complexity f n ≤ f.card ^ n := by
   unfold complexity
   exact card_iterate_le f n
@@ -337,7 +337,7 @@ The axiom-free version requires the explicit hypothesis about bounded refinement
 **Edge case**: The bound uses `f.card + n * C`. When `f.card = 0` (empty partition, only possible
 for empty α), the base case gives 1 ≤ 0 which is false. To avoid this edge case, we assume
 `1 ≤ f.card`, which holds whenever α is nonempty (by `card_pos`). -/
-theorem complexity_linear_of_bounded_refinement [Nonempty α] [OpensMeasurableSpace α] (f : FinitePiecewiseIsometry α)
+theorem complexity_linear_of_bounded_refinement [Nonempty α] [OpensMeasurableSpace α] [BorelSpace α] (f : FinitePiecewiseIsometry α)
     (C : ℕ)
     (h_card : 1 ≤ f.card)
     (h_bounded : ∀ m : ℕ, (f.iterate (m + 1)).card ≤ (f.iterate m).card + C) :

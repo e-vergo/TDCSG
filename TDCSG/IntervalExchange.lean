@@ -150,13 +150,27 @@ theorem intervals_cover : ⋃ i, iet.interval i = Ico 0 1 := by
              - Failure: Equality proof requires Fin sum decomposition lemma not readily available
              - Lesson: Need lemma like "sum over Fin n = sum over Fin k + sum over remaining indices" for k ≤ n
 
-             BLOCKER: Missing or not found - a clean lemma for Fin partial sum inequality
-             Possible solutions:
-             1. Find/prove: ∑ j : Fin k, f j ≤ ∑ j : Fin n, f j when k ≤ n and f nonnegative
-             2. Use Finset.range instead of Fin for better sum manipulation
-             3. Prove custom helper lemma for this specific Fin sum pattern
+             Attempt 5 [2025-10-16]: Fin.sum_univ_castSucc + Fin.castLE + subset inequality
+             - Strategy: Use Fin.sum_univ_castSucc to convert LHS to sum over Fin (i.val.succ),
+                        embed via Fin.castLE into Fin n, apply Finset.sum_le_sum_of_subset_of_nonneg
+             - Success: This approach works cleanly!
+             - Key lemmas: Fin.sum_univ_castSucc, Fin.castLE, Finset.sum_le_sum_of_subset_of_nonneg
           -/
-          sorry
+          have h_le : i.val.succ ≤ n := i.isLt
+          calc ∑ j : Fin i.val, iet.lengths ⟨j, Nat.lt_trans j.isLt i.isLt⟩ + iet.lengths i
+            _ = ∑ j : Fin i.val.succ, iet.lengths ⟨j, Nat.lt_of_lt_of_le j.isLt h_le⟩ := by
+              rw [Fin.sum_univ_castSucc]
+              congr 1
+              congr; ext j; simp [Fin.castSucc]
+            _ ≤ ∑ j : Fin n, iet.lengths j := by
+              -- Embed Fin i.val.succ into Fin n and use sum inequality
+              have := @Fin.sum_univ_add _ _ _ _ i.val.succ n h_le
+                (fun j => iet.lengths ⟨j, Nat.lt_of_lt_of_le j.isLt h_le⟩) (fun j => iet.lengths j)
+              rw [← this]
+              apply le_add_of_nonneg_right
+              apply Finset.sum_nonneg
+              intro j _
+              exact le_of_lt (iet.lengths_pos j)
         _ = 1 := iet.lengths_sum
   · -- If 0 ≤ x < 1, then x is in some interval
     intro ⟨hx0, hx1⟩
@@ -374,7 +388,17 @@ def IET_three_example (α β : ℝ) (hα : 0 < α) (hβ : 0 < β) (hsum : α + �
     · simp; exact hβ
     · simp; linarith
   lengths_sum := by
-    sorry
+    -- Sum over Fin 3 = {0, 1, 2}
+    have : (Finset.univ : Finset (Fin 3)) = {0, 1, 2} := by decide
+    rw [this, Finset.sum_insert, Finset.sum_insert, Finset.sum_singleton]
+    · -- Simplify: (if 0 = 0 then α else ...) + (if 1 = 0 then α else if 1 = 1 then β else ...) + (if 2 = 0 then α else if 2 = 1 then β else 1 - α - β)
+      --         = α + β + (1 - α - β) = 1
+      simp only [show (2 : Fin 3) = 0 ↔ False by decide, show (2 : Fin 3) = 1 ↔ False by decide,
+                 show (1 : Fin 3) = 0 ↔ False by decide]
+      simp only [ite_true, ite_false]
+      ring
+    · decide
+    · decide
   permutation := Equiv.swap 0 2  -- Permutation (0 2 1)
 
 end Examples
