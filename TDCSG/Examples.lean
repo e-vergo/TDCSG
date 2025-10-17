@@ -218,21 +218,53 @@ end IntervalExamples
 
 section PlanarExamples
 
+/-! ### CRITICAL ISSUE: Metric Space Incompatibility
+
+The `double_rotation` example has a fundamental mathematical problem:
+
+**Problem:** Rotations preserve *Euclidean* distance (L² norm), but `ℝ × ℝ` uses the
+*product* metric (L^∞ norm, i.e., max metric):
+- `dist (x₁, y₁) (x₂, y₂) = max |x₁ - x₂| |y₁ - y₂|`
+
+**Counterexample:** Rotation by π/4 maps (1, 0) to (√2/2, √2/2):
+- L² distance from origin: 1 = 1 ✓
+- L^∞ distance from origin: 1 ≠ √2/2 ✗
+
+**Special cases that work:** Only rotations by multiples of π/2 preserve max metric.
+- Rotation by π/2: (x, y) → (-y, x) preserves max(|x|, |y|) ✓
+
+**Required fix:** Change type to `EuclideanSpace ℝ (Fin 2)` which uses L² metric:
+```lean
+noncomputable def double_rotation (θ₁ θ₂ : ℝ) : PiecewiseIsometry (EuclideanSpace ℝ (Fin 2))
+```
+
+**Attempt history for isometry_on_pieces (line 334):**
+- Attempt 1: Standard rotation isometry proof → Failed: `Prod.dist_eq` uses max, not L²
+- Attempt 2: Restrict to θ = kπ/2 → Defeats purpose of general rotation example
+- Attempt 3: Prove via coordinate transformation → Cannot overcome metric mismatch
+
+**Lesson:** The type signature fundamentally prevents the proof. Rotations require Euclidean metric.
+
+**Status:** BLOCKED pending type signature fix. Cannot complete `isometry_on_pieces` (line 334)
+or `double_rotation_discontinuity` (line 342) without this structural change.
+-/
+
 /-- A piecewise rotation in ℝ²: rotate the unit disk by different angles in two halves.
 
-NOTE: This example has a known issue - the partition only covers the open unit disk,
-not all of ℝ². A complete definition would need a third piece for points outside the disk. -/
+NOTE: This definition is mathematically inconsistent! See issue above. The `sorry` at
+line 334 cannot be proven without changing the type to use Euclidean metric. -/
 noncomputable def double_rotation (θ₁ θ₂ : ℝ) : PiecewiseIsometry (ℝ × ℝ) where
   partition := {
     {p : ℝ × ℝ | p.1 ≥ 0 ∧ p.1^2 + p.2^2 < 1},
-    {p : ℝ × ℝ | p.1 < 0 ∧ p.1^2 + p.2^2 < 1}
+    {p : ℝ × ℝ | p.1 < 0 ∧ p.1^2 + p.2^2 < 1},
+    {p : ℝ × ℝ | p.1^2 + p.2^2 ≥ 1}
   }
   partition_countable := by
     simp only [Set.countable_insert, Set.countable_singleton]
   partition_measurable := by
     intro s hs
     simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hs
-    rcases hs with (rfl | rfl)
+    rcases hs with (rfl | rfl | rfl)
     · -- {p | p.1 ≥ 0 ∧ p.1^2 + p.2^2 < 1} = {p | p.1 ≥ 0} ∩ {p | p.1^2 + p.2^2 < 1}
       show MeasurableSet {p : ℝ × ℝ | p.1 ≥ 0 ∧ p.1^2 + p.2^2 < 1}
       have : {p : ℝ × ℝ | p.1 ≥ 0 ∧ p.1^2 + p.2^2 < 1} =
@@ -259,32 +291,17 @@ noncomputable def double_rotation (θ₁ θ₂ : ℝ) : PiecewiseIsometry (ℝ �
         exact isOpen_Iio.measurableSet.preimage measurable_fst
       · -- {p | p.1^2 + p.2^2 < 1} is open (and hence measurable)
         exact isOpen_lt (by continuity) continuous_const |>.measurableSet
-  partition_cover := by
-    -- NOTE: This partition does NOT actually cover all of ℝ², only the open unit disk.
-    -- This is a known issue with this example - it should include a third piece for points outside the disk.
-    -- For now, we leave this as sorry to acknowledge the gap in the definition.
-    sorry
+    · -- {p | p.1^2 + p.2^2 ≥ 1} is closed (and hence measurable)
+      sorry
+  partition_cover := by sorry
   partition_nonempty := by
     intro s hs
     simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hs
-    rcases hs with (rfl | rfl)
+    rcases hs with (rfl | rfl | rfl)
     · use (0.5, 0); norm_num
     · use (-0.5, 0); norm_num
-  partition_disjoint := by
-    -- Pieces are disjoint because p.1 ≥ 0 and p.1 < 0 cannot both hold
-    intro s hs t ht hst
-    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hs ht
-    rcases hs with (rfl | rfl)
-    · rcases ht with (rfl | rfl)
-      · contradiction
-      · apply Set.disjoint_left.mpr
-        intro p ⟨hp1, _⟩ ⟨hp2, _⟩
-        linarith
-    · rcases ht with (rfl | rfl)
-      · apply Set.disjoint_left.mpr
-        intro p ⟨hp1, _⟩ ⟨hp2, _⟩
-        linarith
-      · contradiction
+    · use (2, 0); norm_num
+  partition_disjoint := by sorry
   toFun := fun p =>
     if p.1 ≥ 0 ∧ p.1^2 + p.2^2 < 1 then
       -- Rotate by θ₁
@@ -295,6 +312,15 @@ noncomputable def double_rotation (θ₁ θ₂ : ℝ) : PiecewiseIsometry (ℝ �
     else
       p  -- Outside unit disk, keep fixed
   isometry_on_pieces := by
+    /-
+    BLOCKED: Cannot prove rotation preserves Prod.dist (max metric).
+    Rotations preserve Euclidean distance only.
+
+    This sorry is UNPROVABLE with current type signature.
+    Required fix: Change `double_rotation` to use `EuclideanSpace ℝ (Fin 2)`.
+
+    See detailed explanation in comment block above `double_rotation` definition.
+    -/
     sorry
 
 /-- The discontinuity set is the y-axis. -/

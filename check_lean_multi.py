@@ -13,7 +13,7 @@ from typing import List, Tuple, Dict
 
 def check_file(file_path: str, mode: str, script_dir: str) -> Tuple[str, int, str]:
     """
-    Check a single file using the appropriate mode.
+    Check a single file by calling the bash wrapper script.
 
     Args:
         file_path: Path to Lean file
@@ -23,42 +23,40 @@ def check_file(file_path: str, mode: str, script_dir: str) -> Tuple[str, int, st
     Returns:
         Tuple of (file_path, exit_code, output)
     """
-    # Map mode to Python script
-    script_map = {
-        'errors-only': 'check_lean_errors_only.py',
-        'warnings': 'check_lean_file.py',
-        'sorries': 'check_lean_sorries.py',
-        'warnings-summary': 'check_lean_warnings_summary.py',
+    # Call the check_lean.sh script directly with the appropriate mode flag
+    check_script = os.path.join(script_dir, 'check_lean.sh')
+
+    if not os.path.exists(check_script):
+        return (file_path, 2, f"Error: check_lean.sh not found at {check_script}")
+
+    # Map mode to command-line flag
+    mode_flag_map = {
+        'errors-only': '--errors-only',
+        'warnings': '',  # default mode (no flag)
+        'sorries': '--sorries',
+        'warnings-summary': '--warnings-summary',
     }
 
-    script_name = script_map.get(mode)
-    if not script_name:
+    mode_flag = mode_flag_map.get(mode)
+    if mode_flag is None:
         return (file_path, 2, f"Error: Unknown mode '{mode}'")
 
-    script_path = os.path.join(script_dir, script_name)
-
     try:
-        # Run lake build and pipe to Python script
-        build_proc = subprocess.Popen(
-            ['lake', 'build', file_path],
+        # Build command: ./check_lean.sh [--flag] file_path
+        if mode_flag:
+            cmd = [check_script, mode_flag, file_path]
+        else:
+            cmd = [check_script, file_path]
+
+        # Run the single-file checker
+        result = subprocess.run(
+            cmd,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True
         )
 
-        filter_proc = subprocess.Popen(
-            ['python3', script_path, file_path],
-            stdin=build_proc.stdout,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True
-        )
-
-        build_proc.stdout.close()
-        output, _ = filter_proc.communicate()
-        exit_code = filter_proc.returncode
-
-        return (file_path, exit_code, output.strip())
+        return (file_path, result.returncode, result.stdout.strip())
 
     except Exception as e:
         return (file_path, 2, f"Error checking {file_path}: {str(e)}")
