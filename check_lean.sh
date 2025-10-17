@@ -78,6 +78,8 @@ fi
 if [ "$MODE" = "--all" ]; then
     # Expand directory to all .lean files
     if [ -d "$TARGET" ]; then
+        # Remove trailing slash from TARGET to avoid double slashes
+        TARGET="${TARGET%/}"
         LEAN_FILES=("$TARGET"/*.lean)
     else
         echo "Error: $TARGET is not a directory" >&2
@@ -96,7 +98,7 @@ if [ "$MODE" = "--all" ]; then
     esac
 
     # Run multi-file checker
-    PYTHON_SCRIPT="$SCRIPT_DIR/check_lean_multi.py"
+    PYTHON_SCRIPT="$SCRIPT_DIR/tools/check_lean_multi.py"
     if [ ! -f "$PYTHON_SCRIPT" ]; then
         echo "Error: Python script not found at $PYTHON_SCRIPT" >&2
         exit 2
@@ -114,16 +116,16 @@ fi
 # Single file mode - select appropriate Python script
 case "$MODE" in
     default)
-        PYTHON_SCRIPT="$SCRIPT_DIR/check_lean_file.py"
+        PYTHON_SCRIPT="$SCRIPT_DIR/tools/check_lean_file.py"
         ;;
     --errors-only)
-        PYTHON_SCRIPT="$SCRIPT_DIR/check_lean_errors_only.py"
+        PYTHON_SCRIPT="$SCRIPT_DIR/tools/check_lean_errors_only.py"
         ;;
     --sorries)
-        PYTHON_SCRIPT="$SCRIPT_DIR/check_lean_sorries.py"
+        PYTHON_SCRIPT="$SCRIPT_DIR/tools/check_lean_sorries.py"
         ;;
     --warnings-summary)
-        PYTHON_SCRIPT="$SCRIPT_DIR/check_lean_warnings_summary.py"
+        PYTHON_SCRIPT="$SCRIPT_DIR/tools/check_lean_warnings_summary.py"
         ;;
     *)
         echo "Error: Unknown mode '$MODE'" >&2

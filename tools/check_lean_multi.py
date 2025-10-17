@@ -11,20 +11,107 @@ import os
 from pathlib import Path
 from typing import List, Tuple, Dict
 
-def check_file(file_path: str, mode: str, script_dir: str) -> Tuple[str, int, str]:
+def check_all_files_single_build(file_paths: List[str], mode: str, script_dir: str) -> List[Tuple[str, int, str]]:
+    """
+    Check all files by calling single-file checker for each.
+
+    Args:
+        file_paths: List of Lean file paths
+        mode: One of 'errors-only', 'warnings', 'sorries', 'warnings-summary'
+        script_dir: Directory containing check scripts
+
+    Returns:
+        List of (file_path, exit_code, output) tuples
+    """
+    # Simply call the individual checker for each file
+    # This ensures we get fresh results without caching confusion
+    return [check_file_individual(fp, mode, script_dir) for fp in file_paths]
+
+def file_has_diagnostics(build_output: str, file_path: str, mode: str) -> bool:
+    """Check if build output contains diagnostics for a specific file."""
+    import re
+
+    # Patterns that indicate errors/warnings for this file
+    if mode == 'errors-only':
+        patterns = [
+            rf'^error:\s+{re.escape(file_path)}:\d+:\d+:',
+            rf'^{re.escape(file_path)}:\d+:\d+:\s+error',
+        ]
+    else:  # warnings or warnings-summary
+        patterns = [
+            rf'^error:\s+{re.escape(file_path)}:\d+:\d+:',
+            rf'^{re.escape(file_path)}:\d+:\d+:\s+error',
+            rf'^warning:\s+{re.escape(file_path)}:\d+:\d+:',
+            rf'^{re.escape(file_path)}:\d+:\d+:\s+warning',
+        ]
+
+    for line in build_output.split('\n'):
+        for pattern in patterns:
+            if re.match(pattern, line):
+                return True
+    return False
+
+def extract_file_diagnostics(build_output: str, file_path: str, mode: str) -> str:
+    """Extract diagnostics for a specific file from build output."""
+    import re
+
+    lines = build_output.split('\n')
+    result = []
+
+    if mode == 'errors-only':
+        patterns = [
+            re.compile(rf'^error:\s+{re.escape(file_path)}:\d+:\d+:'),
+            re.compile(rf'^{re.escape(file_path)}:\d+:\d+:\s+error'),
+        ]
+    else:
+        patterns = [
+            re.compile(rf'^error:\s+{re.escape(file_path)}:\d+:\d+:'),
+            re.compile(rf'^{re.escape(file_path)}:\d+:\d+:\s+error'),
+            re.compile(rf'^warning:\s+{re.escape(file_path)}:\d+:\d+:'),
+            re.compile(rf'^{re.escape(file_path)}:\d+:\d+:\s+warning'),
+        ]
+
+    in_diagnostic = False
+    current_diagnostic = []
+
+    for line in lines:
+        # Check if line starts a diagnostic for our file
+        if any(p.match(line) for p in patterns):
+            if current_diagnostic:
+                result.extend(current_diagnostic)
+                result.append('')
+            current_diagnostic = [line]
+            in_diagnostic = True
+        elif in_diagnostic:
+            # Check if we hit a new section
+            if line.startswith('⚠ [') or line.startswith('✔ [') or line.startswith('error:') or line.startswith('warning:'):
+                if current_diagnostic:
+                    result.extend(current_diagnostic)
+                    result.append('')
+                current_diagnostic = []
+                in_diagnostic = False
+            else:
+                current_diagnostic.append(line)
+
+    if current_diagnostic:
+        result.extend(current_diagnostic)
+
+    return '\n'.join(result).strip()
+
+def check_file_individual(file_path: str, mode: str, script_dir: str) -> Tuple[str, int, str]:
     """
     Check a single file by calling the bash wrapper script.
 
     Args:
         file_path: Path to Lean file
         mode: One of 'errors-only', 'warnings', 'sorries', 'warnings-summary'
-        script_dir: Directory containing check scripts
+        script_dir: Directory containing check scripts (the tools/ directory)
 
     Returns:
         Tuple of (file_path, exit_code, output)
     """
-    # Call the check_lean.sh script directly with the appropriate mode flag
-    check_script = os.path.join(script_dir, 'check_lean.sh')
+    # Call the check_lean.sh script (one level up from tools/ directory)
+    check_script = os.path.join(os.path.dirname(script_dir), 'check_lean.sh')
 
     if not os.path.exists(check_script):
         return (file_path, 2, f"Error: check_lean.sh not found at {check_script}")
@@ -166,11 +253,8 @@ def main():
     # Get script directory
     script_dir = os.path.dirname(os.path.abspath(__file__))
 
-    # Check all files
-    results = []
-    for file_path in file_paths:
-        result = check_file(file_path, mode, script_dir)
-        results.append(result)
+    # Check all files using a single build to avoid caching issues
+    results = check_all_files_single_build(file_paths, mode, script_dir)
 
     # Format and print summary
     output = format_multi_file_summary(results, mode)
