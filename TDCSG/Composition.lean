@@ -716,45 +716,43 @@ theorem discontinuitySet_iterate [Nonempty α] [BorelSpace α] (f : PiecewiseIso
       obtain ⟨k, hk_lt, hx_k⟩ := hx_union
       use k, Nat.lt_trans hk_lt (Nat.lt_succ_self n)
 
-/-- If f has finitely many discontinuities, so does each iterate (though possibly more). -/
+/-- If f has finitely many discontinuities and is injective, so does each iterate.
+
+Note: The injectivity hypothesis is necessary. Without it, the preimage of a finite set under f
+can be infinite, even though f is injective on each partition piece. Injectivity is a natural
+assumption for many piecewise isometries arising in dynamical systems. -/
 theorem iterate_finite_discontinuities [Nonempty α] [BorelSpace α] (f : PiecewiseIsometry α) (n : ℕ)
-    (hf : f.discontinuitySet.Finite) :
+    (hf : f.discontinuitySet.Finite)
+    (hinj : Function.Injective f.toFun) :
     (iterate f n).discontinuitySet.Finite := by
-  -- Use discontinuitySet_iterate: (iterate f n).discontinuitySet ⊆ ⋃ k < n, f^[k]⁻¹(f.discontinuitySet)
-  -- This is a finite union of preimages of a finite set
-  -- However, preimages of finite sets need not be finite without injectivity
+  -- Strategy: Use discontinuitySet_iterate to show the iterate's discontinuities are contained
+  -- in a finite union of preimages. With injectivity, each preimage of a finite set is finite.
+  apply Set.Finite.subset _ (discontinuitySet_iterate f n)
 
-  -- PROOF ATTEMPT: This theorem appears to require additional assumptions
-  -- Without injectivity/bijectivity of f, preimages of finite sets can be infinite
-  -- For example, a constant map has infinite preimage of any point
+  -- Convert ⋃ k < n to Finset.biUnion for easier handling
+  have h_union_eq : (⋃ k < n, f.toFun^[k] ⁻¹' f.discontinuitySet) =
+      ⋃ k ∈ Finset.range n, f.toFun^[k] ⁻¹' f.discontinuitySet := by
+    ext x
+    simp only [Set.mem_iUnion, Finset.mem_range]
 
-  -- However, if we assume f is injective on each piece, we might be able to proceed
-  -- But that's not part of the current structure definition
+  rw [h_union_eq]
 
-  -- Alternative: The discontinuity set is contained in partition boundaries,
-  -- which are themselves related to the original partition
-  -- Let me try to use a different approach based on partition properties
+  -- The RHS is a finite union (over Finset.range n) of finite sets
+  apply Set.Finite.biUnion
+  · exact (Finset.range n).finite_toSet
 
-  /- PROOF ATTEMPTS:
-
-  Attempt 1 [2025-10-16]:
-  Strategy: Use discontinuitySet_iterate to bound by finite union, then argue preimages are finite
-  Failure: Preimages of finite sets need not be finite without injectivity
-  Lesson: Need stronger hypothesis (e.g., f injective) or different approach
-
-  Attempt 2 [2025-10-16]:
-  Strategy: Use that discontinuity set is union of partition piece boundaries
-  Failure: Refined partitions can have more pieces, boundaries can grow
-  Lesson: The partition refinement doesn't preserve finiteness of boundary points directly
-
-  CURRENT STATUS: This theorem likely requires additional hypotheses:
-  - Either f is injective (or bijective)
-  - Or f has some bounded-fiber property
-  - Or we work with a different notion of "finite discontinuities"
-
-  This is mathematically non-trivial and may require rethinking the statement.
-  -/
-  sorry
+  · -- Each preimage f^[k]⁻¹(f.discontinuitySet) is finite
+    intro k _
+    -- The preimage of a finite set under an injective function is finite
+    haveI : Finite f.discontinuitySet := hf.to_subtype
+    haveI : Finite (f.toFun^[k] ⁻¹' f.discontinuitySet) := Finite.of_injective
+      (fun (x : f.toFun^[k] ⁻¹' f.discontinuitySet) =>
+        (⟨f.toFun^[k] x, x.property⟩ : f.discontinuitySet))
+      (fun ⟨x, hx⟩ ⟨y, hy⟩ heq => by
+        simp only [Subtype.mk.injEq] at heq
+        have : x = y := hinj.iterate k heq
+        exact Subtype.eq this)
+    exact Set.toFinite (f.toFun^[k] ⁻¹' f.discontinuitySet)
 
 end IterationProperties
 

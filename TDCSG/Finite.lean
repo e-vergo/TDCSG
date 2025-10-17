@@ -424,25 +424,22 @@ def FiniteMeasurePreservingPiecewiseIsometry.toMeasurePreserving
   measurable_toFun := f.measurable_toFun
   measure_preserving := f.measure_preserving
 
-/-- For finite partitions, measure preservation can be checked piece-by-piece.
+/-! ### Removed Theorems
 
-This theorem states that if each partition piece has its measure preserved under the map
-(i.e., μ(f(s)) = μ(s) for each piece s), and if f is surjective, then f is measure-preserving.
+**REMOVED: `measurePreserving_of_pieces`**
 
-The surjectivity hypothesis is essential: without it, the map could fail to be onto, leaving
-some measurable sets with preimage measure not equal to their measure. -/
-theorem measurePreserving_of_pieces
-    (f : FinitePiecewiseIsometry α) (h_meas : Measurable f.toFun)
-    (h_pieces : ∀ s ∈ f.partition, μ (f.toFun '' s) = μ s)
-    (h_surj : Function.Surjective f.toFun) :
-    MeasureTheory.MeasurePreserving f.toFun μ μ := by
-  /- NOTE: This theorem statement is incorrect as written. The hypotheses are insufficient
-     to prove measure preservation without additional assumptions on μ (e.g., that it's
-     Hausdorff or Lebesgue measure). See TDCSG/MeasurePreserving.lean for detailed
-     explanation of why `measurePreserving_of_pieces_preserved` was removed.
+The original theorem claimed that if μ(f(s)) = μ(s) for each partition piece s, and f is
+surjective, then f preserves μ globally. This cannot be proved with the given hypotheses.
 
-     For Mathlib submission, this should be specialized to specific measure types. -/
-  sorry
+The fundamental issue: even knowing μ(f(s)) = μ(s) for each piece, we cannot deduce that f
+preserves the measure of arbitrary measurable subsets without additional structure on μ or
+stronger hypotheses about f's action on measurable sets within each piece.
+
+For a correct version, specialize to specific measure types (Hausdorff or Lebesgue measure)
+where isometry preservation is already established in Mathlib.
+
+See TDCSG/MeasurePreserving.lean lines 108-134 for detailed explanation and counter-example.
+-/
 
 end MeasureTheoretic
 
