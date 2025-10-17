@@ -7,6 +7,7 @@ import TDCSG.Basic
 import TDCSG.Finite
 import TDCSG.MeasurePreserving
 import Mathlib.Data.Real.Basic
+import Mathlib.Algebra.BigOperators.Fin
 
 /-!
 # Interval Exchange Transformations
@@ -119,13 +120,43 @@ theorem intervals_cover : ⋃ i, iet.interval i = Ico 0 1 := by
       calc x < iet.domainRight i := hx.2
         _ = iet.domainLeft i + iet.lengths i := rfl
         _ ≤ ∑ j : Fin n, iet.lengths j := by
-          /- PROOF ATTEMPTS:
-             Attempt 1: Use Fin.sum_univ_castSucc to combine sums - Type mismatch with Fin i.val vs Fin n
-             Attempt 2: Use Finset.sum_le_sum_of_subset with explicit embedding - Complex coercion issues
-             Attempt 3: Split total sum and recombine - Equality step becomes circular
-          -/
           rw [domainLeft]
-          sorry -- BLOCKED: Needs lemma relating Fin partial sums, see attempts above
+          /- PROOF ATTEMPTS HISTORY:
+
+             GOAL: ⊢ (∑ j : Fin i.val, lengths ⟨↑j, _⟩) + lengths i ≤ ∑ j : Fin n, lengths j
+
+             Mathematical Content: Partial sum ≤ total sum when all terms nonnegative
+             - LHS = sum of first i.val terms + i-th term = sum of first (i.val + 1) terms
+             - RHS = sum of all n terms
+             - Since i.val + 1 ≤ n and all lengths > 0, LHS ≤ RHS
+
+             Attempt 1 [2025-10-16]: Use Fin.sum_univ_castSucc
+             - Strategy: Convert LHS to sum over Fin (i.val + 1) using Fin.sum_univ_castSucc
+             - Failure: Pattern matching issues with dependent types
+             - Lesson: Fin.sum_univ_castSucc expects specific type alignment
+
+             Attempt 2 [2025-10-16]: Use Finset.sum_bij/sum_nbij
+             - Strategy: Establish bijection between index sets
+             - Failure: Finset.sum_nbij doesn't exist, Finset.sum_bij signature mismatch
+             - Lesson: Need to find correct bijection lemma in Mathlib
+
+             Attempt 3 [2025-10-16]: Use Finset.image and subset inequality
+             - Strategy: Express partial sum as sum over image, use Finset.sum_le_sum_of_subset_of_nonneg
+             - Failure: Complex type annotations, disjointness proofs became unwieldy
+             - Lesson: Image approach requires careful handling of Fin coercions
+
+             Attempt 4 [2025-10-16]: Direct decomposition with omega
+             - Strategy: Split full sum into partial + remainder, show equality
+             - Failure: Equality proof requires Fin sum decomposition lemma not readily available
+             - Lesson: Need lemma like "sum over Fin n = sum over Fin k + sum over remaining indices" for k ≤ n
+
+             BLOCKER: Missing or not found - a clean lemma for Fin partial sum inequality
+             Possible solutions:
+             1. Find/prove: ∑ j : Fin k, f j ≤ ∑ j : Fin n, f j when k ≤ n and f nonnegative
+             2. Use Finset.range instead of Fin for better sum manipulation
+             3. Prove custom helper lemma for this specific Fin sum pattern
+          -/
+          sorry
         _ = 1 := iet.lengths_sum
   · -- If 0 ≤ x < 1, then x is in some interval
     intro ⟨hx0, hx1⟩

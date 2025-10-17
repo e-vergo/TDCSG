@@ -5,6 +5,7 @@ Authors: Eric Moffat
 -/
 import TDCSG.MeasurePreserving
 import Mathlib.Dynamics.Ergodic.Ergodic
+import Mathlib.Dynamics.Ergodic.Conservative
 
 /-!
 # Ergodic Piecewise Isometries
@@ -230,10 +231,50 @@ REQUIRED MATHLIB ADDITIONS:
   constructor
   · -- Forward: Ergodic → Irreducible
     intro herg s t hs ht μs_pos μt_pos
-    -- This direction requires Poincaré recurrence theorem
-    -- The proof strategy: use recurrence to show A = ⋃ f^n⁻¹(s) is invariant
-    -- Then derive contradiction from ergodicity
-    sorry -- DEEP: Requires Poincaré recurrence theorem (not yet in Mathlib)
+    /-
+    PROOF ATTEMPT HISTORY FOR ergodic_iff_irreducible (forward direction):
+
+    Attempt 1 [2025-10-16]:
+    Strategy: Define A = {x ∈ t : ∀n, f^n(x) ∉ s} and show μ(A) = μ(t) by assumption
+    Failure: Can show f^{-1}(A) ⊇ A but NOT f^{-1}(A) = A (exact invariance)
+    Issue: A is backward invariant but not forward invariant
+      - If x ∈ A and f^n(x) ∉ s for all n, then f^{-1}(x) might leave t
+      - Forward invariance f(A) ⊆ A would require: if f(x) never hits s, then x never hits s
+      - This is EXACTLY Poincaré recurrence: points return to their starting set
+
+    Attempt 2 [2025-10-16]:
+    Strategy: Use B = ⋃_{n≥0} f^{-n}(s) (all points whose orbit eventually hits s)
+    Approach:
+      1. Show f^{-1}(B) ⊇ B (easy: if f^n(x) ∈ s then f^{n+1}(f^{-1}(x)) ∈ s)
+      2. Show f^{-1}(B) ⊆ B (HARD: requires Poincaré recurrence)
+         - Need: if x ∈ B then f(x) ∈ B
+         - i.e., if x eventually hits s, then f(x) eventually hits s
+         - Equivalently: if f^n(x) ∈ s for some n, then f^{n+1}(x) ∈ s OR f(x) returns to s later
+         - This is Poincaré recurrence: points in s return to s infinitely often
+      3. Use ergodicity: B is invariant, so μ(B) ∈ {0, 1}
+      4. Since μ(s) > 0 and s ⊆ B, we have μ(B) = 1
+      5. Similarly for t, contradiction
+
+    ROOT ISSUE: Poincaré recurrence in strong form
+      - Conservative.ae_mem_imp_frequently_image_mem gives: a.e. x ∈ s, f^n(x) ∈ s infinitely often
+      - But we need: ⋃_n f^{-n}(s) is EXACTLY invariant (not just backward invariant)
+      - This requires showing f^{-1}(⋃_n f^{-n}(s)) = ⋃_n f^{-n}(s)
+      - Forward inclusion is trivial
+      - Backward inclusion needs: if ⋃_n f^{-n}(f(x)) ∩ s ≠ ∅, then ⋃_n f^{-n}(x) ∩ s ≠ ∅
+      - This is recurrence property: returning once implies returning infinitely often
+
+    INFRASTRUCTURE NEEDED:
+      - Theorem: For conservative f and set s, define B = {x : ∃^∞ n, f^n(x) ∈ s}
+      - Then f^{-1}(B) = B (exact invariance)
+      - Proof uses: points returning to s must return infinitely often (Poincaré recurrence)
+      - NOT currently in Mathlib as stated (though Conservative has related results)
+
+    CLASSIFICATION: Research-level (confirmed as "hard" in README)
+    This direction genuinely requires formalization not yet in Mathlib:
+      - Conservative.ae_mem_imp_frequently_image_mem is close but works a.e., not for sets
+      - Need measure-theoretic version of "visiting infinitely often" as invariant set
+    -/
+    sorry
   · -- Backward: Irreducible → Ergodic
     intro h_irred
     -- Show f is ergodic using the invariant set characterization
@@ -246,30 +287,27 @@ REQUIRED MATHLIB ADDITIONS:
       right
       -- If μ(sᶜ) > 0, apply irreducibility to s and sᶜ
       by_contra h_not_one
-      have μs_pos : μ s > 0 := by
-        cases' (zero_le (μ s)).lt_or_eq with hlt heq
-        · exact hlt
-        · exact absurd heq.symm h
+      have μs_pos : μ s > 0 :=
+        (zero_le (μ s)).lt_of_ne (Ne.symm h)
       have μsc_pos : μ sᶜ > 0 := by
-        have : μ s ≠ 1 := h_not_one
-        have : μ sᶜ ≠ 0 := by
+        have h1 : μ s ≠ 1 := h_not_one
+        have h2 : μ sᶜ ≠ 0 := by
           intro hsc
           have : μ s = 1 := (MeasureTheory.prob_compl_eq_zero_iff hs).mp hsc
-          exact h_not_one this
-        cases' (zero_le (μ sᶜ)).lt_or_eq with hlt heq
-        · exact hlt
-        · exact absurd heq.symm this
+          exact h1 this
+        exact (zero_le (μ sᶜ)).lt_of_ne (Ne.symm h2)
       -- Apply irreducibility
       obtain ⟨n, hn⟩ := h_irred s sᶜ hs hs.compl μs_pos μsc_pos
-      -- But f^n⁻¹(s) = s by invariance
-      have hinv_n : f.toFun^[n] ⁻¹' s = s := by
-        induction n with
+      -- But f^k⁻¹(s) = s for all k by invariance
+      have hinv_n : ∀ k, f.toFun^[k] ⁻¹' s = s := by
+        intro k
+        induction k with
         | zero => rfl
-        | succ n ih =>
+        | succ k ih =>
           rw [Function.iterate_succ]
           rw [Set.preimage_comp, ih, h_inv]
       -- So f^n⁻¹(s) ∩ sᶜ = s ∩ sᶜ = ∅
-      rw [hinv_n] at hn
+      rw [hinv_n n] at hn
       simp at hn
 
 end ErgodicityConditions

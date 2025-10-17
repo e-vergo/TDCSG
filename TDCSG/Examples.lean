@@ -8,6 +8,7 @@ import TDCSG.Properties
 import TDCSG.Finite
 import TDCSG.IntervalExchange
 import Mathlib.Analysis.InnerProductSpace.PiL2
+import Mathlib.Analysis.Real.Cardinality
 
 /-!
 # Examples of Piecewise Isometries
@@ -229,7 +230,35 @@ noncomputable def double_rotation (θ₁ θ₂ : ℝ) : PiecewiseIsometry (ℝ �
   partition_countable := by
     simp only [Set.countable_insert, Set.countable_singleton]
   partition_measurable := by
-    sorry
+    intro s hs
+    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hs
+    rcases hs with (rfl | rfl)
+    · -- {p | p.1 ≥ 0 ∧ p.1^2 + p.2^2 < 1} = {p | p.1 ≥ 0} ∩ {p | p.1^2 + p.2^2 < 1}
+      show MeasurableSet {p : ℝ × ℝ | p.1 ≥ 0 ∧ p.1^2 + p.2^2 < 1}
+      have : {p : ℝ × ℝ | p.1 ≥ 0 ∧ p.1^2 + p.2^2 < 1} =
+             {p : ℝ × ℝ | p.1 ≥ 0} ∩ {p : ℝ × ℝ | p.1^2 + p.2^2 < 1} := by
+        ext p; simp
+      rw [this]
+      apply MeasurableSet.inter
+      · -- {p | p.1 ≥ 0} is measurable
+        have : {p : ℝ × ℝ | p.1 ≥ 0} = Prod.fst ⁻¹' Set.Ici 0 := by ext p; simp
+        rw [this]
+        exact isClosed_Ici.measurableSet.preimage measurable_fst
+      · -- {p | p.1^2 + p.2^2 < 1} is open (and hence measurable)
+        exact isOpen_lt (by continuity) continuous_const |>.measurableSet
+    · -- {p | p.1 < 0 ∧ p.1^2 + p.2^2 < 1} = {p | p.1 < 0} ∩ {p | p.1^2 + p.2^2 < 1}
+      show MeasurableSet {p : ℝ × ℝ | p.1 < 0 ∧ p.1^2 + p.2^2 < 1}
+      have : {p : ℝ × ℝ | p.1 < 0 ∧ p.1^2 + p.2^2 < 1} =
+             {p : ℝ × ℝ | p.1 < 0} ∩ {p : ℝ × ℝ | p.1^2 + p.2^2 < 1} := by
+        ext p; simp
+      rw [this]
+      apply MeasurableSet.inter
+      · -- {p | p.1 < 0} is measurable
+        have : {p : ℝ × ℝ | p.1 < 0} = Prod.fst ⁻¹' Set.Iio 0 := by ext p; simp
+        rw [this]
+        exact isOpen_Iio.measurableSet.preimage measurable_fst
+      · -- {p | p.1^2 + p.2^2 < 1} is open (and hence measurable)
+        exact isOpen_lt (by continuity) continuous_const |>.measurableSet
   partition_cover := by
     -- NOTE: This partition does NOT actually cover all of ℝ², only the open unit disk.
     -- This is a known issue with this example - it should include a third piece for points outside the disk.
@@ -293,13 +322,13 @@ noncomputable def half_plane_reflection : PiecewiseIsometry (ℝ × ℝ) where
       have : {p : ℝ × ℝ | p.1 < 0} = Prod.fst ⁻¹' (Set.Iio (0 : ℝ)) := by
         ext p; simp [Set.Iio]
       rw [this]
-      exact MeasurableSet.preimage measurable_fst MeasurableSet.Iio
+      exact isOpen_Iio.measurableSet.preimage measurable_fst
     · -- {p | p.1 ≥ 0} is measurable as preimage of [0, ∞) under Prod.fst
       show MeasurableSet {p : ℝ × ℝ | p.1 ≥ 0}
       have : {p : ℝ × ℝ | p.1 ≥ 0} = Prod.fst ⁻¹' (Set.Ici (0 : ℝ)) := by
         ext p; simp [Set.Ici]
       rw [this]
-      exact MeasurableSet.preimage measurable_fst MeasurableSet.Ici
+      exact isClosed_Ici.measurableSet.preimage measurable_fst
   partition_cover := by
     ext p
     simp only [Set.mem_sUnion, Set.mem_insert_iff, Set.mem_singleton_iff, Set.mem_setOf_eq, Set.mem_univ, iff_true]
@@ -329,7 +358,20 @@ noncomputable def half_plane_reflection : PiecewiseIsometry (ℝ × ℝ) where
       · contradiction
   toFun := fun p => if p.1 < 0 then (-p.1, p.2) else p
   isometry_on_pieces := by
-    sorry
+    intro s hs x hx y hy
+    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hs
+    rcases hs with (rfl | rfl)
+    · -- Piece: {p | p.1 < 0}, map: p ↦ (-p.1, p.2)
+      simp only [Set.mem_setOf_eq] at hx hy
+      have hx_if : (if x.1 < 0 then (-x.1, x.2) else x) = (-x.1, x.2) := by simp [hx]
+      have hy_if : (if y.1 < 0 then (-y.1, y.2) else y) = (-y.1, y.2) := by simp [hy]
+      rw [hx_if, hy_if]
+      sorry
+    · -- Piece: {p | p.1 ≥ 0}, map: p ↦ p (identity)
+      simp only [Set.mem_setOf_eq] at hx hy
+      have hx_if : (if x.1 < 0 then (-x.1, x.2) else x) = x := by simp [show ¬x.1 < 0 from not_lt.mpr hx]
+      have hy_if : (if y.1 < 0 then (-y.1, y.2) else y) = y := by simp [show ¬y.1 < 0 from not_lt.mpr hy]
+      rw [hx_if, hy_if]
 
 end PlanarExamples
 
@@ -348,6 +390,11 @@ noncomputable def square_billiard_simple : PiecewiseIsometry (ℝ × ℝ) where
   partition_countable := by
     simp only [Set.countable_singleton]
   partition_measurable := by
+    intro s hs
+    simp only [Set.mem_singleton_iff] at hs
+    rw [hs]
+    -- {p | 0 < p.1 ∧ p.1 < 1 ∧ 0 < p.2 ∧ p.2 < 1} is the open square (0,1)×(0,1)
+    show MeasurableSet {p : ℝ × ℝ | 0 < p.1 ∧ p.1 < 1 ∧ 0 < p.2 ∧ p.2 < 1}
     sorry
   partition_cover := by
     -- Just one piece covering the interior of the square

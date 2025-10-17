@@ -193,76 +193,77 @@ namespace FinitePiecewiseIsometry
 section Composition
 
 /-- Composition of finite piecewise isometries has a finite partition. -/
-def comp (f g : FinitePiecewiseIsometry α) : FinitePiecewiseIsometry α where
+def comp [OpensMeasurableSpace α] (f g : FinitePiecewiseIsometry α) : FinitePiecewiseIsometry α where
   toPiecewiseIsometry := PiecewiseIsometry.comp f.toPiecewiseIsometry g.toPiecewiseIsometry
   partition_finite := by
     -- The refined partition is a subset of the image of f.partition × g.partition
     -- under the intersection operation, which is finite since both partitions are finite
-    unfold PiecewiseIsometry.comp PiecewiseIsometry.refinedPartition
+    unfold PiecewiseIsometry.comp PiecewiseIsometry.refinedPartitionPreimage
     apply Set.Finite.subset
-    · exact (f.partition_finite.prod g.partition_finite).image (fun (s, t) => s ∩ t)
+    · exact (g.partition_finite.prod f.partition_finite).image (fun (s, t) => s ∩ g.toFun ⁻¹' t)
     · intro u hu
       -- Show u is in the image
-      -- hu tells us u ∈ {u | ∃ s ∈ g.partition, ∃ t ∈ f.partition, u = s ∩ t ∧ (s ∩ t).Nonempty}
+      -- hu tells us u ∈ {u | ∃ s ∈ g.partition, ∃ t ∈ f.partition, u = s ∩ g.toFun ⁻¹' t ∧ ...}
       simp only [Set.mem_setOf_eq] at hu
       obtain ⟨s, hs, t, ht, hu_eq, _⟩ := hu
       rw [Set.mem_image]
-      use (t, s)
+      use (s, t)
       constructor
-      · exact Set.mem_prod.mpr ⟨ht, hs⟩
-      · simp [hu_eq, Set.inter_comm]
+      · exact Set.mem_prod.mpr ⟨hs, ht⟩
+      · simp [hu_eq]
 
 /-- The number of pieces in a composition is bounded by the product of the numbers of pieces. -/
-theorem card_comp_le (f g : FinitePiecewiseIsometry α) :
+theorem card_comp_le [OpensMeasurableSpace α] (f g : FinitePiecewiseIsometry α) :
     (f.comp g).card ≤ f.card * g.card := by
   -- The refined partition has at most |f.partition| * |g.partition| pieces
   unfold card comp
   simp only
-  -- The partition of comp is refinedPartition, which is a subset of the image
+  -- The partition of comp is refinedPartitionPreimage, which is a subset of the image
   -- We use that card of finite set ≤ card of finite superset
-  have h_subset : PiecewiseIsometry.refinedPartition g.partition f.partition ⊆
-      (fun (st : Set α × Set α) => st.1 ∩ st.2) '' (f.partition ×ˢ g.partition) := by
+  have h_subset : (f.comp g).partition ⊆
+      (fun (st : Set α × Set α) => st.1 ∩ g.toFun ⁻¹' st.2) '' (g.partition ×ˢ f.partition) := by
     intro u hu
-    unfold PiecewiseIsometry.refinedPartition at hu
+    unfold comp PiecewiseIsometry.comp PiecewiseIsometry.refinedPartitionPreimage at hu
     simp only [Set.mem_setOf_eq] at hu
     obtain ⟨s, hs, t, ht, rfl, _⟩ := hu
-    use (t, s)
-    simp [Set.mem_prod, ht, hs, Set.inter_comm]
+    use (s, t)
+    simp [Set.mem_prod, hs, ht]
   -- Now use that card of subset ≤ card of superset
   -- The refined partition is finite and is a subset of the image
   have h_card_le : (partition_finite (comp f g)).toFinset.card ≤
-      ((f.partition_finite.prod g.partition_finite).image (fun st => st.1 ∩ st.2)).toFinset.card := by
+      ((g.partition_finite.prod f.partition_finite).image (fun st => st.1 ∩ g.toFun ⁻¹' st.2)).toFinset.card := by
     apply Finset.card_le_card
     intro x hx
     simp only [Set.Finite.mem_toFinset] at hx ⊢
     exact h_subset hx
   -- The card of an image is at most the card of the domain
-  have h_image_card : ((f.partition_finite.prod g.partition_finite).image (fun st => st.1 ∩ st.2)).toFinset.card ≤
-      (f.partition_finite.prod g.partition_finite).toFinset.card := by
+  have h_image_card : ((g.partition_finite.prod f.partition_finite).image (fun st => st.1 ∩ g.toFun ⁻¹' st.2)).toFinset.card ≤
+      (g.partition_finite.prod f.partition_finite).toFinset.card := by
     classical
-    have h_finite_prod : (f.partition ×ˢ g.partition).Finite := f.partition_finite.prod g.partition_finite
+    have h_finite_prod : (g.partition ×ˢ f.partition).Finite := g.partition_finite.prod f.partition_finite
     rw [Set.Finite.toFinset_image _ h_finite_prod]
     apply Finset.card_image_le
   -- The card of a product is the product of cards
-  have h_prod_card : (f.partition_finite.prod g.partition_finite).toFinset.card =
-      f.partition_finite.toFinset.card * g.partition_finite.toFinset.card := by
+  have h_prod_card : (g.partition_finite.prod f.partition_finite).toFinset.card =
+      g.partition_finite.toFinset.card * f.partition_finite.toFinset.card := by
     classical
-    have : (f.partition_finite.prod g.partition_finite).toFinset = f.partition_finite.toFinset ×ˢ g.partition_finite.toFinset := by
+    have : (g.partition_finite.prod f.partition_finite).toFinset = g.partition_finite.toFinset ×ˢ f.partition_finite.toFinset := by
       ext x
       simp only [Set.Finite.mem_toFinset, Set.mem_prod, Finset.mem_product]
     rw [this]
     exact Finset.card_product _ _
   calc (partition_finite (comp f g)).toFinset.card
-      ≤ ((f.partition_finite.prod g.partition_finite).image (fun st => st.1 ∩ st.2)).toFinset.card := h_card_le
-    _ ≤ (f.partition_finite.prod g.partition_finite).toFinset.card := h_image_card
-    _ = f.partition_finite.toFinset.card * g.partition_finite.toFinset.card := h_prod_card
+      ≤ ((g.partition_finite.prod f.partition_finite).image (fun st => st.1 ∩ g.toFun ⁻¹' st.2)).toFinset.card := h_card_le
+    _ ≤ (g.partition_finite.prod f.partition_finite).toFinset.card := h_image_card
+    _ = g.partition_finite.toFinset.card * f.partition_finite.toFinset.card := h_prod_card
+    _ = f.card * g.card := by unfold card; ring
 
 end Composition
 
 section Iteration
 
 /-- The nth iterate of a finite piecewise isometry. -/
-def iterate [Nonempty α] (f : FinitePiecewiseIsometry α) : ℕ → FinitePiecewiseIsometry α
+def iterate [Nonempty α] [OpensMeasurableSpace α] (f : FinitePiecewiseIsometry α) : ℕ → FinitePiecewiseIsometry α
   | 0 => FinitePiecewiseIsometry.Constructors.mk_of_finset {Set.univ} (by simp [Finset.Nonempty])
       (by intro s hs; simp [Finset.coe_singleton] at hs; rw [hs]; exact MeasurableSet.univ)
       (by simp [Finset.coe_singleton, Set.sUnion_singleton])
@@ -276,7 +277,7 @@ def iterate [Nonempty α] (f : FinitePiecewiseIsometry α) : ℕ → FinitePiece
 notation:max f "^[" n "]" => iterate f n
 
 /-- The number of pieces in an iterate grows at most exponentially. -/
-theorem card_iterate_le [Nonempty α] (f : FinitePiecewiseIsometry α) (n : ℕ) :
+theorem card_iterate_le [Nonempty α] [OpensMeasurableSpace α] (f : FinitePiecewiseIsometry α) (n : ℕ) :
     (iterate f n).card ≤ f.card ^ n := by
   induction n with
   | zero =>
@@ -300,14 +301,14 @@ namespace Complexity
 
 /-- The combinatorial complexity of a finite piecewise isometry, measuring how the partition
 refines under iteration. -/
-noncomputable def complexity [Nonempty α] (f : FinitePiecewiseIsometry α) (n : ℕ) : ℕ :=
+noncomputable def complexity [Nonempty α] [OpensMeasurableSpace α] (f : FinitePiecewiseIsometry α) (n : ℕ) : ℕ :=
   (f.iterate n).card
 
 /-- Complexity grows at most exponentially in general.
 
 For any finite piecewise isometry, the complexity at step n (number of pieces in the nth iterate)
 is bounded by f.card^n. This follows directly from `card_iterate_le`. -/
-theorem complexity_exponential_bound [Nonempty α] (f : FinitePiecewiseIsometry α) (n : ℕ) :
+theorem complexity_exponential_bound [Nonempty α] [OpensMeasurableSpace α] (f : FinitePiecewiseIsometry α) (n : ℕ) :
     complexity f n ≤ f.card ^ n := by
   unfold complexity
   exact card_iterate_le f n
@@ -336,7 +337,7 @@ The axiom-free version requires the explicit hypothesis about bounded refinement
 **Edge case**: The bound uses `f.card + n * C`. When `f.card = 0` (empty partition, only possible
 for empty α), the base case gives 1 ≤ 0 which is false. To avoid this edge case, we assume
 `1 ≤ f.card`, which holds whenever α is nonempty (by `card_pos`). -/
-theorem complexity_linear_of_bounded_refinement [Nonempty α] (f : FinitePiecewiseIsometry α)
+theorem complexity_linear_of_bounded_refinement [Nonempty α] [OpensMeasurableSpace α] (f : FinitePiecewiseIsometry α)
     (C : ℕ)
     (h_card : 1 ≤ f.card)
     (h_bounded : ∀ m : ℕ, (f.iterate (m + 1)).card ≤ (f.iterate m).card + C) :
@@ -423,14 +424,20 @@ def FiniteMeasurePreservingPiecewiseIsometry.toMeasurePreserving
   measurable_toFun := f.measurable_toFun
   measure_preserving := f.measure_preserving
 
-/-- For finite partitions, measure preservation can be checked piece-by-piece. -/
+/-- For finite partitions, measure preservation can be checked piece-by-piece.
+
+This theorem states that if each partition piece has its measure preserved under the map
+(i.e., μ(f(s)) = μ(s) for each piece s), and if f is surjective, then f is measure-preserving.
+
+The surjectivity hypothesis is essential: without it, the map could fail to be onto, leaving
+some measurable sets with preimage measure not equal to their measure. -/
 theorem measurePreserving_of_pieces
     (f : FinitePiecewiseIsometry α) (h_meas : Measurable f.toFun)
-    (h_pieces : ∀ s ∈ f.partition, μ (f.toFun '' s) = μ s) :
+    (h_pieces : ∀ s ∈ f.partition, μ (f.toFun '' s) = μ s)
+    (h_surj : Function.Surjective f.toFun) :
     MeasureTheory.MeasurePreserving f.toFun μ μ := by
-  -- Use the piece-by-piece preservation from MeasurePreserving.lean
   -- The finite case follows from the general countable case
-  exact measurePreserving_of_pieces_preserved f.toPiecewiseIsometry h_meas h_pieces
+  exact PiecewiseIsometry.measurePreserving_of_pieces_preserved f.toPiecewiseIsometry h_meas h_pieces h_surj
 
 end MeasureTheoretic
 
