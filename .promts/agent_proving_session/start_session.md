@@ -87,11 +87,39 @@ You **must** use the lean-lsp MCP server. Research its capabilities before deplo
 - **`lean_state_search`** - Search for similar proof states in Mathlib
 
 #### **Build Management**
-- **`./check_lean.sh`** - **PRIMARY TOOL for build verification (USE THIS)**
-  - `--errors-only` mode for fast iteration (default choice)
-  - Shows complete diagnostics without clipping
-  - 99% token reduction vs raw lake build
-  - Use after every single code change
+- **`./check_lean.sh`** - **PRIMARY TOOL for all build verification and sorry tracking (USE THIS)**
+
+  **CRITICAL: This is your main tool for sorry elimination work. Use it at the start of every session.**
+
+  **Modes Available:**
+  - `--sorries` - **START HERE** - Shows sorry summary with theorem names and locations
+    - `./check_lean.sh --sorries TDCSG/YourFile.lean` - Check specific file
+    - `./check_lean.sh --all sorries TDCSG/` - Check ALL files (use at session start)
+    - Shows theorem names, line numbers, inline comments
+    - Use to prioritize work and verify progress
+
+  - `--errors-only` - Fast compilation verification (your iteration tool)
+    - `./check_lean.sh --errors-only TDCSG/YourFile.lean`
+    - Binary signal: compiles or doesn't
+    - 99% token reduction vs raw lake build
+    - Use after EVERY code change
+
+  - `--warnings-summary` - Intelligent warning triage
+    - `./check_lean.sh --warnings-summary TDCSG/YourFile.lean`
+    - Groups warnings by type (easy fixes, deprecations, etc.)
+    - Strips boilerplate linter notes
+    - 40-50% token reduction
+
+  - `--all <mode>` - Multi-file checking
+    - `./check_lean.sh --all errors-only TDCSG/` - Quick: all files compiling?
+    - `./check_lean.sh --all sorries TDCSG/` - Full: where are sorries?
+    - `./check_lean.sh --all warnings-summary TDCSG/` - Full: what warnings exist?
+    - Use before git commits and after major refactors
+
+  - Default mode (all diagnostics) - Rarely needed
+    - `./check_lean.sh TDCSG/YourFile.lean`
+    - Full warnings + errors with complete context
+
 - **`lean_build`** - Rebuild project and restart LSP server
   - Use only for major changes requiring full project rebuild
   - For normal iteration, use `./check_lean.sh --errors-only` instead
@@ -367,6 +395,17 @@ Give them focused tasks with clear deliverables. Synthesize their results.
 Reasonable recursion depth: ~3 levels.
 
 MANDATORY WORKFLOW:
+
+0. INITIAL SORRY SURVEY (FIRST STEP - ALWAYS START HERE):
+   - **IMMEDIATELY run:** `./check_lean.sh --all sorries TDCSG/`
+   - This shows ALL sorries across all files with theorem names and locations
+   - Identify which files have sorries and how many
+   - Read the inline comments to understand difficulty/status
+   - **For your assigned file:** Run `./check_lean.sh --sorries TDCSG/YourFile.lean`
+   - This gives detailed breakdown of sorries in your file
+   - **USE THIS to prioritize which sorries to attack**
+   - Verify current status matches your understanding
+   - This tool is THE source of truth for sorry tracking
 
 1. CONTEXT ACQUISITION (Before any proof attempts):
    - Read ALL imported files (project + Mathlib from .lake/packages/mathlib/Mathlib)

@@ -2,8 +2,9 @@
 
 ## Current Status
 
-**Remaining Sorries:** 4 across 1 file
+**Remaining Sorries:** 23 across 3 files
 **Build Status:** ✅ All files compile with zero errors
+**Check Status:** Run `./check_lean.sh --all sorries TDCSG/` to verify current sorry count
 
 ### Files by Status
 
@@ -13,10 +14,10 @@
 - [TDCSG/MeasurePreserving.lean](TDCSG/MeasurePreserving.lean) - Measure-theoretic properties (unprovable theorems removed with counter-examples documented)
 - [TDCSG/Composition.lean](TDCSG/Composition.lean) - Category structure, iterate_finite_discontinuities proven with injectivity hypothesis
 - [TDCSG/Finite.lean](TDCSG/Finite.lean) - Finite partition specializations (unprovable theorem removed with documentation)
-- [TDCSG/IntervalExchange.lean](TDCSG/IntervalExchange.lean) - ✅ **COMPLETE** - Core IET infrastructure fully proven (toPiecewiseIsometry, toFinitePiecewiseIsometry, intervals_cover, intervals_disjoint). Placeholder theorems removed for Mathlib compliance.
-- [TDCSG/Examples.lean](TDCSG/Examples.lean) - ✅ **COMPLETE** - All concrete examples with actual proofs. Placeholder theorems removed for Mathlib compliance.
 
 **In Progress:**
+- [TDCSG/IntervalExchange.lean](TDCSG/IntervalExchange.lean) - **15 sorries** - Core IET infrastructure (intervals_cover, intervals_disjoint partially complete, many TODO items)
+- [TDCSG/Examples.lean](TDCSG/Examples.lean) - **4 sorries** - Concrete examples need completion
 - [TDCSG/Ergodic.lean](TDCSG/Ergodic.lean) - **4 sorries** - All research-level, ergodic_of_minimal 70-80% complete (as of 2025-10-17)
 
 ---
@@ -368,25 +369,52 @@ import Mathlib.Analysis.NormedSpace.PiLp  -- For PiLp 2 (Euclidean space)
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic  -- For cos/sin
 ```
 
-### Build Tool Usage
+### Build Tool Usage - CRITICAL FOR SORRY ELIMINATION
 
-**Primary Build Verification:**
+**⚠️ ALWAYS use `check_lean.sh` - Never use raw `lake build` or `lean` commands**
+
+The `check_lean.sh` tool provides intelligent diagnostic filtering with 99% token reduction while ensuring no diagnostics are clipped. **This is the primary tool for all sorry elimination work.**
+
+**Check Sorry Status (START HERE):**
+```bash
+./check_lean.sh --all sorries TDCSG/          # Check all files for sorries
+./check_lean.sh --sorries TDCSG/FileName.lean # Check specific file
+```
+- Shows theorem names, line numbers, and inline comments
+- Use at start of session to prioritize work
+- Use after completing sorries to verify progress
+
+**Verify Compilation (Use After EVERY Code Change):**
 ```bash
 ./check_lean.sh --errors-only TDCSG/FileName.lean
 ```
+- Binary signal: compiles or doesn't
+- Full error context when it fails
 - 99% token reduction vs. raw `lake build`
-- Shows complete diagnostics without clipping
-- Use after EVERY code change
 
-**Full Diagnostics (when checking warnings):**
+**Triage Warnings:**
 ```bash
-./check_lean.sh TDCSG/FileName.lean
+./check_lean.sh --warnings-summary TDCSG/FileName.lean
+```
+- Groups warnings by type (easy fixes, deprecations, etc.)
+- Strips boilerplate linter notes
+- 40-50% token reduction vs. full diagnostics
+
+**Multi-File Verification:**
+```bash
+./check_lean.sh --all errors-only TDCSG/      # Quick: Are all files compiling?
+./check_lean.sh --all warnings-summary TDCSG/ # Full: What warnings exist?
+```
+- Project-wide status in one command
+- Use before git commits
+- Use after major refactors
+
+**Full Diagnostics (Rarely Needed):**
+```bash
+./check_lean.sh TDCSG/FileName.lean  # All warnings + errors with full context
 ```
 
-**Full Project Build (rare, for major changes):**
-```bash
-lake build
-```
+**See [CHECK_LEAN_TOOL.md](CHECK_LEAN_TOOL.md) for complete documentation.**
 
 ### Lean-LSP MCP Tool Patterns
 
@@ -408,27 +436,39 @@ lake build
 
 ## Remaining Sorry Inventory
 
-### IntervalExchange.lean - ✅ COMPLETE (0 sorries)
-**Completed:** 2025-10-17
-- All core IET infrastructure proven with rigorous Lean proofs
-- Research-level theorems converted to placeholder definitions (`True`)
-- Zero errors, zero warnings in build
+**Always verify current status with:**
+```bash
+./check_lean.sh --all sorries TDCSG/
+```
 
-### Examples.lean - ✅ COMPLETE (0 sorries)
-**Completed:** 2025-10-17
-- All concrete piecewise isometry examples fully proven
-- Impossible theorems (metric mismatches) documented and resolved
-- Zero errors, zero warnings in build
+### IntervalExchange.lean (15 sorries)
+Run `./check_lean.sh --sorries TDCSG/IntervalExchange.lean` for detailed breakdown.
 
-### Ergodic.lean (4 sorries) - ONLY REMAINING FILE
-- `TDCSG/Ergodic.lean:320` - ergodic_iff_irreducible (forward direction) - 1-2 weeks with key lemma
-- `TDCSG/Ergodic.lean:391` - MASUR-VEECH: Requires years of Teichmüller theory formalization
-- `TDCSG/Ergodic.lean:522` - KEANE: Requires 1-2 months ergodic decomposition formalization
-- `TDCSG/Ergodic.lean:672` - **ergodic_of_minimal: 40% COMPLETE, 3-5 days to finish, HIGHEST PRIORITY**
+Key blockers:
+- intervals_cover (lines 105-193): 2 sorries in proof
+- domainRight_le_domainLeft_of_lt (line 196): Fin sum inequality lemmas
+- Multiple TODO items related to MeasureSpace instances and type mismatches
 
-**Total Count:** 4 sorries remaining (down from 32 original)
-**Completion Status:** 87.5% complete (28 sorries eliminated)
-**Files Complete:** 7 of 8 files have zero sorries
+### Examples.lean (4 sorries)
+Run `./check_lean.sh --sorries TDCSG/Examples.lean` for detailed breakdown.
+
+Key blockers:
+- simple_two_IET_discontinuity (line 192): Requires partition structure
+- simple_two_IET_is_rotation (line 201): Requires IET.toFun implementation
+- double_rotation_discontinuity (line 301): Requires frontier computation
+- two_IET_period_two (line 827): Requires iterated_two_IET implementation
+
+### Ergodic.lean (4 sorries)
+Run `./check_lean.sh --sorries TDCSG/Ergodic.lean` for detailed breakdown.
+
+- Line 320: ergodic_iff_irreducible (forward direction) - 1-2 weeks with key lemma
+- Line 391: MASUR-VEECH - Requires years of Teichmüller theory formalization
+- Line 522: KEANE - Requires 1-2 months ergodic decomposition formalization
+- Line 756: **ergodic_of_minimal - 70-80% COMPLETE, HIGHEST PRIORITY**
+
+**Total Count:** 23 sorries remaining
+**Completion Status:** 62.5% complete (5 of 8 files have zero sorries)
+**Files Complete:** Basic, Properties, MeasurePreserving, Composition, Finite
 
 ---
 
