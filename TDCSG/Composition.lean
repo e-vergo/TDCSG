@@ -151,32 +151,82 @@ end Refinement
 
 section Measurability
 
-/-- A piecewise isometry is measurable under OpensMeasurableSpace.
+/-- Helper lemma: isometry on a set implies continuity on that set. -/
+theorem isometry_on_continuous {s : Set α} {f : α → α}
+    (h_iso : ∀ x ∈ s, ∀ y ∈ s, dist (f x) (f y) = dist x y) :
+    ContinuousOn f s := by
+  intro x hx
+  rw [Metric.continuousWithinAt_iff]
+  intro ε hε
+  use ε, hε
+  intro y hy_s hy_dist
+  calc dist (f y) (f x) = dist y x := h_iso y hy_s x hx
+    _ < ε := hy_dist
 
-MATHEMATICAL JUSTIFICATION:
-- f is an isometry (hence continuous) when restricted to each piece s ∈ partition
-- For any measurable set U, we have f⁻¹(U) = ⋃_{s ∈ partition} (f⁻¹(U) ∩ s)
-- Each s is measurable by partition_measurable
-- Challenge: showing f⁻¹(U) ∩ s is measurable for each s
+/-- Key lemma: continuous on a measurable set implies measurable preimage restricted to that set.
 
-BLOCKING ISSUE: Requires a Mathlib lemma of the form:
-  "If f : α → β is continuous on a measurable set s, and U is measurable, then f⁻¹(U) ∩ s is measurable"
-This is a standard result in measure theory but may need to be added to Mathlib.
+This uses the fact that the restriction to a measurable subtype is a measurable embedding. -/
+theorem continuousOn_measurableSet_preimage [BorelSpace α] {f : α → α} {s U : Set α}
+    (hf : ContinuousOn f s) (hs : MeasurableSet s) (hU : IsOpen U) :
+    MeasurableSet (f ⁻¹' U ∩ s) := by
+  -- The restriction f|s : s → α is continuous
+  have g_cont : Continuous (s.restrict f) := continuousOn_iff_continuous_restrict.1 hf
+  -- Therefore f|s is measurable
+  have g_meas : Measurable (s.restrict f) := g_cont.measurable
+  -- The preimage (f|s)⁻¹(U) is measurable
+  have : MeasurableSet ((s.restrict f) ⁻¹' U) := g_meas hU.measurableSet
+  -- Subtype.val : s → α is a measurable embedding when s is measurable
+  have coe_emb : MeasurableEmbedding (Subtype.val : s → α) := MeasurableEmbedding.subtype_coe hs
+  -- The key identity: f⁻¹(U) ∩ s = Subtype.val '' ((f|s)⁻¹(U))
+  have key : f ⁻¹' U ∩ s = Subtype.val '' ((s.restrict f) ⁻¹' U) := by
+    ext x
+    simp only [Set.mem_inter_iff, Set.mem_preimage, Set.mem_image, Set.restrict_apply]
+    constructor
+    · intro ⟨hfx, hxs⟩
+      exact ⟨⟨x, hxs⟩, hfx, rfl⟩
+    · intro ⟨y, hfy, hyx⟩
+      cases y with | mk val prop =>
+      subst hyx
+      exact ⟨hfy, prop⟩
+  rw [key]
+  -- Apply measurable embedding property
+  exact coe_emb.measurableSet_image.mpr this
 
-Alternatively, may require BorelSpace α instead of just OpensMeasurableSpace α. -/
-theorem piecewiseIsometry_measurable [OpensMeasurableSpace α] (f : PiecewiseIsometry α) :
+/-- A piecewise isometry is measurable under BorelSpace.
+
+PROOF STRATEGY:
+- Decompose f⁻¹(U) as the union over partition pieces: f⁻¹(U) = ⋃_{s ∈ partition} (f⁻¹(U) ∩ s)
+- On each piece s, f is an isometry, hence continuous on s
+- Use continuousOn_measurableSet_preimage to show f⁻¹(U) ∩ s is measurable
+- Apply countable union to conclude f⁻¹(U) is measurable
+- Use measurable_of_isOpen to conclude f is measurable
+
+TECHNICAL NOTE: This requires BorelSpace α (not just OpensMeasurableSpace α) to ensure
+that continuous functions on subtypes are measurable. -/
+theorem piecewiseIsometry_measurable [BorelSpace α] (f : PiecewiseIsometry α) :
     Measurable f.toFun := by
-  /- PROOF ATTEMPT HISTORY
-
-  Attempt 1 [2025-10-16]:
-  Strategy: Decompose f⁻¹(U) = ⋃_{s ∈ partition} (f⁻¹(U) ∩ s), apply MeasurableSet.biUnion
-  Failure: Cannot show f⁻¹(U) ∩ s is measurable without stronger lemmas
-  Lesson: Need Mathlib support for measurability of restrictions or stronger type class
-
-  CURRENT STATUS: Blocked on Mathlib infrastructure.
-  This theorem is essential for composition to be well-defined.
-  -/
-  sorry
+  apply measurable_of_isOpen
+  intro U hU
+  -- Decompose f⁻¹(U) as union over partition pieces
+  have decomp : f.toFun ⁻¹' U = ⋃ s ∈ f.partition, (f.toFun ⁻¹' U ∩ s) := by
+    ext x
+    simp only [Set.mem_preimage, Set.mem_iUnion]
+    constructor
+    · intro hx
+      -- x is in some piece of the partition
+      have : x ∈ ⋃₀ f.partition := by rw [f.partition_cover]; trivial
+      obtain ⟨s, hs, hxs⟩ := this
+      exact ⟨s, hs, hx, hxs⟩
+    · intro ⟨s, hs, hxU, hxs⟩
+      exact hxU
+  rw [decomp]
+  -- Apply countable union
+  apply MeasurableSet.biUnion f.partition_countable
+  intro s hs
+  -- On s, f is an isometry, hence continuous
+  have f_cont_s : ContinuousOn f.toFun s := isometry_on_continuous (f.isometry_on_pieces s hs)
+  -- Therefore f⁻¹(U) ∩ s is measurable
+  exact continuousOn_measurableSet_preimage f_cont_s (f.partition_measurable s hs) hU
 
 end Measurability
 
@@ -206,7 +256,7 @@ section Composition
 
 The composition `f.comp g` applies `g` first, then `f`. The resulting partition uses
 preimage-based refinement to ensure g maps each refined piece into a single piece of f's partition. -/
-def comp [OpensMeasurableSpace α] (f g : PiecewiseIsometry α) : PiecewiseIsometry α where
+def comp [BorelSpace α] (f g : PiecewiseIsometry α) : PiecewiseIsometry α where
   partition := refinedPartitionPreimage g.partition f.partition g.toFun
   partition_measurable := by
     apply refinedPartitionPreimage_measurable
@@ -243,7 +293,7 @@ def comp [OpensMeasurableSpace α] (f g : PiecewiseIsometry α) : PiecewiseIsome
 
 /-- Function application for composition. -/
 @[simp]
-theorem comp_apply [OpensMeasurableSpace α] (f g : PiecewiseIsometry α) (x : α) :
+theorem comp_apply [BorelSpace α] (f g : PiecewiseIsometry α) (x : α) :
     (f.comp g) x = f (g x) := rfl
 
 /-! ### Note on Extensionality
@@ -264,7 +314,7 @@ unprovable theorem. Lean's default structural equality is the correct notion.
 -/
 
 /-- Composition is associative. -/
-theorem comp_assoc [OpensMeasurableSpace α] (f g h : PiecewiseIsometry α) :
+theorem comp_assoc [BorelSpace α] (f g h : PiecewiseIsometry α) :
     (f.comp g).comp h = f.comp (g.comp h) := by
   -- The functions are definitionally equal (function composition is associative)
   have h_toFun : ((f.comp g).comp h).toFun = (f.comp (g.comp h)).toFun := by
@@ -344,7 +394,7 @@ theorem comp_assoc [OpensMeasurableSpace α] (f g h : PiecewiseIsometry α) :
   exact ext_partition_toFun h_partition h_toFun
 
 /-- Left identity for composition. -/
-theorem comp_id_left [Nonempty α] [OpensMeasurableSpace α] (f : PiecewiseIsometry α) :
+theorem comp_id_left [Nonempty α] [BorelSpace α] (f : PiecewiseIsometry α) :
     id.comp f = f := by
   -- Since there's no extensionality lemma for PiecewiseIsometry, we need to prove
   -- that the two structures have identical fields.
@@ -379,7 +429,7 @@ theorem comp_id_left [Nonempty α] [OpensMeasurableSpace α] (f : PiecewiseIsome
   exact ext_partition_toFun h_partition h_toFun
 
 /-- Right identity for composition. -/
-theorem comp_id_right [Nonempty α] [OpensMeasurableSpace α] (f : PiecewiseIsometry α) :
+theorem comp_id_right [Nonempty α] [BorelSpace α] (f : PiecewiseIsometry α) :
     f.comp id = f := by
   -- Show the partitions are equal
   -- refinedPartitionPreimage id.partition f.partition id.toFun = f.partition
@@ -419,27 +469,27 @@ section Iteration
 /-- The nth iterate of a piecewise isometry.
 
 `iterate f n` applies `f` a total of `n` times. By convention, `iterate f 0` is the identity. -/
-def iterate [Nonempty α] [OpensMeasurableSpace α] (f : PiecewiseIsometry α) : ℕ → PiecewiseIsometry α
+def iterate [Nonempty α] [BorelSpace α] (f : PiecewiseIsometry α) : ℕ → PiecewiseIsometry α
   | 0 => id
   | n + 1 => f.comp (iterate f n)
 
 /-- Characterization of iterate at successor. -/
-theorem iterate_succ [Nonempty α] [OpensMeasurableSpace α] (f : PiecewiseIsometry α) (n : ℕ) :
+theorem iterate_succ [Nonempty α] [BorelSpace α] (f : PiecewiseIsometry α) (n : ℕ) :
     iterate f (n + 1) = f.comp (iterate f n) := rfl
 
 /-- Iterate at zero is identity. -/
 @[simp]
-theorem iterate_zero_eq [Nonempty α] [OpensMeasurableSpace α] (f : PiecewiseIsometry α) :
+theorem iterate_zero_eq [Nonempty α] [BorelSpace α] (f : PiecewiseIsometry α) :
     iterate f 0 = id := rfl
 
 /-- Iterate at one is the original map. -/
 @[simp]
-theorem iterate_one [Nonempty α] [OpensMeasurableSpace α] (f : PiecewiseIsometry α) :
+theorem iterate_one [Nonempty α] [BorelSpace α] (f : PiecewiseIsometry α) :
     iterate f 1 = f := by
   rw [iterate_succ, iterate_zero_eq, comp_id_right]
 
 /-- Function application for iteration. -/
-theorem iterate_apply [Nonempty α] [OpensMeasurableSpace α] (f : PiecewiseIsometry α) (n : ℕ) (x : α) :
+theorem iterate_apply [Nonempty α] [BorelSpace α] (f : PiecewiseIsometry α) (n : ℕ) (x : α) :
     (iterate f n) x = (f.toFun^[n]) x := by
   induction n with
   | zero =>
@@ -451,7 +501,7 @@ theorem iterate_apply [Nonempty α] [OpensMeasurableSpace α] (f : PiecewiseIsom
     simp [Function.iterate_succ_apply']
 
 /-- Iteration adds exponents. -/
-theorem iterate_add [Nonempty α] [OpensMeasurableSpace α] (f : PiecewiseIsometry α) (m n : ℕ) :
+theorem iterate_add [Nonempty α] [BorelSpace α] (f : PiecewiseIsometry α) (m n : ℕ) :
     iterate f (m + n) = (iterate f m).comp (iterate f n) := by
   induction m with
   | zero =>
@@ -461,13 +511,13 @@ theorem iterate_add [Nonempty α] [OpensMeasurableSpace α] (f : PiecewiseIsomet
     rw [Nat.succ_add, iterate_succ, iterate_succ, ih, comp_assoc]
 
 /-- Each iterate preserves the isometry property. -/
-theorem iterate_isometry_on_pieces [Nonempty α] [OpensMeasurableSpace α] (f : PiecewiseIsometry α) (n : ℕ) (s : Set α)
+theorem iterate_isometry_on_pieces [Nonempty α] [BorelSpace α] (f : PiecewiseIsometry α) (n : ℕ) (s : Set α)
     (hs : s ∈ (iterate f n).partition) (x y : α) (hx : x ∈ s) (hy : y ∈ s) :
     dist ((iterate f n) x) ((iterate f n) y) = dist x y :=
   (iterate f n).dist_eq_on_piece s hs x y hx hy
 
 /-- The underlying function of an iterate is the composition of the underlying functions. -/
-theorem iterate_toFun [Nonempty α] [OpensMeasurableSpace α] (f : PiecewiseIsometry α) (n : ℕ) :
+theorem iterate_toFun [Nonempty α] [BorelSpace α] (f : PiecewiseIsometry α) (n : ℕ) :
     (iterate f n).toFun = f.toFun^[n] := by
   ext x
   exact iterate_apply f n x
@@ -477,14 +527,14 @@ end Iteration
 section CompositionProperties
 
 /-- Composition preserves distance on refined pieces. -/
-theorem comp_dist_eq [OpensMeasurableSpace α] (f g : PiecewiseIsometry α) (x y : α)
+theorem comp_dist_eq [BorelSpace α] (f g : PiecewiseIsometry α) (x y : α)
     (h : ∃ s ∈ (f.comp g).partition, x ∈ s ∧ y ∈ s) :
     dist ((f.comp g) x) ((f.comp g) y) = dist x y := by
   obtain ⟨s, hs, hxs, hys⟩ := h
   exact (f.comp g).isometry_on_pieces s hs x hxs y hys
 
 /-- The discontinuity set of a composition is contained in the union of discontinuity sets. -/
-theorem discontinuitySet_comp_subset [OpensMeasurableSpace α] (f g : PiecewiseIsometry α) :
+theorem discontinuitySet_comp_subset [BorelSpace α] (f g : PiecewiseIsometry α) :
     (f.comp g).discontinuitySet ⊆
       f.discontinuitySet ∪ (g.toFun ⁻¹' f.discontinuitySet) ∪ g.discontinuitySet := by
   -- discontinuitySet = union of frontiers of partition pieces
@@ -626,7 +676,7 @@ end CompositionProperties
 section IterationProperties
 
 /-- The discontinuity set of an iterate grows with iteration. -/
-theorem discontinuitySet_iterate [Nonempty α] [OpensMeasurableSpace α] (f : PiecewiseIsometry α) (n : ℕ) :
+theorem discontinuitySet_iterate [Nonempty α] [BorelSpace α] (f : PiecewiseIsometry α) (n : ℕ) :
     (iterate f n).discontinuitySet ⊆ ⋃ k < n, f.toFun^[k] ⁻¹' f.discontinuitySet := by
   induction n with
   | zero =>
@@ -667,7 +717,7 @@ theorem discontinuitySet_iterate [Nonempty α] [OpensMeasurableSpace α] (f : Pi
       use k, Nat.lt_trans hk_lt (Nat.lt_succ_self n)
 
 /-- If f has finitely many discontinuities, so does each iterate (though possibly more). -/
-theorem iterate_finite_discontinuities [Nonempty α] [OpensMeasurableSpace α] (f : PiecewiseIsometry α) (n : ℕ)
+theorem iterate_finite_discontinuities [Nonempty α] [BorelSpace α] (f : PiecewiseIsometry α) (n : ℕ)
     (hf : f.discontinuitySet.Finite) :
     (iterate f n).discontinuitySet.Finite := by
   -- Use discontinuitySet_iterate: (iterate f n).discontinuitySet ⊆ ⋃ k < n, f^[k]⁻¹(f.discontinuitySet)

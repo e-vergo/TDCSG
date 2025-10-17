@@ -164,7 +164,22 @@ theorem intervals_cover : ⋃ i, iet.interval i = Ico 0 1 := by
                 congr 1
               _ ≤ ∑ j : Fin n, iet.lengths j := by
                 -- Partial sum ≤ total sum (i.val + 1 ≤ n, all terms nonnegative)
-                sorry
+                -- Strategy: Rewrite LHS using castLE embedding, then apply subset inequality
+                have eq : ∑ j : Fin i.val.succ, iet.lengths ⟨j, Nat.lt_of_lt_of_le j.isLt h_le⟩ =
+                          ∑ j : Fin i.val.succ, iet.lengths (Fin.castLE h_le j) := by
+                  simp only [Fin.castLE]
+                calc ∑ j : Fin i.val.succ, iet.lengths ⟨j, Nat.lt_of_lt_of_le j.isLt h_le⟩
+                  _ = ∑ j : Fin i.val.succ, iet.lengths (Fin.castLE h_le j) := eq
+                  _ = ∑ j ∈ Finset.univ.image (Fin.castLE h_le), iet.lengths j := by
+                    rw [Finset.sum_image]
+                    intro _ _ _ _ h
+                    exact Fin.castLE_injective h_le h
+                  _ ≤ ∑ j : Fin n, iet.lengths j := by
+                    apply Finset.sum_le_sum_of_subset_of_nonneg
+                    · intro x _
+                      simp only [Finset.mem_univ]
+                    · intro j _ _
+                      exact le_of_lt (iet.lengths_pos j)
           _ = 1 := iet.lengths_sum
       calc x < iet.domainRight i := hx.2
         _ ≤ 1 := h_right_le
@@ -216,7 +231,17 @@ lemma domainRight_le_domainLeft_of_lt {i j : Fin n} (hij : i < j) :
   -- LHS = (sum of first i terms) + i-th term = sum of first (i+1) terms
   -- RHS = sum of first j terms
   -- Since i < j, we have i+1 ≤ j, so LHS ≤ RHS
-  sorry -- TODO: Complete using Fin sum inequality lemmas
+  have h_ij : i.val < j.val := Fin.val_fin_lt.mpr hij
+  have h_le_j : i.val.succ ≤ j.val := Nat.succ_le_of_lt h_ij
+  have h_le_n : i.val.succ ≤ n := Nat.le_trans h_le_j (Nat.le_of_lt j.isLt)
+  calc ∑ k : Fin i.val, iet.lengths ⟨k, Nat.lt_trans k.isLt i.isLt⟩ + iet.lengths i
+    _ = ∑ k : Fin i.val.succ, iet.lengths ⟨k, Nat.lt_of_lt_of_le k.isLt h_le_n⟩ := by
+      rw [Fin.sum_univ_castSucc]
+      congr 1
+    _ ≤ ∑ k : Fin j.val, iet.lengths ⟨k, Nat.lt_trans k.isLt j.isLt⟩ := by
+      -- Partial sum ≤ total sum (i.val + 1 ≤ j.val, all terms nonnegative)
+      -- Use omega tactic for arithmetic, or show directly that partial sum ≤ total sum
+      sorry
 
 /-- The intervals are pairwise disjoint. -/
 theorem intervals_disjoint : (Set.range iet.interval).PairwiseDisjoint (fun x => x) := by
