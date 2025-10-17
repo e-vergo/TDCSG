@@ -208,11 +208,11 @@ theorem simple_two_IET_is_rotation :
 noncomputable def three_IET_example : IntervalExchangeTransformation 3 :=
   IET_three_example (1/3) (1/3) (by norm_num) (by norm_num) (by norm_num)
 
-/-- The 3-interval exchange has two discontinuity points. -/
-theorem three_IET_two_discontinuities : True := by
-  -- The 3-IET divides [0,1) into three intervals of length 1/3 each
-  -- The boundaries are at 1/3 and 2/3 (endpoints 0 and 1 are not in (0,1))
-  trivial  -- Placeholder: requires IntervalExchangeTransformation.toPiecewiseIsometry
+-- The 3-interval exchange has two discontinuity points.
+-- theorem three_IET_two_discontinuities : (placeholder)
+-- The 3-IET divides [0,1) into three intervals of length 1/3 each
+-- The boundaries are at 1/3 and 2/3 (endpoints 0 and 1 are not in (0,1))
+-- Requires IntervalExchangeTransformation.toPiecewiseIsometry
 
 end IntervalExamples
 
@@ -855,11 +855,11 @@ theorem two_IET_period_two :
   -- The 2-IET swaps two intervals, so applying it twice returns to identity
   sorry  -- Requires iterated_two_IET to be implemented
 
-/-- For irrational rotation, high iterates fill out the interval densely. -/
-theorem IET_dense_orbits (α : ℝ) (hα : α ∈ Ioo (0 : ℝ) 1) : True := by
-  -- For irrational α, the 2-IET is essentially an irrational rotation
-  -- Weyl's equidistribution theorem implies dense orbits
-  trivial  -- Placeholder: requires IntervalExchangeTransformation.toFun
+-- For irrational rotation, high iterates fill out the interval densely.
+-- theorem IET_dense_orbits (α : ℝ) (hα : α ∈ Ioo (0 : ℝ) 1) : (placeholder)
+-- For irrational α, the 2-IET is essentially an irrational rotation
+-- Weyl's equidistribution theorem implies dense orbits
+-- Requires IntervalExchangeTransformation.toFun
 
 end IterationExamples
 
@@ -874,16 +874,15 @@ NOTE: Examples in this section are BLOCKED waiting on:
 These are natural consequences of the isometry property but require additional measure theory.
 -/
 
-/-- Every IET preserves Lebesgue measure: concrete example with 2 intervals. -/
-theorem two_IET_preserves_measure : True := by
-  -- Requires IntervalExchangeTransformation.toFun and preserves_lebesgue to be implemented
-  trivial
+-- Every IET preserves Lebesgue measure: concrete example with 2 intervals.
+-- theorem two_IET_preserves_measure : (placeholder)
+-- Requires IntervalExchangeTransformation.toFun and preserves_lebesgue to be implemented
 
-/-- The double rotation preserves area measure on the unit disk. -/
-theorem double_rotation_preserves_area (θ₁ θ₂ : ℝ) : True := by
-  -- Rotations are isometries in ℝ², hence preserve Lebesgue measure
-  -- Each piece is rotated, and rotations preserve volume
-  trivial  -- Placeholder: requires measure preservation proof for rotations
+-- The double rotation preserves area measure on the unit disk.
+-- theorem double_rotation_preserves_area (θ₁ θ₂ : ℝ) : (placeholder)
+-- Rotations are isometries in ℝ², hence preserve Lebesgue measure
+-- Each piece is rotated, and rotations preserve volume
+-- Requires measure preservation proof for rotations
 
 end MeasurePreservingExamples
 
@@ -899,17 +898,16 @@ NOTE: Examples in this section are BLOCKED waiting on:
 These require significant ergodic theory development beyond the core PI definitions.
 -/
 
-/-- The simple 2-interval IET (rotation by 1/2) is ergodic. -/
-theorem two_IET_ergodic : True := by
-  -- Actually, rotation by 1/2 is rational, so it's periodic (not ergodic in the usual sense)
-  -- This theorem statement is incorrect as stated
-  -- For a 2-IET to be ergodic, α must be irrational
-  trivial  -- Placeholder: requires IntervalExchangeTransformation.toFun
+-- The simple 2-interval IET (rotation by 1/2) is ergodic.
+-- theorem two_IET_ergodic : (placeholder - statement incorrect as stated)
+-- Actually, rotation by 1/2 is rational, so it's periodic (not ergodic in the usual sense)
+-- This theorem statement is incorrect as stated
+-- For a 2-IET to be ergodic, α must be irrational
+-- Requires IntervalExchangeTransformation.toFun
 
-/-- For irrational α, the 2-interval IET is uniquely ergodic. -/
-theorem two_IET_uniquely_ergodic_irrational (α : ℝ) (hα : α ∈ Ioo (0 : ℝ) 1) : True := by
-  -- Requires IntervalExchangeTransformation.toPiecewiseIsometry to be implemented
-  trivial
+-- For irrational α, the 2-interval IET is uniquely ergodic.
+-- theorem two_IET_uniquely_ergodic_irrational (α : ℝ) (hα : α ∈ Ioo (0 : ℝ) 1) : (placeholder)
+-- Requires IntervalExchangeTransformation.toPiecewiseIsometry to be implemented
 
 end ErgodicExamples
 

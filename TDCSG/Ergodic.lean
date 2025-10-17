@@ -316,6 +316,19 @@ REQUIRED MATHLIB ADDITIONS:
 
     ESTIMATED GAP: 1-2 weeks formalization work
     FEASIBILITY: Achievable with current Mathlib infrastructure
+
+    DETAILED ANALYSIS [2025-10-17, Agent Session]:
+    Attempted to prove frequently_visiting_set_invariant:
+    - Forward inclusion f⁻¹(B) ⊆ B is straightforward (shift indices)
+    - Backward inclusion B ⊆ f⁻¹(B) requires: if x visits s infinitely often, then f(x) visits s infinitely often
+    - The challenge: from "x visits s at times n₁, n₂, ..." we need "f(x) visits s infinitely often"
+    - Poincaré recurrence gives: for a.e. x ∈ s, the orbit returns infinitely often
+    - But this is an a.e. statement, not a pointwise statement for all x
+    - Need to bridge: a.e. recurrence → exact set invariance
+    - Possible approach: define B using essential closure or work mod null sets throughout
+    - Alternative: prove a version of ergodicity that works with invariance a.e. (may already exist?)
+
+    BLOCKER: Exact invariance f⁻¹(B) = B vs invariance a.e. f⁻¹(B) = B (mod null sets)
     -/
     sorry
   · -- Backward: Irreducible → Ergodic
@@ -741,8 +754,45 @@ theorem ergodic_of_minimal [OpensMeasurableSpace α] [BorelSpace α]
   --   then the intersection s ∩ V has positive measure (or is empty).
   --
   -- This would follow from:
-  --   Dense.exists_mem_open : orbit hits every nonempty open set
+  --   Dense.exists_mem_open : orbit hits every nonempty open set (✓ AVAILABLE in Mathlib)
   --   Combined with: positive measure implies existence of a point in the topological support
+  --
+  -- DETAILED ANALYSIS [2025-10-17, Agent Session]:
+  -- Key insight discovered: Since orbit of x ∈ s is dense and s is invariant, s itself is dense!
+  -- Proof: orbit ⊆ s (by invariance), closure(orbit) = whole space (by minimality),
+  --        so closure(s) = whole space (s is dense).
+  -- Similarly, sᶜ is invariant (complementarity of invariant sets) and any y ∈ sᶜ has dense orbit,
+  -- so sᶜ is also dense.
+  --
+  -- Therefore: Both s and sᶜ are dense, disjoint, with positive measure.
+  -- This is NOT immediately contradictory (e.g., consider dense G_δ sets in [0,1] with Lebesgue measure).
+  --
+  -- The missing ingredient is a theorem of the form:
+  --   "In a metric space with a regular Borel measure, if a dense set has positive measure
+  --    and its orbit under a measure-preserving map stays within it, then [something stronger]."
+  --
+  -- Or equivalently:
+  --   "Dense orbits must have positive intersection with every set of positive measure."
+  --
+  -- This is a DEEP result connecting topological dynamics (density) with measure theory (positivity).
+  -- Classical proofs use:
+  --   - Poincaré recurrence (available via Conservative.ae_frequently_mem_of_mem_nhds)
+  --   - Baire category theorem + measure regularity (partially available, needs integration)
+  --   - Polish space structure (not assumed in current theorem statement)
+  --
+  -- AVAILABLE infrastructure:
+  --   - Dense.exists_mem_open : dense sets hit open sets (Mathlib.Topology.Closure)
+  --   - Measure.support theory (Mathlib.MeasureTheory.Measure.Support)
+  --   - Conservative.ae_frequently_mem_of_mem_nhds : Poincaré recurrence
+  --   - MeasurePreserving.conservative : measure-preserving ⟹ conservative
+  --
+  -- MISSING infrastructure:
+  --   - Lemma: dense orbit + invariant set + positive measure ⟹ orbit hits the set with positive frequency
+  --   - OR: Baire category + measure theory ⟹ nowhere dense sets have measure zero (FALSE in general!)
+  --   - OR: Polish space structure + above assumptions ⟹ contradiction
+  --
+  -- RECOMMENDATION: Add [SecondCountableTopology α] and formalize the missing lemma connecting
+  --                 dense orbits with measure-theoretic hitting times.
   --
   -- CLASSIFICATION: Hard but achievable
   -- ESTIMATED TIME: 1-2 weeks with proper Mathlib infrastructure

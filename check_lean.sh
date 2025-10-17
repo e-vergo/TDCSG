@@ -7,6 +7,7 @@
 #   ./check_lean.sh --errors-only <filename>        # Show ONLY errors
 #   ./check_lean.sh --sorries <filename>            # Show sorry summary
 #   ./check_lean.sh --warnings-summary <filename>   # Show warning summary
+#   ./check_lean.sh --transparency <filename>       # Check for proof evasion
 #   ./check_lean.sh --all <mode> <directory>        # Check all files in directory
 #
 # Examples:
@@ -14,7 +15,9 @@
 #   ./check_lean.sh --errors-only TDCSG/Composition.lean
 #   ./check_lean.sh --sorries TDCSG/Ergodic.lean
 #   ./check_lean.sh --warnings-summary TDCSG/Composition.lean
+#   ./check_lean.sh --transparency TDCSG/Ergodic.lean
 #   ./check_lean.sh --all errors-only TDCSG/
+#   ./check_lean.sh --all transparency TDCSG/
 #
 # Returns:
 #   - Exit code 0 if no issues found
@@ -37,6 +40,7 @@ show_usage() {
     echo "  --errors-only       Show only errors (no warnings)" >&2
     echo "  --sorries           Show sorry summary with theorem names" >&2
     echo "  --warnings-summary  Show warning summary grouped by type" >&2
+    echo "  --transparency      Check for proof evasion patterns" >&2
     echo "  --all <mode>        Check all .lean files in directory" >&2
     echo "" >&2
     echo "Examples:" >&2
@@ -44,8 +48,10 @@ show_usage() {
     echo "  $0 --errors-only TDCSG/Composition.lean" >&2
     echo "  $0 --sorries TDCSG/Ergodic.lean" >&2
     echo "  $0 --warnings-summary TDCSG/Composition.lean" >&2
+    echo "  $0 --transparency TDCSG/Ergodic.lean" >&2
     echo "  $0 --all errors-only TDCSG/" >&2
     echo "  $0 --all sorries TDCSG/" >&2
+    echo "  $0 --all transparency TDCSG/" >&2
     exit 2
 }
 
@@ -88,11 +94,11 @@ if [ "$MODE" = "--all" ]; then
 
     # Validate submode
     case "$SUBMODE" in
-        errors-only|warnings|sorries|warnings-summary)
+        errors-only|warnings|sorries|warnings-summary|transparency)
             ;;
         *)
             echo "Error: Invalid submode '$SUBMODE' for --all" >&2
-            echo "Valid submodes: errors-only, warnings, sorries, warnings-summary" >&2
+            echo "Valid submodes: errors-only, warnings, sorries, warnings-summary, transparency" >&2
             exit 2
             ;;
     esac
@@ -127,6 +133,9 @@ case "$MODE" in
     --warnings-summary)
         PYTHON_SCRIPT="$SCRIPT_DIR/tools/check_lean_warnings_summary.py"
         ;;
+    --transparency)
+        PYTHON_SCRIPT="$SCRIPT_DIR/tools/check_lean_transparency.py"
+        ;;
     *)
         echo "Error: Unknown mode '$MODE'" >&2
         show_usage
@@ -143,6 +152,17 @@ fi
 if [ ! -f "$TARGET" ]; then
     echo "Error: File not found: $TARGET" >&2
     exit 2
+fi
+
+# Transparency mode doesn't need lake build - just run the checker
+if [ "$MODE" = "--transparency" ]; then
+    if output=$(python3 "$PYTHON_SCRIPT" "$TARGET" 2>&1); then
+        echo "$output"
+        exit 0
+    else
+        echo "$output"
+        exit 1
+    fi
 fi
 
 # Build the file and pipe through Python filter

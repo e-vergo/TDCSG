@@ -556,7 +556,75 @@ theorem intervals_disjoint : (Set.range iet.interval).PairwiseDisjoint (fun x =>
 
 /-- The interval function is injective. -/
 lemma interval_injective : Function.Injective (interval iet) := by
-  sorry
+  intro i j h_eq
+  -- If interval i = interval j, then their left endpoints are equal
+  -- interval i = Ico (domainLeft i) (domainRight i)
+  unfold interval at h_eq
+  -- Now h_eq : Ico (domainLeft i) (domainRight i) = Ico (domainLeft j) (domainRight j)
+  -- Use trichotomy on i and j
+  by_cases hij : i < j
+  · -- If i < j, then domainLeft i < domainLeft j (by strict monotonicity)
+    have h_left_lt : iet.domainLeft i < iet.domainLeft j := iet.domainLeft_strictMono hij
+    -- From h_eq, extract that the left endpoints are equal
+    -- domainLeft i is the infimum of Ico (domainLeft i) (domainRight i)
+    -- If the intervals are equal, their infima are equal
+    have h_left_eq : iet.domainLeft i = iet.domainLeft j := by
+      -- Use the fact that domainLeft i ∈ Ico (domainLeft i) (domainRight i)
+      -- and this is the smallest element
+      have h_i_mem : iet.domainLeft i ∈ Ico (iet.domainLeft i) (iet.domainRight i) := by
+        rw [mem_Ico]
+        constructor
+        · rfl
+        · simp only [domainRight]
+          linarith [iet.lengths_pos i]
+      -- By h_eq, domainLeft i ∈ Ico (domainLeft j) (domainRight j)
+      rw [h_eq] at h_i_mem
+      rw [mem_Ico] at h_i_mem
+      -- So domainLeft j ≤ domainLeft i < domainRight j
+      have h_j_le_i : iet.domainLeft j ≤ iet.domainLeft i := h_i_mem.1
+      -- Similarly, domainLeft j ∈ Ico (domainLeft j) (domainRight j)
+      have h_j_mem : iet.domainLeft j ∈ Ico (iet.domainLeft j) (iet.domainRight j) := by
+        rw [mem_Ico]
+        constructor
+        · rfl
+        · simp only [domainRight]
+          linarith [iet.lengths_pos j]
+      -- By h_eq.symm, domainLeft j ∈ Ico (domainLeft i) (domainRight i)
+      rw [← h_eq] at h_j_mem
+      rw [mem_Ico] at h_j_mem
+      -- So domainLeft i ≤ domainLeft j
+      have h_i_le_j : iet.domainLeft i ≤ iet.domainLeft j := h_j_mem.1
+      -- Therefore domainLeft i = domainLeft j
+      exact le_antisymm h_i_le_j h_j_le_i
+    -- But we also have domainLeft i < domainLeft j, contradiction
+    linarith
+  · by_cases hji : j < i
+    · -- If j < i, symmetric argument: domainLeft j < domainLeft i but they must be equal
+      have h_left_lt : iet.domainLeft j < iet.domainLeft i := iet.domainLeft_strictMono hji
+      have h_left_eq : iet.domainLeft i = iet.domainLeft j := by
+        have h_i_mem : iet.domainLeft i ∈ Ico (iet.domainLeft i) (iet.domainRight i) := by
+          rw [mem_Ico]
+          constructor
+          · rfl
+          · simp only [domainRight]
+            linarith [iet.lengths_pos i]
+        rw [h_eq] at h_i_mem
+        rw [mem_Ico] at h_i_mem
+        have h_j_le_i : iet.domainLeft j ≤ iet.domainLeft i := h_i_mem.1
+        have h_j_mem : iet.domainLeft j ∈ Ico (iet.domainLeft j) (iet.domainRight j) := by
+          rw [mem_Ico]
+          constructor
+          · rfl
+          · simp only [domainRight]
+            linarith [iet.lengths_pos j]
+        rw [← h_eq] at h_j_mem
+        rw [mem_Ico] at h_j_mem
+        have h_i_le_j : iet.domainLeft i ≤ iet.domainLeft j := h_j_mem.1
+        exact le_antisymm h_i_le_j h_j_le_i
+      linarith
+    · -- If neither i < j nor j < i, then i = j
+      push_neg at hij hji
+      exact Fin.eq_of_val_eq (Nat.le_antisymm hji hij)
 
 /-- If x is in interval i, then intervalContaining returns i (by uniqueness). -/
 lemma intervalContaining_unique (x : ℝ) (hx : x ∈ Ico 0 1) (i : Fin n) (hi : x ∈ interval iet i) :
@@ -749,7 +817,7 @@ noncomputable def toPiecewiseIsometry : PiecewiseIsometry ℝ where
       rw [hx_i, hy_i]
       -- Now both map to rangeLeft (permutation i) + (· - domainLeft i)
       -- This is a translation, so dist is preserved
-      simp only [Real.dist_eq, abs_sub_comm]
+      simp only [Real.dist_eq]
       -- |((rangeLeft i + (x - domainLeft i)) - (rangeLeft i + (y - domainLeft i)))| = |x - y|
       congr 1
       ring

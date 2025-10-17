@@ -14,11 +14,18 @@ Eliminate all `sorry` statements through mathematically rigorous, Mathlib-compli
 - **NO placeholder solutions.** No deferrals. No "TODO" markers.
 - **NO Type-theoretic shortcuts.** Every proof must be constructively sound.
 - **NO fake proofs.** Every theorem must prove its stated goal, not something else.
-  - **FORBIDDEN:** `theorem foo := by True := trivial` (proves `True`, not `foo`)
+  - **FORBIDDEN:** `theorem foo : True := trivial` (proves `True`, not meaningful proposition)
+  - **FORBIDDEN:** `def IsPredicate (x : X) : Prop := True` (trivializes dependent theorems)
+  - **FORBIDDEN:** Using `trivial` tactic except for genuinely trivial logical facts
   - **FORBIDDEN:** Type mismatches disguised as proofs
   - **FORBIDDEN:** Proofs that compile but prove the wrong proposition
   - **FORBIDDEN:** Any tactic that changes the goal to something trivial then proves that instead
   - **VERIFICATION REQUIRED:** Every completed proof must prove exactly what the theorem statement claims
+- **TRANSPARENCY ENFORCEMENT:** All code must pass `./check_lean.sh --transparency` check
+  - Detects forbidden keywords: `trivial`, `admitted`, `axiom`, `unsafe`
+  - Detects forbidden patterns: `Prop := True`, `: True :=`
+  - Zero-tolerance: if keyword appears outside comment, automatic failure
+  - See CLAUDE.md Anti-Placeholder Protocol for complete specification
 
 ### **Publication Standard**
 This codebase **will be submitted to Mathlib**. Every line of code will face scrutiny from:
@@ -104,6 +111,14 @@ You **must** use the lean-lsp MCP server. Research its capabilities before deplo
     - 99% token reduction vs raw lake build
     - Use after EVERY code change
 
+  - `--transparency` - **NEW** Zero-tolerance proof quality audit
+    - `./check_lean.sh --transparency TDCSG/YourFile.lean`
+    - Detects forbidden keywords: `trivial`, `admitted`, `axiom`, `unsafe`
+    - Detects forbidden patterns: `Prop := True`, `: True :=`
+    - Exit code 0 = transparent, 1 = violations detected
+    - Use before completing file and before git commits
+    - **REQUIRED:** All files must pass transparency check
+
   - `--warnings-summary` - Intelligent warning triage
     - `./check_lean.sh --warnings-summary TDCSG/YourFile.lean`
     - Groups warnings by type (easy fixes, deprecations, etc.)
@@ -113,6 +128,7 @@ You **must** use the lean-lsp MCP server. Research its capabilities before deplo
   - `--all <mode>` - Multi-file checking
     - `./check_lean.sh --all errors-only TDCSG/` - Quick: all files compiling?
     - `./check_lean.sh --all sorries TDCSG/` - Full: where are sorries?
+    - `./check_lean.sh --all transparency TDCSG/` - **CRITICAL:** verify all files transparent
     - `./check_lean.sh --all warnings-summary TDCSG/` - Full: what warnings exist?
     - Use before git commits and after major refactors
 

@@ -2,7 +2,7 @@
 """
 Check multiple Lean files and provide aggregated summary.
 Usage: python3 check_lean_multi.py <mode> <file1> <file2> ...
-where mode is: errors-only, warnings, sorries, or warnings-summary
+where mode is: errors-only, warnings, sorries, warnings-summary, or transparency
 """
 
 import sys
@@ -17,7 +17,7 @@ def check_all_files_single_build(file_paths: List[str], mode: str, script_dir: s
 
     Args:
         file_paths: List of Lean file paths
-        mode: One of 'errors-only', 'warnings', 'sorries', 'warnings-summary'
+        mode: One of 'errors-only', 'warnings', 'sorries', 'warnings-summary', 'transparency'
         script_dir: Directory containing check scripts
 
     Returns:
@@ -104,7 +104,7 @@ def check_file_individual(file_path: str, mode: str, script_dir: str) -> Tuple[s
 
     Args:
         file_path: Path to Lean file
-        mode: One of 'errors-only', 'warnings', 'sorries', 'warnings-summary'
+        mode: One of 'errors-only', 'warnings', 'sorries', 'warnings-summary', 'transparency'
         script_dir: Directory containing check scripts (the tools/ directory)
 
     Returns:
@@ -122,6 +122,7 @@ def check_file_individual(file_path: str, mode: str, script_dir: str) -> Tuple[s
         'warnings': '',  # default mode (no flag)
         'sorries': '--sorries',
         'warnings-summary': '--warnings-summary',
+        'transparency': '--transparency',
     }
 
     mode_flag = mode_flag_map.get(mode)

@@ -9,12 +9,14 @@ Comprehensive build verification and diagnostic tool for Lean 4 projects.
 ./check_lean.sh --errors-only TDCSG/File.lean        # Fast error checking
 ./check_lean.sh --sorries TDCSG/File.lean            # Sorry tracking
 ./check_lean.sh --warnings-summary TDCSG/File.lean   # Categorized warnings
+./check_lean.sh --transparency TDCSG/File.lean       # Proof evasion detection
 ./check_lean.sh TDCSG/File.lean                      # All diagnostics
 
 # Multi-file modes
 ./check_lean.sh --all errors-only TDCSG/             # Check all files for errors
 ./check_lean.sh --all sorries TDCSG/                 # Sorry summary across files
 ./check_lean.sh --all warnings-summary TDCSG/        # Warnings across files
+./check_lean.sh --all transparency TDCSG/            # Transparency check all files
 ```
 
 ## Overview
@@ -41,7 +43,8 @@ TDCSG/
     ├── check_lean_file.py
     ├── check_lean_multi.py
     ├── check_lean_sorries.py
-    └── check_lean_warnings_summary.py
+    ├── check_lean_warnings_summary.py
+    └── check_lean_transparency.py  # NEW: Proof evasion detection
 ```
 
 **Requirements:**
@@ -135,7 +138,78 @@ Total: 3 warning(s) (3 easy fix(es))
 - Before git commits
 - Cleanup sessions
 
-### 4. Default Mode (All Diagnostics)
+### 4. Transparency Mode (Proof Evasion Detection)
+
+**Purpose:** Detect proof evasion patterns per Anti-Placeholder Protocol
+
+```bash
+./check_lean.sh --transparency TDCSG/File.lean
+```
+
+**What it detects:**
+- **Trivial abuse:** `theorem foo : True := trivial` where name suggests real content
+- **Placeholder definitions:** `def IsFoo := True` (trivializing predicates)
+- **Admitted proofs:** Uses of `admitted` keyword
+- **Custom axioms:** `axiom myAxiom : ...`
+- **Unsafe declarations:** `unsafe def/theorem`
+- **Hidden sorries:** Commented sorries in proof contexts
+- **SorryAx axiom:** Declarations depending on `sorryAx` (hidden sorry usage)
+
+**Output (Clean File):**
+```
+=== TRANSPARENCY CHECK: TDCSG/File.lean ===
+
+✓ PASS: No transparency violations detected
+
+File is transparent:
+  ✓ No trivial abuse (theorem foo : True := trivial)
+  ✓ No placeholder definitions (def IsFoo := True)
+  ✓ No admitted/unsafe declarations
+  ✓ No custom axioms
+  ✓ No hidden sorries
+```
+
+**Output (Violations Found):**
+```
+=== TRANSPARENCY CHECK: TDCSG/File.lean ===
+
+✗ VIOLATIONS DETECTED: 3 total
+
+Trivial Abuse: ✗ 1 violation(s)
+  🔴 Line 42: theorem 'interval_injective' proves 'True := trivial' but name suggests real content
+
+Placeholder Definition: ✗ 1 violation(s)
+  🔴 Line 67: def 'IsStandard' is a placeholder (Prop := True)
+
+Custom Axiom: ✗ 1 violation(s)
+  🔴 Line 89: custom axiom 'myAxiom' declared
+
+Summary:
+  🔴 3 critical violation(s)
+
+Result: ✗ FILE HAS TRANSPARENCY VIOLATIONS
+```
+
+**When to use:**
+- **Before claiming sorry completion** - Verify no fake proofs
+- **After agent work** - Audit agent honesty
+- **Pre-commit validation** - Ensure code quality
+- **CI/CD integration** - Automated proof integrity checks
+
+**Performance:**
+- **Very fast** - No compilation required (static analysis only)
+- Pattern matching + optional Lean axiom checking
+- Safe to run on any file
+
+**Anti-Placeholder Protocol Compliance:**
+This mode implements the Self-Audit Protocol from CLAUDE.md:
+- ✅ Theorem Quality Audit (detects `True :=` patterns)
+- ✅ Trivial Usage Audit (flags suspicious `trivial` usage)
+- ✅ Placeholder Definition Audit (finds `Prop := True`)
+- ✅ Axiom Audit (detects custom axioms and `sorryAx`)
+- ✅ Hidden Sorry Detection
+
+### 5. Default Mode (All Diagnostics)
 
 **Purpose:** See everything (errors + warnings)
 
@@ -160,6 +234,7 @@ Total: 3 warning(s) (3 easy fix(es))
 - `errors-only` - Fast multi-file error check
 - `sorries` - Sorry summary across all files
 - `warnings-summary` - Warning analysis for all files
+- `transparency` - Proof evasion detection across all files
 - (default) - All diagnostics for all files
 
 **Example Output:**

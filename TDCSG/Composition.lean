@@ -214,7 +214,7 @@ theorem piecewiseIsometry_measurable [BorelSpace α] (f : PiecewiseIsometry α) 
     constructor
     · intro hx
       -- x is in some piece of the partition
-      have : x ∈ ⋃₀ f.partition := by rw [f.partition_cover]; trivial
+      have : x ∈ ⋃₀ f.partition := by rw [f.partition_cover]; exact Set.mem_univ x
       obtain ⟨s, hs, hxs⟩ := this
       exact ⟨s, hs, hx, hxs⟩
     · intro ⟨s, hs, hxU, hxs⟩
