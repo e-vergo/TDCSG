@@ -43,10 +43,15 @@ variable {α : Type u} [MetricSpace α] [MeasurableSpace α]
 
 section Refinement
 
-/-- The refined partition obtained by intersecting pieces from two partitions.
+/-- The refined partition obtained by intersecting pieces from two partitions with preimage.
 
-Given two partitions, their refinement consists of all nonempty intersections of pieces from
-each partition. This is the finest partition on which both original functions are isometric. -/
+Given partitions p (for g) and q (for f), and function g, the preimage-based refinement consists
+of all nonempty intersections s ∩ g⁻¹(t) where s ∈ p and t ∈ q.
+This ensures g maps each refined piece entirely into a single piece of f's partition. -/
+def refinedPartitionPreimage (p q : Set (Set α)) (g : α → α) : Set (Set α) :=
+  {u | ∃ s ∈ p, ∃ t ∈ q, u = s ∩ (g ⁻¹' t) ∧ (s ∩ (g ⁻¹' t)).Nonempty}
+
+/-- The naive refined partition (kept for potential use in other contexts). -/
 def refinedPartition (p q : Set (Set α)) : Set (Set α) :=
   {u | ∃ s ∈ p, ∃ t ∈ q, u = s ∩ t ∧ (s ∩ t).Nonempty}
 
@@ -85,6 +90,62 @@ theorem refinedPartition_countable (p q : Set (Set α))
   intro u hu
   obtain ⟨s, hs, t, ht, rfl, _⟩ := hu
   exact ⟨(s, t), ⟨hs, ht⟩, rfl⟩
+
+/-- Elements of the preimage-based refined partition are measurable. -/
+theorem refinedPartitionPreimage_measurable {α : Type u} [MeasurableSpace α]
+    (p q : Set (Set α)) (g : α → α)
+    (hp : ∀ s ∈ p, MeasurableSet s) (hq : ∀ t ∈ q, MeasurableSet t)
+    (hg : Measurable g) :
+    ∀ u ∈ refinedPartitionPreimage p q g, MeasurableSet u := by
+  intro u hu
+  obtain ⟨s, hs, t, ht, rfl, _⟩ := hu
+  exact (hp s hs).inter (hg (hq t ht))
+
+/-- The preimage-based refined partition covers the space. -/
+theorem refinedPartitionPreimage_cover {α : Type u} (p q : Set (Set α)) (g : α → α)
+    (hp : ⋃₀ p = Set.univ) (hq : ⋃₀ q = Set.univ) :
+    ⋃₀ refinedPartitionPreimage p q g = Set.univ := by
+  ext x
+  simp only [Set.mem_sUnion, Set.mem_univ, iff_true]
+  rw [Set.sUnion_eq_univ_iff] at hp hq
+  obtain ⟨s, hs, hxs⟩ := hp x
+  obtain ⟨t, ht, hgxt⟩ := hq (g x)
+  use s ∩ (g ⁻¹' t)
+  constructor
+  · unfold refinedPartitionPreimage
+    simp only [Set.mem_setOf_eq]
+    exact ⟨s, hs, t, ht, rfl, ⟨x, hxs, hgxt⟩⟩
+  · exact ⟨hxs, hgxt⟩
+
+/-- The preimage-based refined partition is countable. -/
+theorem refinedPartitionPreimage_countable (p q : Set (Set α)) (g : α → α)
+    (hp : p.Countable) (hq : q.Countable) :
+    (refinedPartitionPreimage p q g).Countable := by
+  refine Set.Countable.mono ?_ ((hp.prod hq).image (fun st => st.1 ∩ (g ⁻¹' st.2)))
+  intro u hu
+  obtain ⟨s, hs, t, ht, rfl, _⟩ := hu
+  exact ⟨(s, t), ⟨hs, ht⟩, rfl⟩
+
+/-- The preimage-based refined partition is pairwise disjoint. -/
+theorem refinedPartitionPreimage_disjoint {α : Type u} (p q : Set (Set α)) (g : α → α)
+    (hp : ∀ s ∈ p, ∀ t ∈ p, s ≠ t → Disjoint s t)
+    (hq : ∀ s ∈ q, ∀ t ∈ q, s ≠ t → Disjoint s t) :
+    ∀ u ∈ refinedPartitionPreimage p q g, ∀ v ∈ refinedPartitionPreimage p q g, u ≠ v → Disjoint u v := by
+  intro u hu v hv huv
+  obtain ⟨s₁, hs₁, t₁, ht₁, rfl, _⟩ := hu
+  obtain ⟨s₂, hs₂, t₂, ht₂, rfl, _⟩ := hv
+  show Disjoint (s₁ ∩ (g ⁻¹' t₁)) (s₂ ∩ (g ⁻¹' t₂))
+  by_cases h₁ : s₁ = s₂
+  · subst h₁
+    by_cases h₂ : t₁ = t₂
+    · subst h₂
+      exact absurd rfl huv
+    · have hdisj : Disjoint t₁ t₂ := hq t₁ ht₁ t₂ ht₂ h₂
+      exact Set.disjoint_of_subset_right (Set.inter_subset_right)
+        (Set.disjoint_of_subset_left (Set.inter_subset_right) (Disjoint.preimage g hdisj))
+  · have hdisj : Disjoint s₁ s₂ := hp s₁ hs₁ s₂ hs₂ h₁
+    exact Set.disjoint_of_subset_left (Set.inter_subset_left)
+      (Set.disjoint_of_subset_right (Set.inter_subset_left) hdisj)
 
 end Refinement
 

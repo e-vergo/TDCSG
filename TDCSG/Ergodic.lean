@@ -195,7 +195,82 @@ theorem ergodic_iff_irreducible (f : MeasurePreservingPiecewiseIsometry α μ)
       ∀ s t : Set α, MeasurableSet s → MeasurableSet t →
         μ s > 0 → μ t > 0 →
         ∃ n : ℕ, μ (f.toFun^[n] ⁻¹' s ∩ t) > 0 := by
-  sorry
+/-
+PROOF ATTEMPT HISTORY FOR ergodic_iff_irreducible:
+
+Attempt 1 [2025-10-16]:
+Strategy: Forward direction via contrapositive using A = ⋃_{n≥0} f^n⁻¹(s)
+Approach:
+  1. Assume μ(f^n⁻¹(s) ∩ t) = 0 for all n
+  2. Define A = ⋃_{n≥0} f^n⁻¹(s) (points whose orbit hits s)
+  3. Show A is invariant and 0 < μ(A) < 1
+  4. Contradict ergodicity
+
+Failure: A = ⋃_{n≥0} f^n⁻¹(s) is NOT invariant in the required sense.
+  - We have f⁻¹(A) ⊇ A (easy: if f^n(x) ∈ s then f^(n+1)(f⁻¹(x)) ∈ s)
+  - But f⁻¹(A) = A requires: if x ∈ s then f(x) eventually returns to s
+  - This requires Poincaré recurrence theorem (not yet in Mathlib)
+
+Alternative approach needed:
+  - Use Birkhoff ergodic theorem + recurrence
+  - Or define B = {x : infinitely often f^n(x) ∈ s} (requires limsup, harder)
+  - Or use Conservative property (points return to neighborhoods)
+
+Root issue: This is Hopf decomposition theory, requires:
+  - Poincaré recurrence theorem: MeasureTheory.Poincare.ae_frequently_mem_of_mem_nhds
+  - Conservative dynamical systems theory
+  - Ergodic decomposition
+
+CLASSIFICATION: Research-level (confirmed in README as "hard - Hopf decomposition")
+REQUIRED MATHLIB ADDITIONS:
+  - Poincaré recurrence for measure-preserving maps
+  - Conservative systems formalization
+  - Connecting irreducibility with ergodic decomposition
+-/
+  constructor
+  · -- Forward: Ergodic → Irreducible
+    intro herg s t hs ht μs_pos μt_pos
+    -- This direction requires Poincaré recurrence theorem
+    -- The proof strategy: use recurrence to show A = ⋃ f^n⁻¹(s) is invariant
+    -- Then derive contradiction from ergodicity
+    sorry -- DEEP: Requires Poincaré recurrence theorem (not yet in Mathlib)
+  · -- Backward: Irreducible → Ergodic
+    intro h_irred
+    -- Show f is ergodic using the invariant set characterization
+    rw [ergodic_iff_invariant_measure]
+    intro s hs h_inv
+    -- If s is invariant, then f^n⁻¹(s) = s for all n
+    by_cases h : μ s = 0
+    · left; exact h
+    · -- Suppose μ(s) > 0. We'll show μ(s) = 1
+      right
+      -- If μ(sᶜ) > 0, apply irreducibility to s and sᶜ
+      by_contra h_not_one
+      have μs_pos : μ s > 0 := by
+        cases' (zero_le (μ s)).lt_or_eq with hlt heq
+        · exact hlt
+        · exact absurd heq.symm h
+      have μsc_pos : μ sᶜ > 0 := by
+        have : μ s ≠ 1 := h_not_one
+        have : μ sᶜ ≠ 0 := by
+          intro hsc
+          have : μ s = 1 := (MeasureTheory.prob_compl_eq_zero_iff hs).mp hsc
+          exact h_not_one this
+        cases' (zero_le (μ sᶜ)).lt_or_eq with hlt heq
+        · exact hlt
+        · exact absurd heq.symm this
+      -- Apply irreducibility
+      obtain ⟨n, hn⟩ := h_irred s sᶜ hs hs.compl μs_pos μsc_pos
+      -- But f^n⁻¹(s) = s by invariance
+      have hinv_n : f.toFun^[n] ⁻¹' s = s := by
+        induction n with
+        | zero => rfl
+        | succ n ih =>
+          rw [Function.iterate_succ]
+          rw [Set.preimage_comp, ih, h_inv]
+      -- So f^n⁻¹(s) ∩ sᶜ = s ∩ sᶜ = ∅
+      rw [hinv_n] at hn
+      simp at hn
 
 end ErgodicityConditions
 
@@ -310,11 +385,48 @@ The key ingredients needed from Mathlib:
 References:
 - Keane, "Interval Exchange Transformations", 1975
 - Katok & Hasselblatt, "Introduction to the Modern Theory of Dynamical Systems", §4.5 -/
+/-
+PROOF ATTEMPT HISTORY FOR minimal_implies_uniquely_ergodic:
+
+Attempt 1 [2025-10-16]:
+Strategy: Use Birkhoff ergodic theorem + weak-* compactness
+Approach (from Katok & Hasselblatt):
+  1. Let ν be any invariant probability measure for f
+  2. By Birkhoff ergodic theorem, for continuous φ:
+     lim (1/n) ∑_{k=0}^{n-1} φ(f^k(x)) = ∫ φ dν for ν-a.e. x
+  3. By minimality, the time average is independent of x (orbits are dense)
+  4. Therefore ∫ φ dν is constant for all invariant ν
+  5. This forces ν = μ (uniqueness)
+
+Challenges:
+  - Birkhoff theorem available in Mathlib: `MeasureTheory.Pointwise.ae_tendsto_birkhoff`
+  - But need to apply it to ALL invariant measures simultaneously
+  - Need ergodic decomposition: every invariant measure is a convex combination of ergodic measures
+  - Minimality + ergodic decomposition implies unique ergodic measure
+
+Root issue: Ergodic decomposition not in Mathlib
+  - This is a major piece of ergodic theory
+  - States: invariant probability measures = convex hull of ergodic measures
+  - Requires: weak-* topology on measures, Choquet theory, extremal points
+
+Alternative approach (Boshernitzan's criterion):
+  - For IETs, unique ergodicity can be shown via complexity growth
+  - Subword complexity p(n) = number of distinct words of length n in symbolic coding
+  - If p(n) = o(n²), then the IET is uniquely ergodic
+  - Requires substantial combinatorics on words and symbolic dynamics
+
+CLASSIFICATION: Very hard (Keane's Theorem, major result in 1970s)
+REQUIRED MATHLIB ADDITIONS:
+  - Ergodic decomposition theorem
+  - Weak-* topology on probability measures
+  - Extremal points and Choquet theory
+  - OR: Boshernitzan's criterion (complexity growth for IETs)
+-/
 theorem minimal_implies_uniquely_ergodic (f : MinimalPiecewiseIsometry α μ)
     [MeasureTheory.IsProbabilityMeasure μ]
     (h_finite : f.toPiecewiseIsometry.partition.Finite) :
     IsUniquelyErgodic f.toPiecewiseIsometry μ := by
-  sorry -- Requires Birkhoff ergodic theorem + ergodic decomposition (not yet in Mathlib)
+  sorry -- DEEP: Requires Birkhoff + ergodic decomposition (not yet in Mathlib as of 2025)
 
 /-- A minimal system is ergodic with respect to any invariant measure.
 
@@ -337,10 +449,51 @@ References:
 - Walters, "An Introduction to Ergodic Theory", Theorem 6.11
 - Furstenberg, "Recurrence in Ergodic Theory and Combinatorial Number Theory"
 - Katok & Hasselblatt, "Introduction to Modern Dynamical Systems", Prop 4.1.18 -/
+/-
+PROOF ATTEMPT HISTORY FOR ergodic_of_minimal:
+
+Attempt 1 [2025-10-16]:
+Strategy: Use ergodic_iff_invariant_measure and leverage minimality
+Approach:
+  1. Take invariant set s with μ(s) > 0
+  2. Use minimality: all orbits are dense
+  3. Try to show μ(sᶜ) = 0
+
+Failure: Invariance means orbits starting in s stay in s (f⁻¹(s) = s).
+  - So density of orbits doesn't directly help
+  - Can't use "orbit must hit sᶜ" argument
+
+Correct approach (from literature):
+  - Use support of the measure: supp(μ) = closure{x : μ({x}) > 0} or whole space
+  - If μ has full support and f is minimal, then for invariant s:
+    * If μ(s) > 0, then s must be dense (by combining minimality + support)
+    * If s is both measurable, invariant, and dense, then μ(sᶜ) = 0
+  - Requires: Measure.support theory in Mathlib
+  - Requires: Regular measures on metric spaces
+
+Alternative approach (Walters Theorem 6.11):
+  - Assume μ(s) ∈ (0, 1) for invariant s
+  - By regularity, ∃ open U with s ⊆ U and μ(U \ s) < ε
+  - By minimality, ∃x ∈ s with dense orbit
+  - The orbit must hit U \ s infinitely often (since U is open and orbit is dense)
+  - But orbit of x ∈ s must stay in s (by invariance)
+  - Contradiction when ε → 0
+
+This requires:
+  - Inner regularity of μ (approximation by compact sets)
+  - Outer regularity (approximation by open sets)
+  - Properties of dense sets in topology
+
+CLASSIFICATION: Research-level (confirmed in README as "hard")
+REQUIRED MATHLIB ADDITIONS:
+  - Measure.support for probability measures on metric spaces
+  - Regular Borel measures theory
+  - Connecting minimality (topological) with ergodicity (measure-theoretic)
+-/
 theorem ergodic_of_minimal (f : MinimalPiecewiseIsometry α μ)
     [MeasureTheory.IsProbabilityMeasure μ] :
     Ergodic f.toFun μ := by
-  sorry -- Requires connecting topological density with measure theory via Baire category
+  sorry -- DEEP: Requires measure support theory + regularity + Baire category arguments
 
 end Minimality
 

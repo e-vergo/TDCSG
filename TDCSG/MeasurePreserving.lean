@@ -214,24 +214,30 @@ def compMP (f g : MeasurePreservingPiecewiseIsometry α μ) :
 theorem compMP_apply (f g : MeasurePreservingPiecewiseIsometry α μ) (x : α) :
     (compMP f g).toFun x = f.toFun (g.toFun x) := rfl
 
-/-- Composition is associative. -/
+/-- Composition is associative.
+
+**STRUCTURAL ISSUE**: This theorem is blocked by a fundamental design issue in the
+PiecewiseIsometry structure. The two sides `compMP (compMP f g) h` and `compMP f (compMP g h)`
+have:
+- SAME underlying function: (f ∘ g) ∘ h = f ∘ (g ∘ h) definitionally
+- SAME measurability proofs (by proof irrelevance)
+- SAME measure-preservation proofs (by proof irrelevance)
+- DIFFERENT partition structures: The partitions are different refinements
+
+The issue is that PiecewiseIsometry uses `extends` which creates a structure with fields
+for the partition, and Lean's definitional equality for structures requires ALL fields
+to be equal, including the partition field.
+
+**Solutions**:
+1. Add extensionality lemma for MeasurePreservingPiecewiseIsometry based on function equality
+2. Redesign to use quotient types (equivalence classes up to partition refinement)
+3. Redesign PiecewiseIsometry to not include partition in the structure (make it a typeclass)
+
+This is NOT a mathematical gap - the theorem is true. It's a formalization design issue.
+-/
 theorem compMP_assoc (f g h : MeasurePreservingPiecewiseIsometry α μ) :
     compMP (compMP f g) h = compMP f (compMP g h) := by
-  -- Both sides compose the same underlying functions
-  -- The functions are definitionally equal: (f ∘ g) ∘ h = f ∘ (g ∘ h)
-  -- The partitions may differ (both are refinements of refinements)
-  -- But the measurability and measure-preservation follow from the function equality
-  -- We need to show structural equality of the extended structure
-
-  -- Actually, these are genuinely different as MeasurePreservingPiecewiseIsometry structures
-  -- because they have different underlying PiecewiseIsometry structures (different partitions)
-  -- They represent the same function but with different partition representations
-
-  -- For practical purposes, we might want to work with equivalence classes of
-  -- piecewise isometries up to partition refinement, but that's beyond the current setup
-
-  -- Mark as sorry since true extensionality requires rethinking the structure
-  sorry -- Need better extensionality principle or quotient by partition equivalence
+  sorry -- STRUCTURAL: Requires extensionality or structural redesign
 
 end Composition
 
@@ -290,22 +296,22 @@ This is technically solvable but requires more sophisticated arguments about pie
 theorem measure_eq_of_invariant (f : MeasurePreservingPiecewiseIsometry α μ)
     (s : Set α) (hs : MeasurableSet s) (h_inv : IsInvariant f s) :
     μ (f.toFun '' s) = μ s := by
-  -- Use measure preservation: for measurable t, μ(f⁻¹(t)) = μ(t)
-  -- We want to show μ(f(s)) = μ(s)
-  -- By measure preservation: μ(f⁻¹(f(s))) = μ(f(s))
-  -- So it suffices to show μ(f⁻¹(f(s))) = μ(s)
+  -- Since f(s) ⊆ s by invariance, and f is measure-preserving:
+  -- μ(f(s)) = μ(f⁻¹(f⁻¹(f(s)))) by applying measure preservation twice... no that doesn't work
 
-  -- f(s) ⊆ s by invariance, so f⁻¹(f(s)) ⊆ f⁻¹(s)
-  -- Also, s ⊆ f⁻¹(f(s)) always (for any function)
-  -- Therefore we need to show f⁻¹(s) ⊆ f⁻¹(f(s)), which requires... wait
+  -- Different approach: f(s) ⊆ s, and both are measurable
+  -- By measure preservation: μ(f⁻¹(s)) = μ(s)
+  -- We want μ(f(s)) = μ(s)
 
-  -- Actually: x ∈ f⁻¹(f(s)) iff f(x) ∈ f(s) iff f(x) = f(y) for some y ∈ s
-  -- If f is injective, this means x = y, so x ∈ s
-  -- But f is only injective on pieces, not globally
+  -- Since f(s) ⊆ s, we have μ(f(s)) ≤ μ(s)
+  -- To show equality, we need μ(s \ f(s)) = 0
+  -- This would follow if we could show f⁻¹(s \ f(s)) ∩ s = ∅ or has measure 0
 
-  -- The issue: without global injectivity or surjectivity, this is indeed hard
-  -- Let me mark this as requiring additional assumptions
-  sorry -- DEEP: Needs global injectivity or surjectivity of f, or measure-theoretic arguments
+  -- Actually, this is quite subtle. The standard proof requires:
+  -- Either f is bijective (then f⁻¹ exists and f⁻¹(f(s)) = s)
+  -- Or use ergodic theory arguments
+
+  sorry -- DEEP: Requires global bijectivity or ergodic theory (Poincaré recurrence)
 
 /-- A completely invariant measurable set has the same measure as its preimage. -/
 theorem measure_preimage_eq_of_completely_invariant
@@ -343,23 +349,32 @@ theorem measurable_of_borel (f : PiecewiseIsometry α)
   -- The function is continuous on interiors, use measurable_of_isOpen
   apply measurable_of_isOpen
   intro U hU
-  -- f⁻¹(U) = ⋃_{s ∈ partition} (s ∩ f⁻¹(U))
-  have : f.toFun ⁻¹' U = ⋃₀ (Set.image (fun s => s ∩ f.toFun ⁻¹' U) f.partition) := by
+  -- Express f⁻¹(U) as a countable union over partition pieces
+  have h_union : f.toFun ⁻¹' U = ⋃ (s : ↑f.partition), ↑s ∩ f.toFun ⁻¹' U := by
     ext x
-    simp only [Set.mem_preimage, Set.mem_sUnion, Set.mem_image]
+    simp only [Set.mem_preimage, Set.mem_iUnion, Set.mem_inter_iff, Subtype.exists]
     constructor
     · intro hx
       obtain ⟨s, hs, hxs⟩ := f.exists_mem_partition x
-      exact ⟨s ∩ f.toFun ⁻¹' U, ⟨s, hs, rfl⟩, ⟨hxs, hx⟩⟩
-    · intro ⟨_, ⟨s, hs, rfl⟩, hxs, hx⟩
+      exact ⟨s, hs, hxs, hx⟩
+    · intro ⟨s, hs, hxs, hx⟩
       exact hx
-  rw [this]
-  apply MeasurableSet.sUnion
-  · exact f.partition_countable.image _
-  · intro t ht
-    obtain ⟨s, hs, rfl⟩ := ht
-    -- s ∩ f⁻¹(U) is measurable (requires connecting continuity on s with measurability)
-    sorry
+  rw [h_union]
+  -- Show each piece is measurable
+  haveI : Countable (↑f.partition) := f.partition_countable.to_subtype
+  apply MeasurableSet.iUnion
+  intro ⟨s, hs⟩
+  -- For each s ∈ partition, show s ∩ f⁻¹(U) is measurable
+  -- NEEDS MATHLIB: This requires showing that a function continuous on interior s
+  -- has measurable preimages. The issue is the frontier: s = interior s ∪ frontier s,
+  -- and while we can handle interior s via continuity, frontier s needs special treatment.
+  --
+  -- Possible approaches:
+  -- 1. Assume frontiers have measure zero (common for nice partitions)
+  -- 2. Use that frontiers are closed, hence measurable, and f restricted to closed sets
+  --    with some regularity is measurable
+  -- 3. Find a Mathlib lemma about piecewise continuous functions on partitions
+  sorry
 
 /-- A piecewise isometry with continuous pieces is measurable with respect to Borel sigma
 algebra.
@@ -381,31 +396,34 @@ The proof outline:
 - Countable union of measurable sets is measurable
 -/
 theorem borel_measurable_of_continuous_pieces (f : PiecewiseIsometry α)
-    (h_open : ∀ s ∈ f.partition, IsOpen (interior s))
+    (_h_open : ∀ s ∈ f.partition, IsOpen (interior s))
     (h_cont : ∀ s ∈ f.partition, ContinuousOn f.toFun s) :
     Measurable f.toFun := by
-  -- Piecewise continuous functions on a countable partition are measurable
-  -- Use measurable_of_isOpen: show f⁻¹(U) is measurable for all open U
+  -- Use the fact that piecewise continuous functions are measurable
+  -- Strategy: Show that for any open U, f⁻¹(U) is measurable
   apply measurable_of_isOpen
   intro U hU
-  -- f⁻¹(U) = ⋃_{s ∈ partition} (s ∩ f⁻¹(U))
-  have : f.toFun ⁻¹' U = ⋃₀ (Set.image (fun s => s ∩ f.toFun ⁻¹' U) f.partition) := by
+  -- Express f⁻¹(U) as a countable union over partition pieces
+  have h_union : f.toFun ⁻¹' U = ⋃ (s : ↑f.partition), ↑s ∩ f.toFun ⁻¹' U := by
     ext x
-    simp only [Set.mem_preimage, Set.mem_sUnion, Set.mem_image]
+    simp only [Set.mem_preimage, Set.mem_iUnion, Set.mem_inter_iff, Subtype.exists]
     constructor
     · intro hx
       obtain ⟨s, hs, hxs⟩ := f.exists_mem_partition x
-      exact ⟨s ∩ f.toFun ⁻¹' U, ⟨s, hs, rfl⟩, ⟨hxs, hx⟩⟩
-    · intro ⟨_, ⟨s, hs, rfl⟩, hxs, hx⟩
+      exact ⟨s, hs, hxs, hx⟩
+    · intro ⟨s, hs, hxs, hx⟩
       exact hx
-  rw [this]
-  -- Each s ∩ f⁻¹(U) is measurable
-  apply MeasurableSet.sUnion
-  · exact f.partition_countable.image _
-  · intro t ht
-    obtain ⟨s, hs, rfl⟩ := ht
-    -- s ∩ f⁻¹(U) is measurable as intersection of measurable s with preimage
-    sorry
+  rw [h_union]
+  -- Show each piece is measurable
+  haveI : Countable (↑f.partition) := f.partition_countable.to_subtype
+  apply MeasurableSet.iUnion
+  intro ⟨s, hs⟩
+  -- For each s ∈ partition, show s ∩ f⁻¹(U) is measurable
+  -- By continuity on s, f⁻¹(U) ∩ s is measurable
+  obtain ⟨V, hV_open, hV_eq⟩ := (continuousOn_iff'.mp (h_cont s hs)) U hU
+  -- hV_eq : f.toFun ⁻¹' U ∩ s = V ∩ s
+  rw [Set.inter_comm, hV_eq]
+  exact MeasurableSet.inter hV_open.measurableSet (f.partition_measurable s hs)
 
 end BorelMeasure
 

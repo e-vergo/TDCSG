@@ -119,9 +119,13 @@ theorem intervals_cover : ⋃ i, iet.interval i = Ico 0 1 := by
       calc x < iet.domainRight i := hx.2
         _ = iet.domainLeft i + iet.lengths i := rfl
         _ ≤ ∑ j : Fin n, iet.lengths j := by
-          -- domainLeft i is sum of lengths before i, adding lengths i gives partial sum up to i
-          -- This partial sum is ≤ total sum
-          sorry
+          /- PROOF ATTEMPTS:
+             Attempt 1: Use Fin.sum_univ_castSucc to combine sums - Type mismatch with Fin i.val vs Fin n
+             Attempt 2: Use Finset.sum_le_sum_of_subset with explicit embedding - Complex coercion issues
+             Attempt 3: Split total sum and recombine - Equality step becomes circular
+          -/
+          rw [domainLeft]
+          sorry -- BLOCKED: Needs lemma relating Fin partial sums, see attempts above
         _ = 1 := iet.lengths_sum
   · -- If 0 ≤ x < 1, then x is in some interval
     intro ⟨hx0, hx1⟩
@@ -132,12 +136,9 @@ theorem intervals_cover : ⋃ i, iet.interval i = Ico 0 1 := by
 lemma domainRight_le_domainLeft_of_lt {i j : Fin n} (hij : i < j) :
     iet.domainRight i ≤ iet.domainLeft j := by
   unfold domainRight domainLeft
-  -- domainRight i = (∑ k : Fin i.val, lengths k) + lengths i
-  -- domainLeft j = ∑ k : Fin j.val, lengths k
-  -- Since i < j, we have i.val < j.val, so Fin j.val includes all of Fin i.val plus more
-  -- The sum over Fin j.val includes lengths 0, ..., i.val-1, i.val, ..., j.val-1
-  -- The sum over Fin i.val is lengths 0, ..., i.val-1
-  -- So domainLeft j ≥ (sum over Fin i.val) + lengths i = domainRight i
+  -- This requires a monotonicity lemma for Fin sums that's tricky to prove
+  -- The mathematical content is clear: since i < j, the sum up to j includes
+  -- all terms up to i plus additional nonnegative terms
   sorry
 
 /-- The intervals are pairwise disjoint. -/

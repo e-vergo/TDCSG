@@ -153,7 +153,13 @@ example : ¬∃ (pi : PiecewiseIsometry ℝ), ∀ x : ℝ, pi x = 0 := by
         -- But this means ℝ = ⋃₀ partition is a countable union of singletons
         -- Each singleton is countable, and union of countably many countable sets is countable
         -- So ℝ would be countable, contradicting that ℝ is uncountable
-        sorry
+        have h_each_countable : ∀ u ∈ pi.partition, u.Countable := by
+          intro u hu
+          exact Set.Subsingleton.countable (fun _ hx _ hy => h_exists_two u hu _ hx _ hy)
+        have h_univ_countable : (Set.univ : Set ℝ).Countable := by
+          rw [← pi.partition_cover]
+          exact Set.Countable.sUnion pi.partition_countable h_each_countable
+        exact Set.not_countable_univ h_univ_countable
     obtain ⟨a, b, hab, u, hu, hau, hbu⟩ := this
     have : dist (pi a) (pi b) = dist a b := pi.isometry_on_pieces u hu a hau b hbu
     rw [h a, h b] at this
@@ -279,9 +285,27 @@ noncomputable def half_plane_reflection : PiecewiseIsometry (ℝ × ℝ) where
   partition_countable := by
     simp only [Set.countable_insert, Set.countable_singleton]
   partition_measurable := by
-    sorry
+    intro s hs
+    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hs
+    rcases hs with (rfl | rfl)
+    · -- {p | p.1 < 0} is measurable as preimage of (-∞, 0) under Prod.fst
+      show MeasurableSet {p : ℝ × ℝ | p.1 < 0}
+      have : {p : ℝ × ℝ | p.1 < 0} = Prod.fst ⁻¹' (Set.Iio (0 : ℝ)) := by
+        ext p; simp [Set.Iio]
+      rw [this]
+      exact MeasurableSet.preimage measurable_fst MeasurableSet.Iio
+    · -- {p | p.1 ≥ 0} is measurable as preimage of [0, ∞) under Prod.fst
+      show MeasurableSet {p : ℝ × ℝ | p.1 ≥ 0}
+      have : {p : ℝ × ℝ | p.1 ≥ 0} = Prod.fst ⁻¹' (Set.Ici (0 : ℝ)) := by
+        ext p; simp [Set.Ici]
+      rw [this]
+      exact MeasurableSet.preimage measurable_fst MeasurableSet.Ici
   partition_cover := by
-    sorry
+    ext p
+    simp only [Set.mem_sUnion, Set.mem_insert_iff, Set.mem_singleton_iff, Set.mem_setOf_eq, Set.mem_univ, iff_true]
+    by_cases h : p.1 < 0
+    · exact ⟨{p : ℝ × ℝ | p.1 < 0}, Or.inl rfl, h⟩
+    · exact ⟨{p : ℝ × ℝ | p.1 ≥ 0}, Or.inr rfl, le_of_not_gt h⟩
   partition_nonempty := by
     intro s hs
     simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hs
@@ -289,7 +313,20 @@ noncomputable def half_plane_reflection : PiecewiseIsometry (ℝ × ℝ) where
     · use (-1, 0); norm_num
     · use (1, 0); norm_num
   partition_disjoint := by
-    sorry
+    intro s hs t ht hst
+    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hs ht
+    rcases hs with (rfl | rfl)
+    · rcases ht with (rfl | rfl)
+      · contradiction
+      · -- {p | p.1 < 0} and {p | p.1 ≥ 0} are disjoint
+        apply Set.disjoint_left.mpr
+        intro p (hp1 : p.1 < 0) (hp2 : p.1 ≥ 0)
+        linarith [hp1, hp2]
+    · rcases ht with (rfl | rfl)
+      · apply Set.disjoint_left.mpr
+        intro p (hp1 : p.1 ≥ 0) (hp2 : p.1 < 0)
+        linarith [hp1, hp2]
+      · contradiction
   toFun := fun p => if p.1 < 0 then (-p.1, p.2) else p
   isometry_on_pieces := by
     sorry
