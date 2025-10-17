@@ -261,10 +261,15 @@ ABSOLUTE STANDARDS:
 - Every proof must be type-theoretically sound and mathematically rigorous
 - Zero tolerance for shortcuts or incomplete reasoning
 - **NO FAKE PROOFS:** Every theorem must prove its exact stated goal
-  - FORBIDDEN: `theorem foo := by True := trivial` (proves True, not foo)
+  - FORBIDDEN: `theorem foo : True := trivial` (proves True, not meaningful proposition)
+  - FORBIDDEN: `def IsPredicate (x : X) : Prop := True` (trivializes dependent theorems)
+  - FORBIDDEN: Using `trivial` tactic except for genuinely trivial logical facts
   - FORBIDDEN: Changing goal to something trivial then proving that
   - FORBIDDEN: Type mismatches disguised as proofs
   - Every proof must prove the proposition in the theorem statement
+- **TRANSPARENCY REQUIRED:** All code must pass `./check_lean.sh --transparency`
+  - Zero-tolerance detection of forbidden keywords and patterns
+  - See CLAUDE.md Anti-Placeholder Protocol for complete specification
 
 TOOL ACCESS:
 You have access to lean-lsp MCP with the following tools:
@@ -508,6 +513,7 @@ MANDATORY WORKFLOW:
    - Zero sorry statements in your file
    - Zero axioms introduced
    - Final verification: `./check_lean.sh --errors-only TDCSG/YourFile.lean` shows ✓ No errors
+   - **TRANSPARENCY CHECK:** `./check_lean.sh --transparency TDCSG/YourFile.lean` shows ✓ PASS
    - Check warnings if needed: `./check_lean.sh TDCSG/YourFile.lean`
    - **PROOF CORRECTNESS:** Every theorem proves its stated goal (not `True` or wrong proposition)
    - Mathlib style compliance (naming, formatting, documentation)
@@ -536,6 +542,7 @@ COMPLETION CRITERIA FOR YOUR FILE:
 ✅ Zero sorry statements
 ✅ Zero axioms introduced
 ✅ `./check_lean.sh --errors-only TDCSG/YourFile.lean` shows ✓ No errors
+✅ **`./check_lean.sh --transparency TDCSG/YourFile.lean` shows ✓ PASS** (REQUIRED)
 ✅ No warnings when running `./check_lean.sh TDCSG/YourFile.lean`
 ✅ **Every theorem proves its stated goal** (no fake proofs like `True := trivial`)
 ✅ Full Mathlib style compliance
@@ -605,6 +612,7 @@ BEGIN.
 Before approving any agent's work:
 - [ ] Verify zero sorries in assigned file
 - [ ] Check `./check_lean.sh --errors-only` shows ✓ No errors
+- [ ] **Check `./check_lean.sh --transparency` shows ✓ PASS** (CRITICAL - REQUIRED)
 - [ ] Check `./check_lean.sh` shows no warnings
 - [ ] **Verify proof correctness:** Every theorem proves its stated goal (inspect for fake proofs)
 - [ ] Review proof quality (rigor, clarity, style)
@@ -723,12 +731,13 @@ Work is complete **if and only if**:
 1. ✅ **Zero `sorry` statements** across ALL files in TDCSG/
 2. ✅ **Zero axioms introduced** beyond Lean 4 + Mathlib foundations
 3. ✅ **All files pass verification:** `./check_lean.sh --errors-only` shows ✓ No errors for every file
-4. ✅ **No warnings:** `./check_lean.sh` (full mode) shows clean output for all files
-5. ✅ **All proofs are genuine:** Every theorem proves its stated goal (no fake proofs)
-6. ✅ **Successful `lean_build`** for full project integration
-7. ✅ **Full Mathlib style compliance** in every file
-8. ✅ **Every proof verifiable** by independent review
-9. ✅ **Repository is clean:** No orphaned scratch/test files (`scratch_*.lean`, `test_*.lean`)
+4. ✅ **All files pass transparency check:** `./check_lean.sh --all transparency TDCSG/` shows ✓ PASS for every file (CRITICAL - REQUIRED)
+5. ✅ **No warnings:** `./check_lean.sh` (full mode) shows clean output for all files
+6. ✅ **All proofs are genuine:** Every theorem proves its stated goal (no fake proofs)
+7. ✅ **Successful `lean_build`** for full project integration
+8. ✅ **Full Mathlib style compliance** in every file
+9. ✅ **Every proof verifiable** by independent review
+10. ✅ **Repository is clean:** No orphaned scratch/test files (`scratch_*.lean`, `test_*.lean`)
 
 **Until all criteria are met globally, continue.**
 
@@ -947,6 +956,7 @@ Every agent you spawn inherits this standard. Every proof they construct must me
 **The ONLY Acceptable Stopping Condition:**
 - ✅ **ZERO sorries across ALL files in TDCSG/**
 - ✅ **Zero axioms introduced**
+- ✅ **ALL files pass transparency check** (`./check_lean.sh --all transparency TDCSG/`)
 - ✅ **Zero errors/warnings in lean_diagnostics**
 - ✅ **Successful lean_build**
 - ✅ **Full Mathlib compliance**
@@ -963,6 +973,8 @@ Meet the standard. Exceed it where possible. Accept nothing less than excellence
 
 **Use unique identifiers for all scratch files. Clean up when done. No file conflicts. No workspace clutter.**
 
-**0 sorries. 0 axioms. 0 compromises. 0 excuses. 0 orphaned files. 100% completion. 100% rigor.**
+**Verify transparency with --transparency mode. Zero tolerance for forbidden keywords and patterns.**
+
+**0 sorries. 0 axioms. 0 transparency violations. 0 compromises. 0 excuses. 0 orphaned files. 100% completion. 100% rigor.**
 
 **Spawn your agents. Complete the mission. Do not stop until finished.**

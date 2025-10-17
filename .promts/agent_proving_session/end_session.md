@@ -16,6 +16,7 @@ Update `README.md` to enable seamless resumption by your successor. This documen
 
 ### **Mandatory Content**
 - ✅ **Current state:** Exact count and location of remaining sorries
+- ✅ **Transparency status:** Result of `./check_lean.sh --all transparency TDCSG/` (all files must pass)
 - ✅ **File status:** Which files are complete, which have work remaining
 - ✅ **Blockers:** Specific proofs that are challenging, with technical details
 - ✅ **Proven approaches:** What strategies have succeeded (mention in terms of "X tactic works for Y pattern")
