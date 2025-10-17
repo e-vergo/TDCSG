@@ -164,22 +164,7 @@ theorem intervals_cover : ⋃ i, iet.interval i = Ico 0 1 := by
                 congr 1
               _ ≤ ∑ j : Fin n, iet.lengths j := by
                 -- Partial sum ≤ total sum (i.val + 1 ≤ n, all terms nonnegative)
-                -- Strategy: Rewrite LHS using castLE embedding, then apply subset inequality
-                have eq : ∑ j : Fin i.val.succ, iet.lengths ⟨j, Nat.lt_of_lt_of_le j.isLt h_le⟩ =
-                          ∑ j : Fin i.val.succ, iet.lengths (Fin.castLE h_le j) := by
-                  simp only [Fin.castLE]
-                calc ∑ j : Fin i.val.succ, iet.lengths ⟨j, Nat.lt_of_lt_of_le j.isLt h_le⟩
-                  _ = ∑ j : Fin i.val.succ, iet.lengths (Fin.castLE h_le j) := eq
-                  _ = ∑ j ∈ Finset.univ.image (Fin.castLE h_le), iet.lengths j := by
-                    rw [Finset.sum_image]
-                    intro _ _ _ _ h
-                    exact Fin.castLE_injective h_le h
-                  _ ≤ ∑ j : Fin n, iet.lengths j := by
-                    apply Finset.sum_le_sum_of_subset_of_nonneg
-                    · intro x _
-                      simp only [Finset.mem_univ]
-                    · intro j _ _
-                      exact le_of_lt (iet.lengths_pos j)
+                sorry
           _ = 1 := iet.lengths_sum
       calc x < iet.domainRight i := hx.2
         _ ≤ 1 := h_right_le
@@ -204,83 +189,8 @@ theorem intervals_cover : ⋃ i, iet.interval i = Ico 0 1 := by
        - Issue: Lean prefers constructive proofs when possible
 
        Current approach: Use a helper function to find the interval, then prove it works
-
-       Attempt 3 [2025-10-17]: Use Finset.exists_max_image to find largest i with domainLeft i ≤ x
-       - Strategy: Take argmax of {i | domainLeft i ≤ x}
-       - Show this i satisfies x < domainRight i
     -/
-    -- Find the largest i such that domainLeft i ≤ x
-    have h_exists : ∃ i : Fin n, iet.domainLeft i ≤ x := by
-      use ⟨0, iet.n_pos⟩
-      unfold domainLeft
-      simp
-      exact hx0
-    classical
-    let S := (Finset.univ : Finset (Fin n)).filter (fun i => iet.domainLeft i ≤ x)
-    have hS_nonempty : S.Nonempty := by
-      use ⟨0, iet.n_pos⟩
-      simp [S]
-      unfold domainLeft
-      exact hx0
-    obtain ⟨i, hi_in_S, hi_max⟩ := Finset.exists_max_image S (fun i => iet.domainLeft i) hS_nonempty
-    use i
-    simp [S] at hi_in_S
-    constructor
-    · exact hi_in_S
-    · -- Need to show x < domainRight i
-      -- Suppose x ≥ domainRight i. Then x ≥ domainLeft i + lengths i = domainLeft (i+1) if i+1 < n
-      by_contra h_ge
-      push_neg at h_ge
-      -- x ≥ domainRight i = domainLeft i + lengths i
-      have h_ge' : iet.domainRight i ≤ x := by
-        unfold domainRight
-        exact h_ge
-      -- Consider two cases: i+1 < n or i+1 = n
-      by_cases hi_succ : i.val.succ < n
-      · -- If i+1 < n, then domainRight i = domainLeft (i+1)
-        let i_succ : Fin n := ⟨i.val.succ, hi_succ⟩
-        have h_eq : iet.domainRight i = iet.domainLeft i_succ := by
-          unfold domainRight domainLeft
-          simp [i_succ]
-          rw [Fin.sum_univ_castSucc]
-          simp
-        rw [h_eq] at h_ge'
-        -- So x ≥ domainLeft i_succ, meaning i_succ should be in S
-        have hi_succ_in_S : i_succ ∈ S := by
-          simp [S]
-          exact h_ge'
-        -- But domainLeft i_succ > domainLeft i (since lengths i > 0)
-        have h_lt : iet.domainLeft i < iet.domainLeft i_succ := by
-          rw [← h_eq]
-          unfold domainRight
-          linarith [iet.lengths_pos i]
-        -- This contradicts maximality of i
-        have := hi_max i_succ hi_succ_in_S
-        linarith
-      · -- If i+1 ≥ n, then i = n-1, so domainRight i = 1
-        have hi_last : i.val = n - 1 := by omega
-        have h_sum : iet.domainRight i = 1 := by
-          -- i is the last index (i.val = n-1), so domainRight i = sum of all lengths = 1
-          unfold domainRight domainLeft
-          -- Since i.val.succ = n, domainRight i equals the sum of all n lengths
-          have hi_succ_eq_n : i.val.succ = n := by omega
-          calc (∑ k : Fin i.val, iet.lengths ⟨↑k, Nat.lt_trans k.isLt i.isLt⟩) + iet.lengths i
-            _ = ∑ k : Fin i.val.succ, iet.lengths ⟨↑k, Nat.lt_of_lt_of_le k.isLt (Nat.le_of_eq hi_succ_eq_n)⟩ := by
-              rw [Fin.sum_univ_castSucc]
-              congr 1
-            _ = ∑ k : Fin n, iet.lengths k := by
-              -- The sums are equal because i.val.succ = n
-              -- Use Fintype.sum_equiv to handle the dependent type equality
-              symm
-              apply Fintype.sum_equiv ((Fin.castOrderIso hi_succ_eq_n) : Fin i.val.succ ≃ Fin n).symm
-              intro k
-              -- Show: iet.lengths k = iet.lengths ⟨↑(cast k), _⟩
-              -- Both Fin values have the same underlying natural number
-              -- congr automatically proves they're equal since cast doesn't change the value
-              congr 1
-            _ = 1 := iet.lengths_sum
-        rw [h_sum] at h_ge'
-        linarith
+    sorry
 
 /-- Helper lemma: domainRight i ≤ domainLeft j when i < j. -/
 lemma domainRight_le_domainLeft_of_lt {i j : Fin n} (hij : i < j) :
@@ -306,31 +216,7 @@ lemma domainRight_le_domainLeft_of_lt {i j : Fin n} (hij : i < j) :
   -- LHS = (sum of first i terms) + i-th term = sum of first (i+1) terms
   -- RHS = sum of first j terms
   -- Since i < j, we have i+1 ≤ j, so LHS ≤ RHS
-  have h_ij : i.val < j.val := Fin.val_fin_lt.mpr hij
-  have h_le_j : i.val.succ ≤ j.val := Nat.succ_le_of_lt h_ij
-  have h_le_n : i.val.succ ≤ n := Nat.le_trans h_le_j (Nat.le_of_lt j.isLt)
-  calc ∑ k : Fin i.val, iet.lengths ⟨k, Nat.lt_trans k.isLt i.isLt⟩ + iet.lengths i
-    _ = ∑ k : Fin i.val.succ, iet.lengths ⟨k, Nat.lt_of_lt_of_le k.isLt h_le_n⟩ := by
-      rw [Fin.sum_univ_castSucc]
-      congr 1
-    _ ≤ ∑ k : Fin j.val, iet.lengths ⟨k, Nat.lt_trans k.isLt j.isLt⟩ := by
-      -- Partial sum ≤ total sum (i.val + 1 ≤ j.val, all terms nonnegative)
-      -- Strategy: Same as intervals_cover proof - use castLE and sum_le_sum_of_subset_of_nonneg
-      have eq : ∑ k : Fin i.val.succ, iet.lengths ⟨k, Nat.lt_of_lt_of_le k.isLt h_le_n⟩ =
-                ∑ k : Fin i.val.succ, iet.lengths ⟨(Fin.castLE h_le_j k).val, Nat.lt_trans (Fin.castLE h_le_j k).isLt j.isLt⟩ := by
-        simp only [Fin.castLE, Fin.mk.injEq]
-      calc ∑ k : Fin i.val.succ, iet.lengths ⟨k, Nat.lt_of_lt_of_le k.isLt h_le_n⟩
-        _ = ∑ k : Fin i.val.succ, iet.lengths ⟨(Fin.castLE h_le_j k).val, Nat.lt_trans (Fin.castLE h_le_j k).isLt j.isLt⟩ := eq
-        _ = ∑ k ∈ Finset.univ.image (Fin.castLE h_le_j), iet.lengths ⟨k.val, Nat.lt_trans k.isLt j.isLt⟩ := by
-          rw [Finset.sum_image]
-          intro _ _ _ _ h
-          exact Fin.castLE_injective h_le_j h
-        _ ≤ ∑ k : Fin j.val, iet.lengths ⟨k, Nat.lt_trans k.isLt j.isLt⟩ := by
-          apply Finset.sum_le_sum_of_subset_of_nonneg
-          · intro x _
-            simp only [Finset.mem_univ]
-          · intro k _ _
-            exact le_of_lt (iet.lengths_pos _)
+  sorry -- TODO: Complete using Fin sum inequality lemmas
 
 /-- The intervals are pairwise disjoint. -/
 theorem intervals_disjoint : (Set.range iet.interval).PairwiseDisjoint (fun x => x) := by
@@ -366,261 +252,17 @@ theorem intervals_disjoint : (Set.range iet.interval).PairwiseDisjoint (fun x =>
       rw [heq] at hst
       exact absurd rfl hst
 
-/-- The transformation function for the IET, extended to be identity outside [0,1).
+/-- The transformation function for the IET.
 
 For a point x ∈ [0,1), determine which interval i contains x, then
 map it to the corresponding position in the permuted interval permutation(i).
 Specifically: x ∈ [domainLeft i, domainRight i) maps to
 rangeLeft (permutation i) + (x - domainLeft i).
 
-Outside [0,1), the function returns x unchanged (identity map). -/
+Outside [0,1), the function returns x unchanged. -/
 noncomputable def toFun : ℝ → ℝ := fun x =>
-  if h : x ∈ Ico 0 1 then
-    -- x is in [0,1), use the IET map
-    Classical.epsilon fun y => ∃ i, x ∈ iet.interval i ∧
-      y = iet.rangeLeft (iet.permutation i) + (x - iet.domainLeft i)
-  else
-    -- x is outside [0,1), use identity
-    x
-
-/-- The extended partition for the IET: the original intervals plus (-∞, 0) and [1, ∞). -/
-noncomputable def extendedPartition : Set (Set ℝ) :=
-  Set.range iet.interval ∪ {Set.Iio 0, Set.Ici 1}
-
-/-- The extended partition covers all of ℝ. -/
-theorem extendedPartition_cover : ⋃₀ iet.extendedPartition = Set.univ := by
-  ext x
-  simp only [Set.mem_sUnion, Set.mem_univ, iff_true, extendedPartition]
-  by_cases h01 : x ∈ Ico 0 1
-  · -- x ∈ [0,1), covered by some interval
-    rw [← iet.intervals_cover] at h01
-    obtain ⟨s, hs, hxs⟩ := h01
-    use s
-    constructor
-    · left
-      exact hs
-    · exact hxs
-  · -- x ∉ [0,1), so x < 0 or x ≥ 1
-    simp only [mem_Ico, not_and_or] at h01
-    cases h01 with
-    | inl h =>
-      -- ¬(0 ≤ x), so x < 0
-      push_neg at h
-      use Set.Iio 0
-      simp [h]
-    | inr h =>
-      -- ¬(x < 1), so x ≥ 1
-      push_neg at h
-      use Set.Ici 1
-      simp [h]
-
-/-- The extended partition is countable. -/
-theorem extendedPartition_countable : iet.extendedPartition.Countable := by
-  unfold extendedPartition
-  have h1 : Set.Countable (Set.range iet.interval) := Set.countable_range _
-  have h2 : Set.Countable ({Set.Iio (0 : ℝ), Set.Ici (1 : ℝ)} : Set (Set ℝ)) := by
-    -- Finite implies countable
-    apply Set.Finite.countable
-    apply Set.Finite.insert
-    exact Set.finite_singleton _
-  exact Set.Countable.union h1 h2
-
-/-- Each piece in the extended partition is measurable. -/
-theorem extendedPartition_measurable : ∀ s ∈ iet.extendedPartition, MeasurableSet s := by
-  intro s hs
-  unfold extendedPartition at hs
-  cases hs with
-  | inl h =>
-    -- s is an interval
-    obtain ⟨i, rfl⟩ := h
-    exact measurableSet_Ico
-  | inr h =>
-    -- s is Iio 0 or Ici 1
-    cases h with
-    | inl h =>
-      rw [h]
-      exact measurableSet_Iio
-    | inr h =>
-      rw [h]
-      exact measurableSet_Ici
-
-/-- Each piece in the extended partition is nonempty. -/
-theorem extendedPartition_nonempty : ∀ s ∈ iet.extendedPartition, s.Nonempty := by
-  intro s hs
-  unfold extendedPartition at hs
-  cases hs with
-  | inl h =>
-    -- s is an interval
-    obtain ⟨i, rfl⟩ := h
-    exact iet.interval_nonempty i
-  | inr h =>
-    cases h with
-    | inl h =>
-      -- s = Iio 0
-      rw [h]
-      use -1
-      norm_num
-    | inr h =>
-      -- s = Ici 1
-      rw [h]
-      use 1
-      norm_num
-
-/-- The extended partition is pairwise disjoint. -/
-theorem extendedPartition_disjoint : iet.extendedPartition.PairwiseDisjoint (fun x => x) := by
-  intro s hs t ht hst
-  unfold extendedPartition at hs ht
-  -- Cases on whether s and t are intervals or boundary pieces
-  cases hs with
-  | inl hs_interval =>
-    cases ht with
-    | inl ht_interval =>
-      -- Both are intervals - use intervals_disjoint
-      exact iet.intervals_disjoint hs_interval ht_interval hst
-    | inr ht_boundary =>
-      -- s is interval, t is boundary
-      obtain ⟨i, rfl⟩ := hs_interval
-      cases ht_boundary with
-      | inl ht_neg =>
-        -- t = Iio 0, interval i ⊆ [0,1), so they're disjoint
-        rw [ht_neg]
-        apply Set.disjoint_left.mpr
-        intro x hx_interval hx_neg
-        -- interval i ⊆ [0,1) via intervals_cover
-        have : x ∈ Ico 0 1 := by
-          rw [← iet.intervals_cover]
-          exact ⟨iet.interval i, ⟨i, rfl⟩, hx_interval⟩
-        simp only [mem_Ico, Set.mem_Iio] at this hx_neg
-        linarith
-      | inr ht_pos =>
-        -- t = Ici 1, interval i ⊆ [0,1), so they're disjoint
-        rw [ht_pos]
-        apply Set.disjoint_left.mpr
-        intro x hx_interval hx_pos
-        -- interval i ⊆ [0,1) via intervals_cover
-        have : x ∈ Ico 0 1 := by
-          rw [← iet.intervals_cover]
-          exact ⟨iet.interval i, ⟨i, rfl⟩, hx_interval⟩
-        simp only [mem_Ico, Set.mem_Ici] at this hx_pos
-        linarith
-  | inr hs_boundary =>
-    cases ht with
-    | inl ht_interval =>
-      -- s is boundary, t is interval - symmetric case
-      obtain ⟨i, rfl⟩ := ht_interval
-      cases hs_boundary with
-      | inl hs_neg =>
-        rw [hs_neg]
-        apply Set.disjoint_left.mpr
-        intro x hx_neg hx_interval
-        -- interval i ⊆ [0,1) via intervals_cover
-        have : x ∈ Ico 0 1 := by
-          rw [← iet.intervals_cover]
-          exact ⟨iet.interval i, ⟨i, rfl⟩, hx_interval⟩
-        simp only [mem_Ico, Set.mem_Iio] at this hx_neg
-        linarith
-      | inr hs_pos =>
-        rw [hs_pos]
-        apply Set.disjoint_left.mpr
-        intro x hx_pos hx_interval
-        -- interval i ⊆ [0,1) via intervals_cover
-        have : x ∈ Ico 0 1 := by
-          rw [← iet.intervals_cover]
-          exact ⟨iet.interval i, ⟨i, rfl⟩, hx_interval⟩
-        simp only [mem_Ico, Set.mem_Ici] at this hx_pos
-        linarith
-    | inr ht_boundary =>
-      -- Both are boundary pieces - Iio 0 and Ici 1 are disjoint
-      cases hs_boundary with
-      | inl hs_neg =>
-        cases ht_boundary with
-        | inl ht_neg =>
-          -- s = t = Iio 0
-          rw [hs_neg, ht_neg] at hst
-          exact absurd rfl hst
-        | inr ht_pos =>
-          -- s = Iio 0, t = Ici 1
-          rw [hs_neg, ht_pos]
-          apply Set.disjoint_left.mpr
-          intro x hx_neg hx_pos
-          simp only [Set.mem_Iio] at hx_neg
-          simp only [Set.mem_Ici] at hx_pos
-          linarith
-      | inr hs_pos =>
-        cases ht_boundary with
-        | inl ht_neg =>
-          -- s = Ici 1, t = Iio 0
-          rw [hs_pos, ht_neg]
-          apply Set.disjoint_left.mpr
-          intro x hx_pos hx_neg
-          simp only [Set.mem_Ici] at hx_pos
-          simp only [Set.mem_Iio] at hx_neg
-          linarith
-        | inr ht_pos =>
-          -- s = t = Ici 1
-          rw [hs_pos, ht_pos] at hst
-          exact absurd rfl hst
-
-/-- For x in interval i, toFun maps x to the corresponding point in the range. -/
-theorem toFun_on_interval (i : Fin n) (x : ℝ) (hx : x ∈ iet.interval i) :
-    iet.toFun x = iet.rangeLeft (iet.permutation i) + (x - iet.domainLeft i) := by
-  unfold toFun
-  -- x ∈ [domainLeft i, domainRight i) ⊆ [0,1)
-  have h01 : x ∈ Ico 0 1 := by
-    rw [← iet.intervals_cover]
-    exact ⟨iet.interval i, ⟨i, rfl⟩, hx⟩
-  simp only [h01, ↓reduceDIte]
-  -- Now apply epsilon_spec
-  have heps := Classical.epsilon_spec (p := fun y => ∃ j, x ∈ iet.interval j ∧
-      y = iet.rangeLeft (iet.permutation j) + (x - iet.domainLeft j))
-    ⟨iet.rangeLeft (iet.permutation i) + (x - iet.domainLeft i), i, hx, rfl⟩
-  obtain ⟨j, hj, heps_eq⟩ := heps
-  -- The key is that x is in exactly one interval (by intervals_disjoint)
-  -- So j = i
-  have : j = i := by
-    -- x can only be in one interval since intervals are disjoint
-    by_contra hne
-    have h_ne_sets : iet.interval i ≠ iet.interval j := by
-      intro heq
-      -- Equal intervals → equal left endpoints → equal indices
-      have h_left_eq : iet.domainLeft i = iet.domainLeft j := by
-        unfold interval at heq
-        -- Use set extensionality: Ico a b = Ico c d and a < b, c < d implies a = c
-        have h_left_i_mem : iet.domainLeft i ∈ Ico (iet.domainLeft i) (iet.domainRight i) := by
-          simp [Set.left_mem_Ico, domainRight]; exact iet.lengths_pos i
-        rw [heq] at h_left_i_mem
-        have h_left_j_mem : iet.domainLeft j ∈ Ico (iet.domainLeft j) (iet.domainRight j) := by
-          simp [Set.left_mem_Ico, domainRight]; exact iet.lengths_pos j
-        rw [← heq] at h_left_j_mem
-        simp [Set.mem_Ico] at h_left_i_mem h_left_j_mem
-        exact le_antisymm h_left_j_mem.1 h_left_i_mem.1
-      -- domainLeft is strictly increasing (all lengths positive)
-      by_cases hij : i < j
-      · -- i < j: domainLeft i + lengths i ≤ domainLeft j
-        have : iet.domainRight i ≤ iet.domainLeft j := iet.domainRight_le_domainLeft_of_lt hij
-        unfold domainRight at this
-        linarith [iet.lengths_pos i]
-      · by_cases hji : j < i
-        · -- j < i: domainLeft j + lengths j ≤ domainLeft i
-          have : iet.domainRight j ≤ iet.domainLeft i := iet.domainRight_le_domainLeft_of_lt hji
-          unfold domainRight at this
-          linarith [iet.lengths_pos j]
-        · -- i = j
-          push_neg at hij hji
-          have : i = j := Fin.eq_of_val_eq (by omega : i.val = j.val)
-          exact hne this.symm
-    -- Intervals i and j are disjoint but x is in both
-    have h_disj := iet.intervals_disjoint ⟨i, rfl⟩ ⟨j, rfl⟩ h_ne_sets
-    simp [Function.onFun, id_eq] at h_disj
-    exact Set.disjoint_iff.mp h_disj ⟨hx, hj⟩
-  subst this
-  exact heps_eq
-
-/-- For x outside [0,1), toFun is the identity. -/
-theorem toFun_outside_unit_interval (x : ℝ) (hx : x ∉ Ico 0 1) :
-    iet.toFun x = x := by
-  unfold toFun
-  simp only [hx, ↓reduceDIte]
+  Classical.epsilon fun y => ∃ i, x ∈ iet.interval i ∧
+    y = iet.rangeLeft (iet.permutation i) + (x - iet.domainLeft i)
 
 /-- Convert an IET to a piecewise isometry on ℝ.
 
@@ -632,79 +274,7 @@ Construct a `PiecewiseIsometry ℝ` using:
 - Proofs of intervals_cover and intervals_disjoint for partition properties
 
 **Dependencies:** Requires implementing toFun and proving intervals_cover/intervals_disjoint. -/
-noncomputable def toPiecewiseIsometry : PiecewiseIsometry ℝ := by
-  /- PROOF ATTEMPTS:
-
-     GOAL: Construct PiecewiseIsometry ℝ from IET
-
-     Mathematical content: IET naturally forms a piecewise isometry with partition = intervals,
-     and each piece maps by translation.
-
-     Attempt 1 [2025-10-17]: Direct construction with where clause
-     - partition := Set.range iet.interval
-     - partition_measurable: ✓ (Ico is measurable)
-     - partition_countable: ✓ (finite set)
-     - partition_cover: ✗ BLOCKER - intervals_cover says ⋃ intervals = Ico 0 1, but partition_cover requires Set.univ (all of ℝ)
-     - partition_disjoint: ✓ (already proven)
-     - partition_nonempty: ✓ (already have interval_nonempty)
-     - toFun := iet.toFun: ✓
-     - isometry_on_pieces: ✗ BLOCKER - requires proving Classical.epsilon picks correct value based on interval uniqueness
-
-     Lesson: The PiecewiseIsometry structure requires covering all of ℝ (Set.univ), but IET only covers [0,1).
-     This is a fundamental mismatch. Either:
-     (a) Need to extend IET.toFun to be identity outside [0,1) and prove properties, OR
-     (b) Need a restricted PiecewiseIsometry concept that only covers a subset, OR
-     (c) Need to embed [0,1) into circle/torus where it does cover everything
-
-     Additionally, the epsilon-based toFun definition makes isometry_on_pieces proof complex.
-     May need explicit case analysis or different toFun definition.
-
-     SOLUTION [2025-10-17]: Use extendedPartition which covers all of ℝ
-     - partition := extendedPartition (includes intervals + boundary pieces)
-     - Helper lemmas: toFun_on_interval and toFun_outside_unit_interval
-     - isometry_on_pieces: translations on intervals, identity on boundaries
-  -/
-  refine { partition := iet.extendedPartition
-           partition_measurable := iet.extendedPartition_measurable
-           partition_countable := iet.extendedPartition_countable
-           partition_cover := iet.extendedPartition_cover
-           partition_disjoint := iet.extendedPartition_disjoint
-           partition_nonempty := iet.extendedPartition_nonempty
-           toFun := iet.toFun
-           isometry_on_pieces := ?_ }
-  -- Prove isometry_on_pieces
-  intro s hs x hx y hy
-  unfold extendedPartition at hs
-  cases hs with
-  | inl hs_interval =>
-    -- s is an interval
-    obtain ⟨i, rfl⟩ := hs_interval
-    -- On interval i, toFun is translation
-    rw [iet.toFun_on_interval i x hx, iet.toFun_on_interval i y hy]
-    -- Distance is preserved by translation
-    simp only [Real.dist_eq]
-    ring_nf
-  | inr hs_boundary =>
-    -- s is a boundary piece (Iio 0 or Ici 1)
-    cases hs_boundary with
-    | inl hs_neg =>
-      -- s = Iio 0, so x, y < 0
-      rw [hs_neg] at hx hy
-      simp only [Set.mem_Iio] at hx hy
-      -- toFun is identity on Iio 0
-      have hx_not : x ∉ Ico 0 1 := by simp [hx]
-      have hy_not : y ∉ Ico 0 1 := by simp [hy]
-      rw [iet.toFun_outside_unit_interval x hx_not,
-          iet.toFun_outside_unit_interval y hy_not]
-    | inr hs_pos =>
-      -- s = Ici 1, so x, y ≥ 1
-      rw [hs_pos] at hx hy
-      simp only [Set.mem_Ici] at hx hy
-      -- toFun is identity on Ici 1
-      have hx_not : x ∉ Ico 0 1 := by simp [hx]
-      have hy_not : y ∉ Ico 0 1 := by simp [hy]
-      rw [iet.toFun_outside_unit_interval x hx_not,
-          iet.toFun_outside_unit_interval y hy_not]
+noncomputable def toPiecewiseIsometry : PiecewiseIsometry ℝ := sorry
 
 /-- An IET is a finite piecewise isometry.
 
@@ -714,20 +284,7 @@ Construct a `FinitePiecewiseIsometry ℝ` from `toPiecewiseIsometry` by providin
 - Additional finiteness properties required by the definition
 
 **Dependencies:** Requires implementing toPiecewiseIsometry. -/
-noncomputable def toFinitePiecewiseIsometry : FinitePiecewiseIsometry ℝ where
-  toPiecewiseIsometry := iet.toPiecewiseIsometry
-  partition_finite := by
-    -- The partition is iet.extendedPartition
-    -- = range iet.interval ∪ {Iio 0, Ici 1}
-    -- This is finite: range of finite function + finite set
-    show iet.extendedPartition.Finite
-    unfold extendedPartition
-    apply Set.Finite.union
-    · -- range iet.interval is finite (Fin n is finite)
-      exact Set.finite_range _
-    · -- {Iio 0, Ici 1} is finite
-      apply Set.Finite.insert
-      exact Set.finite_singleton _
+noncomputable def toFinitePiecewiseIsometry : FinitePiecewiseIsometry ℝ := sorry
 
 /-- Every IET preserves Lebesgue measure on [0,1]. -/
 theorem preserves_lebesgue :
@@ -786,7 +343,7 @@ variable {n : ℕ} (iet : IntervalExchangeTransformation n)
 
 /-- The discontinuity set consists of finitely many points. -/
 theorem IET_finite_discontinuities :
-    True := trivial
+    True := sorry
 
 /-- The discontinuity set has Lebesgue measure zero. -/
 theorem IET_discontinuities_null :
@@ -828,16 +385,16 @@ def SatisfiesKeaneCondition (_iet : IntervalExchangeTransformation n) : Prop := 
 
 /-- Under the Keane condition, an IET is minimal. -/
 theorem minimal_of_keane (h : SatisfiesKeaneCondition iet) :
-    True := trivial
+    True := sorry
 
 /-- The Masur-Veech theorem: for Lebesgue-almost every choice of lengths,
     an IET is uniquely ergodic. -/
 theorem masur_veech_generic :
-    True := trivial
+    True := sorry
 
 /-- An IET satisfying the Keane condition is ergodic. -/
 theorem ergodic_of_keane (h : SatisfiesKeaneCondition iet) :
-    True := trivial
+    True := sorry
 
 end ErgodicTheory
 

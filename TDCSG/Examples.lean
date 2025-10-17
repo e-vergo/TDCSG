@@ -8,7 +8,6 @@ import TDCSG.Properties
 import TDCSG.Finite
 import TDCSG.IntervalExchange
 import Mathlib.Analysis.InnerProductSpace.PiL2
-import Mathlib.Analysis.NormedSpace.PiLp
 import Mathlib.Analysis.Real.Cardinality
 
 /-!
@@ -174,13 +173,11 @@ section IntervalExamples
 
 /-! ### Interval Exchange Examples
 
-NOTE: Basic IET infrastructure is now COMPLETE:
-- `IntervalExchangeTransformation.toFun` is implemented ✓
-- `IntervalExchangeTransformation.toPiecewiseIsometry` is implemented ✓
-- `IntervalExchangeTransformation.toFinitePiecewiseIsometry` is implemented ✓
+NOTE: Most examples in this section are BLOCKED waiting on:
+- `IntervalExchangeTransformation.toFun` to be implemented
+- `IntervalExchangeTransformation.toPiecewiseIsometry` to be implemented
 
-Remaining sorries in this section are research-level proofs requiring detailed
-analysis of IET behavior (partition structure, toFun properties, etc.).
+These examples demonstrate IET theory but cannot be completed until the IET infrastructure is ready.
 -/
 
 /-- Simple 2-interval exchange: swap [0, 1/2) with [1/2, 1). -/
@@ -189,7 +186,7 @@ noncomputable def simple_two_IET : IntervalExchangeTransformation 2 :=
 
 /-- The simple 2-interval exchange as a piecewise isometry. -/
 noncomputable def simple_two_IET_PI : PiecewiseIsometry ℝ :=
-  simple_two_IET.toPiecewiseIsometry
+  sorry  -- IntervalExchangeTransformation.toPiecewiseIsometry is not yet implemented
 
 /-- The discontinuity set contains only the midpoint. -/
 theorem simple_two_IET_discontinuity :
@@ -198,16 +195,14 @@ theorem simple_two_IET_discontinuity :
   -- For a 2-IET, the partition consists of two intervals [0, α) and [α, 1)
   -- The frontiers are {0, α} and {α, 1}, so the discontinuity set ⊆ {0, α, 1}
   -- Since we work on (0, 1), the relevant boundary point is α = 1/2
-  -- TODO: Research-level proof requiring detailed partition structure analysis
-  sorry
+  sorry  -- Full proof requires showing the partition structure of simple_two_IET
 
 /-- Rotation by 1/2 as a 2-interval IET. -/
 theorem simple_two_IET_is_rotation :
     ∀ x ∈ Ico (0 : ℝ) 1, simple_two_IET_PI x = (x + 1/2) % 1 := by
   -- The 2-IET with α = 1/2 swaps [0, 1/2) with [1/2, 1)
   -- This is equivalent to rotation by 1/2
-  -- TODO: Research-level proof requiring detailed analysis of toFun behavior
-  sorry
+  sorry  -- Requires IntervalExchangeTransformation.toFun to be implemented
 
 /-- A 3-interval exchange with specific parameters. -/
 noncomputable def three_IET_example : IntervalExchangeTransformation 3 :=
@@ -223,34 +218,21 @@ end IntervalExamples
 
 section PlanarExamples
 
-/-- ℝ² with the L2 (Euclidean) metric. -/
-abbrev EuclideanPlane := PiLp 2 (Fin 2 → ℝ)
-
-/-- Helper: extract coordinates from EuclideanPlane point. -/
-def euclidean_coords (p : EuclideanPlane) : ℝ × ℝ :=
-  (p.1 0, p.1 1)
-
-/-- Helper: create EuclideanPlane point from coordinates. -/
-def mk_euclidean (x y : ℝ) : EuclideanPlane :=
-  PiLp.equiv 2 _ (![x, y])
-
 /-- A piecewise rotation in ℝ²: rotate the unit disk by different angles in two halves.
 
-This version uses ℝ × ℝ with the standard product (sup) metric. Note that rotations
-preserve Euclidean distance, not sup distance, so the isometry property cannot be
-satisfied. See double_rotation_euclidean for a correct version using the L2 metric. -/
+NOTE: This example has a known issue - the partition only covers the open unit disk,
+not all of ℝ². A complete definition would need a third piece for points outside the disk. -/
 noncomputable def double_rotation (θ₁ θ₂ : ℝ) : PiecewiseIsometry (ℝ × ℝ) where
   partition := {
     {p : ℝ × ℝ | p.1 ≥ 0 ∧ p.1^2 + p.2^2 < 1},
-    {p : ℝ × ℝ | p.1 < 0 ∧ p.1^2 + p.2^2 < 1},
-    {p : ℝ × ℝ | p.1^2 + p.2^2 ≥ 1}
+    {p : ℝ × ℝ | p.1 < 0 ∧ p.1^2 + p.2^2 < 1}
   }
   partition_countable := by
     simp only [Set.countable_insert, Set.countable_singleton]
   partition_measurable := by
     intro s hs
     simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hs
-    rcases hs with (rfl | rfl | rfl)
+    rcases hs with (rfl | rfl)
     · -- {p | p.1 ≥ 0 ∧ p.1^2 + p.2^2 < 1} = {p | p.1 ≥ 0} ∩ {p | p.1^2 + p.2^2 < 1}
       show MeasurableSet {p : ℝ × ℝ | p.1 ≥ 0 ∧ p.1^2 + p.2^2 < 1}
       have : {p : ℝ × ℝ | p.1 ≥ 0 ∧ p.1^2 + p.2^2 < 1} =
@@ -277,60 +259,32 @@ noncomputable def double_rotation (θ₁ θ₂ : ℝ) : PiecewiseIsometry (ℝ �
         exact isOpen_Iio.measurableSet.preimage measurable_fst
       · -- {p | p.1^2 + p.2^2 < 1} is open (and hence measurable)
         exact isOpen_lt (by continuity) continuous_const |>.measurableSet
-    · -- {p | p.1^2 + p.2^2 ≥ 1} is measurable (closed set)
-      show MeasurableSet {p : ℝ × ℝ | p.1^2 + p.2^2 ≥ 1}
-      exact isClosed_le continuous_const (by continuity) |>.measurableSet
   partition_cover := by
-    -- The partition now covers all of ℝ² via three pieces:
-    -- Right half-disk, left half-disk, and outside the disk
-    ext p
-    simp only [Set.mem_sUnion, Set.mem_insert_iff, Set.mem_singleton_iff, Set.mem_setOf_eq, Set.mem_univ, iff_true]
-    by_cases h : p.1^2 + p.2^2 < 1
-    · -- Inside the unit disk: covered by right or left half
-      by_cases h' : p.1 ≥ 0
-      · exact ⟨{q : ℝ × ℝ | q.1 ≥ 0 ∧ q.1^2 + q.2^2 < 1}, Or.inl rfl, h', h⟩
-      · exact ⟨{q : ℝ × ℝ | q.1 < 0 ∧ q.1^2 + q.2^2 < 1}, Or.inr (Or.inl rfl), not_le.mp h', h⟩
-    · -- Outside or on the boundary of the unit disk
-      exact ⟨{q : ℝ × ℝ | q.1^2 + q.2^2 ≥ 1}, Or.inr (Or.inr rfl), le_of_not_lt h⟩
+    -- NOTE: This partition does NOT actually cover all of ℝ², only the open unit disk.
+    -- This is a known issue with this example - it should include a third piece for points outside the disk.
+    -- For now, we leave this as sorry to acknowledge the gap in the definition.
+    sorry
   partition_nonempty := by
     intro s hs
     simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hs
-    rcases hs with (rfl | rfl | rfl)
+    rcases hs with (rfl | rfl)
     · use (0.5, 0); norm_num
     · use (-0.5, 0); norm_num
-    · use (2, 0); norm_num
   partition_disjoint := by
-    -- Pieces are disjoint: pieces 1,2 are inside disk; piece 3 is outside
+    -- Pieces are disjoint because p.1 ≥ 0 and p.1 < 0 cannot both hold
     intro s hs t ht hst
     simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hs ht
-    rcases hs with (rfl | rfl | rfl) <;> rcases ht with (rfl | rfl | rfl)
-    · contradiction
-    · -- Right half-disk vs left half-disk: disjoint by p.1 ≥ 0 vs p.1 < 0
-      apply Set.disjoint_left.mpr
-      intro p ⟨hp1, _⟩ ⟨hp2, _⟩
-      linarith
-    · -- Right half-disk vs outside: disjoint by p.1^2 + p.2^2 < 1 vs ≥ 1
-      apply Set.disjoint_left.mpr
-      intro p ⟨_, hp1⟩ hp2
-      linarith
-    · -- Left half-disk vs right half-disk: symmetric to case above
-      apply Set.disjoint_left.mpr
-      intro p ⟨hp1, _⟩ ⟨hp2, _⟩
-      linarith
-    · contradiction
-    · -- Left half-disk vs outside: disjoint by p.1^2 + p.2^2 < 1 vs ≥ 1
-      apply Set.disjoint_left.mpr
-      intro p ⟨_, hp1⟩ hp2
-      linarith
-    · -- Outside vs right half-disk: symmetric
-      apply Set.disjoint_left.mpr
-      intro p hp1 ⟨_, hp2⟩
-      linarith
-    · -- Outside vs left half-disk: symmetric
-      apply Set.disjoint_left.mpr
-      intro p hp1 ⟨_, hp2⟩
-      linarith
-    · contradiction
+    rcases hs with (rfl | rfl)
+    · rcases ht with (rfl | rfl)
+      · contradiction
+      · apply Set.disjoint_left.mpr
+        intro p ⟨hp1, _⟩ ⟨hp2, _⟩
+        linarith
+    · rcases ht with (rfl | rfl)
+      · apply Set.disjoint_left.mpr
+        intro p ⟨hp1, _⟩ ⟨hp2, _⟩
+        linarith
+      · contradiction
   toFun := fun p =>
     if p.1 ≥ 0 ∧ p.1^2 + p.2^2 < 1 then
       -- Rotate by θ₁
@@ -341,12 +295,6 @@ noncomputable def double_rotation (θ₁ θ₂ : ℝ) : PiecewiseIsometry (ℝ �
     else
       p  -- Outside unit disk, keep fixed
   isometry_on_pieces := by
-    -- IMPOSSIBLE: Rotations preserve Euclidean (L2) distance, but ℝ × ℝ uses the sup (L∞) metric.
-    -- For a rotation to be an isometry under the sup metric, we would need:
-    --   max(|cos θ · Δx - sin θ · Δy|, |sin θ · Δx + cos θ · Δy|) = max(|Δx|, |Δy|)
-    -- This holds only for θ = 0, π/2, π, 3π/2 (axis-aligned rotations).
-    -- For general θ, rotations are NOT isometries under the sup metric.
-    -- See double_rotation_euclidean below for a correct version using the L2 metric.
     sorry
 
 /-- The discontinuity set is the y-axis. -/
@@ -354,216 +302,8 @@ theorem double_rotation_discontinuity (θ₁ θ₂ : ℝ) :
     (double_rotation θ₁ θ₂).discontinuitySet ⊆ {p : ℝ × ℝ | p.1 = 0 ∧ p.1^2 + p.2^2 ≤ 1} := by
   -- Discontinuities occur on boundaries between pieces
   -- The partition boundary is where p.1 = 0 (the y-axis) restricted to the disk
-  -- NOTE: This theorem depends on double_rotation being valid, which requires the impossible
-  -- isometry_on_pieces. This is kept as a sorry since the entire construction is flawed.
-  -- See double_rotation_euclidean_discontinuity for the working version.
   unfold discontinuitySet
-  sorry
-
-/-- A piecewise rotation using the Euclidean (L2) metric: correctly rotate the unit disk
-by different angles in two halves. This version properly uses EuclideanPlane so that
-rotations are genuine isometries. -/
-noncomputable def double_rotation_euclidean (θ₁ θ₂ : ℝ) : PiecewiseIsometry EuclideanPlane where
-  partition := {
-    {p : EuclideanPlane | p.1 0 ≥ 0 ∧ (p.1 0)^2 + (p.1 1)^2 < 1},
-    {p : EuclideanPlane | p.1 0 < 0 ∧ (p.1 0)^2 + (p.1 1)^2 < 1},
-    {p : EuclideanPlane | (p.1 0)^2 + (p.1 1)^2 ≥ 1}
-  }
-  partition_countable := by
-    simp only [Set.countable_insert, Set.countable_singleton]
-  partition_measurable := by
-    intro s hs
-    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hs
-    rcases hs with (rfl | rfl | rfl)
-    · -- Right half-disk: {p | p.1 0 ≥ 0 ∧ (p.1 0)^2 + (p.1 1)^2 < 1}
-      show MeasurableSet {p : EuclideanPlane | p.1 0 ≥ 0 ∧ (p.1 0)^2 + (p.1 1)^2 < 1}
-      refine MeasurableSet.inter ?_ ?_
-      · -- {p | p.1 0 ≥ 0} is measurable
-        exact isClosed_Ici.measurableSet.preimage (Continuous.comp continuous_apply continuous_id)
-      · -- {p | (p.1 0)^2 + (p.1 1)^2 < 1} is open (hence measurable)
-        have : Continuous fun p : EuclideanPlane => (p.1 0)^2 + (p.1 1)^2 := by continuity
-        exact isOpen_lt this continuous_const |>.measurableSet
-    · -- Left half-disk: {p | p.1 0 < 0 ∧ (p.1 0)^2 + (p.1 1)^2 < 1}
-      show MeasurableSet {p : EuclideanPlane | p.1 0 < 0 ∧ (p.1 0)^2 + (p.1 1)^2 < 1}
-      refine MeasurableSet.inter ?_ ?_
-      · -- {p | p.1 0 < 0} is measurable
-        exact isOpen_Iio.measurableSet.preimage (Continuous.comp continuous_apply continuous_id)
-      · -- {p | (p.1 0)^2 + (p.1 1)^2 < 1} is open (hence measurable)
-        have : Continuous fun p : EuclideanPlane => (p.1 0)^2 + (p.1 1)^2 := by continuity
-        exact isOpen_lt this continuous_const |>.measurableSet
-    · -- Outside disk: {p | (p.1 0)^2 + (p.1 1)^2 ≥ 1}
-      show MeasurableSet {p : EuclideanPlane | (p.1 0)^2 + (p.1 1)^2 ≥ 1}
-      have : Continuous fun p : EuclideanPlane => (p.1 0)^2 + (p.1 1)^2 := by continuity
-      exact isClosed_le continuous_const this |>.measurableSet
-  partition_cover := by
-    ext p
-    simp only [Set.mem_sUnion, Set.mem_insert_iff, Set.mem_singleton_iff, Set.mem_setOf_eq, Set.mem_univ, iff_true]
-    by_cases h : (p.1 0)^2 + (p.1 1)^2 < 1
-    · -- Inside the unit disk
-      by_cases h' : p.1 0 ≥ 0
-      · exact ⟨{q : EuclideanPlane | q.1 0 ≥ 0 ∧ (q.1 0)^2 + (q.1 1)^2 < 1}, Or.inl rfl, h', h⟩
-      · exact ⟨{q : EuclideanPlane | q.1 0 < 0 ∧ (q.1 0)^2 + (q.1 1)^2 < 1}, Or.inr (Or.inl rfl), not_le.mp h', h⟩
-    · -- Outside or on the boundary
-      exact ⟨{q : EuclideanPlane | (q.1 0)^2 + (q.1 1)^2 ≥ 1}, Or.inr (Or.inr rfl), le_of_not_lt h⟩
-  partition_nonempty := by
-    intro s hs
-    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hs
-    rcases hs with (rfl | rfl | rfl)
-    · use mk_euclidean 0.5 0; norm_num [mk_euclidean]
-    · use mk_euclidean (-0.5) 0; norm_num [mk_euclidean]
-    · use mk_euclidean 2 0; norm_num [mk_euclidean]
-  partition_disjoint := by
-    intro s hs t ht hst
-    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hs ht
-    rcases hs with (rfl | rfl | rfl) <;> rcases ht with (rfl | rfl | rfl)
-    · contradiction
-    · apply Set.disjoint_left.mpr; intro p ⟨hp1, _⟩ ⟨hp2, _⟩; linarith
-    · apply Set.disjoint_left.mpr; intro p ⟨_, hp1⟩ hp2; linarith
-    · apply Set.disjoint_left.mpr; intro p ⟨hp1, _⟩ ⟨hp2, _⟩; linarith
-    · contradiction
-    · apply Set.disjoint_left.mpr; intro p ⟨_, hp1⟩ hp2; linarith
-    · apply Set.disjoint_left.mpr; intro p hp1 ⟨_, hp2⟩; linarith
-    · apply Set.disjoint_left.mpr; intro p hp1 ⟨_, hp2⟩; linarith
-    · contradiction
-  toFun := fun p =>
-    let x := p.1 0
-    let y := p.1 1
-    if x ≥ 0 ∧ x^2 + y^2 < 1 then
-      -- Rotate by θ₁
-      mk_euclidean (x * Real.cos θ₁ - y * Real.sin θ₁) (x * Real.sin θ₁ + y * Real.cos θ₁)
-    else if x < 0 ∧ x^2 + y^2 < 1 then
-      -- Rotate by θ₂
-      mk_euclidean (x * Real.cos θ₂ - y * Real.sin θ₂) (x * Real.sin θ₂ + y * Real.cos θ₂)
-    else
-      p  -- Outside unit disk, keep fixed
-  isometry_on_pieces := by
-    intro s hs x hx y hy
-    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hs
-    rcases hs with (rfl | rfl | rfl)
-    · -- Right half-disk: rotation by θ₁
-      simp only [Set.mem_setOf_eq] at hx hy
-      -- Rotation is an isometry: preserve Euclidean distance under L2 metric
-      -- The standard formula: rotation preserves sum of squares
-      -- We need: dist (rot x) (rot y) = dist x y
-      -- For L2 metric: dist = sqrt(sum of squared coordinate differences)
-      -- Rotation matrix is orthogonal, so it preserves the L2 norm
-      have hx_if : (if x.1 0 ≥ 0 ∧ (x.1 0)^2 + (x.1 1)^2 < 1 then
-                     mk_euclidean (x.1 0 * Real.cos θ₁ - x.1 1 * Real.sin θ₁)
-                                   (x.1 0 * Real.sin θ₁ + x.1 1 * Real.cos θ₁)
-                   else if x.1 0 < 0 ∧ (x.1 0)^2 + (x.1 1)^2 < 1 then
-                     mk_euclidean (x.1 0 * Real.cos θ₂ - x.1 1 * Real.sin θ₂)
-                                   (x.1 0 * Real.sin θ₂ + x.1 1 * Real.cos θ₂)
-                   else x) =
-                   mk_euclidean (x.1 0 * Real.cos θ₁ - x.1 1 * Real.sin θ₁)
-                                 (x.1 0 * Real.sin θ₁ + x.1 1 * Real.cos θ₁) := by
-        simp [hx]
-      have hy_if : (if y.1 0 ≥ 0 ∧ (y.1 0)^2 + (y.1 1)^2 < 1 then
-                     mk_euclidean (y.1 0 * Real.cos θ₁ - y.1 1 * Real.sin θ₁)
-                                   (y.1 0 * Real.sin θ₁ + y.1 1 * Real.cos θ₁)
-                   else if y.1 0 < 0 ∧ (y.1 0)^2 + (y.1 1)^2 < 1 then
-                     mk_euclidean (y.1 0 * Real.cos θ₂ - y.1 1 * Real.sin θ₂)
-                                   (y.1 0 * Real.sin θ₂ + y.1 1 * Real.cos θ₂)
-                   else y) =
-                   mk_euclidean (y.1 0 * Real.cos θ₁ - y.1 1 * Real.sin θ₁)
-                                 (y.1 0 * Real.sin θ₁ + y.1 1 * Real.cos θ₁) := by
-        simp [hy]
-      rw [hx_if, hy_if]
-      -- Proof: Rotation preserves L2 distance
-      -- Strategy: Show dist²(rotated) = dist²(original) using L2 formula
-      suffices h_sq : dist (mk_euclidean (x.1 0 * Real.cos θ₁ - x.1 1 * Real.sin θ₁)
-                                          (x.1 0 * Real.sin θ₁ + x.1 1 * Real.cos θ₁))
-                           (mk_euclidean (y.1 0 * Real.cos θ₁ - y.1 1 * Real.sin θ₁)
-                                          (y.1 0 * Real.sin θ₁ + y.1 1 * Real.cos θ₁)) ^ 2
-                      = dist x y ^ 2 by
-        exact sq_eq_sq (dist_nonneg) dist_nonneg |>.mp h_sq
-      -- Convert to sum formula using PiLp.dist_sq_eq_of_L2
-      rw [PiLp.dist_sq_eq_of_L2, PiLp.dist_sq_eq_of_L2]
-      -- Expand the sum over Fin 2 = {0, 1}
-      have fin2_univ : (Finset.univ : Finset (Fin 2)) = {0, 1} := by decide
-      rw [fin2_univ, fin2_univ]
-      rw [Finset.sum_pair (by decide : (0 : Fin 2) ≠ 1)]
-      rw [Finset.sum_pair (by decide : (0 : Fin 2) ≠ 1)]
-      -- Simplify coordinates using mk_euclidean structure
-      have mk_0 : ∀ a b : ℝ, (mk_euclidean a b).1 0 = a := by intro; unfold mk_euclidean; simp
-      have mk_1 : ∀ a b : ℝ, (mk_euclidean a b).1 1 = b := by intro; unfold mk_euclidean; simp
-      rw [mk_0, mk_0, mk_1, mk_1]
-      -- Convert dist to |a - b| in ℝ
-      simp only [Real.dist_eq]
-      -- Let Δx = x.1 0 - y.1 0 and Δy = x.1 1 - y.1 1
-      set Δx := x.1 0 - y.1 0 with hΔx
-      set Δy := x.1 1 - y.1 1 with hΔy
-      -- Simplify absolute values squared
-      have h_first : |Δx * Real.cos θ₁ - Δy * Real.sin θ₁| ^ 2
-                   = (Δx * Real.cos θ₁ - Δy * Real.sin θ₁) ^ 2 := sq_abs _
-      have h_second : |Δx * Real.sin θ₁ + Δy * Real.cos θ₁| ^ 2
-                    = (Δx * Real.sin θ₁ + Δy * Real.cos θ₁) ^ 2 := sq_abs _
-      rw [h_first, h_second]
-      rw [show |Δx| ^ 2 = Δx ^ 2 by rw [sq_abs]]
-      rw [show |Δy| ^ 2 = Δy ^ 2 by rw [sq_abs]]
-      -- Expand and use cos²θ₁ + sin²θ₁ = 1
-      ring_nf
-      rw [Real.cos_sq_add_sin_sq θ₁]
-      ring
-    · -- Left half-disk: rotation by θ₂
-      simp only [Set.mem_setOf_eq] at hx hy
-      have hx_if : (if x.1 0 ≥ 0 ∧ (x.1 0)^2 + (x.1 1)^2 < 1 then
-                     mk_euclidean (x.1 0 * Real.cos θ₁ - x.1 1 * Real.sin θ₁)
-                                   (x.1 0 * Real.sin θ₁ + x.1 1 * Real.cos θ₁)
-                   else if x.1 0 < 0 ∧ (x.1 0)^2 + (x.1 1)^2 < 1 then
-                     mk_euclidean (x.1 0 * Real.cos θ₂ - x.1 1 * Real.sin θ₂)
-                                   (x.1 0 * Real.sin θ₂ + x.1 1 * Real.cos θ₂)
-                   else x) =
-                   mk_euclidean (x.1 0 * Real.cos θ₂ - x.1 1 * Real.sin θ₂)
-                                 (x.1 0 * Real.sin θ₂ + x.1 1 * Real.cos θ₂) := by
-        have : ¬(x.1 0 ≥ 0 ∧ (x.1 0)^2 + (x.1 1)^2 < 1) := fun ⟨h, _⟩ => not_le.mpr hx.1 h
-        simp [this, hx]
-      have hy_if : (if y.1 0 ≥ 0 ∧ (y.1 0)^2 + (y.1 1)^2 < 1 then
-                     mk_euclidean (y.1 0 * Real.cos θ₁ - y.1 1 * Real.sin θ₁)
-                                   (y.1 0 * Real.sin θ₁ + y.1 1 * Real.cos θ₁)
-                   else if y.1 0 < 0 ∧ (y.1 0)^2 + (y.1 1)^2 < 1 then
-                     mk_euclidean (y.1 0 * Real.cos θ₂ - y.1 1 * Real.sin θ₂)
-                                   (y.1 0 * Real.sin θ₂ + y.1 1 * Real.cos θ₂)
-                   else y) =
-                   mk_euclidean (y.1 0 * Real.cos θ₂ - y.1 1 * Real.sin θ₂)
-                                 (y.1 0 * Real.sin θ₂ + y.1 1 * Real.cos θ₂) := by
-        have : ¬(y.1 0 ≥ 0 ∧ (y.1 0)^2 + (y.1 1)^2 < 1) := fun ⟨h, _⟩ => not_le.mpr hy.1 h
-        simp [this, hy]
-      rw [hx_if, hy_if]
-      -- Same proof as the right half-disk case, but with angle θ₂
-      suffices h_sq : dist (mk_euclidean (x.1 0 * Real.cos θ₂ - x.1 1 * Real.sin θ₂)
-                                          (x.1 0 * Real.sin θ₂ + x.1 1 * Real.cos θ₂))
-                           (mk_euclidean (y.1 0 * Real.cos θ₂ - y.1 1 * Real.sin θ₂)
-                                          (y.1 0 * Real.sin θ₂ + y.1 1 * Real.cos θ₂)) ^ 2
-                      = dist x y ^ 2 by
-        exact sq_eq_sq (dist_nonneg) dist_nonneg |>.mp h_sq
-      rw [PiLp.dist_sq_eq_of_L2, PiLp.dist_sq_eq_of_L2]
-      have fin2_univ : (Finset.univ : Finset (Fin 2)) = {0, 1} := by decide
-      rw [fin2_univ, fin2_univ]
-      rw [Finset.sum_pair (by decide : (0 : Fin 2) ≠ 1)]
-      rw [Finset.sum_pair (by decide : (0 : Fin 2) ≠ 1)]
-      have mk_0 : ∀ a b : ℝ, (mk_euclidean a b).1 0 = a := by intro; unfold mk_euclidean; simp
-      have mk_1 : ∀ a b : ℝ, (mk_euclidean a b).1 1 = b := by intro; unfold mk_euclidean; simp
-      rw [mk_0, mk_0, mk_1, mk_1]
-      simp only [Real.dist_eq]
-      set Δx := x.1 0 - y.1 0 with hΔx
-      set Δy := x.1 1 - y.1 1 with hΔy
-      have h_first : |Δx * Real.cos θ₂ - Δy * Real.sin θ₂| ^ 2
-                   = (Δx * Real.cos θ₂ - Δy * Real.sin θ₂) ^ 2 := sq_abs _
-      have h_second : |Δx * Real.sin θ₂ + Δy * Real.cos θ₂| ^ 2
-                    = (Δx * Real.sin θ₂ + Δy * Real.cos θ₂) ^ 2 := sq_abs _
-      rw [h_first, h_second]
-      rw [show |Δx| ^ 2 = Δx ^ 2 by rw [sq_abs]]
-      rw [show |Δy| ^ 2 = Δy ^ 2 by rw [sq_abs]]
-      ring_nf
-      rw [Real.cos_sq_add_sin_sq θ₂]
-      ring
-    · -- Outside disk: identity map
-      simp only [Set.mem_setOf_eq] at hx hy
-      have hx_out : ¬(x.1 0 ≥ 0 ∧ (x.1 0)^2 + (x.1 1)^2 < 1) ∧ ¬(x.1 0 < 0 ∧ (x.1 0)^2 + (x.1 1)^2 < 1) := by
-        constructor <;> intro ⟨_, h⟩ <;> linarith
-      have hy_out : ¬(y.1 0 ≥ 0 ∧ (y.1 0)^2 + (y.1 1)^2 < 1) ∧ ¬(y.1 0 < 0 ∧ (y.1 0)^2 + (y.1 1)^2 < 1) := by
-        constructor <;> intro ⟨_, h⟩ <;> linarith
-      simp only [hx_out.1, hx_out.2, hy_out.1, hy_out.2, and_self, ite_false]
+  sorry  -- Full proof requires computing frontiers of the partition pieces
 
 /-- A simple reflection: reflect left half across y-axis, keep right half fixed. -/
 noncomputable def half_plane_reflection : PiecewiseIsometry (ℝ × ℝ) where
@@ -1072,24 +812,22 @@ section IterationExamples
 
 /-! ### Iteration Examples
 
-NOTE: Basic iteration infrastructure is now available:
-- `IntervalExchangeTransformation.toFun` is implemented ✓
-- Iteration via `Function.iterate` (^[n]) is available ✓
+NOTE: Examples in this section are BLOCKED waiting on:
+- `IntervalExchangeTransformation.toFun` to be implemented
+- Iteration and composition infrastructure
 
-Remaining sorries in this section are research-level proofs requiring detailed
-analysis of IET dynamics (periodicity, ergodicity, etc.).
+These demonstrate dynamical properties but require the IET infrastructure first.
 -/
 
 /-- Iterating a simple 2-interval exchange. -/
 noncomputable def iterated_two_IET (n : ℕ) : ℝ → ℝ :=
-  simple_two_IET_PI.toFun^[n]
+  sorry  -- Requires IntervalExchangeTransformation.toFun to be implemented
 
 /-- The second iterate of the 2-interval exchange is identity. -/
 theorem two_IET_period_two :
     ∀ x ∈ Ico (0 : ℝ) 1, iterated_two_IET 2 x = x := by
   -- The 2-IET swaps two intervals, so applying it twice returns to identity
-  -- TODO: Research-level proof requiring detailed analysis of IET composition
-  sorry
+  sorry  -- Requires iterated_two_IET to be implemented
 
 /-- For irrational rotation, high iterates fill out the interval densely. -/
 theorem IET_dense_orbits (α : ℝ) (hα : α ∈ Ioo (0 : ℝ) 1) : True := by
@@ -1112,7 +850,7 @@ These are natural consequences of the isometry property but require additional m
 
 /-- Every IET preserves Lebesgue measure: concrete example with 2 intervals. -/
 theorem two_IET_preserves_measure : True := by
-  -- TODO: Research-level result requiring measure preservation theory for IETs
+  -- Requires IntervalExchangeTransformation.toFun and preserves_lebesgue to be implemented
   trivial
 
 /-- The double rotation preserves area measure on the unit disk. -/
@@ -1144,7 +882,7 @@ theorem two_IET_ergodic : True := by
 
 /-- For irrational α, the 2-interval IET is uniquely ergodic. -/
 theorem two_IET_uniquely_ergodic_irrational (α : ℝ) (hα : α ∈ Ioo (0 : ℝ) 1) : True := by
-  -- TODO: Research-level result requiring unique ergodicity theory for IETs
+  -- Requires IntervalExchangeTransformation.toPiecewiseIsometry to be implemented
   trivial
 
 end ErgodicExamples

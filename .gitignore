@@ -1,2 +1,4 @@
 /.lake
 .DS_Store
+scratch_*.lean
+test_*.lean
