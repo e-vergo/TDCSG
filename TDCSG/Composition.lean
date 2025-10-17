@@ -180,6 +180,26 @@ theorem piecewiseIsometry_measurable [OpensMeasurableSpace α] (f : PiecewiseIso
 
 end Measurability
 
+section Extensionality
+
+/-- Extensionality lemma for PiecewiseIsometry based on partition and function equality.
+
+If two piecewise isometries have equal partitions and equal underlying functions,
+then they are equal as structures. This is provable because all other fields
+(partition_measurable, partition_countable, etc.) are proofs, which are unique
+by proof irrelevance once the partition is fixed. -/
+theorem ext_partition_toFun {f g : PiecewiseIsometry α}
+    (h_partition : f.partition = g.partition)
+    (h_toFun : f.toFun = g.toFun) :
+    f = g := by
+  obtain ⟨fp, fpm, fpc, fpcover, fpdisj, fpne, ftoFun, fiso⟩ := f
+  obtain ⟨gp, gpm, gpc, gpcover, gpdisj, gpne, gtoFun, giso⟩ := g
+  simp only at h_partition h_toFun
+  subst h_partition h_toFun
+  rfl
+
+end Extensionality
+
 section Composition
 
 /-- Composition of two piecewise isometries.
@@ -246,24 +266,151 @@ unprovable theorem. Lean's default structural equality is the correct notion.
 /-- Composition is associative. -/
 theorem comp_assoc [OpensMeasurableSpace α] (f g h : PiecewiseIsometry α) :
     (f.comp g).comp h = f.comp (g.comp h) := by
-  -- Both sides have the same function
-  -- Partitions: need to show refinement is associative
-  -- Functions are definitionally equal
-  sorry
+  -- The functions are definitionally equal (function composition is associative)
+  have h_toFun : ((f.comp g).comp h).toFun = (f.comp (g.comp h)).toFun := by
+    unfold comp
+    rfl
+
+  -- Need to show the partitions are equal
+  have h_partition : ((f.comp g).comp h).partition = (f.comp (g.comp h)).partition := by
+    unfold comp refinedPartitionPreimage
+    ext u
+    simp only [Set.mem_setOf_eq]
+    constructor
+    · intro ⟨s_h, hs_h, s_fg, hs_fg, hu_eq, hu_ne⟩
+      -- s_fg ∈ refinedPartitionPreimage g.partition f.partition g.toFun
+      obtain ⟨s_g, hs_g, s_f, hs_f, hs_fg_eq, hs_fg_ne⟩ := hs_fg
+      -- u = s_h ∩ (h⁻¹' s_fg) = s_h ∩ (h⁻¹' (s_g ∩ (g⁻¹' s_f)))
+      rw [hs_fg_eq] at hu_eq hu_ne
+      -- Rewrite using preimage properties: h⁻¹(A ∩ B) = h⁻¹(A) ∩ h⁻¹(B)
+      have hu_eq' : u = (s_h ∩ (h.toFun ⁻¹' s_g)) ∩ ((g.toFun ∘ h.toFun) ⁻¹' s_f) := by
+        rw [hu_eq]
+        ext x
+        simp only [Set.mem_inter_iff, Set.mem_preimage, Function.comp_apply]
+        tauto
+      use s_h ∩ (h.toFun ⁻¹' s_g)
+      constructor
+      · -- Show s_h ∩ (h⁻¹' s_g) ∈ refinedPartitionPreimage h.partition g.partition h.toFun
+        use s_h, hs_h, s_g, hs_g
+        constructor
+        · rfl
+        · -- Show (s_h ∩ (h⁻¹' s_g)).Nonempty
+          -- hu_ne : (s_h ∩ h.toFun ⁻¹' (s_g ∩ (g.toFun ⁻¹' s_f))).Nonempty
+          obtain ⟨x, hx⟩ := hu_ne
+          use x
+          simp only [Set.mem_inter_iff, Set.mem_preimage] at hx
+          exact ⟨hx.1, hx.2.1⟩
+      use s_f, hs_f
+      constructor
+      · exact hu_eq'
+      · -- Need to show ((s_h ∩ h.toFun ⁻¹' s_g) ∩ (g.toFun ∘ h.toFun) ⁻¹' s_f).Nonempty
+        obtain ⟨x, hx⟩ := hu_ne
+        use x
+        simp only [Set.mem_inter_iff, Set.mem_preimage, Function.comp_apply]
+        simp only [Set.mem_inter_iff, Set.mem_preimage] at hx
+        exact ⟨⟨hx.1, hx.2.1⟩, hx.2.2⟩
+    · intro ⟨s_gh, hs_gh, s_f, hs_f, hu_eq, hu_ne⟩
+      -- s_gh ∈ refinedPartitionPreimage h.partition g.partition h.toFun
+      obtain ⟨s_h, hs_h, s_g, hs_g, hs_gh_eq, hs_gh_ne⟩ := hs_gh
+      -- u = s_gh ∩ ((g ∘ h)⁻¹' s_f) = (s_h ∩ (h⁻¹' s_g)) ∩ ((g ∘ h)⁻¹' s_f)
+      rw [hs_gh_eq] at hu_eq hu_ne
+      have hu_eq' : u = s_h ∩ (h.toFun ⁻¹' (s_g ∩ (g.toFun ⁻¹' s_f))) := by
+        rw [hu_eq]
+        ext x
+        simp only [Set.mem_inter_iff, Set.mem_preimage, Function.comp_apply]
+        tauto
+      use s_h, hs_h
+      use s_g ∩ (g.toFun ⁻¹' s_f)
+      constructor
+      · -- Show s_g ∩ (g⁻¹' s_f) ∈ refinedPartitionPreimage g.partition f.partition g.toFun
+        use s_g, hs_g, s_f, hs_f
+        constructor
+        · rfl
+        · -- Show (s_g ∩ (g⁻¹' s_f)).Nonempty
+          -- hu_ne : ((s_h ∩ h.toFun ⁻¹' s_g) ∩ (g.toFun ∘ h.toFun) ⁻¹' s_f).Nonempty
+          obtain ⟨x, hx⟩ := hu_ne
+          use h.toFun x
+          simp only [Set.mem_inter_iff, Set.mem_preimage, Function.comp_apply] at hx ⊢
+          exact ⟨hx.1.2, hx.2⟩
+      constructor
+      · exact hu_eq'
+      · -- Need to show (s_h ∩ h.toFun ⁻¹' (s_g ∩ g.toFun ⁻¹' s_f)).Nonempty
+        obtain ⟨x, hx⟩ := hu_ne
+        use x
+        simp only [Set.mem_inter_iff, Set.mem_preimage, Function.comp_apply] at hx
+        simp only [Set.mem_inter_iff, Set.mem_preimage]
+        exact ⟨hx.1.1, hx.1.2, hx.2⟩
+
+  exact ext_partition_toFun h_partition h_toFun
 
 /-- Left identity for composition. -/
 theorem comp_id_left [Nonempty α] [OpensMeasurableSpace α] (f : PiecewiseIsometry α) :
     id.comp f = f := by
-  -- The partition refinedPartition f.partition {univ} should equal f.partition
-  -- and the function id ∘ f = f
-  sorry
+  -- Since there's no extensionality lemma for PiecewiseIsometry, we need to prove
+  -- that the two structures have identical fields.
+  -- Key insight: refinedPartitionPreimage f.partition {univ} f.toFun = f.partition
+  -- because s ∩ (f⁻¹' univ) = s ∩ univ = s
+
+  -- First show the partitions are equal
+  have h_partition : (id.comp f).partition = f.partition := by
+    unfold comp id refinedPartitionPreimage
+    ext u
+    simp only [Set.mem_setOf_eq, Set.mem_singleton_iff]
+    constructor
+    · intro ⟨s, hs, t, ht, hu_eq, _⟩
+      -- t = univ, so s ∩ (f.toFun ⁻¹' univ) = s
+      rw [ht, Set.preimage_univ, Set.inter_univ] at hu_eq
+      rw [hu_eq]
+      exact hs
+    · intro hu
+      use u, hu, Set.univ, rfl
+      constructor
+      · rw [Set.preimage_univ, Set.inter_univ]
+      · rw [Set.preimage_univ, Set.inter_univ]
+        exact f.partition_nonempty u hu
+
+  -- Show the functions are equal
+  have h_toFun : (id.comp f).toFun = f.toFun := by
+    unfold comp id
+    funext x
+    rfl
+
+  -- Use extensionality lemma
+  exact ext_partition_toFun h_partition h_toFun
 
 /-- Right identity for composition. -/
 theorem comp_id_right [Nonempty α] [OpensMeasurableSpace α] (f : PiecewiseIsometry α) :
     f.comp id = f := by
-  -- Partitions: refinedPartition {univ} f.partition = f.partition
-  -- Functions: f ∘ id = f
-  sorry
+  -- Show the partitions are equal
+  -- refinedPartitionPreimage id.partition f.partition id.toFun = f.partition
+  -- which is refinedPartitionPreimage {univ} f.partition id = f.partition
+  have h_partition : (f.comp id).partition = f.partition := by
+    unfold comp id refinedPartitionPreimage
+    ext u
+    simp only [Set.mem_setOf_eq, Set.mem_singleton_iff]
+    constructor
+    · intro ⟨s, hs, t, ht, hu_eq, _⟩
+      -- s ∈ {univ}, so s = univ
+      -- u = univ ∩ (id⁻¹' t) = univ ∩ t = t
+      rw [hs] at hu_eq
+      simp only [_root_.id, Set.preimage_id, Set.univ_inter] at hu_eq
+      rw [hu_eq]
+      exact ht
+    · intro hu
+      use Set.univ, rfl, u, hu
+      constructor
+      · simp only [Set.preimage_id, Set.univ_inter]
+      · simp only [Set.preimage_id, Set.univ_inter]
+        exact f.partition_nonempty u hu
+
+  -- Show the functions are equal
+  have h_toFun : (f.comp id).toFun = f.toFun := by
+    unfold comp id
+    funext x
+    rfl
+
+  -- Use extensionality lemma
+  exact ext_partition_toFun h_partition h_toFun
 
 end Composition
 
@@ -523,8 +670,40 @@ theorem discontinuitySet_iterate [Nonempty α] [OpensMeasurableSpace α] (f : Pi
 theorem iterate_finite_discontinuities [Nonempty α] [OpensMeasurableSpace α] (f : PiecewiseIsometry α) (n : ℕ)
     (hf : f.discontinuitySet.Finite) :
     (iterate f n).discontinuitySet.Finite := by
-  -- The discontinuity set of iterate n is contained in a finite union of preimages
-  -- This requires bijectivity or other conditions to ensure preimages of finite sets are finite
+  -- Use discontinuitySet_iterate: (iterate f n).discontinuitySet ⊆ ⋃ k < n, f^[k]⁻¹(f.discontinuitySet)
+  -- This is a finite union of preimages of a finite set
+  -- However, preimages of finite sets need not be finite without injectivity
+
+  -- PROOF ATTEMPT: This theorem appears to require additional assumptions
+  -- Without injectivity/bijectivity of f, preimages of finite sets can be infinite
+  -- For example, a constant map has infinite preimage of any point
+
+  -- However, if we assume f is injective on each piece, we might be able to proceed
+  -- But that's not part of the current structure definition
+
+  -- Alternative: The discontinuity set is contained in partition boundaries,
+  -- which are themselves related to the original partition
+  -- Let me try to use a different approach based on partition properties
+
+  /- PROOF ATTEMPTS:
+
+  Attempt 1 [2025-10-16]:
+  Strategy: Use discontinuitySet_iterate to bound by finite union, then argue preimages are finite
+  Failure: Preimages of finite sets need not be finite without injectivity
+  Lesson: Need stronger hypothesis (e.g., f injective) or different approach
+
+  Attempt 2 [2025-10-16]:
+  Strategy: Use that discontinuity set is union of partition piece boundaries
+  Failure: Refined partitions can have more pieces, boundaries can grow
+  Lesson: The partition refinement doesn't preserve finiteness of boundary points directly
+
+  CURRENT STATUS: This theorem likely requires additional hypotheses:
+  - Either f is injective (or bijective)
+  - Or f has some bounded-fiber property
+  - Or we work with a different notion of "finite discontinuities"
+
+  This is mathematically non-trivial and may require rethinking the statement.
+  -/
   sorry
 
 end IterationProperties

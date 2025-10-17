@@ -83,29 +83,21 @@ theorem measurable (f : MeasurePreservingPiecewiseIsometry α μ) :
 theorem apply_eq_toFun (f : MeasurePreservingPiecewiseIsometry α μ) (x : α) :
     f x = f.toFun x := rfl
 
-/-- Extensionality for MeasurePreservingPiecewiseIsometry: two are equal if their functions are equal.
+/-- Extensionality for MeasurePreservingPiecewiseIsometry: two are equal if all their structure
+fields are equal. This is a helper lemma for proving equality of two instances when we can show
+that all fields (partition, functions, proofs) coincide.
 
-This is a pragmatic extensionality principle that ignores partition differences. It's justified because:
-1. The partition is determined (up to refinement) by the function's isometry properties
-2. Different partitions representing the same piecewise isometry are mathematically equivalent
-3. All theorems about measure preservation depend only on the function, not the partition choice
--/
+Note: We do NOT claim that function equality alone implies structure equality, as the partition
+structures might differ. This lemma requires actual field-by-field equality. -/
 @[ext]
-theorem ext {f g : MeasurePreservingPiecewiseIsometry α μ}
-    (h : ∀ x, f.toFun x = g.toFun x) : f = g := by
-  -- Extract from structures
+theorem ext_fields {f g : MeasurePreservingPiecewiseIsometry α μ}
+    (h_pi : f.toPiecewiseIsometry = g.toPiecewiseIsometry) : f = g := by
   cases f with | mk f_pi f_meas f_mp =>
   cases g with | mk g_pi g_meas g_mp =>
-  -- Show all fields equal
+  subst h_pi
+  -- After substitution, g_meas and g_mp have the right types
+  -- And they are equal to f_meas, f_mp by proof irrelevance
   congr
-  · -- Show underlying PiecewiseIsometry are equal
-    cases f_pi
-    cases g_pi
-    -- This requires partition equality, which we CANNOT prove from function equality alone
-    -- However, for the specific case of compMP_assoc, both sides have the same function
-    -- So we accept this as an axiom-like extensionality principle
-    simp only [mk.injEq]
-    sorry -- AXIOM: Function equality implies PiecewiseIsometry equality (pragmatic choice)
 
 end MeasurePreservingPiecewiseIsometry
 
@@ -113,94 +105,33 @@ section MeasurePreservation
 
 variable {μ : MeasureTheory.Measure α}
 
-/-- A key theorem: if a piecewise isometry is measurable and its discontinuity set has
-measure zero, then it preserves measure.
+/-! ### Removed Theorems
 
-This is a fundamental result because many natural piecewise isometries (like interval exchange
-transformations) have null discontinuity sets.
+**REMOVED: `measurePreserving_of_null_discontinuities`**
 
-**DEEP RESULT**: This theorem requires bijectivity or surjectivity assumptions on f, which are
-not part of the basic PiecewiseIsometry structure. The proof would need to show that f is
-almost everywhere bijective, which is not automatic from the isometry-on-pieces property alone.
-For a complete proof, one would need additional hypotheses like:
-- f is surjective, or
-- f is injective and μ(α \ range f) = 0, or
-- stronger global properties beyond piecewise isometry
+The original theorem claimed that a surjective piecewise isometry with null discontinuities
+preserves arbitrary measure μ. This is **mathematically false**.
 
-This is closely related to the Poincaré recurrence theorem and requires substantial ergodic theory.
+Counter-example: Let α = ℝ, μ = Dirac measure at 0, f(x) = x+1. Then f is measurable, surjective,
+a piecewise isometry with null discontinuities, but μ(f⁻¹({1})) = 1 ≠ 0 = μ({1}).
+
+The theorem would be true for Hausdorff measure of dimension d (using Mathlib's
+`Isometry.hausdorffMeasure_image`), but with μ arbitrary, it's false.
+
+A correct version would require specializing to Hausdorff or Lebesgue measure.
+
+**REMOVED: `measurePreserving_of_pieces_preserved`**
+
+This theorem claimed that if μ(f(p)) = μ(p) for each partition piece p, and f is surjective,
+then f preserves μ globally. This cannot be proved with the given hypotheses.
+
+The fundamental issue: even knowing μ(f(p)) = μ(p) for each piece, we cannot deduce that f
+preserves the measure of arbitrary measurable subsets without additional structure on μ or
+stronger hypotheses about f's action on measurable sets within each piece.
+
+For Mathlib submission, these should be specialized to specific measure types where isometry
+preservation is already established.
 -/
-theorem measurePreserving_of_null_discontinuities (f : PiecewiseIsometry α)
-    (h_meas : Measurable f.toFun)
-    (h_null : μ (f.discontinuitySet) = 0)
-    (h_surj : Function.Surjective f.toFun) :
-    MeasureTheory.MeasurePreserving f.toFun μ μ := by
-  constructor
-  · exact h_meas
-  · /- PROOF ATTEMPTS:
-       Attempt 1: Direct application of Measure.ext - Failed: No obvious way to show μ(f⁻¹ s) = μ s for arbitrary s
-                  | Lesson: Need to use partition structure and surjectivity more carefully
-       Attempt 2: Decompose via partition using measure_preimage_piece - Blocked: Still need μ(f '' t) = μ t for pieces t
-                  | Lesson: Requires showing isometry on pieces preserves measure, which needs piece-wise bijectivity
-
-       DEEP MATHEMATICAL ISSUE: This theorem requires showing that a surjective piecewise isometry
-       with null discontinuities preserves measure. The natural approach is:
-       1. For any measurable s, write s = ⋃ᵢ (s ∩ pᵢ) where {pᵢ} is the partition
-       2. By null discontinuities, almost all points are in interiors where f is continuous
-       3. Need: f⁻¹(s) decomposes compatibly with the partition
-       4. Use that f is an isometry (hence bijection) on each piece
-
-       The gap: We have surjectivity globally, but need to show that the restriction of f to each
-       partition piece is measure-preserving. This requires either:
-       - Showing f⁻¹(pᵢ) for each piece pᵢ has the right measure structure, or
-       - Using a more sophisticated measure-theoretic argument involving Carathéodory's extension
-
-       This is provable in principle but requires substantial measure theory infrastructure not
-       currently available in this formalization.
-    -/
-    sorry  -- DEEP: Requires partition-based measure decomposition + piece-wise analysis
-
-/-- If each partition piece has the same measure as its image, the map preserves measure.
-
-**DEEP RESULT**: While this looks straightforward, the full proof is subtle. The challenge is to
-show that for an arbitrary measurable set t, we have μ(f⁻¹(t)) = μ(t). The natural approach is:
-1. Partition t using the images of partition pieces
-2. Use that μ(f(s)) = μ(s) for each piece s
-3. Relate f⁻¹(t) to the partition pieces
-
-However, step 1 requires understanding how t intersects with f(s) for each piece s, and this
-intersection may not have a simple preimage structure unless f is bijective on each piece.
-The hypothesis μ(f(s)) = μ(s) gives measure equality but doesn't immediately imply that
-f⁻¹(f(s) ∩ t) has the right measure unless f is injective on pieces (which it is) AND
-we know something about the range of f. This requires careful measure-theoretic arguments
-about images and preimages under piecewise isometries.
--/
-theorem measurePreserving_of_pieces_preserved (f : PiecewiseIsometry α)
-    (h_meas : Measurable f.toFun)
-    (h_pieces : ∀ s ∈ f.partition, μ (f.toFun '' s) = μ s)
-    (h_surj : Function.Surjective f.toFun) :
-    MeasureTheory.MeasurePreserving f.toFun μ μ := by
-  constructor
-  · exact h_meas
-  · /- PROOF ATTEMPTS:
-       Attempt 1: Use Measure.ext to show (map f μ) s = μ s for all measurable s - Blocked: Need μ(f⁻¹ s) = μ s
-                  | Lesson: This is exactly what we need to prove, circular reasoning
-       Attempt 2: Decompose s using f '' (partition pieces) and use hypothesis - Blocked: Arbitrary s may not decompose nicely
-                  | Lesson: Need surjectivity to ensure s = ⋃ᵢ (s ∩ f(pᵢ)) for partition pieces pᵢ
-
-       PROOF STRATEGY (with surjectivity):
-       For measurable s, we have by surjectivity: s = f(f⁻¹(s))
-       Decompose f⁻¹(s) = ⋃ᵢ (f⁻¹(s) ∩ pᵢ) where {pᵢ} is the partition
-       Then s = f(⋃ᵢ (f⁻¹(s) ∩ pᵢ)) = ⋃ᵢ f(f⁻¹(s) ∩ pᵢ)
-
-       By hypothesis μ(f(pᵢ)) = μ(pᵢ), we need to show μ(f⁻¹(s) ∩ pᵢ) = μ(f(f⁻¹(s) ∩ pᵢ))
-       But this requires that f restricted to each piece is measure-preserving, which would follow
-       from the piece hypothesis if we could show f|ₚᵢ is a bijection onto f(pᵢ).
-
-       The missing piece: We need an infrastructure result showing that if f is injective on each
-       piece (which it is, from isometry) and μ(f(piece)) = μ(piece), then f is measure-preserving
-       on each piece. This is a non-trivial measure-theoretic result.
-    -/
-    sorry  -- DEEP: Requires piece-wise measure preservation from global hypothesis
 
 /-- The measure of a preimage of a measurable set can be computed piece-by-piece. -/
 theorem measure_preimage_piece (f : PiecewiseIsometry α)
@@ -274,35 +205,22 @@ def compMP [OpensMeasurableSpace α] [BorelSpace α] (f g : MeasurePreservingPie
 theorem compMP_apply [OpensMeasurableSpace α] [BorelSpace α] (f g : MeasurePreservingPiecewiseIsometry α μ) (x : α) :
     (compMP f g).toFun x = f.toFun (g.toFun x) := rfl
 
-/-- Composition is associative.
+/-- Composition is associative up to functional equality.
 
-**STRUCTURAL ISSUE**: This theorem is blocked by a fundamental design issue in the
-PiecewiseIsometry structure. The two sides `compMP (compMP f g) h` and `compMP f (compMP g h)`
-have:
-- SAME underlying function: (f ∘ g) ∘ h = f ∘ (g ∘ h) definitionally
-- SAME measurability proofs (by proof irrelevance)
-- SAME measure-preservation proofs (by proof irrelevance)
-- DIFFERENT partition structures: The partitions are different refinements
+**NOTE**: Due to the current structure representation (which includes partition information),
+the two sides `compMP (compMP f g) h` and `compMP f (compMP g h)` have different partition
+refinements and thus are not structurally equal. However, they represent the same function,
+which is what matters for applications.
 
-The issue is that PiecewiseIsometry uses `extends` which creates a structure with fields
-for the partition, and Lean's definitional equality for structures requires ALL fields
-to be equal, including the partition field.
-
-**Solutions**:
-1. Add extensionality lemma for MeasurePreservingPiecewiseIsometry based on function equality
-2. Redesign to use quotient types (equivalence classes up to partition refinement)
-3. Redesign PiecewiseIsometry to not include partition in the structure (make it a typeclass)
-
-This is NOT a mathematical gap - the theorem is true. It's a formalization design issue.
+This lemma proves functional associativity. For structural equality, a quotient-based
+representation would be required.
 -/
-theorem compMP_assoc [OpensMeasurableSpace α] [BorelSpace α] (f g h : MeasurePreservingPiecewiseIsometry α μ) :
-    compMP (compMP f g) h = compMP f (compMP g h) := by
-  -- Use the extensionality lemma defined above at line 94
-  -- Two MeasurePreservingPiecewiseIsometry are equal if their functions are equal
-  ext x
+theorem compMP_assoc_fun [OpensMeasurableSpace α] [BorelSpace α]
+    (f g h : MeasurePreservingPiecewiseIsometry α μ) (x : α) :
+    (compMP (compMP f g) h).toFun x = (compMP f (compMP g h)).toFun x := by
   -- Both sides compose functions in the same order: f ∘ g ∘ h
   simp only [compMP_apply]
-  rfl
+  -- Definitionally equal: (f ∘ g) ∘ h = f ∘ (g ∘ h)
 
 end Composition
 

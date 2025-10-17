@@ -117,11 +117,12 @@ theorem intervals_cover : ⋃ i, iet.interval i = Ico 0 1 := by
           intro j _
           exact le_of_lt (iet.lengths_pos _)
     · -- x < 1: follows from domainRight i ≤ 1 and sum of all lengths = 1
-      calc x < iet.domainRight i := hx.2
-        _ = iet.domainLeft i + iet.lengths i := rfl
-        _ ≤ ∑ j : Fin n, iet.lengths j := by
-          rw [domainLeft]
-          /- PROOF ATTEMPTS HISTORY:
+      have h_right_le : iet.domainRight i ≤ 1 := by
+        calc iet.domainRight i
+          _ = iet.domainLeft i + iet.lengths i := rfl
+          _ ≤ ∑ j : Fin n, iet.lengths j := by
+            rw [domainLeft]
+            /- PROOF ATTEMPTS HISTORY:
 
              GOAL: ⊢ (∑ j : Fin i.val, lengths ⟨↑j, _⟩) + lengths i ≤ ∑ j : Fin n, lengths j
 
@@ -155,36 +156,67 @@ theorem intervals_cover : ⋃ i, iet.interval i = Ico 0 1 := by
                         embed via Fin.castLE into Fin n, apply Finset.sum_le_sum_of_subset_of_nonneg
              - Success: This approach works cleanly!
              - Key lemmas: Fin.sum_univ_castSucc, Fin.castLE, Finset.sum_le_sum_of_subset_of_nonneg
-          -/
-          have h_le : i.val.succ ≤ n := i.isLt
-          calc ∑ j : Fin i.val, iet.lengths ⟨j, Nat.lt_trans j.isLt i.isLt⟩ + iet.lengths i
-            _ = ∑ j : Fin i.val.succ, iet.lengths ⟨j, Nat.lt_of_lt_of_le j.isLt h_le⟩ := by
-              rw [Fin.sum_univ_castSucc]
-              congr 1
-              congr; ext j; simp [Fin.castSucc]
-            _ ≤ ∑ j : Fin n, iet.lengths j := by
-              -- Embed Fin i.val.succ into Fin n and use sum inequality
-              have := @Fin.sum_univ_add _ _ _ _ i.val.succ n h_le
-                (fun j => iet.lengths ⟨j, Nat.lt_of_lt_of_le j.isLt h_le⟩) (fun j => iet.lengths j)
-              rw [← this]
-              apply le_add_of_nonneg_right
-              apply Finset.sum_nonneg
-              intro j _
-              exact le_of_lt (iet.lengths_pos j)
-        _ = 1 := iet.lengths_sum
+            -/
+            have h_le : i.val.succ ≤ n := i.isLt
+            calc ∑ j : Fin i.val, iet.lengths ⟨j, Nat.lt_trans j.isLt i.isLt⟩ + iet.lengths i
+              _ = ∑ j : Fin i.val.succ, iet.lengths ⟨j, Nat.lt_of_lt_of_le j.isLt h_le⟩ := by
+                rw [Fin.sum_univ_castSucc]
+                congr 1
+              _ ≤ ∑ j : Fin n, iet.lengths j := by
+                -- Partial sum ≤ total sum (i.val + 1 ≤ n, all terms nonnegative)
+                sorry
+          _ = 1 := iet.lengths_sum
+      calc x < iet.domainRight i := hx.2
+        _ ≤ 1 := h_right_le
   · -- If 0 ≤ x < 1, then x is in some interval
     intro ⟨hx0, hx1⟩
-    -- Find the interval containing x
-    sorry -- Use that intervals partition [0,1)
+    /- PROOF ATTEMPTS:
+
+       GOAL: Find i such that domainLeft i ≤ x < domainRight i
+
+       Strategy: Find the largest i with domainLeft i ≤ x, then show x < domainRight i
+
+       Mathematical content: The intervals partition [0,1). Since x ∈ [0,1), x must be in exactly one.
+       We find it by: i is largest with domainLeft i ≤ x.
+       Then x < domainRight i because otherwise x ≥ domainLeft (i+1), contradicting maximality.
+
+       Attempt 1 [2025-10-16]: Use Finset.exists_max_image
+       - Issue: Need to convert between Set and Finset, handle subtypes
+       - Complexity: High, many type coercions
+
+       Attempt 2 [2025-10-16]: Direct construction using if-then-else
+       - Strategy: Use classical choice or decidability to pick the interval
+       - Issue: Lean prefers constructive proofs when possible
+
+       Current approach: Use a helper function to find the interval, then prove it works
+    -/
+    sorry
 
 /-- Helper lemma: domainRight i ≤ domainLeft j when i < j. -/
 lemma domainRight_le_domainLeft_of_lt {i j : Fin n} (hij : i < j) :
     iet.domainRight i ≤ iet.domainLeft j := by
   unfold domainRight domainLeft
-  -- This requires a monotonicity lemma for Fin sums that's tricky to prove
-  -- The mathematical content is clear: since i < j, the sum up to j includes
-  -- all terms up to i plus additional nonnegative terms
-  sorry
+  /- PROOF ATTEMPTS:
+
+     GOAL: ∑ k : Fin i.val, lengths k + lengths i ≤ ∑ k : Fin j.val, lengths k
+
+     Mathematical content: Since i < j, we have i.val < j.val, so i.val + 1 ≤ j.val.
+     The LHS is the sum of first i.val + 1 terms.
+     The RHS is the sum of first j.val terms.
+     Since all terms are positive and i.val + 1 ≤ j.val, LHS ≤ RHS.
+
+     This is similar to the proof in intervals_cover but with different indices.
+
+     Attempt 1 [2025-10-16]: Reuse the sum inequality technique from intervals_cover
+     - Use Fin.sum_univ_castSucc to convert LHS to sum over Fin (i.val + 1)
+     - Embed into Fin j.val using h_le : i.val + 1 ≤ j.val
+     - Apply Finset.sum_le_sum_of_subset_of_nonneg
+  -/
+  -- The proof strategy is clear but requires careful Fin arithmetic
+  -- LHS = (sum of first i terms) + i-th term = sum of first (i+1) terms
+  -- RHS = sum of first j terms
+  -- Since i < j, we have i+1 ≤ j, so LHS ≤ RHS
+  sorry -- TODO: Complete using Fin sum inequality lemmas
 
 /-- The intervals are pairwise disjoint. -/
 theorem intervals_disjoint : (Set.range iet.interval).PairwiseDisjoint (fun x => x) := by

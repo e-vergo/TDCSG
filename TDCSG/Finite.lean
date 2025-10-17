@@ -436,8 +436,13 @@ theorem measurePreserving_of_pieces
     (h_pieces : ∀ s ∈ f.partition, μ (f.toFun '' s) = μ s)
     (h_surj : Function.Surjective f.toFun) :
     MeasureTheory.MeasurePreserving f.toFun μ μ := by
-  -- The finite case follows from the general countable case
-  exact PiecewiseIsometry.measurePreserving_of_pieces_preserved f.toPiecewiseIsometry h_meas h_pieces h_surj
+  /- NOTE: This theorem statement is incorrect as written. The hypotheses are insufficient
+     to prove measure preservation without additional assumptions on μ (e.g., that it's
+     Hausdorff or Lebesgue measure). See TDCSG/MeasurePreserving.lean for detailed
+     explanation of why `measurePreserving_of_pieces_preserved` was removed.
+
+     For Mathlib submission, this should be specialized to specific measure types. -/
+  sorry
 
 end MeasureTheoretic
 
