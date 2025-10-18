@@ -5,6 +5,26 @@ Eliminate all `sorry` statements through mathematically rigorous, Mathlib-compli
 
 ---
 
+## **CRITICAL: READ README.md FIRST**
+
+Before proceeding with this directive:
+
+1. **Read the project README.md completely** to understand:
+   - Current project state and build status
+   - Proof priorities and roadmap
+   - File-by-file strategies
+   - Domain-specific mathematical context
+   - Mathlib dependencies and resources
+
+2. **The README is your situational briefing.**
+   - This directive provides universal laws and protocols
+   - README provides specific mission parameters
+   - Both are mandatory reading before agent deployment
+
+**Do not spawn agents until you understand the README.**
+
+---
+
 ## **ABSOLUTE REQUIREMENTS: NON-NEGOTIABLE**
 
 ### **Zero Tolerance Policy**
@@ -47,15 +67,30 @@ This codebase **will be submitted to Mathlib**. Every line of code will face scr
 ## **PHASE 1: RECONNAISSANCE**
 
 ### **Initial Survey**
-1. Read `README.md` in its entirety
-2. Map the complete repository structure
-3. Understand the mathematical domain and theoretical dependencies
-4. Identify all Lean files in `TDCSG/` containing `sorry` statements
-5. Document the dependency graph—understand which files import which
+1. **Read project README.md completely** - understand:
+   - Mathematical domain and theoretical dependencies
+   - Current state and priorities
+   - Proof roadmap and strategies
+   - File dependency relationships
+
+2. **Run `./check_lean.sh --all sorries [PROJECT_DIR]/`**
+   - THE source of truth for current sorry count and locations
+   - Validate README's sorry count matches reality
+   - Identify all files requiring proof work
+
+3. **For each file with sorries:**
+   - Run `./check_lean.sh --sorries path/to/file.lean`
+   - Read inline attempt documentation above each sorry
+   - Understand what has been tried and failed
+
+4. **Validate against README:**
+   - Confirm priorities align with current state
+   - Understand why each file matters
+   - Know which files have dependencies on others
 
 ### **Mathematical Context**
-Before proceeding, ensure deep comprehension of:
-- The mathematical objects being formalized
+From README and domain research, ensure deep comprehension of:
+- The mathematical objects being formalized (README explains project specifics)
 - Relevant theorems and their proofs in the literature
 - Standard approaches in the field
 - Mathlib conventions for this domain
@@ -139,6 +174,22 @@ You **must** use the lean-lsp MCP server. Research its capabilities before deplo
 - **`lean_build`** - Rebuild project and restart LSP server
   - Use only for major changes requiring full project rebuild
   - For normal iteration, use `./check_lean.sh --errors-only` instead
+
+#### **Tool Reliability Validation**
+
+The `check_lean.sh` tool has a regression test suite ensuring reliable error detection:
+
+- **Location:** `./tools/test_error_detection.sh`
+- **Purpose:** Validates all 4 error pattern types are caught:
+  1. Standard errors with line:col (`error: File.lean:42:10: message`)
+  2. Alternative format (`File.lean:42:10: error: message`)
+  3. Import/build errors without line:col (`error: File.lean: bad import`)
+  4. Bad import errors in any format
+
+- **When to run:** If you suspect the tool is missing errors (very rare)
+- **Expected result:** All 5 test cases should pass
+
+**Trust the tool.** It's been validated and battle-tested. If it shows "✓ No errors", your file compiles correctly.
 
 ### **Web Research Requirement**
 Before spawning agents:
@@ -417,16 +468,30 @@ Reasonable recursion depth: ~3 levels.
 
 MANDATORY WORKFLOW:
 
-0. INITIAL SORRY SURVEY (FIRST STEP - ALWAYS START HERE):
-   - **IMMEDIATELY run:** `./check_lean.sh --all sorries TDCSG/`
-   - This shows ALL sorries across all files with theorem names and locations
-   - Identify which files have sorries and how many
-   - Read the inline comments to understand difficulty/status
-   - **For your assigned file:** Run `./check_lean.sh --sorries TDCSG/YourFile.lean`
-   - This gives detailed breakdown of sorries in your file
-   - **USE THIS to prioritize which sorries to attack**
-   - Verify current status matches your understanding
-   - This tool is THE source of truth for sorry tracking
+0. ACQUIRE SITUATIONAL AWARENESS (FIRST STEP - MANDATORY SEQUENCE):
+   a. **Read project README.md completely**
+      - Understand project goals and current state
+      - Identify proof priorities and recommended order
+      - Learn domain-specific context and strategies
+      - Note file dependencies and blocking relationships
+
+   b. **Run `./check_lean.sh --all sorries [PROJECT_DIR]/`**
+      - THE source of truth for sorry locations
+      - Verify README sorry count matches reality
+      - Understand full scope of work
+
+   c. **For your assigned file: `./check_lean.sh --sorries path/to/file.lean`**
+      - Detailed breakdown of sorries in your file
+      - See theorem names and locations
+      - Check inline comments for status/difficulty
+
+   d. **Cross-reference with README:**
+      - Understand WHY your file matters (README explains)
+      - Know WHEN to tackle it (README prioritizes)
+      - Learn WHAT strategies to try (README suggests)
+      - Identify WHAT dependencies exist (README documents)
+
+   **Don't start proving randomly. Use README priorities as your roadmap.**
 
 1. CONTEXT ACQUISITION (Before any proof attempts):
    - Read ALL imported files (project + Mathlib from .lake/packages/mathlib/Mathlib)
@@ -859,6 +924,21 @@ Each successive agent for a file inherits:
 
 **This is automatic because documentation lives in the file.**
 
+**Documentation Sources Agents Inherit:**
+
+1. **Universal Laws (this directive):** Behavioral protocols and rigor standards
+2. **Project Situation (README.md):** Current state, priorities, strategies
+3. **Local History (in-file comments):** Failed attempts for specific sorries
+4. **Codebase State (files themselves):** What's proven, what remains
+
+**Reading Order for New Agents:**
+1. This directive (universal protocols)
+2. README.md (project context)
+3. Assigned file(s) (specific work)
+4. In-file attempt documentation (what's been tried)
+
+**All four sources are mandatory reading before beginning proof work.**
+
 ### **Zero Compromise Enforcement**
 If any agent:
 - Introduces axioms → immediate re-spawn with explicit prohibition
@@ -947,16 +1027,17 @@ Every agent you spawn inherits this standard. Every proof they construct must me
 
 **Stopping Conditions That Are NOT ACCEPTABLE:**
 - ❌ "Made significant progress across multiple files"
-- ❌ "Reduced sorry count from 50 to 5"
+- ❌ "Reduced sorry count substantially" (from any number to any smaller number)
+- ❌ "Completed most files but a few remain"
 - ❌ "Hit context limits multiple times"
 - ❌ "Worked for extended period"
-- ❌ "Completed most of the work"
+- ❌ "Completed high percentage of the work"
 - ❌ "Encountered difficult proofs that need more research"
 
 **The ONLY Acceptable Stopping Condition:**
-- ✅ **ZERO sorries across ALL files in TDCSG/**
+- ✅ **ZERO sorries across ALL project files**
 - ✅ **Zero axioms introduced**
-- ✅ **ALL files pass transparency check** (`./check_lean.sh --all transparency TDCSG/`)
+- ✅ **ALL files pass transparency check** (`./check_lean.sh --all transparency [PROJECT_DIR]/`)
 - ✅ **Zero errors/warnings in lean_diagnostics**
 - ✅ **Successful lean_build**
 - ✅ **Full Mathlib compliance**

@@ -3,10 +3,10 @@ import TDCSG.Basic
 import TDCSG.Properties
 import TDCSG.Composition
 import TDCSG.MeasurePreserving
-import TDCSG.Ergodic
 import TDCSG.Finite
 import TDCSG.IntervalExchange
 import TDCSG.Examples
+-- Research-level: TDCSG.Ergodic (not needed for GG5 main theorem)
 
 -- 2D planar geometry infrastructure
 import TDCSG.Planar.Rotations
@@ -38,10 +38,9 @@ of 1D interval exchange transformations from 2D piecewise isometry systems.
 - `TDCSG.Properties`: Partition properties, isometry lemmas, continuity
 - `TDCSG.Composition`: Composition and iteration of piecewise isometries
 - `TDCSG.MeasurePreserving`: Measure-preserving transformations
-- `TDCSG.Ergodic`: Ergodic theory connections (research-level, contains sorries)
 - `TDCSG.Finite`: Finite partition specializations
 - `TDCSG.IntervalExchange`: **IET infrastructure** - critical for Theorem 2!
-- `TDCSG.Examples`: Concrete examples (contains sorries)
+- `TDCSG.Examples`: Proven examples (identity, reflection, counterexamples)
 
 ### 2D Planar Geometry (New Infrastructure)
 

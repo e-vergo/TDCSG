@@ -3,6 +3,8 @@
 ## **Objective**
 Update `README.md` to enable seamless resumption by your successor. This document must be **complete, actionable, and forward-looking only.**
 
+**Note:** Throughout this document, `[PROJECT_DIR]/` refers to the root directory containing your Lean source files (e.g., `TDCSG/`, `MyProject/`, `Mathlib/`, etc.). Replace with your actual project directory path.
+
 ---
 
 ## **CRITICAL REQUIREMENTS**
@@ -16,7 +18,7 @@ Update `README.md` to enable seamless resumption by your successor. This documen
 
 ### **Mandatory Content**
 - ✅ **Current state:** Exact count and location of remaining sorries
-- ✅ **Transparency status:** Result of `./check_lean.sh --all transparency TDCSG/` (all files must pass)
+- ✅ **Transparency status:** Result of `./check_lean.sh --all transparency [PROJECT_DIR]/` (all files must pass)
 - ✅ **File status:** Which files are complete, which have work remaining
 - ✅ **Blockers:** Specific proofs that are challenging, with technical details
 - ✅ **Proven approaches:** What strategies have succeeded (mention in terms of "X tactic works for Y pattern")
@@ -37,7 +39,7 @@ Use this exact structure:
 ## Current Status
 
 **Build Status:** [result of build]
-**Transparency Check:** [result of `./check_lean.sh --all transparency TDCSG/`] - **MUST show all files pass**
+**Transparency Check:** [result of `./check_lean.sh --all transparency [PROJECT_DIR]/`] - **MUST show all files pass**
 **Remaining Sorries:** [exact count] across [N] files
 
 ### Files by Status
@@ -164,8 +166,8 @@ Write for your successor as if briefing them for surgery:
 ## **EXECUTION PROTOCOL**
 
 1. **Scan codebase completely:**
-   - Count all remaining sorries (use `./check_lean.sh --all sorries TDCSG/`)
-   - Verify transparency status (`./check_lean.sh --all transparency TDCSG/`)
+   - Count all remaining sorries (use `./check_lean.sh --all sorries [PROJECT_DIR]/`)
+   - Verify transparency status (`./check_lean.sh --all transparency [PROJECT_DIR]/`)
    - Read all in-file attempt documentation
    - Note all complete vs incomplete files
    - Identify patterns in remaining work

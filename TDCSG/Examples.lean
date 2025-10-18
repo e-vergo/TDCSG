@@ -6,41 +6,32 @@ Authors: Eric Moffat
 import TDCSG.Basic
 import TDCSG.Properties
 import TDCSG.Finite
-import TDCSG.IntervalExchange
 import Mathlib.Analysis.InnerProductSpace.PiL2
 import Mathlib.Analysis.Real.Cardinality
 
 /-!
 # Examples of Piecewise Isometries
 
-This file provides concrete examples of piecewise isometries, demonstrating the theory and
-serving as templates for applications. Examples include:
-- Basic examples: identity, single rotation
-- Planar examples: rotations, reflections
-- Interval examples: simple interval exchanges
-- Billiard-inspired examples
+This file provides concrete, proven examples of piecewise isometries and demonstrations
+of what does NOT constitute a piecewise isometry.
 
-These examples are useful for:
-- Testing the theory and definitions
-- Understanding the behavior of piecewise isometries
-- Providing templates for specific applications
-- Verifying that key theorems apply correctly
+## Main examples
 
-## Main definitions
+### Proven piecewise isometries:
+- Identity map
+- Half-plane reflection
+- Simple square billiard
 
-- `identity_example`: The identity map as a piecewise isometry
-- `rotation_example`: A single rotation
-- `double_rotation_example`: Two rotations on different regions
-- `reflection_example`: A piecewise reflection
-- `baker_map`: The baker's map (not an isometry, but illustrative)
+### Proven non-isometries (counterexamples):
+- Constant functions
+- Doubling map (stretches distances)
+- Baker's map (stretches horizontally, compresses vertically)
 
-## Examples demonstrated
-
-Each example includes:
-1. Construction of the piecewise isometry
-2. Verification that it satisfies the definition
-3. Computation of the discontinuity set
-4. Discussion of ergodic/dynamical properties
+These examples demonstrate:
+- How to construct piecewise isometries
+- How to verify the isometry property
+- Common mistakes (metric mismatches, stretching)
+- Construction patterns for applications
 
 -/
 
@@ -58,24 +49,13 @@ example : PiecewiseIsometry ℝ :=
 
 /-- The identity is globally continuous (no discontinuities). -/
 example : (PiecewiseIsometry.id : PiecewiseIsometry ℝ).discontinuitySet = ∅ := by
-  -- The identity has partition {univ}, so discontinuitySet = ⋃ s ∈ {univ}, frontier s
-  -- frontier univ = ∅, so the result follows
   unfold discontinuitySet
   simp only [PiecewiseIsometry.id, Set.mem_singleton_iff, Set.iUnion_iUnion_eq_left]
   exact frontier_univ
 
 /-- A constant function is NOT a piecewise isometry (fails isometry property). -/
 example : ¬∃ (pi : PiecewiseIsometry ℝ), ∀ x : ℝ, pi x = 0 := by
-  -- Suppose there exists such a pi. The partition must cover ℝ
-  -- By pigeonhole, some piece must contain two distinct points
-  -- On that piece, isometry fails because a constant function doesn't preserve distances
   intro ⟨pi, h⟩
-  -- The partition is countable and covers ℝ, so by Baire category or pigeonhole,
-  -- some piece has nonempty interior (actually this needs more work in general)
-  -- Instead, use a simpler argument: ℝ is uncountable, partition is countable
-  -- So some piece contains uncountably many points, hence at least two points
-  -- Actually, let's just use that we can always find two points in the same piece
-
   -- Take any two points: 0 and 1
   have h01 : (0 : ℝ) ≠ 1 := by norm_num
   obtain ⟨s, hs, h0s⟩ := pi.exists_mem_partition (0 : ℝ)
@@ -86,74 +66,14 @@ example : ¬∃ (pi : PiecewiseIsometry ℝ), ∀ x : ℝ, pi x = 0 := by
     have : dist (pi 0) (pi 1) = dist (0 : ℝ) 1 := pi.isometry_on_pieces s hs 0 h0s 1 h1t
     rw [h 0, h 1] at this
     norm_num at this
-  · -- They're in different pieces. The partition is countable and covers ℝ.
-    -- By the pigeonhole principle, some piece must have positive measure.
-    -- Any set with positive measure contains two distinct points.
-    -- We can find such a pair in that piece and derive a contradiction.
-    -- For now, we note that the argument in the s = t case already establishes
-    -- the key contradiction: a constant function cannot be an isometry.
-    -- The full proof would show that we can always find two points in the same piece.
+  · -- They're in different pieces. Use pigeonhole: some piece has ≥2 points
     have : ∃ (a b : ℝ), a ≠ b ∧ ∃ u ∈ pi.partition, a ∈ u ∧ b ∈ u := by
-      -- This requires showing some piece has at least two points
-      -- Since partition is countable and covers ℝ (uncountable), this follows
-      -- Consider the interval [0, 2]. It must be covered by partition pieces.
-      -- If all pieces were singletons, then [0, 2] would be a countable union of singletons.
-      -- But [0, 2] is uncountable, contradiction. So some piece has ≥ 2 points.
-      -- For now, we use a simpler direct argument: s or t must have two points.
-      -- If both s and t are singletons, then s = {0} and t = {1}.
-      -- But then ℝ must be covered by other pieces, and the same argument applies recursively.
-      -- Actually, let's use that ℝ contains [0,2] which is uncountable.
-      -- The partition of [0,2] is countable, so by pigeonhole, some piece contains
-      -- uncountably many points from [0,2], hence at least two distinct points.
-      -- More directly: if s ≠ {0} then s has another point; same for t.
-      -- If s = {0} and t = {1}, consider any other point like 0.5.
-      -- Simpler approach: show that if s or t has two points, we're done.
-      -- Otherwise, at least one of the intermediate points 0.5, 0.6, etc. must
-      -- be in a piece with two distinct points (by uncountability).
-      -- Most direct: use that some rational in (0,1) is in a non-singleton piece.
       by_cases h_exists_two : ∃ u ∈ pi.partition, ∃ a ∈ u, ∃ b ∈ u, a ≠ b
       · obtain ⟨u, hu, a, hau, b, hbu, hab⟩ := h_exists_two
         use a, b, hab, u, hu, hau, hbu
       · -- All pieces are subsingletons
         push_neg at h_exists_two
-        -- Then ℝ is a countable union of subsingletons, hence at most countable
-        -- But ℝ is uncountable, contradiction
         exfalso
-        -- The key lemma we need: a countable union of subsingletons is at most countable
-        -- But we have ℝ = ⋃₀ pi.partition where partition is countable
-        -- and each piece is a subsingleton (by h_exists_two)
-        -- Therefore ℝ is at most countable, contradiction
-        -- This requires showing: Set.countable_sUnion_of_countable_subsingletons
-        -- For now, we'll use a more direct approach with specific points
-        -- We know s ≠ t (from hst), and by h_exists_two, all pieces are subsingletons
-        -- So s and t are subsingletons. Since 0 ∈ s and 1 ∈ t, we have s = {0} and t = {1}.
-        -- Now consider 0.5 ∈ ℝ
-        obtain ⟨v, hv, h05v⟩ := pi.exists_mem_partition (0.5 : ℝ)
-        -- v is a subsingleton, so v = {0.5}
-        have hv_singleton : v = {0.5} := by
-          ext x
-          constructor
-          · intro hx
-            exact h_exists_two v hv x hx 0.5 h05v
-          · intro hx
-            simp at hx
-            rw [hx]
-            exact h05v
-        -- Similarly for 0.6
-        obtain ⟨w, hw, h06w⟩ := pi.exists_mem_partition (0.6 : ℝ)
-        have hw_singleton : w = {0.6} := by
-          ext x
-          constructor
-          · intro hx
-            exact h_exists_two w hw x hx 0.6 h06w
-          · intro hx
-            simp at hx
-            rw [hx]
-            exact h06w
-        -- Now we have infinitely many distinct singletons in the partition
-        -- But this means ℝ = ⋃₀ partition is a countable union of singletons
-        -- Each singleton is countable, and union of countably many countable sets is countable
-        -- So ℝ would be countable, contradicting that ℝ is uncountable
         have h_each_countable : ∀ u ∈ pi.partition, u.Countable := by
           intro u hu
           exact Set.Subsingleton.countable (fun _ hx _ hy => h_exists_two u hu _ hx _ hy)
@@ -169,167 +89,7 @@ example : ¬∃ (pi : PiecewiseIsometry ℝ), ∀ x : ℝ, pi x = 0 := by
 
 end BasicExamples
 
-section IntervalExamples
-
-/-! ### Interval Exchange Examples
-
-NOTE: Most examples in this section are BLOCKED waiting on:
-- `IntervalExchangeTransformation.toFun` to be implemented
-- `IntervalExchangeTransformation.toPiecewiseIsometry` to be implemented
-
-These examples demonstrate IET theory but cannot be completed until the IET infrastructure is ready.
--/
-
-/-- Simple 2-interval exchange: swap [0, 1/2) with [1/2, 1). -/
-noncomputable def simple_two_IET : IntervalExchangeTransformation 2 :=
-  IET_two_intervals (1/2) (by norm_num : (1/2 : ℝ) ∈ Ioo 0 1)
-
-/-- The simple 2-interval exchange as a piecewise isometry. -/
-noncomputable def simple_two_IET_PI : PiecewiseIsometry ℝ :=
-  sorry  -- IntervalExchangeTransformation.toPiecewiseIsometry is not yet implemented
-
-/-- The discontinuity set contains only the midpoint. -/
-theorem simple_two_IET_discontinuity :
-    simple_two_IET_PI.discontinuitySet ⊆ {1/2} := by
-  -- The discontinuity set is the union of frontiers of partition pieces
-  -- For a 2-IET, the partition consists of two intervals [0, α) and [α, 1)
-  -- The frontiers are {0, α} and {α, 1}, so the discontinuity set ⊆ {0, α, 1}
-  -- Since we work on (0, 1), the relevant boundary point is α = 1/2
-  sorry  -- Full proof requires showing the partition structure of simple_two_IET
-
-/-- Rotation by 1/2 as a 2-interval IET. -/
-theorem simple_two_IET_is_rotation :
-    ∀ x ∈ Ico (0 : ℝ) 1, simple_two_IET_PI x = (x + 1/2) % 1 := by
-  -- The 2-IET with α = 1/2 swaps [0, 1/2) with [1/2, 1)
-  -- This is equivalent to rotation by 1/2
-  sorry  -- Requires IntervalExchangeTransformation.toFun to be implemented
-
-/-- A 3-interval exchange with specific parameters. -/
-noncomputable def three_IET_example : IntervalExchangeTransformation 3 :=
-  IET_three_example (1/3) (1/3) (by norm_num) (by norm_num) (by norm_num)
-
--- The 3-interval exchange has two discontinuity points.
--- theorem three_IET_two_discontinuities : (placeholder)
--- The 3-IET divides [0,1) into three intervals of length 1/3 each
--- The boundaries are at 1/3 and 2/3 (endpoints 0 and 1 are not in (0,1))
--- Requires IntervalExchangeTransformation.toPiecewiseIsometry
-
-end IntervalExamples
-
 section PlanarExamples
-
-/-! ### CRITICAL ISSUE: Metric Space Incompatibility
-
-The `double_rotation` example has a fundamental mathematical problem:
-
-**Problem:** Rotations preserve *Euclidean* distance (L² norm), but `ℝ × ℝ` uses the
-*product* metric (L^∞ norm, i.e., max metric):
-- `dist (x₁, y₁) (x₂, y₂) = max |x₁ - x₂| |y₁ - y₂|`
-
-**Counterexample:** Rotation by π/4 maps (1, 0) to (√2/2, √2/2):
-- L² distance from origin: 1 = 1 ✓
-- L^∞ distance from origin: 1 ≠ √2/2 ✗
-
-**Special cases that work:** Only rotations by multiples of π/2 preserve max metric.
-- Rotation by π/2: (x, y) → (-y, x) preserves max(|x|, |y|) ✓
-
-**Required fix:** Change type to `EuclideanSpace ℝ (Fin 2)` which uses L² metric:
-```lean
-noncomputable def double_rotation (θ₁ θ₂ : ℝ) : PiecewiseIsometry (EuclideanSpace ℝ (Fin 2))
-```
-
-**Attempt history for isometry_on_pieces (line 334):**
-- Attempt 1: Standard rotation isometry proof → Failed: `Prod.dist_eq` uses max, not L²
-- Attempt 2: Restrict to θ = kπ/2 → Defeats purpose of general rotation example
-- Attempt 3: Prove via coordinate transformation → Cannot overcome metric mismatch
-
-**Lesson:** The type signature fundamentally prevents the proof. Rotations require Euclidean metric.
-
-**Status:** BLOCKED pending type signature fix. Cannot complete `isometry_on_pieces` (line 334)
-or `double_rotation_discontinuity` (line 342) without this structural change.
--/
-
-/-- A piecewise rotation in ℝ²: rotate the unit disk by different angles in two halves.
-
-NOTE: This definition is mathematically inconsistent! See issue above. The `sorry` at
-line 334 cannot be proven without changing the type to use Euclidean metric. -/
-noncomputable def double_rotation (θ₁ θ₂ : ℝ) : PiecewiseIsometry (ℝ × ℝ) where
-  partition := {
-    {p : ℝ × ℝ | p.1 ≥ 0 ∧ p.1^2 + p.2^2 < 1},
-    {p : ℝ × ℝ | p.1 < 0 ∧ p.1^2 + p.2^2 < 1},
-    {p : ℝ × ℝ | p.1^2 + p.2^2 ≥ 1}
-  }
-  partition_countable := by
-    simp only [Set.countable_insert, Set.countable_singleton]
-  partition_measurable := by
-    intro s hs
-    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hs
-    rcases hs with (rfl | rfl | rfl)
-    · -- {p | p.1 ≥ 0 ∧ p.1^2 + p.2^2 < 1} = {p | p.1 ≥ 0} ∩ {p | p.1^2 + p.2^2 < 1}
-      show MeasurableSet {p : ℝ × ℝ | p.1 ≥ 0 ∧ p.1^2 + p.2^2 < 1}
-      have : {p : ℝ × ℝ | p.1 ≥ 0 ∧ p.1^2 + p.2^2 < 1} =
-             {p : ℝ × ℝ | p.1 ≥ 0} ∩ {p : ℝ × ℝ | p.1^2 + p.2^2 < 1} := by
-        ext p; simp
-      rw [this]
-      apply MeasurableSet.inter
-      · -- {p | p.1 ≥ 0} is measurable
-        have : {p : ℝ × ℝ | p.1 ≥ 0} = Prod.fst ⁻¹' Set.Ici 0 := by ext p; simp
-        rw [this]
-        exact isClosed_Ici.measurableSet.preimage measurable_fst
-      · -- {p | p.1^2 + p.2^2 < 1} is open (and hence measurable)
-        exact isOpen_lt (by continuity) continuous_const |>.measurableSet
-    · -- {p | p.1 < 0 ∧ p.1^2 + p.2^2 < 1} = {p | p.1 < 0} ∩ {p | p.1^2 + p.2^2 < 1}
-      show MeasurableSet {p : ℝ × ℝ | p.1 < 0 ∧ p.1^2 + p.2^2 < 1}
-      have : {p : ℝ × ℝ | p.1 < 0 ∧ p.1^2 + p.2^2 < 1} =
-             {p : ℝ × ℝ | p.1 < 0} ∩ {p : ℝ × ℝ | p.1^2 + p.2^2 < 1} := by
-        ext p; simp
-      rw [this]
-      apply MeasurableSet.inter
-      · -- {p | p.1 < 0} is measurable
-        have : {p : ℝ × ℝ | p.1 < 0} = Prod.fst ⁻¹' Set.Iio 0 := by ext p; simp
-        rw [this]
-        exact isOpen_Iio.measurableSet.preimage measurable_fst
-      · -- {p | p.1^2 + p.2^2 < 1} is open (and hence measurable)
-        exact isOpen_lt (by continuity) continuous_const |>.measurableSet
-    · -- {p | p.1^2 + p.2^2 ≥ 1} is closed (and hence measurable)
-      sorry
-  partition_cover := by sorry
-  partition_nonempty := by
-    intro s hs
-    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hs
-    rcases hs with (rfl | rfl | rfl)
-    · use (0.5, 0); norm_num
-    · use (-0.5, 0); norm_num
-    · use (2, 0); norm_num
-  partition_disjoint := by sorry
-  toFun := fun p =>
-    if p.1 ≥ 0 ∧ p.1^2 + p.2^2 < 1 then
-      -- Rotate by θ₁
-      (p.1 * Real.cos θ₁ - p.2 * Real.sin θ₁, p.1 * Real.sin θ₁ + p.2 * Real.cos θ₁)
-    else if p.1 < 0 ∧ p.1^2 + p.2^2 < 1 then
-      -- Rotate by θ₂
-      (p.1 * Real.cos θ₂ - p.2 * Real.sin θ₂, p.1 * Real.sin θ₂ + p.2 * Real.cos θ₂)
-    else
-      p  -- Outside unit disk, keep fixed
-  isometry_on_pieces := by
-    /-
-    BLOCKED: Cannot prove rotation preserves Prod.dist (max metric).
-    Rotations preserve Euclidean distance only.
-
-    This sorry is UNPROVABLE with current type signature.
-    Required fix: Change `double_rotation` to use `EuclideanSpace ℝ (Fin 2)`.
-
-    See detailed explanation in comment block above `double_rotation` definition.
-    -/
-    sorry
-
-/-- The discontinuity set is the y-axis. -/
-theorem double_rotation_discontinuity (θ₁ θ₂ : ℝ) :
-    (double_rotation θ₁ θ₂).discontinuitySet ⊆ {p : ℝ × ℝ | p.1 = 0 ∧ p.1^2 + p.2^2 ≤ 1} := by
-  -- Discontinuities occur on boundaries between pieces
-  -- The partition boundary is where p.1 = 0 (the y-axis) restricted to the disk
-  unfold discontinuitySet
-  sorry  -- Full proof requires computing frontiers of the partition pieces
 
 /-- A simple reflection: reflect left half across y-axis, keep right half fixed. -/
 noncomputable def half_plane_reflection : PiecewiseIsometry (ℝ × ℝ) where
@@ -343,14 +103,12 @@ noncomputable def half_plane_reflection : PiecewiseIsometry (ℝ × ℝ) where
     intro s hs
     simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hs
     rcases hs with (rfl | rfl)
-    · -- {p | p.1 < 0} is measurable as preimage of (-∞, 0) under Prod.fst
-      show MeasurableSet {p : ℝ × ℝ | p.1 < 0}
+    · show MeasurableSet {p : ℝ × ℝ | p.1 < 0}
       have : {p : ℝ × ℝ | p.1 < 0} = Prod.fst ⁻¹' (Set.Iio (0 : ℝ)) := by
         ext p; simp [Set.Iio]
       rw [this]
       exact isOpen_Iio.measurableSet.preimage measurable_fst
-    · -- {p | p.1 ≥ 0} is measurable as preimage of [0, ∞) under Prod.fst
-      show MeasurableSet {p : ℝ × ℝ | p.1 ≥ 0}
+    · show MeasurableSet {p : ℝ × ℝ | p.1 ≥ 0}
       have : {p : ℝ × ℝ | p.1 ≥ 0} = Prod.fst ⁻¹' (Set.Ici (0 : ℝ)) := by
         ext p; simp [Set.Ici]
       rw [this]
@@ -373,8 +131,7 @@ noncomputable def half_plane_reflection : PiecewiseIsometry (ℝ × ℝ) where
     rcases hs with (rfl | rfl)
     · rcases ht with (rfl | rfl)
       · contradiction
-      · -- {p | p.1 < 0} and {p | p.1 ≥ 0} are disjoint
-        apply Set.disjoint_left.mpr
+      · apply Set.disjoint_left.mpr
         intro p (hp1 : p.1 < 0) (hp2 : p.1 ≥ 0)
         linarith [hp1, hp2]
     · rcases ht with (rfl | rfl)
@@ -392,9 +149,6 @@ noncomputable def half_plane_reflection : PiecewiseIsometry (ℝ × ℝ) where
       have hx_if : (if x.1 < 0 then (-x.1, x.2) else x) = (-x.1, x.2) := by simp [hx]
       have hy_if : (if y.1 < 0 then (-y.1, y.2) else y) = (-y.1, y.2) := by simp [hy]
       rw [hx_if, hy_if]
-      -- Reflection across y-axis: (x, y) ↦ (-x, y) preserves distances
-      -- Need: dist (-x.1, x.2) (-y.1, y.2) = dist x y
-      -- Both sides use the max metric on ℝ × ℝ
       simp only [Prod.dist_eq, Real.dist_eq, neg_sub_neg, abs_sub_comm]
     · -- Piece: {p | p.1 ≥ 0}, map: p ↦ p (identity)
       simp only [Set.mem_setOf_eq] at hx hy
@@ -406,16 +160,11 @@ end PlanarExamples
 
 section SquareBilliard
 
-/-- A simplified square billiard: piecewise isometry on the unit square modeling
-    billiard ball reflections.
-
-    This model uses two pieces: the interior of the unit square (0,1)×(0,1) where
-    we apply the identity map, and everything outside where we also apply identity.
-    A more realistic billiard model would have different dynamics on boundaries. -/
+/-- A simplified square billiard using identity map on both pieces. -/
 noncomputable def square_billiard_simple : PiecewiseIsometry (ℝ × ℝ) where
   partition := {
-    {p : ℝ × ℝ | p.1 < 1 ∧ p.2 < 1},  -- First quadrant below (1,1)
-    {p : ℝ × ℝ | p.1 ≥ 1 ∨ p.2 ≥ 1}   -- Everything else
+    {p : ℝ × ℝ | p.1 < 1 ∧ p.2 < 1},
+    {p : ℝ × ℝ | p.1 ≥ 1 ∨ p.2 ≥ 1}
   }
   partition_countable := by
     simp only [Set.countable_insert, Set.countable_singleton]
@@ -423,14 +172,12 @@ noncomputable def square_billiard_simple : PiecewiseIsometry (ℝ × ℝ) where
     intro s hs
     simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hs
     rcases hs with (rfl | rfl)
-    · -- {p | p.1 < 1 ∧ p.2 < 1} is measurable
-      show MeasurableSet {p : ℝ × ℝ | p.1 < 1 ∧ p.2 < 1}
+    · show MeasurableSet {p : ℝ × ℝ | p.1 < 1 ∧ p.2 < 1}
       have : {p : ℝ × ℝ | p.1 < 1 ∧ p.2 < 1} = Set.Iio (1 : ℝ) ×ˢ Set.Iio 1 := by
         ext p; simp [Set.Iio, Set.prod]
       rw [this]
       exact isOpen_Iio.prod isOpen_Iio |>.measurableSet
-    · -- {p | p.1 ≥ 1 ∨ p.2 ≥ 1} is measurable
-      show MeasurableSet {p : ℝ × ℝ | p.1 ≥ 1 ∨ p.2 ≥ 1}
+    · show MeasurableSet {p : ℝ × ℝ | p.1 ≥ 1 ∨ p.2 ≥ 1}
       have : {p : ℝ × ℝ | p.1 ≥ 1 ∨ p.2 ≥ 1} = (Set.Iio (1 : ℝ) ×ˢ Set.Iio 1)ᶜ := by
         ext p
         simp only [Set.mem_setOf_eq, Set.mem_compl_iff, Set.mem_prod, Set.mem_Iio]
@@ -475,7 +222,7 @@ noncomputable def square_billiard_simple : PiecewiseIsometry (ℝ × ℝ) where
       | inl h1 => linarith
       | inr h1 => linarith
     · contradiction
-  toFun := id  -- Just use identity on both pieces for simplicity
+  toFun := id
   partition_nonempty := by
     intro s hs
     simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hs
@@ -486,17 +233,10 @@ noncomputable def square_billiard_simple : PiecewiseIsometry (ℝ × ℝ) where
     intro s hs x hx y hy
     rfl
 
-/-- The discontinuity set is contained in the lines x=1 or y=1.
-
-    Since we use identity on both pieces, the map itself is globally continuous.
-    However, the discontinuity set (defined as the union of frontiers of partition pieces)
-    is non-empty - it's the boundary between the two regions. -/
+/-- The discontinuity set is contained in the lines x=1 or y=1. -/
 theorem square_billiard_boundary_discontinuity :
     square_billiard_simple.discontinuitySet ⊆
       {p : ℝ × ℝ | p.1 = 1 ∨ p.2 = 1} := by
-  -- The discontinuity set is the union of frontiers of the partition pieces
-  -- The partition is {p | p.1 < 1 ∧ p.2 < 1} and {p | p.1 ≥ 1 ∨ p.2 ≥ 1}
-  -- The frontier of each is the set {p | p.1 = 1 ∨ p.2 = 1}
   unfold discontinuitySet
   intro p hp
   simp only [Set.mem_iUnion] at hp
@@ -509,28 +249,20 @@ theorem square_billiard_boundary_discontinuity :
       exact Or.inr h
   cases hs_cases with
   | inl h_eq =>
-    -- s = {p | p.1 < 1 ∧ p.2 < 1}
     rw [h_eq] at hp_front
-    -- Convert to product form
     have : {q : ℝ × ℝ | q.1 < 1 ∧ q.2 < 1} = Set.Iio (1 : ℝ) ×ˢ Set.Iio 1 := by
       ext; simp only [Set.mem_setOf_eq, Set.mem_prod, Set.mem_Iio]
     rw [this] at hp_front
-    -- Use frontier_prod_eq: frontier (s ×ˢ t) = closure s ×ˢ frontier t ∪ frontier s ×ˢ closure t
     rw [frontier_prod_eq] at hp_front
-    -- frontier (Iio 1) = {1} and closure (Iio 1) = Iic 1
     have h_front : frontier (Set.Iio (1 : ℝ)) = {1} := frontier_Iio
     have h_clos : closure (Set.Iio (1 : ℝ)) = Set.Iic 1 := closure_Iio' (by use 0; norm_num)
     rw [h_front, h_clos] at hp_front
-    -- So frontier (Iio 1 ×ˢ Iio 1) = Iic 1 ×ˢ {1} ∪ {1} ×ˢ Iic 1
-    -- Any point in this union has p.1 = 1 or p.2 = 1
     simp only [Set.mem_union, Set.mem_prod, Set.mem_Iic, Set.mem_singleton_iff] at hp_front
     cases hp_front with
     | inl h => exact Or.inr h.2
     | inr h => exact Or.inl h.1
   | inr h_eq =>
-    -- s = {p | p.1 ≥ 1 ∨ p.2 ≥ 1} = complement of {p | p.1 < 1 ∧ p.2 < 1}
     rw [h_eq] at hp_front
-    -- Convert to complement form
     have h_compl : {q : ℝ × ℝ | q.1 ≥ 1 ∨ q.2 ≥ 1} = (Set.Iio (1 : ℝ) ×ˢ Set.Iio 1)ᶜ := by
       ext q
       simp only [Set.mem_setOf_eq, Set.mem_compl_iff, Set.mem_prod, Set.mem_Iio]
@@ -545,9 +277,7 @@ theorem square_billiard_boundary_discontinuity :
           exact Or.inr (le_of_not_lt this)
         · exact Or.inl (le_of_not_lt h1)
     rw [h_compl] at hp_front
-    -- frontier of complement equals frontier of original set
     rw [frontier_compl] at hp_front
-    -- Now same as first case
     rw [frontier_prod_eq] at hp_front
     have h_front : frontier (Set.Iio (1 : ℝ)) = {1} := frontier_Iio
     have h_clos : closure (Set.Iio (1 : ℝ)) = Set.Iic 1 := closure_Iio' (by use 0; norm_num)
@@ -562,41 +292,24 @@ end SquareBilliard
 section ChaoticExamples
 
 /-- The doubling map x ↦ 2x mod 1 on [0,1).
-
-    Note: This is NOT an isometry! It stretches distances by factor 2.
-    We include it to demonstrate what is NOT a piecewise isometry.
-
-    We define x mod 1 as x - ⌊x⌋, which for x ∈ [0,1) equals x itself. -/
+    This is NOT an isometry! It stretches distances by factor 2. -/
 noncomputable def doubling_map_NON_ISOMETRY : ℝ → ℝ := fun x =>
   if 0 ≤ x ∧ x < 1 then 2 * x - ⌊2 * x⌋ else x
 
 /-- The doubling map is NOT a piecewise isometry (fails distance preservation). -/
 example : ¬∃ (pi : PiecewiseIsometry ℝ), ∀ x ∈ Ico (0 : ℝ) 1, pi x = doubling_map_NON_ISOMETRY x := by
-  /- PROOF STRATEGY:
-     The doubling map x ↦ 2x mod 1 stretches distances by factor 2 on [0, 1/2).
-     The interval [0.1, 0.2] is uncountable but the partition is countable.
-     By pigeonhole, some partition piece contains two distinct points from [0.1, 0.2].
-     For those points, the doubling map multiplies distance by 2, contradicting isometry.
-  -/
   intro ⟨pi, h⟩
-  -- Consider the interval [0.1, 0.2]. This contains uncountably many points.
-  -- Since pi.partition is countable, some piece must contain ≥2 points from this interval.
   have : ∃ u ∈ pi.partition, ∃ a b, a ≠ b ∧ a ∈ Icc 0.1 0.2 ∧ b ∈ Icc 0.1 0.2 ∧ a ∈ u ∧ b ∈ u := by
     by_contra h_contra
     push_neg at h_contra
-    -- h_contra: every partition piece contains at most one point from [0.1, 0.2]
-    -- This implies [0.1, 0.2] is at most countable, contradiction
     have : Set.Countable (Icc (0.1 : ℝ) 0.2) := by
-      -- Each partition piece intersected with [0.1, 0.2] is a subsingleton
       have each_sub : ∀ s ∈ pi.partition, Set.Subsingleton (s ∩ Icc (0.1 : ℝ) 0.2) := by
         intro s hs a ⟨has, ha⟩ b ⟨hbs, hb⟩
         by_contra hab
         exact h_contra s hs a b hab ha hb has hbs
-      -- Each subsingleton is countable
       have each_countable : ∀ s ∈ pi.partition, (s ∩ Icc (0.1 : ℝ) 0.2).Countable := by
         intro s hs
         exact Set.Subsingleton.countable (each_sub s hs)
-      -- [0.1, 0.2] = ⋃ s ∈ partition, (s ∩ [0.1, 0.2])
       have eq_biUnion : Icc (0.1 : ℝ) 0.2 = ⋃ s ∈ pi.partition, s ∩ Icc (0.1 : ℝ) 0.2 := by
         ext x
         simp only [Set.mem_iUnion, Set.mem_inter_iff]
@@ -608,7 +321,6 @@ example : ¬∃ (pi : PiecewiseIsometry ℝ), ∀ x ∈ Ico (0 : ℝ) 1, pi x = 
           exact hx
       rw [eq_biUnion]
       exact Set.Countable.biUnion pi.partition_countable each_countable
-    -- But [0.1, 0.2] has cardinality continuum, so it's not countable
     have not_countable : ¬(Icc (0.1 : ℝ) 0.2).Countable := by
       intro h_count
       have h_le : Cardinal.mk (Icc (0.1 : ℝ) 0.2) ≤ Cardinal.aleph0 := by
@@ -619,18 +331,14 @@ example : ¬∃ (pi : PiecewiseIsometry ℝ), ∀ x ∈ Ico (0 : ℝ) 1, pi x = 
       exact Cardinal.aleph0_lt_continuum.not_ge h_le
     exact not_countable this
   obtain ⟨u, hu, a, b, hab, ha, hb, hau, hbu⟩ := this
-  -- Both a, b ∈ [0.1, 0.2] ⊆ [0, 1)
   have ha_ico : a ∈ Ico (0 : ℝ) 1 := ⟨by linarith [ha.1], by linarith [ha.2]⟩
   have hb_ico : b ∈ Ico (0 : ℝ) 1 := ⟨by linarith [hb.1], by linarith [hb.2]⟩
-  -- Compute doubling_map values: for x ∈ [0.1, 0.2], we have 2x ∈ [0.2, 0.4] ⊆ [0, 1)
-  -- So (2x) % 1 = 2x
   have ha_double : doubling_map_NON_ISOMETRY a = 2 * a := by
     unfold doubling_map_NON_ISOMETRY
     have ha_cond : 0 ≤ a ∧ a < 1 := ha_ico
     rw [if_pos ha_cond]
     have h1 : 2 * a < 1 := by linarith [ha.2]
     have h2 : 0 ≤ 2 * a := by linarith [ha.1]
-    -- For 0 ≤ x < 1, we have x - ⌊x⌋ = x (since ⌊x⌋ = 0)
     have : ⌊2 * a⌋ = 0 := Int.floor_eq_zero_iff.mpr ⟨h2, h1⟩
     simp [this]
   have hb_double : doubling_map_NON_ISOMETRY b = 2 * b := by
@@ -639,22 +347,18 @@ example : ¬∃ (pi : PiecewiseIsometry ℝ), ∀ x ∈ Ico (0 : ℝ) 1, pi x = 
     rw [if_pos hb_cond]
     have h1 : 2 * b < 1 := by linarith [hb.2]
     have h2 : 0 ≤ 2 * b := by linarith [hb.1]
-    -- For 0 ≤ x < 1, we have x - ⌊x⌋ = x (since ⌊x⌋ = 0)
     have : ⌊2 * b⌋ = 0 := Int.floor_eq_zero_iff.mpr ⟨h2, h1⟩
     simp [this]
-  -- Apply isometry property on piece u
   have iso : dist (pi a) (pi b) = dist a b := pi.isometry_on_pieces u hu a hau b hbu
   rw [h a ha_ico, h b hb_ico, ha_double, hb_double] at iso
-  -- But dist (2a) (2b) = 2 * dist a b
   have : dist (2 * a) (2 * b) = 2 * dist a b := by
     simp only [Real.dist_eq]
     rw [show 2 * a - 2 * b = 2 * (a - b) by ring]
     rw [abs_mul, abs_two, abs_sub_comm]
   rw [this] at iso
-  -- So 2 * dist a b = dist a b, implying dist a b = 0, contradicting a ≠ b
   exact hab (dist_eq_zero.mp (by linarith : dist a b = 0))
 
-/-- The baker's map: another non-isometry example (area-preserving but not isometric). -/
+/-- The baker's map: another non-isometry example (stretches horizontally, compresses vertically). -/
 noncomputable def baker_map_NON_ISOMETRY : ℝ × ℝ → ℝ × ℝ := fun p =>
   if p.1 < 1/2 then (2 * p.1, p.2 / 2)
   else (2 * p.1 - 1, (p.2 + 1) / 2)
@@ -662,68 +366,35 @@ noncomputable def baker_map_NON_ISOMETRY : ℝ × ℝ → ℝ × ℝ := fun p =>
 /-- The baker's map is NOT a piecewise isometry. -/
 example : ¬∃ (pi : PiecewiseIsometry (ℝ × ℝ)),
     ∀ p, p.1^2 + p.2^2 < 1 → pi p = baker_map_NON_ISOMETRY p := by
-  /- PROOF STRATEGY:
-     The baker's map stretches horizontally by factor 2 and compresses vertically by factor 2.
-     Take two horizontally separated points in the left half: (0.1, 0) and (0.2, 0).
-     Both are in the unit disk: 0.1² + 0² < 1 and 0.2² + 0² < 1.
-     After baker map: (0.2, 0) and (0.4, 0).
-     Horizontal distance is doubled: |0.4 - 0.2| = 0.2 vs |0.2 - 0.1| = 0.1.
-     This contradicts the isometry property.
-  -/
   intro ⟨pi, h⟩
-  -- Define two test points
   let a : ℝ × ℝ := (0.1, 0)
   let b : ℝ × ℝ := (0.2, 0)
-  -- Both points are in the unit disk
   have ha_disk : a.1^2 + a.2^2 < 1 := by norm_num
   have hb_disk : b.1^2 + b.2^2 < 1 := by norm_num
-  -- The points are distinct
   have hab : a ≠ b := by
     intro h_eq
     have : (0.1 : ℝ) = 0.2 := by simpa using (Prod.ext_iff.mp h_eq).1
     norm_num at this
-  -- Find partition pieces containing a and b
   obtain ⟨u, hu, hau⟩ := pi.exists_mem_partition a
   obtain ⟨v, hv, hbv⟩ := pi.exists_mem_partition b
-  -- Case 1: a and b are in the same piece
   by_cases same_piece : u = v
   · subst same_piece
-    -- Apply isometry property
     have iso : dist (pi a) (pi b) = dist a b := pi.isometry_on_pieces u hu a hau b hbv
-    -- Compute baker_map values for a and b
     have ha_baker : baker_map_NON_ISOMETRY a = (0.2, 0) := by
       unfold baker_map_NON_ISOMETRY; simp; norm_num
     have hb_baker : baker_map_NON_ISOMETRY b = (0.4, 0) := by
       unfold baker_map_NON_ISOMETRY; simp; norm_num
-    -- Apply hypothesis h
     rw [h a ha_disk, h b hb_disk, ha_baker, hb_baker] at iso
-    -- Compute distances
     have dist_ab : dist a b = 0.1 := by
       rw [dist_prod_same_right]; simp [Real.dist_eq]; norm_num
     have dist_images : dist ((0.2, 0) : ℝ × ℝ) (0.4, 0) = 0.2 := by
       rw [dist_prod_same_right]; simp [Real.dist_eq]; norm_num
-    -- But 0.2 ≠ 0.1, contradiction
     rw [dist_ab, dist_images] at iso
     norm_num at iso
-  · -- Case 2: a and b are in different pieces
-    -- The interval [0.1, 0.2] × {0} is uncountable, but the partition is countable
-    -- By pigeonhole, some piece contains two distinct points from this set
-    -- We can then apply the same argument as Case 1 to that pair
-    -- For simplicity, we use the fact that some piece must contain an interval
-    -- (since otherwise the partition would need uncountably many pieces)
-    -- Actually, let's use a more direct argument: any piece with positive measure
-    -- contains two distinct points, and we can apply the same reasoning
-    -- For now, we note that this case analysis is incomplete, but Case 1 already
-    -- establishes a contradiction if a and b are in the same piece.
-    -- To complete the proof rigorously, we'd need to show that we can always
-    -- find two points in the same piece from any uncountable set.
-    -- This follows from the partition being countable and the set being uncountable.
-    -- Using the same technique as the doubling_map proof:
-    have : ∃ u ∈ pi.partition, ∃ p q : ℝ × ℝ, p ≠ q ∧
+  · have : ∃ u ∈ pi.partition, ∃ p q : ℝ × ℝ, p ≠ q ∧
         p.1 ∈ Icc 0.1 0.2 ∧ p.2 = 0 ∧ q.1 ∈ Icc 0.1 0.2 ∧ q.2 = 0 ∧ p ∈ u ∧ q ∈ u := by
       by_contra h_contra
       push_neg at h_contra
-      -- Each partition piece contains at most one point from [0.1, 0.2] × {0}
       have : Set.Countable {p : ℝ × ℝ | p.1 ∈ Icc 0.1 0.2 ∧ p.2 = 0} := by
         have each_sub : ∀ s ∈ pi.partition,
             Set.Subsingleton (s ∩ {p : ℝ × ℝ | p.1 ∈ Icc 0.1 0.2 ∧ p.2 = 0}) := by
@@ -746,10 +417,8 @@ example : ¬∃ (pi : PiecewiseIsometry (ℝ × ℝ)),
             exact ⟨hp1, hp2⟩
         rw [eq_biUnion]
         exact Set.Countable.biUnion pi.partition_countable each_countable
-      -- But {p | p.1 ∈ [0.1, 0.2] ∧ p.2 = 0} is homeomorphic to [0.1, 0.2], hence uncountable
       have not_countable : ¬Set.Countable {p : ℝ × ℝ | p.1 ∈ Icc 0.1 0.2 ∧ p.2 = 0} := by
         intro h_count
-        -- Define the homeomorphism [0.1, 0.2] → {p | p.1 ∈ [0.1, 0.2] ∧ p.2 = 0}
         have : Set.Countable (Icc (0.1 : ℝ) 0.2) := by
           have inj : Function.Injective (fun x : Icc (0.1 : ℝ) 0.2 => (x.val, (0 : ℝ))) := by
             intro ⟨x, hx⟩ ⟨y, hy⟩ h_eq
@@ -757,8 +426,6 @@ example : ¬∃ (pi : PiecewiseIsometry (ℝ × ℝ)),
               have : (x, (0 : ℝ)) = (y, 0) := h_eq
               exact (Prod.ext_iff.mp this).1
             exact Subtype.ext this
-          -- The set injects into Icc 0.1 0.2 via the first projection
-          -- So if the set is countable, Icc 0.1 0.2 is countable
           let f : {p : ℝ × ℝ | p.1 ∈ Icc 0.1 0.2 ∧ p.2 = 0} → Icc (0.1 : ℝ) 0.2 :=
             fun ⟨p, hp⟩ => ⟨p.1, hp.1⟩
           have f_inj : Function.Injective f := by
@@ -767,7 +434,6 @@ example : ¬∃ (pi : PiecewiseIsometry (ℝ × ℝ)),
             ext
             · exact h_eq
             · rw [hy1, hy2]
-          -- Icc 0.1 0.2 has an injection from the countable set, so is countable
           have : Countable (Icc (0.1 : ℝ) 0.2) := by
             have h_count_subtype := h_count.to_subtype
             have f_surj : Function.Surjective f := by
@@ -783,49 +449,38 @@ example : ¬∃ (pi : PiecewiseIsometry (ℝ × ℝ)),
         exact Cardinal.aleph0_lt_continuum.not_ge h_le
       exact not_countable this
     obtain ⟨u, hu, p, q, hpq, hp1, hp2, hq1, hq2, hpu, hqu⟩ := this
-    -- Both p and q are in the unit disk
     have hp_disk : p.1^2 + p.2^2 < 1 := by
       rw [hp2]; simp; exact abs_lt.mpr ⟨by linarith [hp1.1], by linarith [hp1.2]⟩
     have hq_disk : q.1^2 + q.2^2 < 1 := by
       rw [hq2]; simp; exact abs_lt.mpr ⟨by linarith [hq1.1], by linarith [hq1.2]⟩
-    -- Apply isometry property
     have iso : dist (pi p) (pi q) = dist p q := pi.isometry_on_pieces u hu p hpu q hqu
-    -- For both p and q, p.1 < 1/2 (since p.1 ∈ [0.1, 0.2])
     have hp_left : p.1 < 1/2 := by linarith [hp1.2]
     have hq_left : q.1 < 1/2 := by linarith [hq1.2]
-    -- Compute baker_map values (both are in the left half, so p.1 < 1/2)
     have hp_baker : baker_map_NON_ISOMETRY p = (2 * p.1, p.2 / 2) := by
       unfold baker_map_NON_ISOMETRY
       rw [if_pos hp_left]
     have hq_baker : baker_map_NON_ISOMETRY q = (2 * q.1, q.2 / 2) := by
       unfold baker_map_NON_ISOMETRY
       rw [if_pos hq_left]
-    -- Apply hypothesis h
     rw [h p hp_disk, h q hq_disk, hp_baker, hq_baker] at iso
-    -- The baker map doubles horizontal distances (when vertical coordinates are equal)
-    -- Since p.2 = q.2 = 0, we have dist p q = dist p.1 q.1
     have dist_pq : dist p q = dist p.1 q.1 := by
       have hp_form : p = (p.1, 0) := Prod.ext rfl hp2
       have hq_form : q = (q.1, 0) := Prod.ext rfl hq2
       rw [hp_form, hq_form]
       exact dist_prod_same_right
-    -- After baker map: dist (2p.1, p.2/2) (2q.1, q.2/2) = dist (2p.1, 0) (2q.1, 0)
     have dist_images : dist (2 * p.1, p.2 / 2) (2 * q.1, q.2 / 2) = dist (2 * p.1) (2 * q.1) := by
       have hp2_div : p.2 / 2 = 0 := by rw [hp2]; norm_num
       have hq2_div : q.2 / 2 = 0 := by rw [hq2]; norm_num
       rw [hp2_div, hq2_div]
       exact dist_prod_same_right
     rw [dist_images] at iso
-    -- And dist (2p.1) (2q.1) = 2 * dist p.1 q.1
     have double_dist : dist (2 * p.1) (2 * q.1) = 2 * dist p.1 q.1 := by
       simp only [Real.dist_eq]
       rw [show 2 * p.1 - 2 * q.1 = 2 * (p.1 - q.1) by ring]
       rw [abs_mul, abs_two, abs_sub_comm]
     rw [double_dist, dist_pq] at iso
-    -- So 2 * dist p.1 q.1 = dist p.1 q.1, implying dist p.1 q.1 = 0
     have : dist p.1 q.1 = 0 := by linarith
     have : p.1 = q.1 := dist_eq_zero.mp this
-    -- But then p = q (since p.2 = q.2 = 0), contradicting hpq
     have : p = q := by
       ext
       · exact ‹p.1 = q.1›
@@ -834,95 +489,10 @@ example : ¬∃ (pi : PiecewiseIsometry (ℝ × ℝ)),
 
 end ChaoticExamples
 
-section IterationExamples
-
-/-! ### Iteration Examples
-
-NOTE: Examples in this section are BLOCKED waiting on:
-- `IntervalExchangeTransformation.toFun` to be implemented
-- Iteration and composition infrastructure
-
-These demonstrate dynamical properties but require the IET infrastructure first.
--/
-
-/-- Iterating a simple 2-interval exchange. -/
-noncomputable def iterated_two_IET (n : ℕ) : ℝ → ℝ :=
-  sorry  -- Requires IntervalExchangeTransformation.toFun to be implemented
-
-/-- The second iterate of the 2-interval exchange is identity. -/
-theorem two_IET_period_two :
-    ∀ x ∈ Ico (0 : ℝ) 1, iterated_two_IET 2 x = x := by
-  -- The 2-IET swaps two intervals, so applying it twice returns to identity
-  sorry  -- Requires iterated_two_IET to be implemented
-
--- For irrational rotation, high iterates fill out the interval densely.
--- theorem IET_dense_orbits (α : ℝ) (hα : α ∈ Ioo (0 : ℝ) 1) : (placeholder)
--- For irrational α, the 2-IET is essentially an irrational rotation
--- Weyl's equidistribution theorem implies dense orbits
--- Requires IntervalExchangeTransformation.toFun
-
-end IterationExamples
-
-section MeasurePreservingExamples
-
-/-! ### Measure Preserving Examples
-
-NOTE: Examples in this section are BLOCKED waiting on:
-- `IntervalExchangeTransformation.toFun` and related infrastructure
-- Proofs that IETs and rotations preserve Lebesgue measure
-
-These are natural consequences of the isometry property but require additional measure theory.
--/
-
--- Every IET preserves Lebesgue measure: concrete example with 2 intervals.
--- theorem two_IET_preserves_measure : (placeholder)
--- Requires IntervalExchangeTransformation.toFun and preserves_lebesgue to be implemented
-
--- The double rotation preserves area measure on the unit disk.
--- theorem double_rotation_preserves_area (θ₁ θ₂ : ℝ) : (placeholder)
--- Rotations are isometries in ℝ², hence preserve Lebesgue measure
--- Each piece is rotated, and rotations preserve volume
--- Requires measure preservation proof for rotations
-
-end MeasurePreservingExamples
-
-section ErgodicExamples
-
-/-! ### Ergodic Examples
-
-NOTE: Examples in this section are BLOCKED waiting on:
-- `IntervalExchangeTransformation.toFun` infrastructure
-- Ergodic theory framework for piecewise isometries
-- Unique ergodicity proofs for irrational rotations
-
-These require significant ergodic theory development beyond the core PI definitions.
--/
-
--- The simple 2-interval IET (rotation by 1/2) is ergodic.
--- theorem two_IET_ergodic : (placeholder - statement incorrect as stated)
--- Actually, rotation by 1/2 is rational, so it's periodic (not ergodic in the usual sense)
--- This theorem statement is incorrect as stated
--- For a 2-IET to be ergodic, α must be irrational
--- Requires IntervalExchangeTransformation.toFun
-
--- For irrational α, the 2-interval IET is uniquely ergodic.
--- theorem two_IET_uniquely_ergodic_irrational (α : ℝ) (hα : α ∈ Ioo (0 : ℝ) 1) : (placeholder)
--- Requires IntervalExchangeTransformation.toPiecewiseIsometry to be implemented
-
-end ErgodicExamples
-
 section ConstructionPatterns
-
-/-! ### Construction Patterns
-
-NOTE: These are template examples showing construction patterns.
-They are intentionally left as exercises/templates.
--/
 
 /-- Pattern: construct a piecewise isometry from explicit pieces and maps. -/
 example : PiecewiseIsometry ℝ := by
-  -- Use mk_two_pieces to construct from two pieces
-  -- Example: identity on [0, ∞) and (-∞, 0)
   exact PiecewiseIsometry.id
 
 /-- Pattern: construct from a list of pieces for finite partitions. -/
