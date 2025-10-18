@@ -36,6 +36,8 @@ Use this exact structure:
 
 ## Current Status
 
+**Build Status:** [result of build]
+**Transparency Check:** [result of `./check_lean.sh --all transparency TDCSG/`] - **MUST show all files pass**
 **Remaining Sorries:** [exact count] across [N] files
 
 ### Files by Status
@@ -103,6 +105,11 @@ Use this exact structure:
 
 ## Technical Notes
 
+**Transparency Compliance:** All files must pass `./check_lean.sh --transparency` check
+  - No forbidden keywords outside comments: `trivial`, `admitted`, `axiom`, `unsafe`
+  - No forbidden patterns: `Prop := True`, `: True :=`
+  - See CLAUDE.md Anti-Placeholder Protocol for enforcement details
+
 **Type Class Issues:** [Any recurring instance resolution problems]
 **Import Requirements:** [Critical imports that must be maintained]
 **Build Considerations:** [Anything about lean_build behavior or project setup]
@@ -157,7 +164,8 @@ Write for your successor as if briefing them for surgery:
 ## **EXECUTION PROTOCOL**
 
 1. **Scan codebase completely:**
-   - Count all remaining sorries (use grep or file inspection)
+   - Count all remaining sorries (use `./check_lean.sh --all sorries TDCSG/`)
+   - Verify transparency status (`./check_lean.sh --all transparency TDCSG/`)
    - Read all in-file attempt documentation
    - Note all complete vs incomplete files
    - Identify patterns in remaining work
@@ -198,6 +206,7 @@ Before finalizing, verify your README answers these questions:
 
 **For Immediate Resumption:**
 - [ ] Can successor identify exact current state in 30 seconds?
+- [ ] Is transparency status clearly documented (all files must pass)?
 - [ ] Can successor know precisely what to do first?
 - [ ] Are all remaining sorries enumerated with locations?
 

@@ -36,6 +36,8 @@ def file_has_diagnostics(build_output: str, file_path: str, mode: str) -> bool:
         patterns = [
             rf'^error:\s+{re.escape(file_path)}:\d+:\d+:',
             rf'^{re.escape(file_path)}:\d+:\d+:\s+error',
+            rf'^error:\s+{re.escape(file_path)}:\s+',  # Import/build errors without line:col
+            rf'^error:.*{re.escape(file_path)}.*bad import',  # Bad import errors
         ]
     else:  # warnings or warnings-summary
         patterns = [
@@ -62,6 +64,8 @@ def extract_file_diagnostics(build_output: str, file_path: str, mode: str) -> st
         patterns = [
             re.compile(rf'^error:\s+{re.escape(file_path)}:\d+:\d+:'),
             re.compile(rf'^{re.escape(file_path)}:\d+:\d+:\s+error'),
+            re.compile(rf'^error:\s+{re.escape(file_path)}:\s+'),  # Import/build errors
+            re.compile(rf'^error:.*{re.escape(file_path)}.*bad import'),  # Bad imports
         ]
     else:
         patterns = [

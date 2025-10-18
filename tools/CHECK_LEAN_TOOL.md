@@ -330,17 +330,46 @@ check_lean.sh (bash)
 4. Extract multi-line diagnostic blocks
 5. Format and display
 
-**Patterns matched:**
+**Error Patterns Matched:**
+
+The tool matches **four distinct error patterns** to ensure complete coverage:
+
 ```
-error: TDCSG/File.lean:42:10: <message>
-TDCSG/File.lean:42:10: error: <message>
+Pattern 1: error: TDCSG/File.lean:42:10: <message>
+           (standard lake build format with line:col)
+
+Pattern 2: TDCSG/File.lean:42:10: error: <message>
+           (lean command format with line:col)
+
+Pattern 3: error: TDCSG/File.lean: <message>
+           (import/build errors WITHOUT line:col)
+
+Pattern 4: error: ... TDCSG/File.lean ... bad import '...'
+           (bad import errors - can appear anywhere in line)
+```
+
+**Warning Patterns:**
+```
 warning: TDCSG/File.lean:42:10: <message>
+TDCSG/File.lean:42:10: warning: <message>
 ```
+
+**Critical: Patterns 3 & 4 (2025-10-17 Fix)**
+
+Prior to 2025-10-17, the tool **silently missed** critical error types:
+- ❌ Bad import errors: `error: File.lean: bad import 'Mathlib.Nonexistent'`
+- ❌ Build system errors without line numbers
+- ❌ Dependency resolution errors
+
+**Why this was critical:** These errors would cause builds to fail, but the tool would report `✓ No errors`, creating a false sense of success.
+
+**Regression testing:** All error patterns are validated by `tools/test_error_detection.sh`
 
 **Multi-line handling:**
 - Diagnostics continue until next section marker
 - Preserves indentation and formatting
 - Never clips mid-diagnostic
+- Filters out errors from other files
 
 ## Troubleshooting
 
@@ -502,10 +531,19 @@ echo "All checks passed!"
 
 ## Changelog
 
-### 2025-10-17 - Major Refactoring
+### 2025-10-17b - Critical Error Detection Fix
+- **CRITICAL FIX**: Added error patterns 3 & 4 to catch all error types
+- Now detects bad import errors without line:col numbers
+- Now detects build system errors without line:col numbers
+- Added regression test suite (`tools/test_error_detection.sh`)
+- Updated `check_lean_errors_only.py` and `check_lean_multi.py`
+- Fixed false negatives where tool reported "✓ No errors" on failed builds
+
+### 2025-10-17a - Major Refactoring
 - Moved Python scripts to `tools/` directory
 - Fixed double-slash path bug in multi-file mode
 - Simplified multi-file checker to call single-file checker
+- Added recursive file finding for `--all` mode (bash 3.2+ compatible)
 - All modes now work correctly
 - Improved error reporting consistency
 

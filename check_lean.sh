@@ -82,11 +82,20 @@ fi
 
 # Handle --all mode (multi-file)
 if [ "$MODE" = "--all" ]; then
-    # Expand directory to all .lean files
+    # Expand directory to all .lean files (recursively)
     if [ -d "$TARGET" ]; then
         # Remove trailing slash from TARGET to avoid double slashes
         TARGET="${TARGET%/}"
-        LEAN_FILES=("$TARGET"/*.lean)
+        # Use find to get all .lean files recursively (compatible with bash 3.2+)
+        LEAN_FILES=()
+        while IFS= read -r file; do
+            LEAN_FILES+=("$file")
+        done < <(find "$TARGET" -type f -name "*.lean" | sort)
+
+        if [ ${#LEAN_FILES[@]} -eq 0 ]; then
+            echo "Error: No .lean files found in $TARGET" >&2
+            exit 2
+        fi
     else
         echo "Error: $TARGET is not a directory" >&2
         exit 2

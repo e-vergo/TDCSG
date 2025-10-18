@@ -26,11 +26,19 @@ def extract_errors_only(build_output: str, target_file: str) -> str:
     # Patterns to match error lines for our target file
     # Format 1: "error: TDCSG/File.lean:line:col:" (lake build format)
     # Format 2: "TDCSG/File.lean:line:col: error:" (lean command format)
+    # Format 3: "error: TDCSG/File.lean: bad import ..." (import/build errors without line:col)
+    # Format 4: Various build errors mentioning the file
     error_pattern_1 = re.compile(
         rf'^error:\s+{re.escape(target_file)}:\d+:\d+:'
     )
     error_pattern_2 = re.compile(
         rf'^{re.escape(target_file)}:\d+:\d+:\s+error'
+    )
+    error_pattern_3 = re.compile(
+        rf'^error:\s+{re.escape(target_file)}:\s+'
+    )
+    error_pattern_4 = re.compile(
+        rf'^error:.*{re.escape(target_file)}.*bad import'
     )
 
     # Patterns that indicate end of current diagnostic or start of new section
@@ -46,7 +54,8 @@ def extract_errors_only(build_output: str, target_file: str) -> str:
 
     for line in lines:
         # Check if this line starts an ERROR for our target file
-        if error_pattern_1.match(line) or error_pattern_2.match(line):
+        if (error_pattern_1.match(line) or error_pattern_2.match(line) or
+            error_pattern_3.match(line) or error_pattern_4.match(line)):
             # Save previous diagnostic if exists
             if current_diagnostic:
                 result.extend(current_diagnostic)
