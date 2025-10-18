@@ -196,10 +196,27 @@ noncomputable def G : ℂ := 2 * F - E
 
 /-- The conjugate of ζ₅ equals ζ₅⁴. -/
 lemma zeta5_conj : starRingEnd ℂ ζ₅ = ζ₅^4 := by
-  sorry
+  have h5 : ζ₅ ^ 5 = 1 := zeta5_pow_five
+  unfold ζ₅
+  rw [← Complex.exp_conj]
+  rw [map_div₀, map_mul, map_mul]
+  simp only [map_ofNat, Complex.conj_ofReal, Complex.conj_I]
+  rw [show (2 * ↑π * -I / 5 : ℂ) = -(2 * ↑π * I / 5) by ring]
+  rw [Complex.exp_neg, ← Complex.exp_nat_mul]
+  norm_num
+  field_simp [Complex.exp_ne_zero]
+  unfold ζ₅ at h5
+  rw [← Complex.exp_nat_mul] at h5
+  ring_nf at h5 ⊢
+  rw [← Complex.exp_add]
+  convert h5.symm using 2
+  ring
 
 /-- E lies on the right disk boundary. -/
 lemma E_on_right_disk_boundary : ‖E - 1‖ = r_crit := by
+  -- We prove this by showing ‖E - 1‖² = r_crit² = 3 + φ
+  -- This is a lengthy trigonometric calculation requiring ~200 lines
+  -- of helper lemmas for sin²(π/5), cos²(2π/5), etc.
   sorry
 
 /-- E lies in the left disk. -/
@@ -209,6 +226,11 @@ lemma E_in_left_disk : ‖E + 1‖ ≤ r_crit := by
 /-- F lies on the segment E'E. -/
 lemma F_on_segment_E'E :
     ∃ t : ℝ, 0 ≤ t ∧ t ≤ 1 ∧ F = E' + t • (E - E') := by
+  -- We'll show that F = E' + t • (E - E') for some specific t ∈ [0,1]
+  -- E = ζ₅ - ζ₅², E' = -E, E - E' = 2E
+  -- So we need F = E' + t • 2E = -E + 2tE = (2t - 1)E
+  -- Need to verify algebraically that F can be written as (2t - 1)(ζ₅ - ζ₅²)
+  -- This is a lengthy calculation using cyclotomic identities
   sorry
 
 /-- G lies on the segment E'E. -/
