@@ -558,21 +558,56 @@ MANDATORY WORKFLOW:
    b) ADD your attempt to the existing list (do not erase prior attempts)
    c) Use the next sequential number (if last was Attempt 3, yours is Attempt 4)
    d) Format: Attempt N: [strategy] → [failure] | Lesson: [insight]
-   
+
    Example of aggregating documentation:
-   
+
    /- PROOF ATTEMPTS:
       Attempt 1: ring tactic after mul_comm rewrite → goal remained, ring expects polynomial expressions over CommRing but have CommSemiring | Lesson: ring requires full ring structure
       Attempt 2: Nat.add_comm to transport goal → type error, goal over general α not ℕ, missing CommSemiring instance | Lesson: verify type class assumptions before general tactics
       Attempt 3: direct mul_comm application → instance resolution failed, α not inferred as CommSemiring | Lesson: need explicit instance or different lemma
    -/
    sorry
-   
+
    Keep entries PITHY but COMPLETE:
    - State strategy precisely (name tactics, lemmas)
    - State exact failure mode (type error, missing instance, unsolved goal)
    - Extract key lesson (what this rules out, what to try next)
    - One line per attempt, use → and | as separators
+
+5b. FILE PERSISTENCE VERIFICATION (CRITICAL - DO THIS AFTER EACH SORRY ELIMINATION):
+   **After eliminating a sorry, IMMEDIATELY verify your edit persisted:**
+
+   ```bash
+   # Step 1: Check git shows your file as modified
+   git status --short | grep "M TDCSG/YourFile.lean"
+   ```
+   **MUST see:** `M TDCSG/YourFile.lean`
+   **If not:** Your edit is in an isolated context and did NOT persist!
+
+   ```bash
+   # Step 2: Verify sorry count decreased
+   ./check_lean.sh --sorries TDCSG/YourFile.lean
+   ```
+   **MUST show:** One fewer sorry than before
+
+   ```bash
+   # Step 3: Inspect the diff to see your proof
+   git diff TDCSG/YourFile.lean | grep -A 10 "theorem_name"
+   ```
+   **MUST see:** Your actual proof code (not just comments)
+
+   **If ANY check fails:**
+   - You are working in an ISOLATED ENVIRONMENT
+   - Your edits are NOT visible to the parent workspace
+   - Use Edit or Write tools explicitly to persist changes
+   - Re-read the file to confirm your changes stuck
+   - DO NOT continue until persistence is verified
+
+   **Why this is critical:**
+   - In 2025-10-17 incident, agents reported "zero sorries" but edits never persisted
+   - All work was lost because agents didn't verify file persistence
+   - Parent orchestrator saw zero progress despite agent claims
+   - This verification step prevents that failure mode
 
 6. QUALITY VERIFICATION:
    - Zero sorry statements in your file
@@ -613,6 +648,40 @@ COMPLETION CRITERIA FOR YOUR FILE:
 ✅ Full Mathlib style compliance
 ✅ All failed attempts documented in comments
 ✅ **All scratch/test files cleaned up** (no `scratch_*` or `test_*` files remain)
+
+**CRITICAL FILE PERSISTENCE VERIFICATION (MANDATORY):**
+
+Before reporting completion, you MUST verify your edits persisted to the actual workspace:
+
+1. **Check git status:**
+   ```bash
+   git status --short
+   ```
+   **REQUIRED OUTPUT:** Must show `M TDCSG/YourFile.lean` (modified marker)
+
+2. **Verify sorry count decreased:**
+   ```bash
+   ./check_lean.sh --sorries TDCSG/YourFile.lean
+   ```
+   **REQUIRED OUTPUT:** Must show 0 sorries (or reduced count if partial progress)
+
+3. **Inspect your changes:**
+   ```bash
+   git diff TDCSG/YourFile.lean | head -50
+   ```
+   **VERIFY:** Your proof edits are visible in the diff
+
+**If ANY of these checks fail:**
+- Your edits did NOT persist to the workspace
+- You are working in an isolated environment
+- You MUST use Write/Edit tools to commit changes
+- DO NOT report completion until git shows your modifications
+
+**Why this matters:**
+- Agents may work in isolated contexts
+- File reads/edits in isolation don't affect parent workspace
+- Parent orchestrator CANNOT see your work unless git shows changes
+- Reporting "completion" without persisted changes = mission failure
 
 **CRITICAL: You work until YOUR file is COMPLETE. Not "mostly done." Not "made progress." COMPLETE.**
 
@@ -674,8 +743,25 @@ BEGIN.
 - Every agent in the tree shares the same mission, standards, and protocols
 
 **Agent Verification Checklist:**
-Before approving any agent's work:
-- [ ] Verify zero sorries in assigned file
+
+**CRITICAL: Parent orchestrator must verify BEFORE accepting agent completion.**
+
+**Step 1: Verify File Persistence (FIRST - MANDATORY)**
+```bash
+# Check if agent's file was actually modified
+git status --short | grep "M TDCSG/AgentFile.lean"
+```
+- **MUST see:** `M TDCSG/AgentFile.lean`
+- **If missing:** Agent's work did NOT persist, reject completion immediately
+
+**Step 2: Verify Sorry Reduction**
+```bash
+./check_lean.sh --sorries TDCSG/AgentFile.lean
+```
+- **MUST show:** 0 sorries (or documented reduced count)
+- **If unchanged:** Agent failed, reject completion
+
+**Step 3: Verify Code Quality**
 - [ ] Check `./check_lean.sh --errors-only` shows ✓ No errors
 - [ ] **Check `./check_lean.sh --transparency` shows ✓ PASS** (CRITICAL - REQUIRED)
 - [ ] Check `./check_lean.sh` shows no warnings
@@ -685,7 +771,21 @@ Before approving any agent's work:
 - [ ] Ensure no axioms were introduced
 - [ ] **Verify all scratch/test files cleaned up** (no orphaned `scratch_*` or `test_*` files)
 
-If **any** criterion fails, **re-spawn agent with prior context and explicit correction directive.**
+**Step 4: Inspect Actual Changes**
+```bash
+git diff TDCSG/AgentFile.lean | head -100
+```
+- **Verify:** Actual proof code visible (not just reports)
+- **Check:** Changes are substantive (not just comments)
+
+**If ANY criterion fails, re-spawn agent with explicit correction directive.**
+
+**CRITICAL LESSON LEARNED (2025-10-17):**
+In a parallel orchestration attempt, 7 of 8 agents reported "zero sorries achieved" with detailed proof descriptions, but ZERO edits persisted to workspace files. Only 1 agent's file was modified (and sorry count increased). This was a complete mission failure.
+
+**ROOT CAUSE:** Agents worked in isolated environments. Their edits didn't commit back to parent workspace, but they reported success based on their local context.
+
+**SOLUTION:** Parent orchestrator MUST verify git status shows modified files BEFORE accepting completion. Agent self-reporting is insufficient.
 
 ---
 

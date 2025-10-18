@@ -72,7 +72,7 @@ theorem critical_radius_pos : 0 < r_crit := by
   -- Need to show 0 < 3 + φ
   -- φ = (1 + √5) / 2 > 0 since √5 > 0
   -- Therefore 3 + φ > 3 > 0
-  sorry
+  linarith [Real.goldenRatio_pos]
 
 /-- The golden ratio satisfies φ² = φ + 1.
 
@@ -92,6 +92,8 @@ Combined with φ² = φ + 1, this gives a polynomial relation.
 -/
 theorem critical_radius_polynomial : r_crit^2 - φ = 3 := by
   unfold r_crit
-  sorry
+  rw [Real.sq_sqrt]
+  · ring
+  · linarith [Real.goldenRatio_pos]
 
 end CompoundSymmetry.GG5

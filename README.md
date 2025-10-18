@@ -10,6 +10,14 @@ Formal verification in Lean 4 of the critical radius theorem for two-disk compou
 **Sorries:** 62 strategic sorries across 9 files (7 files proof-complete)
 **Phase:** Scaffolding complete, ready for systematic proof development
 
+**⚠️ Agent Orchestration Incident (2025-10-17):**
+- Attempted parallel agent deployment to eliminate all sorries
+- **Result:** FAILED - Zero sorries eliminated despite agent reports
+- **Root cause:** Agent file edits did not persist to parent workspace
+- **Fix:** Updated directive with file persistence verification protocol
+- **Full report:** See [AGENT_ORCHESTRATION_REPORT.md](AGENT_ORCHESTRATION_REPORT.md)
+- **Positive outcome:** Identified critical blockers in TwoDisk and Geometry files
+
 ### Proof-Complete Files (0 sorries)
 - `TDCSG.Basic` - Piecewise isometry framework
 - `TDCSG.Composition` - Composition and iteration
@@ -177,29 +185,60 @@ A `sorry` is only complete when:
 
 ## Next Steps: Proof Development Plan
 
-### Priority 1: TwoDisk.lean (11 sorries)
+### ⚠️ BLOCKER: TwoDisk.lean Design Flaw (Discovered 2025-10-17)
 
-**Goal:** Complete the core two-disk system infrastructure.
+**CRITICAL ISSUE:** The current `basicPartition` definition is **mathematically invalid** when disks overlap.
 
-**Sorries to prove:**
-1. `basicPartition_countable` - The partition is countable (easy)
-2. `basicPartition_measurable` - Partition pieces are measurable (straightforward)
-3. `basicPartition_cover` - Partition covers the space (moderate)
-4. `basicPartition_disjoint` - Pieces are pairwise disjoint (moderate)
-5. `basicPartition_nonempty` - Each piece is nonempty (easy)
-6. `genA_isometry_on_leftDisk` - Generator a preserves distances on left disk (use rotateAround properties)
-7. `genB_isometry_on_rightDisk` - Generator b preserves distances on right disk (similar)
-8. `genA_eq_id_on_compl` - Generator a is identity outside left disk (by definition)
-9. `genB_eq_id_on_compl` - Generator b is identity outside right disk (by definition)
+**The Problem:**
+```lean
+def basicPartition := {leftDisk, rightDisk, exterior}
+```
 
-**Why first:** This unlocks the ability to work with concrete two-disk systems.
+When `dist leftCenter rightCenter ≤ r1 + r2` (overlapping or touching disks):
+- `leftDisk ∩ rightDisk ≠ ∅` (non-empty intersection)
+- Violates `PiecewiseIsometry.partition_disjoint` requirement
+- **Cannot prove `basicPartition_disjoint`** (it's false!)
 
-**Strategy:**
-- Use Mathlib's `Metric.closedBall` properties
-- Leverage `rotateAround` isometry proofs from Rotations.lean
-- Classical decidability for if-expressions
+**Why this matters:** The two-disk compound symmetry groups in the paper have **overlapping disks** at the critical radius. The current formalization cannot handle this.
 
-### Priority 2: Planar Geometry (5 sorries)
+**Required Decision (Choose One):**
+
+**Option 1: Refined Partition (Recommended)**
+```lean
+def basicPartition := {
+  leftDisk \ rightDisk,     -- left-only region
+  leftDisk ∩ rightDisk,     -- overlap region (need priority rule)
+  rightDisk \ leftDisk,     -- right-only region
+  exterior                  -- outside both
+}
+```
+- **Pros:** Handles overlapping disks (matches paper)
+- **Cons:** Need to specify which generator applies in overlap
+- **Paper guidance needed:** Does left disk have priority? Or define map differently on overlap?
+
+**Option 2: Disjointness Constraint**
+```lean
+structure TwoDiskSystem where
+  ...
+  disks_disjoint : dist leftCenter rightCenter > r1 + r2
+```
+- **Pros:** Makes current code work immediately
+- **Cons:** Excludes the interesting GG5 case (critical radius has touching disks!)
+
+**Option 3: Open Balls**
+```lean
+leftDisk := Metric.ball (leftCenter sys) sys.r1  -- open ball
+```
+- **Pros:** Open balls that touch are disjoint
+- **Cons:** Creates measure-zero gaps at boundaries, changes semantics
+
+**Recommendation:** Review paper §2-3 to determine intended behavior on overlap region, then implement Option 1 with appropriate precedence rule.
+
+**Impact:** TwoDisk.lean **BLOCKED** until design decision made. Cannot reach 0 sorries with current definition.
+
+---
+
+### Priority 1: Planar Geometry (5 sorries) - READY TO PROVE
 
 **Rotations.lean (2 sorries):**
 1. `rotateAround_iterate_aux` - Rotation iteration identity
@@ -210,26 +249,62 @@ A `sorry` is only complete when:
 2. `disk_inter_measurable` - Intersection is measurable
 3. `disk_inter_compact` - Intersection is compact
 
-**Why:** Needed for partition proofs in TwoDisk.lean
+**Why first now:** These proofs are **unblocked** and have clear strategies (discovered during 2025-10-17 agent analysis).
 
-**Strategy:**
-- Use Mathlib's metric space lemmas
-- Compactness from closed + bounded
+**Proven strategies:**
+- `rotateAround_iterate_aux`: Induction using `Orientation.rotation_rotation`
+- `rotateAround_periodic`: Apply iterate_aux, use `Real.Angle.coe_two_pi`
+- `disks_overlap_iff`: `Metric.dist_le_add_of_nonempty_closedBall_inter_closedBall`
+- `disk_inter_measurable`: `MeasurableSet.inter` with `isClosed_closedBall.measurableSet`
+- `disk_inter_compact`: `IsCompact.inter` with `isCompact_closedBall`
 
-### Priority 3: GG5 Geometry (18 sorries)
+### Priority 2: CriticalRadius.lean (2 sorries) - READY TO PROVE
 
-**Focus areas:**
-1. **Basic properties** (4 sorries): r_crit_pos, zeta5 properties
-2. **Point definitions** (5 sorries): E, F, G positions and relationships
-3. **Transformations** (3 sorries): How group elements act on segment
-4. **Golden ratio connections** (6 sorries): Segment ratios and irrationality
+**Simple algebraic facts:**
+1. `critical_radius_pos` - r_crit > 0
+2. `critical_radius_polynomial` - Polynomial relation for r_crit
 
-**Why:** These are the geometric facts needed for the IET emergence proof
+**Proven strategies:**
+- `critical_radius_pos`: `Real.sqrt_pos.mpr` with `linarith [Real.goldenRatio_pos]`
+- `critical_radius_polynomial`: `Real.sq_sqrt` then `ring`
 
-**Strategy:**
-- Heavy use of Complex number arithmetic from Mathlib
-- `Real.goldenRatio` and `Real.goldenRatio_sq` properties
-- Coordinate geometry in ℝ²
+**Why prioritize:** Quick wins, unblocks nothing but demonstrates progress
+
+### ⚠️ Priority 3: GG5 Geometry (18 sorries) - PARTIALLY BLOCKED
+
+**Status (as of 2025-10-17):**
+- ✅ **7 proofs completed** (blocked from persisting due to agent orchestration issue)
+- ⚠️ **12 sorries blocked** on cyclotomic computation
+
+**BLOCKER: Cyclotomic Identity**
+```lean
+lemma cos_two_pi_fifth : Real.cos (2 * π / 5) = (Real.goldenRatio - 1) / 2
+```
+
+This classical identity is **not in Mathlib** and blocks:
+- `E_sub_one_normSq` - Computing |E - 1|² = 3 + φ
+- `E_in_left_disk` - Norm bound verification
+- `r_crit_approx` - Numerical bounds
+- All segment geometry lemmas (F, G positions)
+- `segment_ratio_is_golden` - Golden ratio relationships
+- `translations_irrational` - Irrationality proof
+- And 6 more dependent results
+
+**Approaches to prove cos(2π/5):**
+1. **Search Mathlib deeper** - May exist under different name
+2. **Cyclotomic polynomial** - Solve Φ₅(x) = x⁴ + x³ + x² + x + 1 = 0
+3. **Trigonometric derivation** - Multiple-angle formulas from cos(π/5)
+4. **Numerical → exact** - Compute numerically, prove algebraically
+
+**Already completed (need to re-apply):**
+- ✅ `r_crit_pos` - Using sqrt positivity
+- ✅ `zeta5_pow_five` - Using exp properties
+- ✅ `zeta5_ne_one` - Proof by contradiction
+- ✅ `zeta5_abs` - Unit circle property
+- ✅ `r_crit_minimal_poly` - Polynomial r⁴ - 7r² + 11 = 0
+- ✅ Helper lemmas for 5th roots of unity
+
+**Impact:** Once cos(2π/5) is proven, the remaining 11-12 geometric lemmas should follow systematically.
 
 ### Priority 4: Segment Maps & IET (21 sorries)
 

@@ -142,15 +142,28 @@ lemma rotateAround_iterate_aux (c : ℝ²) (θ : ℝ) (n : ℕ) :
   induction n with
   | zero => ext x; simp [Function.iterate_zero, rotateAround_zero, Nat.cast_zero, zero_mul]
   | succ n' ih =>
-      ext x
-      rw [Function.iterate_succ_apply']
-      simp only [Function.comp_apply, ih]
-      simp only [rotateAround_apply, rotation2D, add_sub_cancel_left]
-      sorry
+      have angle_eq : ((n' : ℝ) * θ : Real.Angle) + (θ : Real.Angle) = (((n' : ℝ) + 1) * θ : Real.Angle) := by
+        rw [← Real.Angle.coe_add]
+        congr 1
+        ring
+      simp only [Function.iterate_succ', Function.comp, ih]
+      funext x
+      have comp_eq := rotateAround_comp c ((n' : ℝ) * θ : Real.Angle) (θ : Real.Angle)
+      have := congrFun (congrArg DFunLike.coe comp_eq) x
+      simp only [AffineIsometryEquiv.coe_trans, Function.comp_apply] at this ⊢
+      rw [this, angle_eq]
+      congr 1
+      simp only [Nat.cast_succ]
 
 /-- Rotating n times by 2π/n gives the identity (for positive n) -/
 theorem rotateAround_periodic (c : ℝ²) (n : ℕ) (hn : 0 < n) :
     (rotateAround c (2 * Real.pi / n : ℝ))^[n] = id := by
-  sorry
+  rw [rotateAround_iterate_aux]
+  ext x
+  rw [rotateAround_apply]
+  simp only [rotation2D, id_eq]
+  have angle_calc : (n : ℝ) * (2 * Real.pi / (n : ℝ)) = 2 * Real.pi := by field_simp
+  rw [angle_calc, Real.Angle.coe_two_pi, Orientation.rotation_zero]
+  simp [LinearIsometryEquiv.coe_refl]
 
 end Planar

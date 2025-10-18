@@ -63,7 +63,9 @@ noncomputable def r_crit : ℝ := Real.sqrt (3 + Real.goldenRatio)
 
 /-- The critical radius is positive. -/
 lemma r_crit_pos : 0 < r_crit := by
-  sorry
+  unfold r_crit
+  apply Real.sqrt_pos.mpr
+  linarith [Real.goldenRatio_pos]
 
 /-- Numerical approximation of the critical radius. -/
 lemma r_crit_approx : 2.148 < r_crit ∧ r_crit < 2.150 := by
@@ -76,7 +78,10 @@ noncomputable def ζ₅ : ℂ := exp (2 * π * I / 5)
 
 /-- ζ₅ is a 5th root of unity. -/
 lemma zeta5_pow_five : ζ₅ ^ 5 = 1 := by
-  sorry
+  unfold ζ₅
+  rw [← Complex.exp_nat_mul]
+  convert Complex.exp_two_pi_mul_I using 2
+  ring
 
 /-- ζ₅ is not equal to 1. -/
 lemma zeta5_ne_one : ζ₅ ≠ 1 := by
@@ -213,7 +218,17 @@ lemma transformation_case_3 : True := by
 
 /-- The critical radius satisfies the minimal polynomial x⁴ - 7x² + 11 = 0. -/
 lemma r_crit_minimal_poly : r_crit ^ 4 - 7 * r_crit ^ 2 + 11 = 0 := by
-  sorry
+  unfold r_crit
+  have h1 : (Real.sqrt (3 + Real.goldenRatio)) ^ 2 = 3 + Real.goldenRatio := by
+    rw [sq_sqrt]
+    linarith [Real.goldenRatio_pos]
+  have h2 : Real.goldenRatio ^ 2 = Real.goldenRatio + 1 := Real.goldenRatio_sq
+  calc (Real.sqrt (3 + Real.goldenRatio)) ^ 4 - 7 * (Real.sqrt (3 + Real.goldenRatio)) ^ 2 + 11
+      = ((Real.sqrt (3 + Real.goldenRatio)) ^ 2) ^ 2 - 7 * (Real.sqrt (3 + Real.goldenRatio)) ^ 2 + 11 := by ring
+    _ = (3 + Real.goldenRatio) ^ 2 - 7 * (3 + Real.goldenRatio) + 11 := by rw [h1]
+    _ = 9 + 6 * Real.goldenRatio + Real.goldenRatio ^ 2 - 21 - 7 * Real.goldenRatio + 11 := by ring
+    _ = 9 + 6 * Real.goldenRatio + (Real.goldenRatio + 1) - 21 - 7 * Real.goldenRatio + 11 := by rw [h2]
+    _ = 0 := by ring
 
 /-- Theorem 2: GG5 is infinite at r = √(3 + φ).
 The proof relies on the three transformation cases showing that any portion
