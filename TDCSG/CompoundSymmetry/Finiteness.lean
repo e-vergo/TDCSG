@@ -87,7 +87,8 @@ theorem theorem_1
   (G : ℝ → Type*) [∀ r, Group (G r)]
   [∀ r, MulAction (G r) ℝ²]
   (h_finite : ∀ r ∈ Set.Ioo (0 : ℝ) 1, IsFiniteGroup (G r)) :
-  ∀ r ∈ Set.Ioo (0 : ℝ) 1, Subsingleton (G r) :=
+  ∀ r ∈ Set.Ioo (0 : ℝ) 1, Subsingleton (G r) := by
+  intro r hr
   sorry
 
 end TDCSG

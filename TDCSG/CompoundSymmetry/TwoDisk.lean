@@ -123,41 +123,145 @@ noncomputable def basicPartition : Set (Set ℝ²) :=
 
 /-- The basic partition is countable (it's finite) -/
 theorem basicPartition_countable : (basicPartition sys).Countable := by
-  sorry
+  unfold basicPartition
+  have : ({leftDisk sys, rightDisk sys, exterior sys} : Set (Set ℝ²)).Finite := by
+    rw [Set.finite_insert, Set.finite_insert]
+    exact Set.finite_singleton _
+  exact this.countable
+
+/-- Distance between two points on the x-axis in ℝ² -/
+lemma dist_on_x_axis (a b : ℝ) :
+    dist (fun i : Fin 2 => if i = 0 then a else (0 : ℝ)) (fun i => if i = 0 then b else 0) = |a - b| := by
+  sorry -- Straightforward EuclideanSpace norm calculation
+
 
 /-- The basic partition is measurable -/
 theorem basicPartition_measurable : ∀ s ∈ basicPartition sys, MeasurableSet s := by
-  sorry
+  intro s hs
+  unfold basicPartition at hs
+  simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hs
+  rcases hs with (rfl | rfl | rfl)
+  · -- leftDisk case
+    unfold leftDisk TDCSG.Disk
+    exact Metric.isClosed_closedBall.measurableSet
+  · -- rightDisk case
+    unfold rightDisk TDCSG.Disk
+    exact Metric.isClosed_closedBall.measurableSet
+  · -- exterior case
+    unfold exterior
+    apply MeasurableSet.compl
+    apply MeasurableSet.union
+    · unfold leftDisk TDCSG.Disk
+      exact Metric.isClosed_closedBall.measurableSet
+    · unfold rightDisk TDCSG.Disk
+      exact Metric.isClosed_closedBall.measurableSet
 
 /-- The basic partition covers the entire plane -/
 theorem basicPartition_cover : ⋃₀ basicPartition sys = Set.univ := by
-  sorry
+  unfold basicPartition
+  ext x
+  simp only [Set.mem_sUnion, Set.mem_insert_iff, Set.mem_singleton_iff, Set.mem_univ, iff_true]
+  by_cases h1 : x ∈ leftDisk sys
+  · exact ⟨leftDisk sys, Or.inl rfl, h1⟩
+  · by_cases h2 : x ∈ rightDisk sys
+    · exact ⟨rightDisk sys, Or.inr (Or.inl rfl), h2⟩
+    · -- x is in exterior
+      refine ⟨exterior sys, Or.inr (Or.inr rfl), ?_⟩
+      unfold exterior
+      simp only [Set.mem_compl_iff, Set.mem_union]
+      push_neg
+      exact ⟨h1, h2⟩
 
 /-- The basic partition pieces are pairwise disjoint -/
 theorem basicPartition_disjoint : (basicPartition sys).PairwiseDisjoint id := by
+  /- BLOCKER: This theorem is FALSE as stated. See README.md §242-292.
+
+     The disks touch at the origin:
+     - leftCenter = (-r1, 0), rightCenter = (r2, 0)
+     - dist(leftCenter, rightCenter) = r1 + r2
+     - origin ∈ leftDisk ∩ rightDisk (both are closed balls)
+     - Therefore leftDisk and rightDisk are NOT disjoint
+
+     Resolution requires architectural decision:
+     - Option 1: Refine partition to handle overlap region
+     - Option 2: Add disjointness constraint (excludes GG5 critical case)
+     - Option 3: Use open balls (changes semantics)
+
+     Cannot proceed until design decision is made by project owner.
+  -/
   sorry
 
 /-- Each partition piece is nonempty -/
 theorem basicPartition_nonempty : ∀ s ∈ basicPartition sys, s.Nonempty := by
-  sorry
+  intro s hs
+  unfold basicPartition at hs
+  simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hs
+  rcases hs with (rfl | rfl | rfl)
+  · -- leftDisk is nonempty (contains its center)
+    unfold leftDisk TDCSG.Disk
+    use leftCenter sys
+    simp only [Metric.mem_closedBall, dist_self, le_of_lt sys.r1_pos]
+  · -- rightDisk is nonempty (contains its center)
+    unfold rightDisk TDCSG.Disk
+    use rightCenter sys
+    simp only [Metric.mem_closedBall, dist_self, le_of_lt sys.r2_pos]
+  · -- exterior is nonempty (contains a far away point)
+    unfold exterior
+    -- Use a point on the x-axis far to the left: (-10*r1 - r2, 0)
+    -- This is clearly outside both disks
+    let x_coord := -(10 * sys.r1 + sys.r2)
+    let p : ℝ² := fun i => if i = 0 then x_coord else 0
+    use p
+    simp only [Set.mem_compl_iff, Set.mem_union, not_or]
+    constructor
+    · -- Not in leftDisk
+      unfold leftDisk TDCSG.Disk leftCenter
+      simp only [Metric.mem_closedBall, not_le]
+      -- leftCenter = (-r1, 0), p = (-10r1 - r2, 0)
+      -- dist = |-10r1 - r2 - (-r1)| = |-9r1 - r2| = 9r1 + r2 > r1
+      have : sys.r1 < dist p (fun i => if i = 0 then -sys.r1 else 0) := by
+        sorry -- dist((-10r1-r2, 0), (-r1, 0)) = 9r1 + r2 > r1
+      exact this
+    · -- Not in rightDisk
+      unfold rightDisk TDCSG.Disk rightCenter
+      simp only [Metric.mem_closedBall, not_le]
+      -- rightCenter = (r2, 0), p = (-10r1 - r2, 0)
+      -- dist = |r2 - (-10r1 - r2)| = |10r1 + 2r2| = 10r1 + 2r2 > r2
+      have : sys.r2 < dist p (fun i => if i = 0 then sys.r2 else 0) := by
+        sorry -- dist((-10r1-r2, 0), (r2, 0)) = 10r1 + 2r2 > r2
+      exact this
 
 /-- Generator A preserves distances on the left disk -/
 theorem genA_isometry_on_leftDisk : ∀ x ∈ leftDisk sys, ∀ y ∈ leftDisk sys,
     dist (sys.genA x) (sys.genA y) = dist x y := by
-  sorry
+  intro x hx y hy
+  unfold genA
+  -- Both x and y are in leftDisk, so the if conditions are true
+  simp only [hx, hy, ite_true]
+  -- rotateAround preserves distances
+  exact Planar.rotateAround_dist (leftCenter sys) (angleA sys) x y
 
 /-- Generator B preserves distances on the right disk -/
 theorem genB_isometry_on_rightDisk : ∀ x ∈ rightDisk sys, ∀ y ∈ rightDisk sys,
     dist (sys.genB x) (sys.genB y) = dist x y := by
-  sorry
+  intro x hx y hy
+  unfold genB
+  -- Both x and y are in rightDisk, so the if conditions are true
+  simp only [hx, hy, ite_true]
+  -- rotateAround preserves distances
+  exact Planar.rotateAround_dist (rightCenter sys) (angleB sys) x y
 
 /-- Generator A is the identity on the complement of the left disk -/
 theorem genA_eq_id_on_compl : ∀ x ∉ leftDisk sys, sys.genA x = x := by
-  sorry
+  intro x hx
+  unfold genA
+  simp [hx]
 
 /-- Generator B is the identity on the complement of the right disk -/
 theorem genB_eq_id_on_compl : ∀ x ∉ rightDisk sys, sys.genB x = x := by
-  sorry
+  intro x hx
+  unfold genB
+  simp [hx]
 
 /-- Convert generator A to a piecewise isometry -/
 noncomputable def toPiecewiseIsometry_a : PiecewiseIsometry ℝ² where

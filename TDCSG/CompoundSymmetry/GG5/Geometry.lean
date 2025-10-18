@@ -1,6 +1,7 @@
 import Mathlib.Analysis.SpecialFunctions.Exp
 import Mathlib.NumberTheory.Real.GoldenRatio
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Complex
+import Mathlib.Algebra.Order.Ring.Basic
 import TDCSG.CompoundSymmetry.TwoDisk
 
 /-!
@@ -179,6 +180,41 @@ lemma zeta5_abs : ‖ζ₅‖ = 1 := by
     ring]
   exact Complex.norm_exp_ofReal_mul_I (2 * π / 5)
 
+/-! ### Trigonometric Identities for Fifth Roots -/
+
+/-- The key trigonometric identity: cos(2π/5) = (φ - 1)/2 where φ is the golden ratio.
+This is derived from Mathlib's cos_pi_div_five using the double-angle formula. -/
+lemma cos_two_pi_fifth : Real.cos (2 * π / 5) = (Real.goldenRatio - 1) / 2 := by
+  -- Rewrite 2 * π / 5 as 2 * (π / 5)
+  rw [show (2 * π / 5 : ℝ) = 2 * (π / 5) by ring]
+  -- Apply double-angle formula: cos(2x) = 2·cos²(x) - 1
+  rw [Real.cos_two_mul]
+  -- Substitute Mathlib's cos_pi_div_five: cos(π/5) = (1 + √5) / 4
+  rw [Real.cos_pi_div_five]
+  -- Now we need: 2·((1 + √5) / 4)² - 1 = (φ - 1) / 2 where φ = (1 + √5) / 2
+  unfold Real.goldenRatio
+  -- Compute: 2·((1 + √5) / 4)² - 1 = 2·(1 + √5)²/16 - 1
+  --                                = (1 + √5)²/8 - 1
+  --                                = (1 + 2√5 + 5)/8 - 1
+  --                                = (6 + 2√5)/8 - 1
+  --                                = (6 + 2√5 - 8)/8
+  --                                = (2√5 - 2)/8
+  --                                = (√5 - 1)/4
+  -- And (φ - 1)/2 = ((1 + √5)/2 - 1)/2 = ((√5 - 1)/2)/2 = (√5 - 1)/4
+  rw [show (2 * ((1 + Real.sqrt 5) / 4) ^ 2 - 1 : ℝ) = (Real.sqrt 5 - 1) / 4 by
+    have h : (1 + Real.sqrt 5) ^ 2 = 6 + 2 * Real.sqrt 5 := by
+      rw [add_sq]
+      rw [Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)]
+      ring
+    calc 2 * ((1 + Real.sqrt 5) / 4) ^ 2 - 1
+        = 2 * (1 + Real.sqrt 5) ^ 2 / 16 - 1 := by ring
+      _ = 2 * (6 + 2 * Real.sqrt 5) / 16 - 1 := by rw [h]
+      _ = (12 + 4 * Real.sqrt 5) / 16 - 1 := by ring
+      _ = (12 + 4 * Real.sqrt 5 - 16) / 16 := by ring
+      _ = (4 * Real.sqrt 5 - 4) / 16 := by ring
+      _ = (Real.sqrt 5 - 1) / 4 := by ring]
+  rw [show ((1 + Real.sqrt 5) / 2 - 1) / 2 = (Real.sqrt 5 - 1) / 4 by field_simp; ring]
+
 /-! ### Key Geometric Points -/
 
 /-- Point E: lies on the boundary of the right disk at the critical radius.
@@ -201,6 +237,15 @@ noncomputable def G : ℂ := 2 * F - E
 
 /-- E lies on the boundary of the right disk (centered at 1) with radius r_crit. -/
 lemma E_on_right_disk_boundary : ‖E - 1‖ = r_crit := by
+  unfold E ζ₅ r_crit
+  -- E - 1 = ζ₅ - ζ₅² - 1 = exp(2πi/5) - exp(4πi/5) - 1
+  -- We need to show ‖exp(2πi/5) - exp(4πi/5) - 1‖ = √(3 + φ)
+  -- This requires computing:
+  --   normSq(exp(2πi/5) - exp(4πi/5) - 1)
+  --   = normSq((cos(2π/5) - cos(4π/5) - 1) + i(sin(2π/5) - sin(4π/5)))
+  --   = (cos(2π/5) - cos(4π/5) - 1)² + (sin(2π/5) - sin(4π/5))²
+  -- After expanding and using cos(2π/5) = (φ-1)/2 and trigonometric identities,
+  -- this should equal 3 + φ.
   sorry
 
 /-- E lies on the left disk at the critical radius. -/
@@ -287,20 +332,6 @@ noncomputable def GG5_critical : CompoundSymmetry.TwoDiskSystem where
   r2_pos := r_crit_pos
   n1_ge := by norm_num
   n2_ge := by norm_num
-
-/-! ### Group Element Transformations (Placeholders) -/
-
-/-- Placeholder: The transformation a⁻²b⁻¹a⁻¹b⁻¹ maps segment E'F to segment GF. -/
-lemma transformation_case_1 : True := by
-  sorry
-
-/-- Placeholder: The transformation abab² maps segment F'G to segment FE. -/
-lemma transformation_case_2 : True := by
-  sorry
-
-/-- Placeholder: The transformation abab⁻¹a⁻¹b⁻¹ maps segment G'E to segment E'G. -/
-lemma transformation_case_3 : True := by
-  sorry
 
 /-! ### Main Infiniteness Result -/
 
