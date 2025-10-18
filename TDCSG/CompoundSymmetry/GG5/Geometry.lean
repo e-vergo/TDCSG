@@ -69,7 +69,55 @@ lemma r_crit_pos : 0 < r_crit := by
 
 /-- Numerical approximation of the critical radius. -/
 lemma r_crit_approx : 2.148 < r_crit ∧ r_crit < 2.150 := by
-  sorry
+  unfold r_crit
+  constructor
+  · -- Prove 2.148 < √(3 + φ)
+    -- Equivalently: 2.148² < 3 + φ
+    rw [show (2.148 : ℝ) = Real.sqrt (2.148 ^ 2) by
+      rw [Real.sqrt_sq]; norm_num]
+    apply Real.sqrt_lt_sqrt
+    · norm_num
+    -- Need to prove: 2.148² < 3 + φ
+    have h_sq : (2.148 : ℝ) ^ 2 = 4.613904 := by norm_num
+    rw [h_sq]
+    -- Need: 4.613904 < 3 + φ, i.e., 1.613904 < φ
+    have φ_lower : (1.613904 : ℝ) < Real.goldenRatio := by
+      unfold Real.goldenRatio
+      -- φ = (1 + √5)/2
+      -- Need: 1.613904 < (1 + √5)/2
+      -- i.e., 3.227808 < 1 + √5, i.e., 2.227808 < √5
+      -- i.e., 2.227808² < 5
+      have h1 : (2.227808 : ℝ) ^ 2 < 5 := by norm_num
+      have h2 : (2.227808 : ℝ) < Real.sqrt 5 := by
+        rw [show (2.227808 : ℝ) = Real.sqrt (2.227808 ^ 2) by
+          rw [Real.sqrt_sq]; norm_num]
+        exact Real.sqrt_lt_sqrt (by norm_num) h1
+      linarith
+    linarith
+  · -- Prove √(3 + φ) < 2.150
+    -- Equivalently: 3 + φ < 2.150²
+    rw [show (2.150 : ℝ) = Real.sqrt (2.150 ^ 2) by
+      rw [Real.sqrt_sq]; norm_num]
+    apply Real.sqrt_lt_sqrt
+    · linarith [Real.goldenRatio_pos]
+    -- Need to prove: 3 + φ < 2.150²
+    have h_sq : (2.150 : ℝ) ^ 2 = 4.6225 := by norm_num
+    rw [h_sq]
+    -- Need: 3 + φ < 4.6225, i.e., φ < 1.6225
+    have φ_upper : Real.goldenRatio < (1.6225 : ℝ) := by
+      unfold Real.goldenRatio
+      -- φ = (1 + √5)/2
+      -- Need: (1 + √5)/2 < 1.6225
+      -- i.e., 1 + √5 < 3.245, i.e., √5 < 2.245
+      -- i.e., 5 < 2.245²
+      have h1 : 5 < (2.245 : ℝ) ^ 2 := by norm_num
+      have h2 : Real.sqrt 5 < (2.245 : ℝ) := by
+        rw [show (2.245 : ℝ) = Real.sqrt (2.245 ^ 2) by
+          rw [Real.sqrt_sq]; norm_num]
+        exact Real.sqrt_lt_sqrt (by norm_num) h1
+      linarith
+    linarith
+
 
 /-! ### 5th Roots of Unity -/
 
@@ -85,11 +133,51 @@ lemma zeta5_pow_five : ζ₅ ^ 5 = 1 := by
 
 /-- ζ₅ is not equal to 1. -/
 lemma zeta5_ne_one : ζ₅ ≠ 1 := by
-  sorry
+  unfold ζ₅
+  -- Use basic properties of exp: exp(2πi/5) ≠ 1 because 2π/5 is not a multiple of 2π
+  have : (2 : ℝ) * π / 5 ≠ 0 := by
+    apply div_ne_zero
+    apply mul_ne_zero
+    · norm_num
+    · exact Real.pi_ne_zero
+    · norm_num
+  intro h
+  rw [show (exp (2 * ↑π * I / 5) : ℂ) = exp ((2 * π / 5 : ℝ) * I) by
+    congr 1
+    push_cast
+    ring] at h
+  rw [Complex.exp_eq_one_iff] at h
+  obtain ⟨k, hk⟩ := h
+  -- From hk: (2π/5) * I = k * 2π * I
+  -- This means 2π/5 = k * 2π, i.e., 1/5 = k
+  have : (2 * π / 5 : ℝ) = k * (2 * π) := by
+    have h_eq : ((2 * π / 5 : ℝ) * I : ℂ) = (k : ℂ) * ((2 * π : ℝ) * I) := by
+      convert hk using 2
+      push_cast
+      ring
+    have h_im := congr_arg Complex.im h_eq
+    simp at h_im
+    exact h_im
+  have : (1 : ℝ) / 5 = k := by
+    field_simp at this
+    linarith [Real.pi_pos]
+  -- But k is an integer and 1/5 is not
+  have h_real : (k : ℝ) * 5 = 1 := by linarith
+  have h_int : k * 5 = 1 := by
+    have : (k : ℝ) * (5 : ℝ) = (1 : ℝ) := h_real
+    norm_cast at this
+  -- This is impossible mod 5
+  have : (1 : ℤ) % 5 = 0 := by rw [← h_int]; simp
+  norm_num at this
 
 /-- |ζ₅| = 1 -/
 lemma zeta5_abs : ‖ζ₅‖ = 1 := by
-  sorry
+  unfold ζ₅
+  rw [show (2 : ℂ) * π * I / 5 = (2 * π / 5 : ℝ) * I by
+    simp [div_eq_mul_inv]
+    push_cast
+    ring]
+  exact Complex.norm_exp_ofReal_mul_I (2 * π / 5)
 
 /-! ### Key Geometric Points -/
 

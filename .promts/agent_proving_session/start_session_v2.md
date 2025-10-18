@@ -112,23 +112,68 @@ If ANY check fails: Your edit did NOT persist. Use Edit/Write tools explicitly.
 
 ### **For Parent Orchestrators:**
 
-**YOU MUST deploy all file agents IN PARALLEL in your first response.**
-
-```bash
-# CORRECT (parallel):
-Task(file1) + Task(file2) + Task(file3)  # All in ONE message
-
-# WRONG (sequential):
-Task(file1), wait for response, then Task(file2)  # Too slow!
+```
+╔═══════════════════════════════════════════════════════════════════╗
+║  CRITICAL: SPAWN ONE AGENT PER FILE WITH SORRIES                  ║
+╠═══════════════════════════════════════════════════════════════════╣
+║  1. Run: ./check_lean.sh --all sorries TDCSG/                     ║
+║     This shows ALL files with sorries                             ║
+║                                                                    ║
+║  2. For EVERY file with sorries: spawn ONE agent                  ║
+║     - File has 3 sorries? → 1 agent for that file                ║
+║     - File has 18 sorries? → 1 agent for that file               ║
+║     - 6 files with sorries? → 6 agents TOTAL                     ║
+║                                                                    ║
+║  3. Deploy ALL agents in a SINGLE message with multiple Task()   ║
+║     calls in parallel                                             ║
+║                                                                    ║
+║  4. NOT OPTIONAL. This is not a suggestion. DO IT.                ║
+╚═══════════════════════════════════════════════════════════════════╝
 ```
 
-**Agent Deployment Strategy:**
+**The Rule:**
+```
+ONE FILE = ONE AGENT
+ALL FILES = ALL AGENTS
+ALL AGENTS = ONE MESSAGE (parallel deployment)
+```
 
-1. Read README.md to understand file dependencies
-2. Identify ALL unblocked files (no dependency blockers)
-3. Deploy agents to ALL unblocked files SIMULTANEOUSLY
-4. Quick wins first: attack easy files before hard files
-5. Monitor all agents concurrently
+**Example:**
+If `./check_lean.sh --all sorries TDCSG/` shows:
+- Geometry.lean: 18 sorries
+- IET.lean: 14 sorries
+- SegmentMaps.lean: 14 sorries
+- TwoDisk.lean: 11 sorries
+- Disks.lean: 3 sorries
+- Rotations.lean: 2 sorries
+
+Then when you deploy agents, send ONE message containing:
+```python
+Task(Geometry.lean) + Task(IET.lean) + Task(SegmentMaps.lean) +
+Task(TwoDisk.lean) + Task(Disks.lean) + Task(Rotations.lean)
+# All 6 agents spawned in ONE message
+```
+
+**WRONG approaches:**
+❌ "Let me start with the easy file first" → NO, start with ALL files
+❌ "I'll deploy one agent and see how it goes" → NO, deploy ALL agents
+❌ "Let me focus on Geometry.lean" → NO, spawn agents for ALL files
+❌ Sequential deployment → NO, parallel only
+
+**Agent Deployment Checklist:**
+
+Before deploying agents, verify:
+- [ ] I ran `./check_lean.sh --all sorries TDCSG/`
+- [ ] I counted how many files have sorries
+- [ ] I am spawning EXACTLY that many agents
+- [ ] All Task() calls are in ONE message
+- [ ] I am not holding back any files
+
+**Why this matters:**
+- Maximum parallelism = maximum efficiency
+- Files are independent = can work simultaneously
+- One agent per file = focused ownership
+- All at once = compress work into top-level chat
 
 ### **For File-Level Agents:**
 
