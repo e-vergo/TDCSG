@@ -117,7 +117,22 @@ noncomputable def genB : ℝ² → ℝ² :=
   else
     x
 
-/-- The basic partition for the two-disk system -/
+/-- The partition for generator A: {leftDisk, leftDisk^c}.
+    This is a proper partition (disjoint pieces) for genA, which rotates points in leftDisk
+    and leaves everything else fixed. -/
+noncomputable def partitionA : Set (Set ℝ²) :=
+  {leftDisk sys, (leftDisk sys)ᶜ}
+
+/-- The partition for generator B: {rightDisk, rightDisk^c}.
+    This is a proper partition (disjoint pieces) for genB, which rotates points in rightDisk
+    and leaves everything else fixed. -/
+noncomputable def partitionB : Set (Set ℝ²) :=
+  {rightDisk sys, (rightDisk sys)ᶜ}
+
+/-- The basic partition for the two-disk system.
+    NOTE: This partition has overlapping pieces when the disks touch or overlap.
+    It is kept for compatibility but should NOT be used for PiecewiseIsometry construction.
+    Use partitionA for genA and partitionB for genB instead. -/
 noncomputable def basicPartition : Set (Set ℝ²) :=
   {leftDisk sys, rightDisk sys, exterior sys}
 
@@ -131,8 +146,18 @@ theorem basicPartition_countable : (basicPartition sys).Countable := by
 
 /-- Distance between two points on the x-axis in ℝ² -/
 lemma dist_on_x_axis (a b : ℝ) :
-    dist (fun i : Fin 2 => if i = 0 then a else (0 : ℝ)) (fun i => if i = 0 then b else 0) = |a - b| := by
-  sorry -- Straightforward EuclideanSpace norm calculation
+    let p : ℝ² := fun i => if i = 0 then a else 0
+    let q : ℝ² := fun i => if i = 0 then b else 0
+    dist p q = |a - b| := by
+  intro p q
+  rw [dist_eq_norm, EuclideanSpace.norm_eq]
+  simp only [Pi.sub_apply, Fin.sum_univ_two]
+  -- Simplify the function applications
+  simp only [p, q, Pi.sub_apply]
+  -- Now we have sqrt of sum of squared norms
+  simp only [Fin.isValue, Real.norm_eq_abs]
+  norm_num
+  exact Real.sqrt_sq_eq_abs (a - b)
 
 
 /-- The basic partition is measurable -/
@@ -172,24 +197,12 @@ theorem basicPartition_cover : ⋃₀ basicPartition sys = Set.univ := by
       push_neg
       exact ⟨h1, h2⟩
 
-/-- The basic partition pieces are pairwise disjoint -/
-theorem basicPartition_disjoint : (basicPartition sys).PairwiseDisjoint id := by
-  /- BLOCKER: This theorem is FALSE as stated. See README.md §242-292.
+/- NOTE: basicPartition_disjoint has been REMOVED because it is mathematically FALSE.
+   The disks touch/overlap at the origin when dist(leftCenter, rightCenter) = r1 + r2,
+   so leftDisk and rightDisk are NOT disjoint (origin is in both).
 
-     The disks touch at the origin:
-     - leftCenter = (-r1, 0), rightCenter = (r2, 0)
-     - dist(leftCenter, rightCenter) = r1 + r2
-     - origin ∈ leftDisk ∩ rightDisk (both are closed balls)
-     - Therefore leftDisk and rightDisk are NOT disjoint
-
-     Resolution requires architectural decision:
-     - Option 1: Refine partition to handle overlap region
-     - Option 2: Add disjointness constraint (excludes GG5 critical case)
-     - Option 3: Use open balls (changes semantics)
-
-     Cannot proceed until design decision is made by project owner.
-  -/
-  sorry
+   For piecewise isometry construction, use partitionA for genA and partitionB for genB,
+   which are properly disjoint. -/
 
 /-- Each partition piece is nonempty -/
 theorem basicPartition_nonempty : ∀ s ∈ basicPartition sys, s.Nonempty := by
@@ -220,7 +233,12 @@ theorem basicPartition_nonempty : ∀ s ∈ basicPartition sys, s.Nonempty := by
       -- leftCenter = (-r1, 0), p = (-10r1 - r2, 0)
       -- dist = |-10r1 - r2 - (-r1)| = |-9r1 - r2| = 9r1 + r2 > r1
       have : sys.r1 < dist p (fun i => if i = 0 then -sys.r1 else 0) := by
-        sorry -- dist((-10r1-r2, 0), (-r1, 0)) = 9r1 + r2 > r1
+        rw [dist_on_x_axis]
+        simp only [x_coord]
+        ring_nf
+        rw [abs_of_neg]
+        · linarith [sys.r1_pos, sys.r2_pos]
+        · linarith [sys.r1_pos, sys.r2_pos]
       exact this
     · -- Not in rightDisk
       unfold rightDisk TDCSG.Disk rightCenter
@@ -228,8 +246,135 @@ theorem basicPartition_nonempty : ∀ s ∈ basicPartition sys, s.Nonempty := by
       -- rightCenter = (r2, 0), p = (-10r1 - r2, 0)
       -- dist = |r2 - (-10r1 - r2)| = |10r1 + 2r2| = 10r1 + 2r2 > r2
       have : sys.r2 < dist p (fun i => if i = 0 then sys.r2 else 0) := by
-        sorry -- dist((-10r1-r2, 0), (r2, 0)) = 10r1 + 2r2 > r2
+        rw [dist_on_x_axis]
+        simp only [x_coord]
+        ring_nf
+        rw [abs_of_neg]
+        · linarith [sys.r1_pos, sys.r2_pos]
+        · linarith [sys.r1_pos, sys.r2_pos]
       exact this
+
+/-! ### Partition A theorems (for generator A) -/
+
+/-- Partition A is countable (it's finite) -/
+theorem partitionA_countable : (partitionA sys).Countable := by
+  unfold partitionA
+  have : ({leftDisk sys, (leftDisk sys)ᶜ} : Set (Set ℝ²)).Finite := by
+    rw [Set.finite_insert]
+    exact Set.finite_singleton _
+  exact this.countable
+
+/-- Partition A is measurable -/
+theorem partitionA_measurable : ∀ s ∈ partitionA sys, MeasurableSet s := by
+  intro s hs
+  unfold partitionA at hs
+  simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hs
+  rcases hs with (rfl | rfl)
+  · unfold leftDisk TDCSG.Disk
+    exact Metric.isClosed_closedBall.measurableSet
+  · exact (Metric.isClosed_closedBall.measurableSet).compl
+
+/-- Partition A covers the entire plane -/
+theorem partitionA_cover : ⋃₀ partitionA sys = Set.univ := by
+  unfold partitionA
+  ext x
+  simp only [Set.mem_sUnion, Set.mem_insert_iff, Set.mem_singleton_iff, Set.mem_univ, iff_true]
+  by_cases h : x ∈ leftDisk sys
+  · exact ⟨leftDisk sys, Or.inl rfl, h⟩
+  · exact ⟨(leftDisk sys)ᶜ, Or.inr rfl, h⟩
+
+/-- Partition A pieces are pairwise disjoint -/
+theorem partitionA_disjoint : (partitionA sys).PairwiseDisjoint id := by
+  intro s hs t ht hst
+  unfold partitionA at hs ht
+  simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hs ht
+  rcases hs with (rfl | rfl) <;> rcases ht with (rfl | rfl)
+  · contradiction
+  · exact disjoint_compl_right
+  · exact disjoint_compl_left
+  · contradiction
+
+/-- Each partition A piece is nonempty -/
+theorem partitionA_nonempty : ∀ s ∈ partitionA sys, s.Nonempty := by
+  intro s hs
+  unfold partitionA at hs
+  simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hs
+  rcases hs with (rfl | rfl)
+  · -- leftDisk is nonempty (contains its center)
+    unfold leftDisk TDCSG.Disk
+    use leftCenter sys
+    simp only [Metric.mem_closedBall, dist_self, le_of_lt sys.r1_pos]
+  · -- complement is nonempty (contains a far right point)
+    use (fun i : Fin 2 => if i = 0 then 10 * sys.r1 else 0)
+    simp only [Set.mem_compl_iff]
+    unfold leftDisk TDCSG.Disk leftCenter
+    simp only [Metric.mem_closedBall, not_le]
+    rw [dist_on_x_axis]
+    ring_nf
+    rw [abs_of_pos]
+    · linarith [sys.r1_pos]
+    · linarith [sys.r1_pos]
+
+/-! ### Partition B theorems (for generator B) -/
+
+/-- Partition B is countable (it's finite) -/
+theorem partitionB_countable : (partitionB sys).Countable := by
+  unfold partitionB
+  have : ({rightDisk sys, (rightDisk sys)ᶜ} : Set (Set ℝ²)).Finite := by
+    rw [Set.finite_insert]
+    exact Set.finite_singleton _
+  exact this.countable
+
+/-- Partition B is measurable -/
+theorem partitionB_measurable : ∀ s ∈ partitionB sys, MeasurableSet s := by
+  intro s hs
+  unfold partitionB at hs
+  simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hs
+  rcases hs with (rfl | rfl)
+  · unfold rightDisk TDCSG.Disk
+    exact Metric.isClosed_closedBall.measurableSet
+  · exact (Metric.isClosed_closedBall.measurableSet).compl
+
+/-- Partition B covers the entire plane -/
+theorem partitionB_cover : ⋃₀ partitionB sys = Set.univ := by
+  unfold partitionB
+  ext x
+  simp only [Set.mem_sUnion, Set.mem_insert_iff, Set.mem_singleton_iff, Set.mem_univ, iff_true]
+  by_cases h : x ∈ rightDisk sys
+  · exact ⟨rightDisk sys, Or.inl rfl, h⟩
+  · exact ⟨(rightDisk sys)ᶜ, Or.inr rfl, h⟩
+
+/-- Partition B pieces are pairwise disjoint -/
+theorem partitionB_disjoint : (partitionB sys).PairwiseDisjoint id := by
+  intro s hs t ht hst
+  unfold partitionB at hs ht
+  simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hs ht
+  rcases hs with (rfl | rfl) <;> rcases ht with (rfl | rfl)
+  · contradiction
+  · exact disjoint_compl_right
+  · exact disjoint_compl_left
+  · contradiction
+
+/-- Each partition B piece is nonempty -/
+theorem partitionB_nonempty : ∀ s ∈ partitionB sys, s.Nonempty := by
+  intro s hs
+  unfold partitionB at hs
+  simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hs
+  rcases hs with (rfl | rfl)
+  · -- rightDisk is nonempty (contains its center)
+    unfold rightDisk TDCSG.Disk
+    use rightCenter sys
+    simp only [Metric.mem_closedBall, dist_self, le_of_lt sys.r2_pos]
+  · -- complement is nonempty (contains a far left point)
+    use (fun i : Fin 2 => if i = 0 then -10 * sys.r2 else 0)
+    simp only [Set.mem_compl_iff]
+    unfold rightDisk TDCSG.Disk rightCenter
+    simp only [Metric.mem_closedBall, not_le]
+    rw [dist_on_x_axis]
+    ring_nf
+    rw [abs_of_neg]
+    · linarith [sys.r2_pos]
+    · linarith [sys.r2_pos]
 
 /-- Generator A preserves distances on the left disk -/
 theorem genA_isometry_on_leftDisk : ∀ x ∈ leftDisk sys, ∀ y ∈ leftDisk sys,
@@ -265,25 +410,43 @@ theorem genB_eq_id_on_compl : ∀ x ∉ rightDisk sys, sys.genB x = x := by
 
 /-- Convert generator A to a piecewise isometry -/
 noncomputable def toPiecewiseIsometry_a : PiecewiseIsometry ℝ² where
-  partition := basicPartition sys
-  partition_measurable := basicPartition_measurable sys
-  partition_countable := basicPartition_countable sys
-  partition_cover := basicPartition_cover sys
-  partition_disjoint := basicPartition_disjoint sys
-  partition_nonempty := basicPartition_nonempty sys
+  partition := partitionA sys
+  partition_measurable := partitionA_measurable sys
+  partition_countable := partitionA_countable sys
+  partition_cover := partitionA_cover sys
+  partition_disjoint := partitionA_disjoint sys
+  partition_nonempty := partitionA_nonempty sys
   toFun := sys.genA
-  isometry_on_pieces := by sorry
+  isometry_on_pieces := by
+    intro s hs x hx y hy
+    unfold partitionA at hs
+    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hs
+    rcases hs with (rfl | rfl)
+    · -- s = leftDisk: genA is isometric on leftDisk
+      exact genA_isometry_on_leftDisk sys x hx y hy
+    · -- s = leftDisk^c: genA is identity on leftDisk^c
+      simp only [Set.mem_compl_iff] at hx hy
+      rw [genA_eq_id_on_compl sys x hx, genA_eq_id_on_compl sys y hy]
 
 /-- Convert generator B to a piecewise isometry -/
 noncomputable def toPiecewiseIsometry_b : PiecewiseIsometry ℝ² where
-  partition := basicPartition sys
-  partition_measurable := basicPartition_measurable sys
-  partition_countable := basicPartition_countable sys
-  partition_cover := basicPartition_cover sys
-  partition_disjoint := basicPartition_disjoint sys
-  partition_nonempty := basicPartition_nonempty sys
+  partition := partitionB sys
+  partition_measurable := partitionB_measurable sys
+  partition_countable := partitionB_countable sys
+  partition_cover := partitionB_cover sys
+  partition_disjoint := partitionB_disjoint sys
+  partition_nonempty := partitionB_nonempty sys
   toFun := sys.genB
-  isometry_on_pieces := by sorry
+  isometry_on_pieces := by
+    intro s hs x hx y hy
+    unfold partitionB at hs
+    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hs
+    rcases hs with (rfl | rfl)
+    · -- s = rightDisk: genB is isometric on rightDisk
+      exact genB_isometry_on_rightDisk sys x hx y hy
+    · -- s = rightDisk^c: genB is identity on rightDisk^c
+      simp only [Set.mem_compl_iff] at hx hy
+      rw [genB_eq_id_on_compl sys x hx, genB_eq_id_on_compl sys y hy]
 
 end TwoDiskSystem
 

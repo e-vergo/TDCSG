@@ -2,6 +2,8 @@ import Mathlib.Analysis.SpecialFunctions.Exp
 import Mathlib.NumberTheory.Real.GoldenRatio
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Complex
 import Mathlib.Algebra.Order.Ring.Basic
+import Mathlib.Analysis.Normed.Module.Convex
+import Mathlib.Analysis.Convex.Basic
 import TDCSG.CompoundSymmetry.TwoDisk
 
 /-!
@@ -235,6 +237,19 @@ noncomputable def G : ℂ := 2 * F - E
 
 /-! ### Point Properties -/
 
+/-- The conjugate of ζ₅ equals ζ₅⁴ -/
+lemma zeta5_conj : conj ζ₅ = ζ₅^4 := by
+  unfold ζ₅
+  rw [Complex.conj_exp, conj_ofReal, conj_ofReal, conj_I]
+  rw [show -(2 * ↑π * I / 5) = (-(2 : ℂ) * π * I / 5) by ring]
+  rw [show (-(2 : ℂ) * ↑π * I / 5) = ((2 * π / 5 : ℝ) * (-I)) by push_cast; ring]
+  rw [← Complex.exp_neg]
+  rw [show (- (2 * ↑π * I / 5) : ℂ) = (8 * π * I / 5 - 2 * π * I) by ring]
+  rw [Complex.exp_sub, Complex.exp_two_pi_mul_I]
+  simp
+  rw [← Complex.exp_nat_mul]
+  norm_num
+
 /-- E lies on the boundary of the right disk (centered at 1) with radius r_crit. -/
 lemma E_on_right_disk_boundary : ‖E - 1‖ = r_crit := by
   unfold E ζ₅ r_crit
@@ -307,12 +322,75 @@ noncomputable def G_R2 : ℝ × ℝ := toR2 G
 
 /-! ### Disk Intersection -/
 
+/-- E' is on the left disk boundary (centered at -1). -/
+lemma E'_on_left_disk_boundary : ‖E' - (-1)‖ = r_crit := by
+  unfold E'
+  rw [show ((-E : ℂ) - (-1 : ℂ)) = -(E - 1) by ring]
+  rw [norm_neg]
+  exact E_on_right_disk_boundary
+
+/-- E' is in the right disk (centered at 1). -/
+lemma E'_in_right_disk : ‖E' - 1‖ ≤ r_crit := by
+  unfold E'
+  rw [show ((-E : ℂ) - (1 : ℂ)) = -(E + 1) by ring]
+  rw [norm_neg]
+  exact E_in_left_disk
+
 /-- Points on segment E'E remain in the intersection of both disks during the
 three transformation sequences in Theorem 2. -/
 lemma segment_in_disk_intersection (t : ℝ) (ht : 0 ≤ t ∧ t ≤ 1) :
     let p := E' + t • (E - E')
     ‖p + 1‖ ≤ r_crit ∧ ‖p - 1‖ ≤ r_crit := by
-  sorry
+  intro p
+  -- The parametrization p = E' + t•(E - E') = (1-t)•E' + t•E is a point on segment [E' -[ℝ] E]
+  have hp_segment : p ∈ segment ℝ E' E := by
+    use (1 - t), t
+    constructor; · linarith [ht.1]
+    constructor; · exact ht.1
+    constructor; · linarith [ht.2]
+    simp only [p, smul_sub]
+    ring
+
+  constructor
+
+  -- Goal 1: ‖p + 1‖ ≤ r_crit (p is in left disk centered at -1)
+  · -- Show segment is contained in left disk using convexity
+    have h_E'_in_left : E' ∈ Metric.closedBall ((-1) : ℂ) r_crit := by
+      rw [Metric.mem_closedBall, dist_comm]
+      exact E'_on_left_disk_boundary.le
+    have h_E_in_left : E ∈ Metric.closedBall ((-1) : ℂ) r_crit := by
+      rw [Metric.mem_closedBall]
+      simp only [dist_eq_norm]
+      exact E_in_left_disk
+    have h_convex : Convex ℝ (Metric.closedBall ((-1) : ℂ) r_crit) :=
+      convex_closedBall ((-1) : ℂ) r_crit
+    have h_segment_subset : segment ℝ E' E ⊆ Metric.closedBall ((-1) : ℂ) r_crit :=
+      h_convex.segment_subset h_E'_in_left h_E_in_left
+    have hp_in_left : p ∈ Metric.closedBall ((-1) : ℂ) r_crit :=
+      h_segment_subset hp_segment
+    rw [Metric.mem_closedBall] at hp_in_left
+    simp only [dist_eq_norm] at hp_in_left
+    exact hp_in_left
+
+  -- Goal 2: ‖p - 1‖ ≤ r_crit (p is in right disk centered at 1)
+  · -- Show segment is contained in right disk using convexity
+    have h_E'_in_right : E' ∈ Metric.closedBall (1 : ℂ) r_crit := by
+      rw [Metric.mem_closedBall]
+      simp only [dist_eq_norm]
+      exact E'_in_right_disk
+    have h_E_in_right : E ∈ Metric.closedBall (1 : ℂ) r_crit := by
+      rw [Metric.mem_closedBall, dist_comm]
+      simp only [dist_eq_norm]
+      exact E_on_right_disk_boundary.le
+    have h_convex : Convex ℝ (Metric.closedBall (1 : ℂ) r_crit) :=
+      convex_closedBall (1 : ℂ) r_crit
+    have h_segment_subset : segment ℝ E' E ⊆ Metric.closedBall (1 : ℂ) r_crit :=
+      h_convex.segment_subset h_E'_in_right h_E_in_right
+    have hp_in_right : p ∈ Metric.closedBall (1 : ℂ) r_crit :=
+      h_segment_subset hp_segment
+    rw [Metric.mem_closedBall] at hp_in_right
+    simp only [dist_eq_norm] at hp_in_right
+    exact hp_in_right
 
 /-! ### TwoDiskSystem Definition -/
 

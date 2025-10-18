@@ -155,17 +155,17 @@ lemma mul_zeta5_inv_isometry (z w : ℂ) : ‖z * ζ₅⁻¹ - w * ζ₅⁻¹‖
 /-- genA preserves distance from the left disk center -/
 lemma genA_preserves_left_disk (z : ℂ) (hz : ‖z + 1‖ ≤ r_crit) : ‖genA z + 1‖ ≤ r_crit := by
   unfold genA
-  simp [hz]
-  have : (z + 1) * ζ₅ - 1 + 1 = (z + 1) * ζ₅ := by ring
-  rw [this, norm_mul, zeta5_abs, mul_one]
+  rw [if_pos hz]
+  have h : (z + 1) * ζ₅ - 1 + 1 = (z + 1) * ζ₅ := by ring
+  rw [h, norm_mul, zeta5_abs, mul_one]
   exact hz
 
 /-- genA_inv preserves distance from the left disk center -/
 lemma genA_inv_preserves_left_disk (z : ℂ) (hz : ‖z + 1‖ ≤ r_crit) : ‖genA_inv z + 1‖ ≤ r_crit := by
   unfold genA_inv
-  simp [hz]
-  have : (z + 1) * ζ₅⁻¹ - 1 + 1 = (z + 1) * ζ₅⁻¹ := by ring
-  rw [this, norm_mul]
+  rw [if_pos hz]
+  have h : (z + 1) * ζ₅⁻¹ - 1 + 1 = (z + 1) * ζ₅⁻¹ := by ring
+  rw [h, norm_mul]
   have : ‖ζ₅⁻¹‖ = 1 := by rw [norm_inv, zeta5_abs, inv_one]
   rw [this, mul_one]
   exact hz
@@ -173,17 +173,17 @@ lemma genA_inv_preserves_left_disk (z : ℂ) (hz : ‖z + 1‖ ≤ r_crit) : ‖
 /-- genB preserves distance from the right disk center -/
 lemma genB_preserves_right_disk (z : ℂ) (hz : ‖z - 1‖ ≤ r_crit) : ‖genB z - 1‖ ≤ r_crit := by
   unfold genB
-  simp [hz]
-  have : (z - 1) * ζ₅ + 1 - 1 = (z - 1) * ζ₅ := by ring
-  rw [this, norm_mul, zeta5_abs, mul_one]
+  rw [if_pos hz]
+  have h : (z - 1) * ζ₅ + 1 - 1 = (z - 1) * ζ₅ := by ring
+  rw [h, norm_mul, zeta5_abs, mul_one]
   exact hz
 
 /-- genB_inv preserves distance from the right disk center -/
 lemma genB_inv_preserves_right_disk (z : ℂ) (hz : ‖z - 1‖ ≤ r_crit) : ‖genB_inv z - 1‖ ≤ r_crit := by
   unfold genB_inv
-  simp [hz]
-  have : (z - 1) * ζ₅⁻¹ + 1 - 1 = (z - 1) * ζ₅⁻¹ := by ring
-  rw [this, norm_mul]
+  rw [if_pos hz]
+  have h : (z - 1) * ζ₅⁻¹ + 1 - 1 = (z - 1) * ζ₅⁻¹ := by ring
+  rw [h, norm_mul]
   have : ‖ζ₅⁻¹‖ = 1 := by rw [norm_inv, zeta5_abs, inv_one]
   rw [this, mul_one]
   exact hz
@@ -192,37 +192,45 @@ lemma genB_inv_preserves_right_disk (z : ℂ) (hz : ‖z - 1‖ ≤ r_crit) : �
 lemma genA_isometric_on_left_disk (z w : ℂ) (hz : ‖z + 1‖ ≤ r_crit) (hw : ‖w + 1‖ ≤ r_crit) :
     ‖genA z - genA w‖ = ‖z - w‖ := by
   unfold genA
-  simp [hz, hw]
-  have : (z + 1) * ζ₅ - 1 - ((w + 1) * ζ₅ - 1) = (z + 1) * ζ₅ - (w + 1) * ζ₅ := by ring
+  rw [if_pos hz, if_pos hw]
+  have h : (z + 1) * ζ₅ - 1 - ((w + 1) * ζ₅ - 1) = (z + 1) * ζ₅ - (w + 1) * ζ₅ := by ring
+  rw [h]
+  have : ‖(z + 1) * ζ₅ - (w + 1) * ζ₅‖ = ‖z + 1 - (w + 1)‖ := mul_zeta5_isometry (z + 1) (w + 1)
   rw [this]
-  exact mul_zeta5_isometry (z + 1) (w + 1)
+  ring_nf
 
 /-- genA_inv is isometric when both points are in the left disk -/
 lemma genA_inv_isometric_on_left_disk (z w : ℂ) (hz : ‖z + 1‖ ≤ r_crit) (hw : ‖w + 1‖ ≤ r_crit) :
     ‖genA_inv z - genA_inv w‖ = ‖z - w‖ := by
   unfold genA_inv
-  simp [hz, hw]
-  have : (z + 1) * ζ₅⁻¹ - 1 - ((w + 1) * ζ₅⁻¹ - 1) = (z + 1) * ζ₅⁻¹ - (w + 1) * ζ₅⁻¹ := by ring
+  rw [if_pos hz, if_pos hw]
+  have h : (z + 1) * ζ₅⁻¹ - 1 - ((w + 1) * ζ₅⁻¹ - 1) = (z + 1) * ζ₅⁻¹ - (w + 1) * ζ₅⁻¹ := by ring
+  rw [h]
+  have : ‖(z + 1) * ζ₅⁻¹ - (w + 1) * ζ₅⁻¹‖ = ‖z + 1 - (w + 1)‖ := mul_zeta5_inv_isometry (z + 1) (w + 1)
   rw [this]
-  exact mul_zeta5_inv_isometry (z + 1) (w + 1)
+  ring_nf
 
 /-- genB is isometric when both points are in the right disk -/
 lemma genB_isometric_on_right_disk (z w : ℂ) (hz : ‖z - 1‖ ≤ r_crit) (hw : ‖w - 1‖ ≤ r_crit) :
     ‖genB z - genB w‖ = ‖z - w‖ := by
   unfold genB
-  simp [hz, hw]
-  have : (z - 1) * ζ₅ + 1 - ((w - 1) * ζ₅ + 1) = (z - 1) * ζ₅ - (w - 1) * ζ₅ := by ring
+  rw [if_pos hz, if_pos hw]
+  have h : (z - 1) * ζ₅ + 1 - ((w - 1) * ζ₅ + 1) = (z - 1) * ζ₅ - (w - 1) * ζ₅ := by ring
+  rw [h]
+  have : ‖(z - 1) * ζ₅ - (w - 1) * ζ₅‖ = ‖z - 1 - (w - 1)‖ := mul_zeta5_isometry (z - 1) (w - 1)
   rw [this]
-  exact mul_zeta5_isometry (z - 1) (w - 1)
+  ring_nf
 
 /-- genB_inv is isometric when both points are in the right disk -/
 lemma genB_inv_isometric_on_right_disk (z w : ℂ) (hz : ‖z - 1‖ ≤ r_crit) (hw : ‖w - 1‖ ≤ r_crit) :
     ‖genB_inv z - genB_inv w‖ = ‖z - w‖ := by
   unfold genB_inv
-  simp [hz, hw]
-  have : (z - 1) * ζ₅⁻¹ + 1 - ((w - 1) * ζ₅⁻¹ + 1) = (z - 1) * ζ₅⁻¹ - (w - 1) * ζ₅⁻¹ := by ring
+  rw [if_pos hz, if_pos hw]
+  have h : (z - 1) * ζ₅⁻¹ + 1 - ((w - 1) * ζ₅⁻¹ + 1) = (z - 1) * ζ₅⁻¹ - (w - 1) * ζ₅⁻¹ := by ring
+  rw [h]
+  have : ‖(z - 1) * ζ₅⁻¹ - (w - 1) * ζ₅⁻¹‖ = ‖z - 1 - (w - 1)‖ := mul_zeta5_inv_isometry (z - 1) (w - 1)
   rw [this]
-  exact mul_zeta5_inv_isometry (z - 1) (w - 1)
+  ring_nf
 
 /-- At the critical radius, rotating around the left disk center preserves the right disk.
 This is a special geometric property of r_crit = √(3 + φ). -/
