@@ -1,5 +1,5 @@
 /-
-Copyright (c) 2024 Eric Moffat. All rights reserved.
+Copyright (c) 2025-10-18 Eric Moffat. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Moffat
 -/
@@ -12,26 +12,15 @@ import Mathlib.Analysis.Real.Cardinality
 /-!
 # Examples of Piecewise Isometries
 
-This file provides concrete, proven examples of piecewise isometries and demonstrations
-of what does NOT constitute a piecewise isometry.
+This file provides concrete examples of piecewise isometries and counterexamples
+of functions that fail to be piecewise isometries.
 
 ## Main examples
 
-### Proven piecewise isometries:
-- Identity map
-- Half-plane reflection
-- Simple square billiard
+Proven piecewise isometries: identity map, half-plane reflection, simple square
+billiard.
 
-### Proven non-isometries (counterexamples):
-- Constant functions
-- Doubling map (stretches distances)
-- Baker's map (stretches horizontally, compresses vertically)
-
-These examples demonstrate:
-- How to construct piecewise isometries
-- How to verify the isometry property
-- Common mistakes (metric mismatches, stretching)
-- Construction patterns for applications
+Proven non-isometries: constant functions, doubling map, Baker's map.
 
 -/
 
@@ -115,7 +104,8 @@ noncomputable def half_plane_reflection : PiecewiseIsometry (ℝ × ℝ) where
       exact isClosed_Ici.measurableSet.preimage measurable_fst
   partition_cover := by
     ext p
-    simp only [Set.mem_sUnion, Set.mem_insert_iff, Set.mem_singleton_iff, Set.mem_setOf_eq, Set.mem_univ, iff_true]
+    simp only [Set.mem_sUnion, Set.mem_insert_iff, Set.mem_singleton_iff,
+      Set.mem_setOf_eq, Set.mem_univ, iff_true]
     by_cases h : p.1 < 0
     · exact ⟨{p : ℝ × ℝ | p.1 < 0}, Or.inl rfl, h⟩
     · exact ⟨{p : ℝ × ℝ | p.1 ≥ 0}, Or.inr rfl, le_of_not_gt h⟩
@@ -152,8 +142,10 @@ noncomputable def half_plane_reflection : PiecewiseIsometry (ℝ × ℝ) where
       simp only [Prod.dist_eq, Real.dist_eq, neg_sub_neg, abs_sub_comm]
     · -- Piece: {p | p.1 ≥ 0}, map: p ↦ p (identity)
       simp only [Set.mem_setOf_eq] at hx hy
-      have hx_if : (if x.1 < 0 then (-x.1, x.2) else x) = x := by simp [show ¬x.1 < 0 from not_lt.mpr hx]
-      have hy_if : (if y.1 < 0 then (-y.1, y.2) else y) = y := by simp [show ¬y.1 < 0 from not_lt.mpr hy]
+      have hx_if : (if x.1 < 0 then (-x.1, x.2) else x) = x := by
+        simp [show ¬x.1 < 0 from not_lt.mpr hx]
+      have hy_if : (if y.1 < 0 then (-y.1, y.2) else y) = y := by
+        simp [show ¬y.1 < 0 from not_lt.mpr hy]
       rw [hx_if, hy_if]
 
 end PlanarExamples
@@ -196,7 +188,8 @@ noncomputable def square_billiard_simple : PiecewiseIsometry (ℝ × ℝ) where
       exact (isOpen_Iio.prod isOpen_Iio |>.measurableSet).compl
   partition_cover := by
     ext p
-    simp only [Set.mem_sUnion, Set.mem_insert_iff, Set.mem_singleton_iff, Set.mem_setOf_eq, Set.mem_univ, iff_true]
+    simp only [Set.mem_sUnion, Set.mem_insert_iff, Set.mem_singleton_iff,
+      Set.mem_setOf_eq, Set.mem_univ, iff_true]
     by_cases h1 : p.1 < 1 ∧ p.2 < 1
     · use {q : ℝ × ℝ | q.1 < 1 ∧ q.2 < 1}
       exact ⟨Or.inl rfl, h1⟩
@@ -291,26 +284,30 @@ end SquareBilliard
 
 section ChaoticExamples
 
-/-- The doubling map x ↦ 2x mod 1 on [0,1).
-    This is NOT an isometry! It stretches distances by factor 2. -/
+/-- The doubling map x ↦ 2x mod 1 on [0,1). -/
 noncomputable def doubling_map_NON_ISOMETRY : ℝ → ℝ := fun x =>
   if 0 ≤ x ∧ x < 1 then 2 * x - ⌊2 * x⌋ else x
 
-/-- The doubling map is NOT a piecewise isometry (fails distance preservation). -/
-example : ¬∃ (pi : PiecewiseIsometry ℝ), ∀ x ∈ Ico (0 : ℝ) 1, pi x = doubling_map_NON_ISOMETRY x := by
+/-- The doubling map is NOT a piecewise isometry. -/
+example : ¬∃ (pi : PiecewiseIsometry ℝ),
+    ∀ x ∈ Ico (0 : ℝ) 1, pi x = doubling_map_NON_ISOMETRY x := by
   intro ⟨pi, h⟩
-  have : ∃ u ∈ pi.partition, ∃ a b, a ≠ b ∧ a ∈ Icc 0.1 0.2 ∧ b ∈ Icc 0.1 0.2 ∧ a ∈ u ∧ b ∈ u := by
+  have : ∃ u ∈ pi.partition, ∃ a b, a ≠ b ∧ a ∈ Icc 0.1 0.2 ∧
+      b ∈ Icc 0.1 0.2 ∧ a ∈ u ∧ b ∈ u := by
     by_contra h_contra
     push_neg at h_contra
     have : Set.Countable (Icc (0.1 : ℝ) 0.2) := by
-      have each_sub : ∀ s ∈ pi.partition, Set.Subsingleton (s ∩ Icc (0.1 : ℝ) 0.2) := by
+      have each_sub : ∀ s ∈ pi.partition,
+          Set.Subsingleton (s ∩ Icc (0.1 : ℝ) 0.2) := by
         intro s hs a ⟨has, ha⟩ b ⟨hbs, hb⟩
         by_contra hab
         exact h_contra s hs a b hab ha hb has hbs
-      have each_countable : ∀ s ∈ pi.partition, (s ∩ Icc (0.1 : ℝ) 0.2).Countable := by
+      have each_countable : ∀ s ∈ pi.partition,
+          (s ∩ Icc (0.1 : ℝ) 0.2).Countable := by
         intro s hs
         exact Set.Subsingleton.countable (each_sub s hs)
-      have eq_biUnion : Icc (0.1 : ℝ) 0.2 = ⋃ s ∈ pi.partition, s ∩ Icc (0.1 : ℝ) 0.2 := by
+      have eq_biUnion :
+          Icc (0.1 : ℝ) 0.2 = ⋃ s ∈ pi.partition, s ∩ Icc (0.1 : ℝ) 0.2 := by
         ext x
         simp only [Set.mem_iUnion, Set.mem_inter_iff]
         constructor
@@ -358,7 +355,7 @@ example : ¬∃ (pi : PiecewiseIsometry ℝ), ∀ x ∈ Ico (0 : ℝ) 1, pi x = 
   rw [this] at iso
   exact hab (dist_eq_zero.mp (by linarith : dist a b = 0))
 
-/-- The baker's map: another non-isometry example (stretches horizontally, compresses vertically). -/
+/-- The baker's map: another non-isometry example. -/
 noncomputable def baker_map_NON_ISOMETRY : ℝ × ℝ → ℝ × ℝ := fun p =>
   if p.1 < 1/2 then (2 * p.1, p.2 / 2)
   else (2 * p.1 - 1, (p.2 + 1) / 2)
@@ -510,7 +507,8 @@ example : FinitePiecewiseIsometry ℝ := {
     · exact isClosed_Ici.measurableSet
   partition_cover := by
     ext x
-    simp only [Set.mem_sUnion, Set.mem_insert_iff, Set.mem_singleton_iff, Set.mem_Iio, Set.mem_Ici, Set.mem_univ, iff_true]
+    simp only [Set.mem_sUnion, Set.mem_insert_iff, Set.mem_singleton_iff,
+      Set.mem_Iio, Set.mem_Ici, Set.mem_univ, iff_true]
     by_cases h : x < 0
     · exact ⟨Set.Iio 0, Or.inl rfl, h⟩
     · exact ⟨Set.Ici 0, Or.inr rfl, le_of_not_gt h⟩

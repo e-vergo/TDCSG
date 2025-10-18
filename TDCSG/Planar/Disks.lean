@@ -1,5 +1,5 @@
 /-
-Copyright (c) 2025 TDCSG Contributors. All rights reserved.
+Copyright (c) 2025-10-18 TDCSG Contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: TDCSG Contributors
 -/
@@ -13,8 +13,8 @@ import TDCSG.Planar.Rotations
 /-!
 # Planar Disks
 
-This file defines planar disks (closed balls in ℝ²) and establishes their key properties
-for the TDCSG formalization.
+This file defines planar disks (closed balls in ℝ²) and establishes their
+key properties for the TDCSG formalization.
 
 ## Main Definitions
 
@@ -25,15 +25,6 @@ for the TDCSG formalization.
 * `disks_overlap_iff`: Characterization of when two disks overlap.
 * `disk_inter_measurable`: The intersection of two disks is measurable.
 * `disk_inter_compact`: The intersection of two disks is compact.
-
-## Implementation Notes
-
-We define disks as closed balls to ensure:
-- Compactness (closed and bounded in ℝ²)
-- Measurability under the Borel σ-algebra
-- Compatibility with standard metric space theory
-
-The definition uses `Metric.closedBall` from Mathlib's metric space library.
 
 ## References
 
@@ -48,23 +39,16 @@ namespace TDCSG
 -- Import the ℝ² notation from Planar namespace
 open Planar
 
-/-- A disk in ℝ² is a closed ball with specified center and radius.
-
-This is defined as a simple type alias to `Set ℝ²` for the closed ball,
-providing a lightweight wrapper around `Metric.closedBall`. -/
-def Disk (center : ℝ²) (radius : ℝ) : Set ℝ² := Metric.closedBall center radius
+/-- A disk in ℝ² is a closed ball with specified center and radius. -/
+def Disk (center : ℝ²) (radius : ℝ) : Set ℝ² :=
+  Metric.closedBall center radius
 
 namespace Disk
 
 variable {c₁ c₂ : ℝ²} {r₁ r₂ : ℝ}
 
-/--
-Two disks overlap if and only if the distance between their centers
-is at most the sum of their radii.
-
-This is a fundamental geometric characterization used throughout
-the TDCSG development.
--/
+/-- Two disks overlap if and only if the distance between their centers
+is at most the sum of their radii. -/
 lemma disks_overlap_iff (hr₁ : 0 ≤ r₁) (hr₂ : 0 ≤ r₂) :
     (Disk c₁ r₁ ∩ Disk c₂ r₂).Nonempty ↔ dist c₁ c₂ ≤ r₁ + r₂ := by
   unfold Disk
@@ -99,7 +83,8 @@ lemma disks_overlap_iff (hr₁ : 0 ≤ r₁) (hr₂ : 0 ≤ r₂) :
               _ = ‖c₁ + t • (c₂ - c₁) - c₁‖ := rfl
               _ = ‖t • (c₂ - c₁)‖ := by rw [add_sub_cancel_left]
               _ = t * ‖c₂ - c₁‖ := by
-                    rw [norm_smul, Real.norm_of_nonneg (div_nonneg hr₁ (le_of_lt h_dist_pos))]
+                    rw [norm_smul, Real.norm_of_nonneg
+                      (div_nonneg hr₁ (le_of_lt h_dist_pos))]
               _ = t * d := by rw [← dist_eq_norm, dist_comm]
               _ = r₁ := div_mul_cancel₀ r₁ (ne_of_gt h_dist_pos)
           linarith
@@ -109,14 +94,16 @@ lemma disks_overlap_iff (hr₁ : 0 ≤ r₁) (hr₂ : 0 ≤ r₂) :
               _ = c₁ - c₂ + t • (c₂ - c₁) := by abel
               _ = c₁ - c₂ + t • c₂ - t • c₁ := by rw [smul_sub]; abel
               _ = (1 - t) • c₁ - (1 - t) • c₂ := by
-                    rw [sub_smul, sub_smul, one_smul, one_smul]; abel
+                    rw [sub_smul, sub_smul, one_smul, one_smul]
+                    abel
               _ = (1 - t) • (c₁ - c₂) := by rw [smul_sub]
           show dist x c₂ ≤ r₂
           have h_t_le_1 : t ≤ 1 := by
             rw [div_le_one h_dist_pos]
             exact h_case
           have h_sub_nonneg : 0 ≤ 1 - t := by linarith
-          have h_td_eq_r1 : t * d = r₁ := div_mul_cancel₀ r₁ (ne_of_gt h_dist_pos)
+          have h_td_eq_r1 : t * d = r₁ :=
+            div_mul_cancel₀ r₁ (ne_of_gt h_dist_pos)
           calc dist x c₂ = ‖x - c₂‖ := by rw [dist_eq_norm]
             _ = ‖(1 - t) • (c₁ - c₂)‖ := by rw [key]
             _ = |1 - t| * ‖c₁ - c₂‖ := norm_smul _ _
@@ -137,26 +124,20 @@ lemma disks_overlap_iff (hr₁ : 0 ≤ r₁) (hr₂ : 0 ≤ r₂) :
         · show dist c₂ c₂ ≤ r₂
           simp [dist_self, hr₂]
 
-/--
-The intersection of two disks is measurable with respect to the Borel σ-algebra.
-
-This follows from the measurability of closed balls in metric spaces.
--/
+/-- The intersection of two disks is measurable with respect to the
+Borel σ-algebra. -/
 lemma disk_inter_measurable (c₁ c₂ : ℝ²) (r₁ r₂ : ℝ) :
     MeasurableSet (Disk c₁ r₁ ∩ Disk c₂ r₂) := by
   unfold Disk
-  exact MeasurableSet.inter isClosed_closedBall.measurableSet isClosed_closedBall.measurableSet
+  exact MeasurableSet.inter isClosed_closedBall.measurableSet
+    isClosed_closedBall.measurableSet
 
-/--
-The intersection of two disks is compact.
-
-This is a consequence of the intersection of two compact sets being compact,
-combined with the fact that closed balls in ℝ² are compact.
--/
+/-- The intersection of two disks is compact. -/
 lemma disk_inter_compact (c₁ c₂ : ℝ²) (r₁ r₂ : ℝ) :
     IsCompact (Disk c₁ r₁ ∩ Disk c₂ r₂) := by
   unfold Disk
-  exact IsCompact.inter (isCompact_closedBall c₁ r₁) (isCompact_closedBall c₂ r₂)
+  exact IsCompact.inter (isCompact_closedBall c₁ r₁)
+    (isCompact_closedBall c₂ r₂)
 
 end Disk
 

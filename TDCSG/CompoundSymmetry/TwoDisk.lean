@@ -1,5 +1,5 @@
 /-
-Copyright (c) 2024 Eric Moffat. All rights reserved.
+Copyright (c) 2025-10-18 Eric Moffat. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Moffat
 -/
@@ -10,29 +10,18 @@ import TDCSG.Planar.Disks
 /-!
 # Two-Disk Compound Symmetry Groups
 
-This file formalizes the two-disk compound symmetry group construction from the paper
-"Two-Disk Compound Symmetry Groups" (arXiv:2302.12950v1).
+This file formalizes the two-disk compound symmetry group construction.
 
 ## Main definitions
 
-- `TwoDiskSystem`: A structure encoding two disks with specified radii and rotation orders
+- `TwoDiskSystem`: Two disks with specified radii and rotation orders
 - `TwoDiskSystem.leftDisk`: The left disk in the system
 - `TwoDiskSystem.rightDisk`: The right disk in the system
 - `TwoDiskSystem.genA`: Generator A (rotation on left disk)
 - `TwoDiskSystem.genB`: Generator B (rotation on right disk)
-- `TwoDiskSystem.basicPartition`: The initial partition for the two-disk system
-- `TwoDiskSystem.toPiecewiseIsometry_a`: Convert generator A to a piecewise isometry
-- `TwoDiskSystem.toPiecewiseIsometry_b`: Convert generator B to a piecewise isometry
-
-## Notation
-
-- `GG_n(r)` for the single-disk group with n-fold rotation symmetry and radius r
-- `GG_{n1,n2}(r1,r2)` for the two-disk compound symmetry group
-
-## Implementation notes
-
-We use EuclideanSpace ℝ (Fin 2) to ensure proper Euclidean distance metric.
-The two disks are positioned symmetrically about the origin along the x-axis.
+- `TwoDiskSystem.basicPartition`: The initial partition
+- `TwoDiskSystem.toPiecewiseIsometry_a`: Generator A as piecewise isometry
+- `TwoDiskSystem.toPiecewiseIsometry_b`: Generator B as piecewise isometry
 
 ## References
 
@@ -46,13 +35,7 @@ open Classical
 
 namespace CompoundSymmetry
 
-/-- A two-disk system with specified radii and rotation orders.
-
-   The system consists of:
-   - Left disk: centered at (-d, 0) with radius r1, n1-fold rotation symmetry
-   - Right disk: centered at (d, 0) with radius r2, n2-fold rotation symmetry
-   where d is chosen so the disks touch at the origin (d = r1 = r2 for equal radii)
--/
+/-- A two-disk system with specified radii and rotation orders. -/
 structure TwoDiskSystem where
   /-- Radius of the left disk -/
   r1 : ℝ
@@ -117,22 +100,15 @@ noncomputable def genB : ℝ² → ℝ² :=
   else
     x
 
-/-- The partition for generator A: {leftDisk, leftDisk^c}.
-    This is a proper partition (disjoint pieces) for genA, which rotates points in leftDisk
-    and leaves everything else fixed. -/
+/-- The partition for generator A. -/
 noncomputable def partitionA : Set (Set ℝ²) :=
   {leftDisk sys, (leftDisk sys)ᶜ}
 
-/-- The partition for generator B: {rightDisk, rightDisk^c}.
-    This is a proper partition (disjoint pieces) for genB, which rotates points in rightDisk
-    and leaves everything else fixed. -/
+/-- The partition for generator B. -/
 noncomputable def partitionB : Set (Set ℝ²) :=
   {rightDisk sys, (rightDisk sys)ᶜ}
 
-/-- The basic partition for the two-disk system.
-    NOTE: This partition has overlapping pieces when the disks touch or overlap.
-    It is kept for compatibility but should NOT be used for PiecewiseIsometry construction.
-    Use partitionA for genA and partitionB for genB instead. -/
+/-- The basic partition for the two-disk system. -/
 noncomputable def basicPartition : Set (Set ℝ²) :=
   {leftDisk sys, rightDisk sys, exterior sys}
 
@@ -197,12 +173,6 @@ theorem basicPartition_cover : ⋃₀ basicPartition sys = Set.univ := by
       push_neg
       exact ⟨h1, h2⟩
 
-/- NOTE: basicPartition_disjoint has been REMOVED because it is mathematically FALSE.
-   The disks touch/overlap at the origin when dist(leftCenter, rightCenter) = r1 + r2,
-   so leftDisk and rightDisk are NOT disjoint (origin is in both).
-
-   For piecewise isometry construction, use partitionA for genA and partitionB for genB,
-   which are properly disjoint. -/
 
 /-- Each partition piece is nonempty -/
 theorem basicPartition_nonempty : ∀ s ∈ basicPartition sys, s.Nonempty := by
