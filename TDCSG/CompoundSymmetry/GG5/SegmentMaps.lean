@@ -520,7 +520,7 @@ Three segment mappings cover entire segment E'E.
 -/
 theorem segments_cover_E'E :
     ∀ z : ℂ, (∃ t : ℝ, 0 ≤ t ∧ t ≤ 1 ∧ z = E' + t • (E - E')) →
-    (∃ (case : Fin 3), True) := by
+    (∃ (_ : Fin 3), True) := by
   intro z _
   use 0
 

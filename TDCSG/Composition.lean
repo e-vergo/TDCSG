@@ -81,6 +81,7 @@ theorem refinedPartition_cover {α : Type u} (p q : Set (Set α))
     exact ⟨s, hs, t, ht, rfl, ⟨x, hxs, hxt⟩⟩
   · exact ⟨hxs, hxt⟩
 
+omit [MetricSpace α] [MeasurableSpace α] in
 /-- The refined partition is countable if both original partitions are countable. -/
 theorem refinedPartition_countable (p q : Set (Set α))
     (hp : p.Countable) (hq : q.Countable) :
@@ -117,6 +118,7 @@ theorem refinedPartitionPreimage_cover {α : Type u} (p q : Set (Set α)) (g : �
     exact ⟨s, hs, t, ht, rfl, ⟨x, hxs, hgxt⟩⟩
   · exact ⟨hxs, hgxt⟩
 
+omit [MetricSpace α] [MeasurableSpace α] in
 /-- The preimage-based refined partition is countable. -/
 theorem refinedPartitionPreimage_countable (p q : Set (Set α)) (g : α → α)
     (hp : p.Countable) (hq : q.Countable) :
@@ -151,6 +153,7 @@ end Refinement
 
 section Measurability
 
+omit [MeasurableSpace α] in
 /-- Helper lemma: isometry on a set implies continuity on that set. -/
 theorem isometry_on_continuous {s : Set α} {f : α → α}
     (h_iso : ∀ x ∈ s, ∀ y ∈ s, dist (f x) (f y) = dist x y) :
@@ -443,7 +446,7 @@ theorem comp_id_right [Nonempty α] [BorelSpace α] (f : PiecewiseIsometry α) :
       -- s ∈ {univ}, so s = univ
       -- u = univ ∩ (id⁻¹' t) = univ ∩ t = t
       rw [hs] at hu_eq
-      simp only [_root_.id, Set.preimage_id, Set.univ_inter] at hu_eq
+      simp only [Set.preimage_id, Set.univ_inter] at hu_eq
       rw [hu_eq]
       exact ht
     · intro hu

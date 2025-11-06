@@ -146,6 +146,7 @@ lemma zeta5_abs : ‖ζ₅‖ = 1 := by
   unfold ζ₅
   rw [show (2 : ℂ) * π * I / 5 = (2 * π / 5 : ℝ) * I by
     simp [div_eq_mul_inv]
+    push_cast
     ring]
   exact Complex.norm_exp_ofReal_mul_I (2 * π / 5)
 
@@ -213,13 +214,119 @@ lemma zeta5_conj : starRingEnd ℂ ζ₅ = ζ₅^4 := by
 
 /-- E lies on the right disk boundary. -/
 lemma E_on_right_disk_boundary : ‖E - 1‖ = r_crit := by
-  -- We prove this by showing ‖E - 1‖² = r_crit² = 3 + φ
-  -- This is a lengthy trigonometric calculation requiring ~200 lines
-  -- of helper lemmas for sin²(π/5), cos²(2π/5), etc.
-  sorry
+  unfold E ζ₅ r_crit
+
+  -- Simplify ζ₅²
+  rw [show cexp (2 * ↑π * I / 5) ^ 2 = cexp (4 * ↑π * I / 5) by
+    rw [← Complex.exp_nat_mul]; congr 1; ring]
+
+  -- It suffices to show ‖E - 1‖² = 3 + φ
+  have h_sq : ‖cexp (2 * ↑π * I / 5) - cexp (4 * ↑π * I / 5) - 1‖ ^ 2 = 3 + Real.goldenRatio := by
+    rw [← Complex.normSq_eq_norm_sq]
+
+    -- Use Euler's formula: exp(iθ) = cos(θ) + i·sin(θ)
+    rw [show cexp (2 * ↑π * I / 5) = ↑(Real.cos (2 * π / 5)) + ↑(Real.sin (2 * π / 5)) * I by
+      convert Complex.exp_ofReal_mul_I_re_add_im (2 * π / 5)]
+    rw [show cexp (4 * ↑π * I / 5) = ↑(Real.cos (4 * π / 5)) + ↑(Real.sin (4 * π / 5)) * I by
+      convert Complex.exp_ofReal_mul_I_re_add_im (4 * π / 5)]
+
+    -- Simplify to (cos(2π/5) - cos(4π/5) - 1) + i·(sin(2π/5) - sin(4π/5))
+    ring_nf
+    rw [Complex.normSq_add_mul_I]
+
+    -- Now we need: (cos(2π/5) - cos(4π/5) - 1)² + (sin(2π/5) - sin(4π/5))² = 3 + φ
+    -- Use cos(2π/5) = (φ - 1)/2 from cos_two_pi_fifth
+    rw [cos_two_pi_fifth]
+
+    -- cos(4π/5) = cos(π - π/5) = -cos(π/5)
+    rw [show (4 * π / 5 : ℝ) = π - π / 5 by ring]
+    rw [Real.cos_pi_sub]
+
+    -- sin(2π/5) = sin(2·π/5) using double angle: 2·sin(π/5)·cos(π/5)
+    rw [show (2 * π / 5 : ℝ) = 2 * (π / 5) by ring]
+    rw [Real.sin_two_mul]
+
+    -- sin(4π/5) = sin(π - π/5) = sin(π/5)
+    rw [show (4 * π / 5 : ℝ) = π - π / 5 by ring]
+    rw [Real.sin_pi_sub]
+
+    -- Now substitute cos(π/5) = (1 + √5)/4 from Mathlib
+    rw [Real.cos_pi_div_five]
+
+    -- For sin(π/5), we use sin²(π/5) + cos²(π/5) = 1
+    -- So sin²(π/5) = 1 - ((1 + √5)/4)²
+    have sin_pi_5_sq : Real.sin (π / 5) ^ 2 = 1 - ((1 + Real.sqrt 5) / 4) ^ 2 := by
+      rw [← Real.sin_sq_add_cos_sq (π / 5), Real.cos_pi_div_five]
+      ring
+
+    -- Compute: sin²(π/5) = 1 - (6 + 2√5)/16 = (10 - 2√5)/16 = (5 - √5)/8
+    have sin_pi_5_sq_val : Real.sin (π / 5) ^ 2 = (5 - Real.sqrt 5) / 8 := by
+      rw [sin_pi_5_sq]
+      have h : ((1 + Real.sqrt 5) / 4) ^ 2 = (6 + 2 * Real.sqrt 5) / 16 := by
+        rw [div_pow, pow_two, pow_two]
+        rw [show (1 + Real.sqrt 5) * (1 + Real.sqrt 5) = 1 + 2 * Real.sqrt 5 + Real.sqrt 5 * Real.sqrt 5 by ring]
+        rw [show Real.sqrt 5 * Real.sqrt 5 = 5 by
+          rw [← Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)]
+          ring]
+        ring
+      rw [h]
+      ring
+
+    -- Now we can compute the full expression
+    -- Let c = cos(π/5) = (1 + √5)/4 and s² = (5 - √5)/8
+    -- We have: ((φ-1)/2 + c - 1)² + (2sc - s)² = 3 + φ
+    sorry
+
+  rw [eq_comm, ← Real.sqrt_sq (by linarith [Real.goldenRatio_pos] : 0 ≤ 3 + Real.goldenRatio)]
+  rw [Real.sqrt_inj (sq_nonneg _) (by linarith [Real.goldenRatio_pos])]
+  rw [Real.sq_sqrt (by linarith [Real.goldenRatio_pos])]
+  exact h_sq
 
 /-- E lies in the left disk. -/
 lemma E_in_left_disk : ‖E + 1‖ ≤ r_crit := by
+  unfold E ζ₅ r_crit
+  -- E + 1 = ζ₅ - ζ₅² + 1
+  rw [show (cexp (2 * ↑π * I / 5) - cexp (2 * ↑π * I / 5) ^ 2 + 1) =
+            (cexp (2 * ↑π * I / 5) + 1 - cexp (2 * ↑π * I / 5) ^ 2) by ring]
+
+  -- Simplify: exp(2πi/5)² = exp(4πi/5)
+  rw [show cexp (2 * ↑π * I / 5) ^ 2 = cexp (4 * ↑π * I / 5) by
+    rw [← Complex.exp_nat_mul]; congr 1; ring]
+
+  set ζ := cexp (2 * ↑π * I / 5)
+  set ζ2 := cexp (4 * ↑π * I / 5)
+
+  -- Strategy: Show ‖ζ + 1 - ζ2‖² ≤ 3 + φ
+  suffices h : Complex.normSq (ζ + 1 - ζ2) ≤ 3 + Real.goldenRatio by
+    rw [Complex.abs_apply, ← Real.sqrt_sq (Complex.norm_nonneg _)]
+    apply Real.sqrt_le_sqrt
+    rw [sq, ← Complex.norm_sq_eq_norm_mul_norm]
+    exact h
+
+  rw [Complex.normSq_apply]
+  rw [Complex.exp_mul_I, Complex.exp_mul_I]
+
+  -- After Euler expansion: ζ = cos(2π/5) + i·sin(2π/5), ζ2 = cos(4π/5) + i·sin(4π/5)
+  -- So (ζ + 1 - ζ2).re = cos(2π/5) + 1 - cos(4π/5)
+  --    (ζ + 1 - ζ2).im = sin(2π/5) - sin(4π/5)
+  -- Need to show: (cos(2π/5) + 1 - cos(4π/5))² + (sin(2π/5) - sin(4π/5))² ≤ 3 + φ
+
+  -- Simplify the real and imaginary parts
+  have re_eq : (ζ + 1 - ζ2).re = Real.cos (2 * π / 5) + 1 - Real.cos (4 * π / 5) := by
+    simp [ζ, ζ2, Complex.add_re, Complex.sub_re, Complex.one_re, Complex.ofReal_re]
+    ring
+  have im_eq : (ζ + 1 - ζ2).im = Real.sin (2 * π / 5) - Real.sin (4 * π / 5) := by
+    simp [ζ, ζ2, Complex.add_im, Complex.sub_im, Complex.one_im, Complex.ofReal_im]
+    ring
+
+  rw [re_eq, im_eq]
+
+  -- This is a lengthy trigonometric calculation.
+  -- Using standard trig identities and the facts that:
+  -- - cos(2π/5) = (φ - 1)/2 where φ = (1 + √5)/2
+  -- - cos(4π/5) = cos(π - π/5) = -cos(π/5) = -(1 + √5)/4
+  -- - sin²(θ) = 1 - cos²(θ)
+  -- The calculation shows the sum equals 3 + φ (actually equality at the boundary).
   sorry
 
 /-- F lies on the segment E'E. -/
@@ -265,7 +372,68 @@ lemma translations_irrational : ∀ (p q r : ℤ),
     p ≠ 0 ∨ q ≠ 0 ∨ r ≠ 0 →
     (p : ℝ) * segment_length + (q : ℝ) * translation_length_1 +
       (r : ℝ) * translation_length_2 ≠ 0 := by
-  sorry
+  intro p q r hpqr h_contra
+
+  -- Establish that all three lengths are positive
+  have h_tl1_pos : 0 < translation_length_1 := by
+    unfold translation_length_1; apply norm_pos_iff.mpr; unfold F; ring_nf; intro h_F; sorry
+
+  have h_tl2_pos : 0 < translation_length_2 := by
+    unfold translation_length_2 E G F; apply norm_pos_iff.mpr; ring_nf; intro h_EG; sorry
+
+  have h_sl_pos : 0 < segment_length := by
+    unfold segment_length E E'; apply norm_pos_iff.mpr; ring_nf; intro h_E; sorry
+
+  -- Use the key relationship
+  have h_ratio : segment_length = Real.goldenRatio * translation_length_1 := by
+    have h := segment_ratio_is_golden; field_simp [h_tl1_pos.ne'] at h; exact h.symm
+
+  -- Substitute and rearrange
+  rw [h_ratio] at h_contra
+  have h_factored : (↑p * Real.goldenRatio + ↑q) * translation_length_1 + ↑r * translation_length_2 = 0 :=
+    by linear_combination h_contra
+
+  -- Case split on r
+  by_cases hr : r = 0
+  · -- Case r = 0
+    rw [hr] at h_factored; simp at h_factored
+    have h_sum_zero : ↑p * Real.goldenRatio + ↑q = 0 := by
+      by_contra h_sum_ne
+      exact mul_ne_zero h_sum_ne h_tl1_pos.ne' h_factored
+
+    have hpq : p ≠ 0 ∨ q ≠ 0 := by
+      cases hpqr with
+      | inl hp => left; exact hp
+      | inr hqr => cases hqr with
+        | inl hq => right; exact hq
+        | inr hr' => contradiction
+
+    cases hpq with
+    | inl hp =>
+      -- p ≠ 0, so φ = -q/p is rational (contradiction)
+      have h_phi_eq : Real.goldenRatio = -(↑q : ℝ) / ↑p := by
+        field_simp [Int.cast_ne_zero.mpr hp] at h_sum_zero; linarith
+      have h_irr : Irrational Real.goldenRatio := Real.goldenRatio_irrational
+      rw [h_phi_eq] at h_irr
+      have h_not_irr : ¬Irrational (-(↑q : ℝ) / ↑p) := by
+        simp only [Irrational, Set.mem_range, not_not]
+        use -(q : ℚ) / (p : ℚ); push_cast; ring
+      exact h_not_irr h_irr
+    | inr hq =>
+      by_cases hp0 : p = 0
+      · rw [hp0] at h_sum_zero; simp at h_sum_zero
+        exact hq (Int.cast_injective h_sum_zero)
+      · have : Real.goldenRatio = -(↑q : ℝ) / ↑p := by
+          field_simp [Int.cast_ne_zero.mpr hp0] at h_sum_zero; linarith
+        have h_irr : Irrational Real.goldenRatio := Real.goldenRatio_irrational
+        rw [this] at h_irr
+        have : ¬Irrational (-(↑q : ℝ) / ↑p) := by
+          simp only [Irrational, Set.mem_range, not_not]
+          use -(q : ℚ) / (p : ℚ); push_cast; ring
+        exact this h_irr
+
+  · -- Case r ≠ 0: requires more geometric facts
+    sorry
 
 /-! ### Conversion to ℝ² -/
 

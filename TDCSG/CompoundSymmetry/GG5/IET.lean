@@ -169,7 +169,7 @@ def HasEmergentIET (r : ℝ) : Prop :=
 
 /-- The emergent IET at a given radius. -/
 noncomputable def EmergentIET (r : ℝ)
-    (h : HasEmergentIET r) :
+    (_ : HasEmergentIET r) :
     IntervalExchangeTransformation 3 :=
   GG5_induced_IET
 
@@ -193,7 +193,6 @@ theorem IET_structure_golden_ratio
     iet.lengths 1 = length2 ∧
     iet.lengths 2 = length3 := by
   unfold EmergentIET GG5_induced_IET
-  simp only [and_self]
   constructor
   · rfl
   constructor

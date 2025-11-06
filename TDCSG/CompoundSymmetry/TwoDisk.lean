@@ -127,9 +127,9 @@ lemma dist_on_x_axis (a b : ℝ) :
     dist p q = |a - b| := by
   intro p q
   rw [dist_eq_norm, EuclideanSpace.norm_eq]
-  simp only [Pi.sub_apply, Fin.sum_univ_two]
+  simp only [Fin.sum_univ_two]
   -- Simplify the function applications
-  simp only [p, q, Pi.sub_apply]
+  simp only [p, q]
   -- Now we have sqrt of sum of squared norms
   simp only [Fin.isValue, Real.norm_eq_abs]
   norm_num

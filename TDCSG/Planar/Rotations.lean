@@ -89,7 +89,7 @@ theorem rotateAround_comp (c : ℝ²) (θ₁ θ₂ : Real.Angle) :
   unfold rotation2D
   rw [← LinearIsometryEquiv.trans_apply]
   rw [Orientation.rotation_trans]
-  abel
+  abel_nf
 
 /-- Rotation about the origin equals the standard rotation -/
 theorem rotateAround_origin (θ : Real.Angle) (x : ℝ²) :
@@ -142,7 +142,7 @@ lemma rotateAround_iterate_aux (c : ℝ²) (θ : ℝ) (n : ℕ) :
   | zero =>
       ext x
       simp [Function.iterate_zero, rotateAround_zero,
-        Nat.cast_zero, zero_mul]
+        zero_mul]
   | succ n' ih =>
       have angle_eq :
           ((n' : ℝ) * θ : Real.Angle) + (θ : Real.Angle) =
@@ -150,7 +150,7 @@ lemma rotateAround_iterate_aux (c : ℝ²) (θ : ℝ) (n : ℕ) :
         rw [← Real.Angle.coe_add]
         congr 1
         ring
-      simp only [Function.iterate_succ', Function.comp, ih]
+      simp only [Function.iterate_succ', ih]
       funext x
       have comp_eq :=
         rotateAround_comp c ((n' : ℝ) * θ : Real.Angle)

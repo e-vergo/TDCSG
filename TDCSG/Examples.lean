@@ -105,7 +105,7 @@ noncomputable def half_plane_reflection : PiecewiseIsometry (ℝ × ℝ) where
   partition_cover := by
     ext p
     simp only [Set.mem_sUnion, Set.mem_insert_iff, Set.mem_singleton_iff,
-      Set.mem_setOf_eq, Set.mem_univ, iff_true]
+      Set.mem_univ, iff_true]
     by_cases h : p.1 < 0
     · exact ⟨{p : ℝ × ℝ | p.1 < 0}, Or.inl rfl, h⟩
     · exact ⟨{p : ℝ × ℝ | p.1 ≥ 0}, Or.inr rfl, le_of_not_gt h⟩
@@ -166,7 +166,7 @@ noncomputable def square_billiard_simple : PiecewiseIsometry (ℝ × ℝ) where
     rcases hs with (rfl | rfl)
     · show MeasurableSet {p : ℝ × ℝ | p.1 < 1 ∧ p.2 < 1}
       have : {p : ℝ × ℝ | p.1 < 1 ∧ p.2 < 1} = Set.Iio (1 : ℝ) ×ˢ Set.Iio 1 := by
-        ext p; simp [Set.Iio, Set.prod]
+        ext p; simp [Set.Iio]
       rw [this]
       exact isOpen_Iio.prod isOpen_Iio |>.measurableSet
     · show MeasurableSet {p : ℝ × ℝ | p.1 ≥ 1 ∨ p.2 ≥ 1}
@@ -182,14 +182,14 @@ noncomputable def square_billiard_simple : PiecewiseIsometry (ℝ × ℝ) where
         · intro h
           by_cases h1 : p.1 < 1
           · have h2 : ¬p.2 < 1 := fun h2 => h ⟨h1, h2⟩
-            exact Or.inr (le_of_not_lt h2)
-          · exact Or.inl (le_of_not_lt h1)
+            exact Or.inr (le_of_not_gt h2)
+          · exact Or.inl (le_of_not_gt h1)
       rw [this]
       exact (isOpen_Iio.prod isOpen_Iio |>.measurableSet).compl
   partition_cover := by
     ext p
     simp only [Set.mem_sUnion, Set.mem_insert_iff, Set.mem_singleton_iff,
-      Set.mem_setOf_eq, Set.mem_univ, iff_true]
+      Set.mem_univ, iff_true]
     by_cases h1 : p.1 < 1 ∧ p.2 < 1
     · use {q : ℝ × ℝ | q.1 < 1 ∧ q.2 < 1}
       exact ⟨Or.inl rfl, h1⟩
@@ -197,8 +197,8 @@ noncomputable def square_billiard_simple : PiecewiseIsometry (ℝ × ℝ) where
       refine ⟨Or.inr rfl, ?_⟩
       simp only [not_and_or] at h1
       cases h1 with
-      | inl h1 => exact Or.inl (le_of_not_lt h1)
-      | inr h1 => exact Or.inr (le_of_not_lt h1)
+      | inl h1 => exact Or.inl (le_of_not_gt h1)
+      | inr h1 => exact Or.inr (le_of_not_gt h1)
   partition_disjoint := by
     intro s hs t ht hst
     simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hs ht
@@ -267,8 +267,8 @@ theorem square_billiard_boundary_discontinuity :
       · intro h
         by_cases h1 : q.1 < 1
         · have : ¬q.2 < 1 := fun h2 => h ⟨h1, h2⟩
-          exact Or.inr (le_of_not_lt this)
-        · exact Or.inl (le_of_not_lt h1)
+          exact Or.inr (le_of_not_gt this)
+        · exact Or.inl (le_of_not_gt h1)
     rw [h_compl] at hp_front
     rw [frontier_compl] at hp_front
     rw [frontier_prod_eq] at hp_front
@@ -508,7 +508,7 @@ example : FinitePiecewiseIsometry ℝ := {
   partition_cover := by
     ext x
     simp only [Set.mem_sUnion, Set.mem_insert_iff, Set.mem_singleton_iff,
-      Set.mem_Iio, Set.mem_Ici, Set.mem_univ, iff_true]
+      Set.mem_univ, iff_true]
     by_cases h : x < 0
     · exact ⟨Set.Iio 0, Or.inl rfl, h⟩
     · exact ⟨Set.Ici 0, Or.inr rfl, le_of_not_gt h⟩
