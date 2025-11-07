@@ -6,7 +6,6 @@ import TDCSG.MeasurePreserving
 import TDCSG.Finite
 import TDCSG.IntervalExchange
 import TDCSG.Examples
--- Research-level: TDCSG.Ergodic (not needed for GG5 main theorem)
 
 -- 2D planar geometry infrastructure
 import TDCSG.Planar.Rotations
