@@ -2,3 +2,19 @@
 .DS_Store
 scratch_*.lean
 test_*.lean
+
+# Backup and temporary files
+*.bak
+*.tmp
+*.swp
+*~
+
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Editor artifacts
+.vscode/
+*.sublime-*
