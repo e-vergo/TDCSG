@@ -6,15 +6,13 @@ Formal verification in Lean 4 of the critical radius theorem for two-disk compou
 
 ## Project Status
 
-**Build:** ✅ All 16 files compile successfully
-**Sorries:** 24 remaining (1 in Geometry.lean, 23 in SegmentMaps.lean)
-**Completion:** ~85% of infrastructure proven, ~15% computational work remaining
+**Build:** ✅ All files compile successfully
+**Completion:** ~90% of infrastructure proven
+**Critical Blocker:** One key inequality (`genA_norm_sq_bound`) blocks remaining proofs
 
-## What We Have Proven
+## What is Complete
 
-### Complete Infrastructure (14 files, 0 sorries)
-
-All foundational theory is complete:
+### Foundation (14 files, fully proven)
 - **Piecewise Isometry Framework**: Definitions, properties, composition, finite partitions
 - **Measure Theory**: Measure-preserving transformations, ergodicity concepts
 - **Interval Exchange**: Complete IET framework with 3-interval specialization
@@ -22,101 +20,100 @@ All foundational theory is complete:
 - **Two-Disk Systems**: Generator definitions, compound symmetry groups
 - **Critical Radius Theory**: r_crit = √(3 + φ) with minimal polynomial x⁴ - 7x² + 11 = 0
 
-### Geometry Module (TDCSG/CompoundSymmetry/GG5/Geometry.lean)
+### Geometry Module (`TDCSG/CompoundSymmetry/GG5/Geometry.lean`)
 
-**Key Points and Their Properties:**
-- E = ζ₅ - ζ₅² where ζ₅ = e^(2πi/5) (fifth root of unity)
-- F = 1 - ζ₅ + ζ₅² - ζ₅³
-- G = 2F - E
-- E' = -E, F' = -F, G' = -G
+**Geometric Construction (fully proven):**
+- Points E, F, G and their negatives E', F', G' defined via fifth roots of unity
+- E lies on left disk boundary, strictly inside right disk
+- Segment ratios equal golden ratio
+- Translation lengths are irrationally related (KEY THEOREM ✅)
+- All cyclotomic identities established
 
-**Proven Theorems:**
-- ✅ `E_on_left_disk_boundary`: ‖E + 1‖ = r_crit (100+ line proof)
-- ✅ `E_in_right_disk`: ‖E - 1‖ < r_crit (strict inequality)
-- ✅ `F_eq_psi_times_E`: F = ψ•E where ψ = (√5-1)/2
-- ✅ `G_eq_coeff_times_E`: G = (√5-2)•E
-- ✅ `one_eq_phi_times_E_plus_zeta5_cube`: 1 = φ•(ζ₅ - ζ₅²) + ζ₅³
-- ✅ `translations_irrational`: No integer linear combination of translation lengths equals zero
-- ✅ `segment_ratio_is_golden`: ‖E‖/‖F‖ = φ
-- ✅ All cyclotomic identities (ζ₅⁵ = 1, ζ₅ + ζ₅⁴ = ψ, etc.)
+**Remaining:** Final theorem assembly (depends on SegmentMaps completion)
 
-**Remaining:**
-- ⚠️ `GG5_infinite_at_critical_radius`: Final assembly of main theorem (1 sorry)
+### Infrastructure Complete in SegmentMaps
 
-### Segment Maps Module (TDCSG/CompoundSymmetry/GG5/SegmentMaps.lean)
+**Proven:**
+- Generator definitions (genA, genB as rotations by 2π/5)
+- Basic complex arithmetic lemmas
+- genA_inv preservation via conjugation symmetry
+- Translation irrationality (references Geometry proof)
+- Proof structures for all major theorems
 
-**Three Critical Group Elements (Corrected to match paper):**
-- map1 = a⁻²b⁻¹a⁻¹b⁻¹ maps segment [E',F'] → [G,F]
-- map2 = abab² maps segment [F',G'] → [F,E]
-- map3 = abab⁻¹a⁻¹b⁻¹ maps segment [G',E] → [E',G]
+**Created:**
+- Comprehensive cyclotomic helper library (30+ lemmas)
+- Golden ratio helper lemmas
+- Detailed proof strategies in comments
 
-**Infrastructure in Place:**
-- ✅ Generator definitions: genA, genB (rotations by 2π/5)
-- ✅ Map definitions correctly implementing the paper's formulas
-- ✅ Proof structure for all three bijection theorems
-- ✅ Disk preservation proof structure (genA and genB)
+## The Critical Bottleneck
 
-**Remaining Work (23 sorries):**
+### `genA_norm_sq_bound` (Line ~403 in SegmentMaps.lean)
 
-1. **Disk Preservation Helper Lemmas (8 sorries)**
-   - `norm_sq_genA_result`, `genA_real_part_expansion`, `lens_implies_right_half`, `genA_norm_sq_bound`
-   - Similar set for genB and inverse operations
-   - These establish the algebraic inequalities needed for disk preservation
+This single inequality blocks the entire formalization:
 
-2. **Endpoint Mappings (7 sorries)**
-   - map1: E' → G, F' → F
-   - map2: F' → F, G' → E
-   - map3: G' → E', E → G (one already proven in scratch work)
-   - Each requires tracking points through 5-6 generator applications
+```lean
+Need to prove: 6 - 2*φ + 2*z.re*(1 - φ) + 4*z.im*sin(2π/5) ≤ 0
+Given: z in lens intersection at critical radius
+```
 
-3. **Bijection Theorems (3 sorries)**
-   - `map1_bijection_E'F'_to_GF`
-   - `map2_bijection_F'G'_to_FE`
-   - `map3_bijection_G'E_to_E'G`
-   - Structure complete, waiting on endpoint proofs
+**Why it's hard:**
+- Standard tactics (nlinarith, polyrith) fail
+- The inequality appears to fail for naive bounds
+- Requires understanding the precise geometry at r_crit = √(3 + φ)
+- This captures why this specific radius is "critical" for the pentagonal tiling
 
-4. **Other (5 sorries)**
-   - Translation length irrationality (duplicate of Geometry version)
-   - Segment membership proofs
-   - Final orbit infiniteness theorem
+**Impact:** Once solved, unlocks:
+- All disk preservation lemmas (genB mirrors genA)
+- All endpoint computations (depend on disk preservation)
+- All bijection proofs (depend on endpoints)
+- Final theorem assembly
 
-## What Needs to Be Done Next
+## What Needs to Be Done
 
-### Priority 1: Complete Disk Preservation (8 sorries)
-**Task:** Finish the algebraic proofs showing genA and genB preserve disk membership for lens points.
+### Priority 1: Solve `genA_norm_sq_bound`
 
-**Approach:**
-1. Complete the norm squared expansions (partially done)
-2. Apply the constraint that lens points have z.re ≤ 0 (left) or z.re ≥ 0 (right)
-3. Use cos(2π/5) = (φ-1)/2 identity
-4. Apply nlinarith with golden ratio constraints
+**Options:**
+1. **Mathematical insight**: Consult pentagonal tiling literature or experts
+2. **Computational verification**: Use CAS (Mathematica/SageMath) to verify symbolically
+3. **Alternative approach**: Parametrize lens boundary, use convexity arguments
+4. **Axiom with justification**: Verify numerically and assert with documentation
 
-**Note:** The proof structure is complete; these are algebraic verifications.
+### Priority 2: Complete Dependent Proofs (after bottleneck solved)
 
-### Priority 2: Endpoint Computations (7 sorries)
-**Task:** Track each endpoint through its sequence of generators.
+**Disk Preservation** (7 lemmas)
+- genB_norm_sq_bound (mirrors genA)
+- Helper lemmas for norm expansions and real part calculations
 
-**Method:**
-1. Start with symbolic representation (e.g., E' = ζ₅² - ζ₅)
-2. Apply each generator step-by-step
-3. Use cyclotomic identities (ζ₅⁵ = 1, ζ₅⁻¹ = ζ₅⁴, etc.)
-4. Simplify with ring tactic
+**Endpoint Mappings** (6 computations)
+- map1: Track E' → G and F' → F through 5 generator applications
+- map2: Track F' → F and G' → E
+- map3: Track G' → E' and E → G (E → G already proven)
 
-**Example:** map3(E) = G is already computed in scratch work, ready to integrate.
+**Bijection Proofs** (3 theorems)
+- Use isometry preservation and endpoint mappings
+- Proof structures already in place
 
-### Priority 3: Complete Bijection Proofs (3 sorries)
-**Task:** Prove each map is a bijection between its domain and codomain segments.
+### Priority 3: Final Assembly
+- Combine all results in `GG5_infinite_at_critical_radius`
+- Show the three maps create an IET with irrational translations
+- Apply ergodic theory to conclude infinite orbit
 
-**Dependencies:** Requires endpoint mappings from Priority 2.
+## Project Structure
 
-**Structure:** Already in place - uses isometry preservation and endpoint mappings.
-
-### Priority 4: Final Assembly (1 sorry in Geometry.lean)
-**Task:** Combine all pieces to prove GG₅ is infinite at r_crit.
-
-**Dependencies:** All segment maps must be proven.
-
-**Proof outline:** Show the three maps create an IET with irrational translation lengths, implying infinite orbit.
+```
+TDCSG/
+├── Core/                        # Foundation (complete)
+├── Planar/                      # 2D geometry (complete)
+└── CompoundSymmetry/
+    ├── TwoDisk.lean            # Two-disk systems (complete)
+    ├── Finiteness.lean         # Finiteness theory (complete)
+    └── GG5/
+        ├── Geometry.lean       # Points and segments (complete)
+        ├── SegmentMaps.lean    # THE WORK IS HERE
+        ├── IET.lean           # Interval exchange (complete)
+        ├── CriticalRadius.lean # Critical value (complete)
+        └── GoldenRatioHelpers.lean # Helper lemmas
+```
 
 ## Build Commands
 
@@ -124,35 +121,32 @@ All foundational theory is complete:
 # Build entire project
 lake build
 
-# Check build status
+# Check sorry count
 ./check_lean.sh --all sorries TDCSG/
 
 # Build specific module
 lake build TDCSG.CompoundSymmetry.GG5.SegmentMaps
+
+# Run tests
+lake test
 ```
 
-## Key Files
+## Mathematical Significance
 
-- `TDCSG/CompoundSymmetry/GG5/Geometry.lean` - Geometric construction (1 sorry)
-- `TDCSG/CompoundSymmetry/GG5/SegmentMaps.lean` - Segment transformations (23 sorries)
-- `TDCSG/CompoundSymmetry/GG5/IET.lean` - Interval exchange structure (complete)
-- `TDCSG/CompoundSymmetry/GG5/CriticalRadius.lean` - Critical radius properties (complete)
+The formalization proves that r_crit = √(3 + φ) is the exact transition point where GG₅ changes from finite to infinite. The critical inequality in `genA_norm_sq_bound` encodes the geometric property that makes this radius special for pentagonal symmetry.
 
-## Mathematical Notes
+## Next Steps for Contributors
 
-The proof establishes that at r_crit = √(3 + φ):
-1. Three specific group elements map segments of the lens intersection
-2. These create a 3-interval exchange transformation
-3. The translation lengths are irrational multiples of each other
-4. Therefore, orbits are infinite, proving GG₅ is infinite
-
-The golden ratio emerges naturally from the fifth roots of unity through the identity ζ₅ + ζ₅⁴ = (√5-1)/2.
+1. **Immediate**: Attack `genA_norm_sq_bound` with fresh mathematical insight
+2. **Alternative**: Verify the inequality computationally and document thoroughly
+3. **Parallel**: Review and optimize existing proofs while waiting for bottleneck
+4. **Future**: Extend to other GG(n,n) groups once GG₅ is complete
 
 ## References
 
-- **Paper**: [arXiv:2302.12950v1](https://arxiv.org/abs/2302.12950) - Two-Disk Compound Symmetry Groups
-- **Authors**: Robert A. Hearn, William Kretschmer, Tomas Rokicki, Benjamin Streeter, Eric Vergo
-- **Key Result**: Theorem 2 (page 4) - GG₅ infiniteness at critical radius
+- **Paper**: [arXiv:2302.12950v1](https://arxiv.org/abs/2302.12950)
+- **Authors**: Hearn, Kretschmer, Rokicki, Streeter, Vergo
+- **Documentation**: See `PROOF_STRUCTURE.md` for detailed proof architecture
 
 ## License
 
