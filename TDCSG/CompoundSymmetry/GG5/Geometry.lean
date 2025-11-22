@@ -224,6 +224,75 @@ lemma zeta5_inv_eq_pow4 : ζ₅⁻¹ = ζ₅^4 := by
   field_simp [h2]
   rw [← h1]
 
+/-! ### Fifth root of unity computation helpers
+
+These lemmas help simplify expressions involving compositions of rotations.
+The key insight is that ζ₅⁵ = 1, so all powers reduce to ζ₅^(n mod 5).
+
+Usage pattern for endpoint calculations:
+1. Use `zeta5_inv_as_pow4` to convert ζ₅⁻¹ → ζ₅⁴
+2. Use `pow_add` to combine powers: ζ₅ⁿ * ζ₅ᵐ = ζ₅ⁿ⁺ᵐ
+3. Use `zeta5_pow_reduce` to normalize: ζ₅ⁿ = ζ₅^(n mod 5)
+4. Specific helpers like `zeta5_sq_mul_inv` shortcut common patterns
+
+Example: Simplify (z + 1) * ζ₅² * ζ₅⁻¹
+  Step 1: Rewrite ζ₅⁻¹ as ζ₅⁴ using `zeta5_inv_as_pow4`
+          → (z + 1) * ζ₅² * ζ₅⁴
+  Step 2: Combine powers using `pow_add`
+          → (z + 1) * ζ₅⁶
+  Step 3: Reduce using `zeta5_pow_reduce`
+          → (z + 1) * ζ₅  (since 6 mod 5 = 1)
+  Or use the direct helper `zeta5_sq_mul_inv` in one step.
+-/
+
+/-- ζ₅ is not zero. -/
+lemma zeta5_ne_zero : ζ₅ ≠ 0 := by
+  intro h
+  have h1 : ζ₅^5 = 1 := zeta5_pow_five
+  rw [h] at h1
+  norm_num at h1
+
+/-- Reduce powers of ζ₅ using ζ₅⁵ = 1 -/
+lemma zeta5_pow_reduce (n : ℕ) : ζ₅ ^ n = ζ₅ ^ (n % 5) := by
+  conv_lhs => rw [← Nat.div_add_mod n 5]
+  rw [pow_add, pow_mul]
+  simp [zeta5_pow_five]
+
+/-- Simplify ζ₅⁻¹ * ζ₅ -/
+lemma zeta5_inv_mul : ζ₅⁻¹ * ζ₅ = 1 := by
+  field_simp [zeta5_ne_zero]
+
+/-- Simplify ζ₅ * ζ₅⁻¹ -/
+lemma zeta5_mul_inv : ζ₅ * ζ₅⁻¹ = 1 := by
+  field_simp [zeta5_ne_zero]
+
+/-- Express ζ₅⁻¹ as ζ₅⁴ for easier computation -/
+lemma zeta5_inv_as_pow4 : ζ₅⁻¹ = ζ₅^4 := zeta5_inv_eq_pow4
+
+/-- Product of positive and negative powers: ζ₅ⁿ * ζ₅⁻¹ = ζ₅ⁿ⁻¹ -/
+lemma zeta5_pow_mul_inv (n : ℕ) : ζ₅^n * ζ₅⁻¹ = ζ₅^((n + 4) % 5) := by
+  rw [zeta5_inv_as_pow4]
+  rw [← pow_add]
+  exact zeta5_pow_reduce (n + 4)
+
+/-- Product of negative and positive powers: ζ₅⁻¹ * ζ₅ⁿ = ζ₅ⁿ⁻¹ -/
+lemma zeta5_inv_mul_pow (n : ℕ) : ζ₅⁻¹ * ζ₅^n = ζ₅^((n + 4) % 5) := by
+  rw [mul_comm]
+  exact zeta5_pow_mul_inv n
+
+/-- Useful for ζ₅² * ζ₅⁻¹ = ζ₅ -/
+lemma zeta5_sq_mul_inv : ζ₅^2 * ζ₅⁻¹ = ζ₅ := by
+  have : ζ₅^2 * ζ₅⁻¹ = ζ₅^((2 + 4) % 5) := zeta5_pow_mul_inv 2
+  norm_num at this
+  exact this
+
+/-- Useful for ζ₅⁴ * ζ₅² = ζ₅ -/
+lemma zeta5_pow4_mul_sq : ζ₅^4 * ζ₅^2 = ζ₅ := by
+  rw [← pow_add]
+  have : ζ₅^6 = ζ₅^(6 % 5) := zeta5_pow_reduce 6
+  norm_num at this
+  exact this
+
 /-- Helper: express ζ₅ in terms of cos and sin -/
 private lemma zeta5_eq : ζ₅ = ↑(Real.cos (2 * π / 5)) + I * ↑(Real.sin (2 * π / 5)) := by
   unfold ζ₅

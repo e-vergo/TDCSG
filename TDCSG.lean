@@ -17,7 +17,7 @@ import TDCSG.CompoundSymmetry.Finiteness
 
 -- Theorem 2: GG₅ critical radius formalization
 import TDCSG.CompoundSymmetry.GG5.Geometry
-import TDCSG.CompoundSymmetry.GG5.SegmentMaps
+import TDCSG.CompoundSymmetry.GG5.SegmentMaps.Main
 import TDCSG.CompoundSymmetry.GG5.IET
 import TDCSG.CompoundSymmetry.GG5.CriticalRadius
 
