@@ -1,0 +1,21 @@
+[project]
+name = "TDCSG"
+title = "Two-Disk Compound Symmetry Groups"
+
+[lean]
+# Path to the Lean source directory
+src = "TDCSG"
+
+[blueprint]
+# Path to the blueprint source
+src = "blueprint/src"
+# Path to the web output
+web = "blueprint/web"
+# Path to the print output
+print = "blueprint/print"
+
+[links]
+# GitHub repository
+github = "https://github.com/eric/TDCSG"
+# Documentation home
+docs = "https://eric.github.io/TDCSG/docs"

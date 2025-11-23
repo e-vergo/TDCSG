@@ -1,0 +1,30 @@
+{"synthetic": false,
+ "outputs":
+ {"o": ["11549669959019822682"],
+  "i": "17391953392024430189",
+  "c": "3214315957445433575"},
+ "log":
+ [{"message":
+   ".> LEAN_PATH=/Users/eric/Documents/GitHub/TDCSG/.lake/packages/Cli/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/batteries/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/Qq/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/aesop/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/proofwidgets/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/importGraph/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/plausible/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/mathlib/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/build/lib/lean /Users/eric/.elan/toolchains/leanprover--lean4---v4.24.0/bin/lean /Users/eric/Documents/GitHub/TDCSG/TDCSG/CompoundSymmetry/GG5/SegmentMaps/Isometries.lean -o /Users/eric/Documents/GitHub/TDCSG/.lake/build/lib/lean/TDCSG/CompoundSymmetry/GG5/SegmentMaps/Isometries.olean -i /Users/eric/Documents/GitHub/TDCSG/.lake/build/lib/lean/TDCSG/CompoundSymmetry/GG5/SegmentMaps/Isometries.ilean -c /Users/eric/Documents/GitHub/TDCSG/.lake/build/ir/TDCSG/CompoundSymmetry/GG5/SegmentMaps/Isometries.c --setup /Users/eric/Documents/GitHub/TDCSG/.lake/build/ir/TDCSG/CompoundSymmetry/GG5/SegmentMaps/Isometries.setup.json --json",
+   "level": "trace"}],
+ "inputs":
+ [["TDCSG.CompoundSymmetry.GG5.SegmentMaps.Isometries:deps",
+   [["deps",
+     [["TDCSG/TDCSG:extraDep", [["@TDCSG:extraDep", "1723"]]],
+      ["imports",
+       [["TDCSG.CompoundSymmetry.GG5.SegmentMaps.Maps transitive imports (legacy)",
+         "17443766126163579113"],
+        ["TDCSG.CompoundSymmetry.GG5.SegmentMaps.Maps:importAllArts",
+         "13664043882701776910"]]]]],
+    ["libs",
+     [["import dynlibs", "1723"],
+      ["package external libraries", "1723"],
+      ["module dynlibs", "1723"],
+      ["module plugins", "1723"]]]]],
+  ["Lean 4.24.0, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b",
+   "1165570713881806064"],
+  ["/Users/eric/Documents/GitHub/TDCSG/TDCSG/CompoundSymmetry/GG5/SegmentMaps/Isometries.lean",
+   "13989212346982946694"],
+  ["options", [["-Dpp.unicode.fun=true", "11210593074386665387"]]],
+  ["Module.leanArgs: #[]", "1723"]],
+ "depHash": "11568710246572082269"}

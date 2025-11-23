@@ -1,0 +1,352 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta name="generator" content="plasTeX">
+<meta content="text/html; charset=utf-8" http-equiv="content-type">
+
+<title></title>
+
+
+
+<link rel="stylesheet" href="styles/styles.css">
+</head>
+<body>
+
+<div class="navigation">
+<table cellspacing="2" cellpadding="0" width="100%">
+<tr>
+
+<td><img border="0" alt="" src="icons/blank.gif" width="32" height="32"></td>
+
+<td><img border="0" alt="" src="icons/blank.gif" width="32" height="32"></td>
+
+<td><img border="0" alt="" src="icons/blank.gif" width="32" height="32"></td>
+<td class="navtitle" align="center">TDCSG: Two-Disk Compound Symmetry Groups</td>
+<td><a href="../web/index.html" title="Table of Contents"><img border="0" alt="" src="icons/contents.gif" width="32" height="32"></a></td>
+
+
+<td><img border="0" alt="" src="icons/blank.gif" width="32" height="32"></td>
+<td><img border="0" alt="" src="icons/blank.gif" width="32" height="32"></td>
+</tr>
+</table>
+</div>
+
+
+
+<div><p>  </p><div class="titlepage">
+<h1>TDCSG: Two-Disk Compound Symmetry Groups</h1>
+<p>
+<div>Formal Verification in Lean 4</div>
+</p>
+
+
+</div><div class="titlepage">
+<h1>TDCSG: Two-Disk Compound Symmetry Groups</h1>
+<p>
+<div>Formal Verification in Lean 4</div>
+</p>
+
+
+</div><div class="abstract"> This blueprint documents the formal verification in Lean 4 of the critical radius theorem for two-disk compound symmetry groups from arXiv:2302.12950v1. The main result proves that the compound symmetry group GG₅ is infinite at the critical radius <object data="images/img-0001.svg" style="width:&amp;images/img-0001.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0001.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0001.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0001.png" alt="$r_c = \sqrt{3 + \phi }$" style="vertical-align:&amp;images/img-0001.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0001.png-width;&amp;px;; 
+                                     height:&amp;images/img-0001.png-height;&amp;px;" class="math gen"></object>, where <object data="images/img-0002.svg" style="width:&amp;images/img-0002.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0002.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0002.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0002.png" alt="$\phi = \frac{1+\sqrt{5}}{2}$" style="vertical-align:&amp;images/img-0002.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0002.png-width;&amp;px;; 
+                                     height:&amp;images/img-0002.png-height;&amp;px;" class="math gen"></object> is the golden ratio. </div><h1 id="a0000000002">0.1 Main Theorem</h1>
+<p> GG5_infinite_at_critical_radius The compound symmetry group GG₅ is infinite at the critical radius <object data="images/img-0001.svg" style="width:&amp;images/img-0001.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0001.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0001.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0001.png" alt="$r_c = \sqrt{3 + \phi }$" style="vertical-align:&amp;images/img-0001.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0001.png-width;&amp;px;; 
+                                     height:&amp;images/img-0001.png-height;&amp;px;" class="math gen"></object>. Formally, there exists a point <object data="images/img-0003.svg" style="width:&amp;images/img-0003.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0003.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0003.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0003.png" alt="$x$" style="vertical-align:&amp;images/img-0003.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0003.png-width;&amp;px;; 
+                                     height:&amp;images/img-0003.png-height;&amp;px;" class="math gen"></object> whose orbit under the group has arbitrarily large finite subsets. thm:iet_infinite_orbit, def:gg5_critical, def:r_crit </p><h1 id="a0000000003">0.2 Foundations</h1>
+<h2 id="a0000000004">0.2.1 Critical Radius</h2>
+<p> r_crit The critical radius is defined as <object data="images/img-0001.svg" style="width:&amp;images/img-0001.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0001.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0001.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0001.png" alt="$r_c = \sqrt{3 + \phi }$" style="vertical-align:&amp;images/img-0001.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0001.png-width;&amp;px;; 
+                                     height:&amp;images/img-0001.png-height;&amp;px;" class="math gen"></object> where <object data="images/img-0004.svg" style="width:&amp;images/img-0004.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0004.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0004.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0004.png" alt="$\phi $" style="vertical-align:&amp;images/img-0004.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0004.png-width;&amp;px;; 
+                                     height:&amp;images/img-0004.png-height;&amp;px;" class="math gen"></object> is the golden ratio. </p><p> r_crit_pos The critical radius is positive: <object data="images/img-0005.svg" style="width:&amp;images/img-0005.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0005.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0005.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0005.png" alt="$r_c &gt; 0$" style="vertical-align:&amp;images/img-0005.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0005.png-width;&amp;px;; 
+                                     height:&amp;images/img-0005.png-height;&amp;px;" class="math gen"></object>. def:r_crit </p><p> r_crit_approx The critical radius satisfies <object data="images/img-0006.svg" style="width:&amp;images/img-0006.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0006.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0006.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0006.png" alt="$2.148 &lt; r_c &lt; 2.150$" style="vertical-align:&amp;images/img-0006.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0006.png-width;&amp;px;; 
+                                     height:&amp;images/img-0006.png-height;&amp;px;" class="math gen"></object>. def:r_crit </p><p> r_crit_minimal_poly The critical radius satisfies the minimal polynomial equation: <object data="images/img-0007.svg" style="width:&amp;images/img-0007.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0007.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0007.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0007.png" alt="$r_c^4 - 7r_c^2 + 11 = 0$" style="vertical-align:&amp;images/img-0007.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0007.png-width;&amp;px;; 
+                                     height:&amp;images/img-0007.png-height;&amp;px;" class="math gen"></object>. def:r_crit </p><h2 id="a0000000005">0.2.2 Fifth Root of Unity</h2>
+<p> ζ₅ Let <object data="images/img-0008.svg" style="width:&amp;images/img-0008.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0008.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0008.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0008.png" alt="$\zeta _5 = e^{2\pi i/5}$" style="vertical-align:&amp;images/img-0008.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0008.png-width;&amp;px;; 
+                                     height:&amp;images/img-0008.png-height;&amp;px;" class="math gen"></object> be the primitive fifth root of unity. </p><p> zeta5_pow_five <object data="images/img-0009.svg" style="width:&amp;images/img-0009.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0009.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0009.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0009.png" alt="$\zeta _5^5 = 1$" style="vertical-align:&amp;images/img-0009.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0009.png-width;&amp;px;; 
+                                     height:&amp;images/img-0009.png-height;&amp;px;" class="math gen"></object>. def:zeta5 </p><p> zeta5_isPrimitiveRoot <object data="images/img-0010.svg" style="width:&amp;images/img-0010.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0010.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0010.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0010.png" alt="$\zeta _5$" style="vertical-align:&amp;images/img-0010.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0010.png-width;&amp;px;; 
+                                     height:&amp;images/img-0010.png-height;&amp;px;" class="math gen"></object> is a primitive fifth root of unity. def:zeta5, lem:zeta5_pow_five </p><p> zeta5_abs <object data="images/img-0011.svg" style="width:&amp;images/img-0011.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0011.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0011.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0011.png" alt="$|\zeta _5| = 1$" style="vertical-align:&amp;images/img-0011.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0011.png-width;&amp;px;; 
+                                     height:&amp;images/img-0011.png-height;&amp;px;" class="math gen"></object>. def:zeta5 </p><p> cyclotomic5_sum <object data="images/img-0012.svg" style="width:&amp;images/img-0012.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0012.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0012.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0012.png" alt="$1 + \zeta _5 + \zeta _5^2 + \zeta _5^3 + \zeta _5^4 = 0$" style="vertical-align:&amp;images/img-0012.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0012.png-width;&amp;px;; 
+                                     height:&amp;images/img-0012.png-height;&amp;px;" class="math gen"></object>. def:zeta5, lem:zeta5_primitive </p><p> cos_two_pi_fifth <object data="images/img-0013.svg" style="width:&amp;images/img-0013.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0013.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0013.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0013.png" alt="$\cos (2\pi /5) = (\phi - 1)/2$" style="vertical-align:&amp;images/img-0013.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0013.png-width;&amp;px;; 
+                                     height:&amp;images/img-0013.png-height;&amp;px;" class="math gen"></object>. def:zeta5 </p><h2 id="a0000000006">0.2.3 Geometric Points</h2>
+<p> E The point <object data="images/img-0014.svg" style="width:&amp;images/img-0014.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0014.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0014.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0014.png" alt="$E$" style="vertical-align:&amp;images/img-0014.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0014.png-width;&amp;px;; 
+                                     height:&amp;images/img-0014.png-height;&amp;px;" class="math gen"></object> is defined via the fifth root of unity and lies on the boundary of the left disk. def:zeta5, def:r_crit </p><p> E’ The point <object data="images/img-0015.svg" style="width:&amp;images/img-0015.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0015.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0015.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0015.png" alt="$E&#x27;$" style="vertical-align:&amp;images/img-0015.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0015.png-width;&amp;px;; 
+                                     height:&amp;images/img-0015.png-height;&amp;px;" class="math gen"></object> is the reflection of <object data="images/img-0014.svg" style="width:&amp;images/img-0014.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0014.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0014.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0014.png" alt="$E$" style="vertical-align:&amp;images/img-0014.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0014.png-width;&amp;px;; 
+                                     height:&amp;images/img-0014.png-height;&amp;px;" class="math gen"></object> and lies on the boundary of the right disk. def:E </p><p> F The point <object data="images/img-0016.svg" style="width:&amp;images/img-0016.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0016.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0016.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0016.png" alt="$F$" style="vertical-align:&amp;images/img-0016.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0016.png-width;&amp;px;; 
+                                     height:&amp;images/img-0016.png-height;&amp;px;" class="math gen"></object> lies on the segment from <object data="images/img-0015.svg" style="width:&amp;images/img-0015.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0015.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0015.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0015.png" alt="$E&#x27;$" style="vertical-align:&amp;images/img-0015.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0015.png-width;&amp;px;; 
+                                     height:&amp;images/img-0015.png-height;&amp;px;" class="math gen"></object> to <object data="images/img-0014.svg" style="width:&amp;images/img-0014.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0014.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0014.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0014.png" alt="$E$" style="vertical-align:&amp;images/img-0014.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0014.png-width;&amp;px;; 
+                                     height:&amp;images/img-0014.png-height;&amp;px;" class="math gen"></object>. def:E, def:Eprime, def:zeta5 </p><p> G The point <object data="images/img-0017.svg" style="width:&amp;images/img-0017.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0017.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0017.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0017.png" alt="$G$" style="vertical-align:&amp;images/img-0017.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0017.png-width;&amp;px;; 
+                                     height:&amp;images/img-0017.png-height;&amp;px;" class="math gen"></object> lies on the segment from <object data="images/img-0015.svg" style="width:&amp;images/img-0015.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0015.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0015.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0015.png" alt="$E&#x27;$" style="vertical-align:&amp;images/img-0015.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0015.png-width;&amp;px;; 
+                                     height:&amp;images/img-0015.png-height;&amp;px;" class="math gen"></object> to <object data="images/img-0014.svg" style="width:&amp;images/img-0014.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0014.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0014.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0014.png" alt="$E$" style="vertical-align:&amp;images/img-0014.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0014.png-width;&amp;px;; 
+                                     height:&amp;images/img-0014.png-height;&amp;px;" class="math gen"></object>. def:E, def:Eprime, def:zeta5 </p><p> E_on_left_disk_boundary <object data="images/img-0018.svg" style="width:&amp;images/img-0018.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0018.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0018.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0018.png" alt="$\| E + 1\|  = r_c$" style="vertical-align:&amp;images/img-0018.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0018.png-width;&amp;px;; 
+                                     height:&amp;images/img-0018.png-height;&amp;px;" class="math gen"></object>. def:E, def:r_crit </p><p> E_in_right_disk <object data="images/img-0019.svg" style="width:&amp;images/img-0019.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0019.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0019.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0019.png" alt="$\| E - 1\|  \leq r_c$" style="vertical-align:&amp;images/img-0019.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0019.png-width;&amp;px;; 
+                                     height:&amp;images/img-0019.png-height;&amp;px;" class="math gen"></object>. def:E, def:r_crit </p><p> E’_on_right_disk_boundary <object data="images/img-0020.svg" style="width:&amp;images/img-0020.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0020.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0020.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0020.png" alt="$\| E&#x27; - 1\|  = r_c$" style="vertical-align:&amp;images/img-0020.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0020.png-width;&amp;px;; 
+                                     height:&amp;images/img-0020.png-height;&amp;px;" class="math gen"></object>. def:Eprime, def:r_crit </p><p> E’_in_left_disk <object data="images/img-0021.svg" style="width:&amp;images/img-0021.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0021.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0021.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0021.png" alt="$\| E&#x27; + 1\|  \leq r_c$" style="vertical-align:&amp;images/img-0021.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0021.png-width;&amp;px;; 
+                                     height:&amp;images/img-0021.png-height;&amp;px;" class="math gen"></object>. def:Eprime, def:r_crit </p><h2 id="a0000000007">0.2.4 Segment Structure</h2>
+<p> F_on_segment_E’E <object data="images/img-0016.svg" style="width:&amp;images/img-0016.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0016.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0016.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0016.png" alt="$F$" style="vertical-align:&amp;images/img-0016.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0016.png-width;&amp;px;; 
+                                     height:&amp;images/img-0016.png-height;&amp;px;" class="math gen"></object> lies on the segment from <object data="images/img-0015.svg" style="width:&amp;images/img-0015.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0015.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0015.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0015.png" alt="$E&#x27;$" style="vertical-align:&amp;images/img-0015.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0015.png-width;&amp;px;; 
+                                     height:&amp;images/img-0015.png-height;&amp;px;" class="math gen"></object> to <object data="images/img-0014.svg" style="width:&amp;images/img-0014.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0014.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0014.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0014.png" alt="$E$" style="vertical-align:&amp;images/img-0014.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0014.png-width;&amp;px;; 
+                                     height:&amp;images/img-0014.png-height;&amp;px;" class="math gen"></object>: there exists <object data="images/img-0022.svg" style="width:&amp;images/img-0022.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0022.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0022.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0022.png" alt="$t \in [0,1]$" style="vertical-align:&amp;images/img-0022.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0022.png-width;&amp;px;; 
+                                     height:&amp;images/img-0022.png-height;&amp;px;" class="math gen"></object> with <object data="images/img-0023.svg" style="width:&amp;images/img-0023.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0023.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0023.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0023.png" alt="$F = E&#x27; + t(E - E&#x27;)$" style="vertical-align:&amp;images/img-0023.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0023.png-width;&amp;px;; 
+                                     height:&amp;images/img-0023.png-height;&amp;px;" class="math gen"></object>. def:F, def:E, def:Eprime </p><p> G_on_segment_E’E <object data="images/img-0017.svg" style="width:&amp;images/img-0017.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0017.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0017.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0017.png" alt="$G$" style="vertical-align:&amp;images/img-0017.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0017.png-width;&amp;px;; 
+                                     height:&amp;images/img-0017.png-height;&amp;px;" class="math gen"></object> lies on the segment from <object data="images/img-0015.svg" style="width:&amp;images/img-0015.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0015.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0015.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0015.png" alt="$E&#x27;$" style="vertical-align:&amp;images/img-0015.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0015.png-width;&amp;px;; 
+                                     height:&amp;images/img-0015.png-height;&amp;px;" class="math gen"></object> to <object data="images/img-0014.svg" style="width:&amp;images/img-0014.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0014.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0014.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0014.png" alt="$E$" style="vertical-align:&amp;images/img-0014.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0014.png-width;&amp;px;; 
+                                     height:&amp;images/img-0014.png-height;&amp;px;" class="math gen"></object>: there exists <object data="images/img-0022.svg" style="width:&amp;images/img-0022.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0022.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0022.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0022.png" alt="$t \in [0,1]$" style="vertical-align:&amp;images/img-0022.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0022.png-width;&amp;px;; 
+                                     height:&amp;images/img-0022.png-height;&amp;px;" class="math gen"></object> with <object data="images/img-0024.svg" style="width:&amp;images/img-0024.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0024.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0024.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0024.png" alt="$G = E&#x27; + t(E - E&#x27;)$" style="vertical-align:&amp;images/img-0024.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0024.png-width;&amp;px;; 
+                                     height:&amp;images/img-0024.png-height;&amp;px;" class="math gen"></object>. def:G, def:E, def:Eprime </p><p> segment_ordering The points are ordered as <object data="images/img-0015.svg" style="width:&amp;images/img-0015.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0015.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0015.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0015.png" alt="$E&#x27;$" style="vertical-align:&amp;images/img-0015.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0015.png-width;&amp;px;; 
+                                     height:&amp;images/img-0015.png-height;&amp;px;" class="math gen"></object>, <object data="images/img-0017.svg" style="width:&amp;images/img-0017.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0017.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0017.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0017.png" alt="$G$" style="vertical-align:&amp;images/img-0017.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0017.png-width;&amp;px;; 
+                                     height:&amp;images/img-0017.png-height;&amp;px;" class="math gen"></object>, <object data="images/img-0016.svg" style="width:&amp;images/img-0016.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0016.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0016.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0016.png" alt="$F$" style="vertical-align:&amp;images/img-0016.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0016.png-width;&amp;px;; 
+                                     height:&amp;images/img-0016.png-height;&amp;px;" class="math gen"></object>, <object data="images/img-0014.svg" style="width:&amp;images/img-0014.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0014.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0014.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0014.png" alt="$E$" style="vertical-align:&amp;images/img-0014.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0014.png-width;&amp;px;; 
+                                     height:&amp;images/img-0014.png-height;&amp;px;" class="math gen"></object> with <object data="images/img-0025.svg" style="width:&amp;images/img-0025.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0025.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0025.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0025.png" alt="$0 &lt; t_G &lt; t_F &lt; 1$" style="vertical-align:&amp;images/img-0025.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0025.png-width;&amp;px;; 
+                                     height:&amp;images/img-0025.png-height;&amp;px;" class="math gen"></object>. def:E, def:Eprime, def:F, def:G </p><p> translation_length_1, translation_length_2 The translation lengths of the three segment maps. def:E, def:Eprime, def:F, def:G </p><p> segment_length The length of the segment from <object data="images/img-0015.svg" style="width:&amp;images/img-0015.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0015.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0015.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0015.png" alt="$E&#x27;$" style="vertical-align:&amp;images/img-0015.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0015.png-width;&amp;px;; 
+                                     height:&amp;images/img-0015.png-height;&amp;px;" class="math gen"></object> to <object data="images/img-0014.svg" style="width:&amp;images/img-0014.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0014.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0014.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0014.png" alt="$E$" style="vertical-align:&amp;images/img-0014.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0014.png-width;&amp;px;; 
+                                     height:&amp;images/img-0014.png-height;&amp;px;" class="math gen"></object>. def:E, def:Eprime </p><p> segment_ratio_is_golden The ratio of segment length to the first translation length equals the golden ratio: <object data="images/img-0026.svg" style="width:&amp;images/img-0026.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0026.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0026.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0026.png" alt="$\frac{\text{segment\_ length}}{\text{translation\_ length}_1} = \phi $" style="vertical-align:&amp;images/img-0026.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0026.png-width;&amp;px;; 
+                                     height:&amp;images/img-0026.png-height;&amp;px;" class="math gen"></object>. def:segment_length, def:translation_lengths </p><p> translations_irrational The translation lengths are irrationally related: for any integers <object data="images/img-0027.svg" style="width:&amp;images/img-0027.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0027.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0027.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0027.png" alt="$q, r$" style="vertical-align:&amp;images/img-0027.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0027.png-width;&amp;px;; 
+                                     height:&amp;images/img-0027.png-height;&amp;px;" class="math gen"></object> not both zero, <object data="images/img-0028.svg" style="width:&amp;images/img-0028.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0028.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0028.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0028.png" alt="$q \cdot \text{translation\_ length}_1 + r \cdot \text{translation\_ length}_2 \neq 0$" style="vertical-align:&amp;images/img-0028.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0028.png-width;&amp;px;; 
+                                     height:&amp;images/img-0028.png-height;&amp;px;" class="math gen"></object>. def:translation_lengths, thm:segment_ratio_golden </p><h2 id="a0000000008">0.2.5 Two-Disk System</h2>
+<p> CompoundSymmetry.TwoDiskSystem A two-disk system consists of two disks with specified radii and generators that are rotations. </p><p> genA, genB The generators are rotations by <object data="images/img-0029.svg" style="width:&amp;images/img-0029.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0029.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0029.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0029.png" alt="$2\pi /5$" style="vertical-align:&amp;images/img-0029.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0029.png-width;&amp;px;; 
+                                     height:&amp;images/img-0029.png-height;&amp;px;" class="math gen"></object> about the disk centers. def:twodisk, def:zeta5 </p><p> GG5_critical The two-disk system GG₅ at the critical radius. def:twodisk, def:r_crit, def:generators </p><h1 id="a0000000009">0.3 Generators and Isometries</h1>
+<p> lens_intersection_preserved_by_rotation If <object data="images/img-0030.svg" style="width:&amp;images/img-0030.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0030.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0030.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0030.png" alt="$z$" style="vertical-align:&amp;images/img-0030.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0030.png-width;&amp;px;; 
+                                     height:&amp;images/img-0030.png-height;&amp;px;" class="math gen"></object> is in the intersection of both disks, then its rotation is also in the intersection. def:r_crit, def:zeta5 </p><p> genA_preserves_intersection The generator <object data="images/img-0031.svg" style="width:&amp;images/img-0031.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0031.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0031.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0031.png" alt="$A$" style="vertical-align:&amp;images/img-0031.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0031.png-width;&amp;px;; 
+                                     height:&amp;images/img-0031.png-height;&amp;px;" class="math gen"></object> preserves the disk intersection. def:generators, ax:lens_preserved </p><p> genB_preserves_intersection The generator <object data="images/img-0032.svg" style="width:&amp;images/img-0032.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0032.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0032.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0032.png" alt="$B$" style="vertical-align:&amp;images/img-0032.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0032.png-width;&amp;px;; 
+                                     height:&amp;images/img-0032.png-height;&amp;px;" class="math gen"></object> preserves the disk intersection. def:generators, ax:lens_preserved </p><p> genA_isometric_on_intersection The generator <object data="images/img-0031.svg" style="width:&amp;images/img-0031.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0031.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0031.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0031.png" alt="$A$" style="vertical-align:&amp;images/img-0031.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0031.png-width;&amp;px;; 
+                                     height:&amp;images/img-0031.png-height;&amp;px;" class="math gen"></object> is an isometry on the disk intersection. def:generators </p><p> genB_isometric_on_intersection The generator <object data="images/img-0032.svg" style="width:&amp;images/img-0032.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0032.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0032.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0032.png" alt="$B$" style="vertical-align:&amp;images/img-0032.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0032.png-width;&amp;px;; 
+                                     height:&amp;images/img-0032.png-height;&amp;px;" class="math gen"></object> is an isometry on the disk intersection. def:generators </p><h1 id="a0000000010">0.4 Segment Maps</h1>
+<p> map1 The first segment map constructed from compositions of generators. def:generators </p><p> map2 The second segment map constructed from compositions of generators. def:generators </p><p> map3 The third segment map constructed from compositions of generators. def:generators </p><p> map1_new_z1_in_left_disk A specific computed point under map1 lies in the left disk. def:map1, def:r_crit </p><p> map1_new_z2_in_right_disk A specific computed point under map1 lies in the right disk. def:map1, def:r_crit </p><p> map1_new_z3_in_left_disk A specific computed point under map1 lies in the left disk. def:map1, def:r_crit </p><p> map1_new_z4_in_right_disk A specific computed point under map1 lies in the right disk. def:map1, def:r_crit </p><p> map1_endpoint_E’ <object data="images/img-0033.svg" style="width:&amp;images/img-0033.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0033.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0033.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0033.png" alt="$\text{map1}(E&#x27;) = G$" style="vertical-align:&amp;images/img-0033.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0033.png-width;&amp;px;; 
+                                     height:&amp;images/img-0033.png-height;&amp;px;" class="math gen"></object>. def:map1, def:E, def:Eprime, def:G, ax:map1_z1, ax:map1_z2, ax:map1_z3, ax:map1_z4 </p><p> map1_endpoint_F’ <object data="images/img-0034.svg" style="width:&amp;images/img-0034.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0034.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0034.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0034.png" alt="$\text{map1}(F&#x27;) = F$" style="vertical-align:&amp;images/img-0034.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0034.png-width;&amp;px;; 
+                                     height:&amp;images/img-0034.png-height;&amp;px;" class="math gen"></object>. def:map1, def:F, ax:map1_z1, ax:map1_z2, ax:map1_z3, ax:map1_z4 </p><p> map2_sends_F’_to_F <object data="images/img-0035.svg" style="width:&amp;images/img-0035.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0035.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0035.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0035.png" alt="$\text{map2}(F&#x27;) = F$" style="vertical-align:&amp;images/img-0035.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0035.png-width;&amp;px;; 
+                                     height:&amp;images/img-0035.png-height;&amp;px;" class="math gen"></object>. def:map2, def:F </p><p> map2_sends_G’_to_E <object data="images/img-0036.svg" style="width:&amp;images/img-0036.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0036.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0036.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0036.png" alt="$\text{map2}(G&#x27;) = E$" style="vertical-align:&amp;images/img-0036.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0036.png-width;&amp;px;; 
+                                     height:&amp;images/img-0036.png-height;&amp;px;" class="math gen"></object>. def:map2, def:G, def:E </p><p> map3_sends_G’_to_E’ <object data="images/img-0037.svg" style="width:&amp;images/img-0037.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0037.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0037.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0037.png" alt="$\text{map3}(G&#x27;) = E&#x27;$" style="vertical-align:&amp;images/img-0037.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0037.png-width;&amp;px;; 
+                                     height:&amp;images/img-0037.png-height;&amp;px;" class="math gen"></object>. def:map3, def:G, def:Eprime </p><p> map3_sends_E_to_G <object data="images/img-0038.svg" style="width:&amp;images/img-0038.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0038.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0038.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0038.png" alt="$\text{map3}(E) = G$" style="vertical-align:&amp;images/img-0038.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0038.png-width;&amp;px;; 
+                                     height:&amp;images/img-0038.png-height;&amp;px;" class="math gen"></object>. def:map3, def:E, def:G </p><h1 id="a0000000011">0.5 Interval Exchange Transformation</h1>
+<p> length1, length2, length3 The three interval lengths for the induced interval exchange transformation. </p><p> lengths_sum_to_one <object data="images/img-0039.svg" style="width:&amp;images/img-0039.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0039.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0039.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0039.png" alt="$\text{length}_1 + \text{length}_2 + \text{length}_3 = 1$" style="vertical-align:&amp;images/img-0039.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0039.png-width;&amp;px;; 
+                                     height:&amp;images/img-0039.png-height;&amp;px;" class="math gen"></object>. def:iet_lengths </p><p> interval_lengths_golden_ratio_relations <object data="images/img-0040.svg" style="width:&amp;images/img-0040.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0040.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0040.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0040.png" alt="$\text{length}_2 = \phi \cdot \text{length}_1$" style="vertical-align:&amp;images/img-0040.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0040.png-width;&amp;px;; 
+                                     height:&amp;images/img-0040.png-height;&amp;px;" class="math gen"></object> and <object data="images/img-0041.svg" style="width:&amp;images/img-0041.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0041.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0041.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0041.png" alt="$\text{length}_3 = \phi \cdot \text{length}_2$" style="vertical-align:&amp;images/img-0041.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0041.png-width;&amp;px;; 
+                                     height:&amp;images/img-0041.png-height;&amp;px;" class="math gen"></object>. def:iet_lengths </p><p> GG5_induced_IET The interval exchange transformation induced by the three segment maps. def:map1, def:map2, def:map3, def:iet_lengths </p><p> GG5_IET_rotation_irrational The rotation ratio <object data="images/img-0042.svg" style="width:&amp;images/img-0042.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0042.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0042.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0042.png" alt="$\text{length}_2 / \text{length}_1$" style="vertical-align:&amp;images/img-0042.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0042.png-width;&amp;px;; 
+                                     height:&amp;images/img-0042.png-height;&amp;px;" class="math gen"></object> is irrational. def:gg5_iet, lem:length_golden </p><h1 id="a0000000012">0.6 Orbit Theory</h1>
+<p> orbitSet The orbit of a point under a map. </p><p> IsPeriodic A point is periodic if it returns to itself after finitely many iterations. def:orbit_set </p><p> finite_orbit_has_collision A finite orbit must have a collision. def:orbit_set </p><p> finite_orbit_implies_periodic A finite orbit contains a periodic point. def:orbit_set, def:periodic, lem:finite_orbit_collision </p><p> IET_irrational_rotation_no_periodic_orbits For an interval exchange transformation with irrational rotation, no point has a periodic orbit. def:periodic </p><p> IET_maps_to_self An IET maps the interval <object data="images/img-0043.svg" style="width:&amp;images/img-0043.png-width;&amp;em;; 
+                                                                height:&amp;images/img-0043.png-height;&amp;em;; 
+                                                                vertical-align:&amp;images/img-0043.svg-depth;&amp;em;" type="image/svg+xml"><img src="images/img-0043.png" alt="$[0,1)$" style="vertical-align:&amp;images/img-0043.png-depth;&amp;px;; 
+                                     width:&amp;images/img-0043.png-width;&amp;px;; 
+                                     height:&amp;images/img-0043.png-height;&amp;px;" class="math gen"></object> to itself. </p><p> no_orbit_point_periodic_implies_infinite If no point in an orbit is periodic, the orbit is infinite. def:orbit_set, def:periodic, lem:finite_orbit_periodic </p><p> GG5_IET_has_infinite_orbit The GG5 induced IET has an infinite orbit. def:gg5_iet, ax:keane, ax:iet_maps_to_self, lem:iet_rotation_irrational, lem:no_periodic_infinite </p><h1 id="a0000000013">0.7 Axiom Summary</h1>
+<p>The formalization uses 7 axioms: </p><p><b class="bfseries">Computational Axioms (5):</b> </p><ul class="itemize">
+<li><p><a href="../web/index.html#ax:map1_z1">38</a>, <a href="../web/index.html#ax:map1_z2">39</a>, <a href="../web/index.html#ax:map1_z3">40</a>, <a href="../web/index.html#ax:map1_z4">41</a>: Disk membership assertions for specific computed points </p></li><li><p><a href="../web/index.html#ax:lens_preserved">30</a>: Lens intersection preservation under rotation </p></li>
+</ul><p><b class="bfseries">Ergodic Theory Axioms (2):</b> </p><ul class="itemize">
+<li><p><a href="../web/index.html#ax:keane">57</a>: Keane’s theorem (1975) - IETs with irrational rotation have no periodic orbits </p></li><li><p><a href="../web/index.html#ax:iet_maps_to_self">58</a>: IET domain preservation </p></li>
+</ul><p>All axioms are mathematically justified. The computational axioms could be proven via norm calculations (estimated 240-370 lines). Keane’s theorem is a deep result in ergodic theory requiring substantial infrastructure (estimated 800-1200 lines). </p></div>
+
+
+
+
+
+<div class="navigation">
+<table cellspacing="2" cellpadding="0" width="100%">
+<tr>
+
+<td><img border="0" alt="" src="icons/blank.gif" width="32" height="32"></td>
+
+<td><img border="0" alt="" src="icons/blank.gif" width="32" height="32"></td>
+
+<td><img border="0" alt="" src="icons/blank.gif" width="32" height="32"></td>
+<td class="navtitle" align="center">TDCSG: Two-Disk Compound Symmetry Groups</td>
+<td><a href="../web/index.html" title="Table of Contents"><img border="0" alt="" src="icons/contents.gif" width="32" height="32"></a></td>
+
+
+<td><img border="0" alt="" src="icons/blank.gif" width="32" height="32"></td>
+<td><img border="0" alt="" src="icons/blank.gif" width="32" height="32"></td>
+</tr>
+</table>
+</div>
+
+</body>
+</html>

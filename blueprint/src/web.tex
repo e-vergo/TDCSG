@@ -1,0 +1,32 @@
+\documentclass{report}
+
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{blueprint}
+
+% Configuration for web output
+\home{https://github.com/eric/TDCSG}
+\github{https://github.com/eric/TDCSG}
+\dochome{https://eric.github.io/TDCSG/docs}
+
+% Color configuration for dependency graph
+\graphcolor{theorem}{blue!40}{Theorems}
+\graphcolor{lemma}{green!40}{Lemmas}
+\graphcolor{definition}{yellow!40}{Definitions}
+\graphcolor{axiom}{red!40}{Axioms}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{axiom}[theorem]{Axiom}
+
+\begin{document}
+
+\title{TDCSG: Two-Disk Compound Symmetry Groups}
+\author{Formal Verification in Lean 4}
+\maketitle
+
+\input{content.tex}
+
+\end{document}

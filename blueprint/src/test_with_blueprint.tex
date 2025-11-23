@@ -1,0 +1,37 @@
+\documentclass{report}
+
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{blueprint}
+
+% Configuration for web output
+\home{https://github.com/eric/TDCSG}
+\github{https://github.com/eric/TDCSG}
+\dochome{https://eric.github.io/TDCSG/docs}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+
+\begin{document}
+
+\title{Test Blueprint}
+\author{Test}
+\maketitle
+
+\chapter{Test}
+
+\begin{theorem}\label{thm:test}
+\lean{test_theorem}
+\leanok
+Test theorem.
+\uses{thm:helper}
+\end{theorem}
+
+\begin{lemma}\label{thm:helper}
+\lean{helper_lemma}
+\leanok
+Helper lemma.
+\end{lemma}
+
+\end{document}
