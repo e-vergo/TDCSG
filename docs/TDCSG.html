@@ -1,0 +1,86 @@
+<html lang="en"><head><meta charset="UTF-8"></meta><meta name="viewport" content="width=device-width, initial-scale=1"></meta><link rel="stylesheet" href="./style.css"></link><link rel="icon" href="./favicon.svg"></link><link rel="mask-icon" href="./favicon.svg" color="#000000"></link><link rel="prefetch" href=".//declarations/declaration-data.bmp" as="image"></link><title>TDCSG</title><script defer="true" src="./mathjax-config.js"></script><script defer="true" src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script><script defer="true" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script><script>const SITE_ROOT="./";</script><script>const MODULE_NAME="TDCSG";</script><script type="module" src="./jump-src.js"></script><script type="module" src="./search.js"></script><script type="module" src="./expand-nav.js"></script><script type="module" src="./how-about.js"></script><script type="module" src="./instances.js"></script><script type="module" src="./importedBy.js"></script></head><body><input id="nav_toggle" type="checkbox"></input><header><h1><label for="nav_toggle"></label><span>Documentation</span></h1><h2 class="header_filename break_within"><span class="name">TDCSG</span></h2><form id="search_form"><input type="text" name="q" autocomplete="off"></input>&#32;<button id="search_button" onclick="javascript: form.action='./search.html';">Search</button></form></header><nav class="internal_nav"><p><a href="#top">return to top</a></p><p class="gh_nav_link"><a href="https://github.com/e-vergo/TDCSG/blob/9d8bd66a9da14a131583df888464ed6d6c30793f/TDCSG.lean">source</a></p><div class="imports"><details><summary>Imports</summary><ul><li><a href="./Init.html">Init</a></li><li><a href="./TDCSG/Basic.html">TDCSG.Basic</a></li><li><a href="./TDCSG/Composition.html">TDCSG.Composition</a></li><li><a href="./TDCSG/Examples.html">TDCSG.Examples</a></li><li><a href="./TDCSG/Finite.html">TDCSG.Finite</a></li><li><a href="./TDCSG/IntervalExchange.html">TDCSG.IntervalExchange</a></li><li><a href="./TDCSG/MeasurePreserving.html">TDCSG.MeasurePreserving</a></li><li><a href="./TDCSG/Properties.html">TDCSG.Properties</a></li><li><a href="./TDCSG/CompoundSymmetry/Finiteness.html">TDCSG.CompoundSymmetry.Finiteness</a></li><li><a href="./TDCSG/CompoundSymmetry/TwoDisk.html">TDCSG.CompoundSymmetry.TwoDisk</a></li><li><a href="./TDCSG/Planar/Disks.html">TDCSG.Planar.Disks</a></li><li><a href="./TDCSG/Planar/Rotations.html">TDCSG.Planar.Rotations</a></li><li><a href="./TDCSG/CompoundSymmetry/GG5/CriticalRadius.html">TDCSG.CompoundSymmetry.GG5.CriticalRadius</a></li><li><a href="./TDCSG/CompoundSymmetry/GG5/Geometry.html">TDCSG.CompoundSymmetry.GG5.Geometry</a></li><li><a href="./TDCSG/CompoundSymmetry/GG5/IET.html">TDCSG.CompoundSymmetry.GG5.IET</a></li><li><a href="./TDCSG/CompoundSymmetry/GG5/SegmentMaps/Main.html">TDCSG.CompoundSymmetry.GG5.SegmentMaps.Main</a></li></ul></details><details><summary>Imported by</summary><ul id="imported-by-TDCSG" class="imported-by-list"></ul></details></div></nav><main>
+<div class="mod_doc"><h1 class="markdown-heading" id="TDCSG-Two-Disk-Compound-Symmetry-Groups">TDCSG - Two-Disk Compound Symmetry Groups <a class="hover-link" href="#TDCSG-Two-Disk-Compound-Symmetry-Groups">#</a></h1><p>Formal verification of <strong>Two-Disk Compound Symmetry Groups</strong> from [arXiv:2302.12950v1].</p><p><strong>Primary Goal:</strong> Formalize Theorem 2 - the critical radius formula for GG₅ and the emergence
+of 1D interval exchange transformations from 2D piecewise isometry systems.</p><h2 class="markdown-heading" id="Module-Organization">Module Organization <a class="hover-link" href="#Module-Organization">#</a></h2><h3 class="markdown-heading" id="1D-Piecewise-Isometry-Framework-Foundation">1D Piecewise Isometry Framework (Foundation) <a class="hover-link" href="#1D-Piecewise-Isometry-Framework-Foundation">#</a></h3><ul>
+<li><code><a href="./TDCSG/Basic.html">TDCSG.Basic</a></code>: Core <code><a href="./TDCSG/Basic.html#PiecewiseIsometry">PiecewiseIsometry</a></code> structure, discontinuity sets, partitions</li>
+<li><code><a href="./TDCSG/Properties.html">TDCSG.Properties</a></code>: Partition properties, isometry lemmas, continuity</li>
+<li><code><a href="./TDCSG/Composition.html">TDCSG.Composition</a></code>: Composition and iteration of piecewise isometries</li>
+<li><code><a href="./TDCSG/MeasurePreserving.html">TDCSG.MeasurePreserving</a></code>: Measure-preserving transformations</li>
+<li><code><a href="./TDCSG/Finite.html">TDCSG.Finite</a></code>: Finite partition specializations</li>
+<li><code><a href="./TDCSG/IntervalExchange.html">TDCSG.IntervalExchange</a></code>: <strong>IET infrastructure</strong> - critical for Theorem 2!</li>
+<li><code><a href="./TDCSG/Examples.html">TDCSG.Examples</a></code>: Proven examples (identity, reflection, counterexamples)</li>
+</ul><h3 class="markdown-heading" id="2D-Planar-Geometry-New-Infrastructure">2D Planar Geometry (New Infrastructure) <a class="hover-link" href="#2D-Planar-Geometry-New-Infrastructure">#</a></h3><ul>
+<li><code><a href="./TDCSG/Planar/Rotations.html">TDCSG.Planar.Rotations</a></code>: Rotations about arbitrary points in ℝ²<ul>
+<li><code>rotateAround</code>: Built using Mathlib's <code><a href="./Mathlib/Geometry/Euclidean/Angle/Oriented/Rotation.html#Orientation.rotation">Orientation.rotation</a></code> and <code><a href="./Mathlib/Analysis/Normed/Affine/Isometry.html#AffineIsometryEquiv">AffineIsometryEquiv</a></code></li>
+</ul>
+</li>
+<li><code><a href="./TDCSG/Planar/Disks.html">TDCSG.Planar.Disks</a></code>: Disk geometry, overlaps, measurability<ul>
+<li>Uses Mathlib's <code><a href="./Mathlib/Topology/MetricSpace/Pseudo/Defs.html#Metric.closedBall">Metric.closedBall</a></code></li>
+</ul>
+</li>
+</ul><h3 class="markdown-heading" id="Two-Disk-Compound-Symmetry-Groups">Two-Disk Compound Symmetry Groups <a class="hover-link" href="#Two-Disk-Compound-Symmetry-Groups">#</a></h3><ul>
+<li><code><a href="./TDCSG/CompoundSymmetry/TwoDisk.html">TDCSG.CompoundSymmetry.TwoDisk</a></code>: Core <code>TwoDiskSystem</code> structure<ul>
+<li>Generators a, b (rotations on overlapping disks)</li>
+<li>Conversion to <code><a href="./TDCSG/Basic.html#PiecewiseIsometry">PiecewiseIsometry</a></code></li>
+<li>Notation: <code>GG_n(r)</code> and <code>GG_{n₁,n₂}(r₁,r₂)</code></li>
+</ul>
+</li>
+<li><code><a href="./TDCSG/CompoundSymmetry/Finiteness.html">TDCSG.CompoundSymmetry.Finiteness</a></code>: Critical radius theory<ul>
+<li><code>IsFiniteGroup</code>, <code>HasInfiniteOrbit</code>, <code>CriticalRadius</code></li>
+<li>Theorem 1 statement (if direction)</li>
+</ul>
+</li>
+</ul><h3 class="markdown-heading" id="Theorem-2-GG₅-Critical-Radius-Main-Goal">Theorem 2: GG₅ Critical Radius (Main Goal) <a class="hover-link" href="#Theorem-2-GG₅-Critical-Radius-Main-Goal">#</a></h3><ul>
+<li><p><code><a href="./TDCSG/CompoundSymmetry/GG5/Geometry.html">TDCSG.CompoundSymmetry.GG5.Geometry</a></code>: Geometric setup</p>
+<ul>
+<li>Points E, E', F, G (using 5th roots of unity)</li>
+<li><code>r_crit = √(3 + φ)</code> where φ is the golden ratio</li>
+<li><code>GG5_critical : TwoDiskSystem</code></li>
+</ul>
+</li>
+<li><p><code>TDCSG.CompoundSymmetry.GG5.SegmentMaps</code>: Three group elements</p>
+<ul>
+<li>map1, map2, map3: piecewise permutations of segment E'E</li>
+<li>Bijection theorems for the three interval transformations</li>
+</ul>
+</li>
+<li><p><code><a href="./TDCSG/CompoundSymmetry/GG5/IET.html">TDCSG.CompoundSymmetry.GG5.IET</a></code>: <strong>1D IET emergence from 2D system</strong></p>
+<ul>
+<li><code>GG5_induced_IET : IntervalExchangeTransformation 3</code></li>
+<li>Interval lengths involve golden ratio (irrational ratios)</li>
+<li>Connection to infinite orbit</li>
+</ul>
+</li>
+<li><p><code><a href="./TDCSG/CompoundSymmetry/GG5/CriticalRadius.html">TDCSG.CompoundSymmetry.GG5.CriticalRadius</a></code>: <strong>Main Theorem 2</strong></p>
+<ul>
+<li><code>theorem GG5_critical_radius : CriticalRadius 5 5 = √(3 + φ)</code></li>
+<li>Proof strategy: IET emergence → infinite orbit → critical transition</li>
+</ul>
+</li>
+</ul><h2 class="markdown-heading" id="Quick-Start">Quick Start <a class="hover-link" href="#Quick-Start">#</a></h2><h3 class="markdown-heading" id="Work-with-piecewise-isometries">Work with piecewise isometries <a class="hover-link" href="#Work-with-piecewise-isometries">#</a></h3><pre><code class="language-lean">import <a href="./TDCSG.html">TDCSG</a>
+
+-- Define a simple piecewise isometry
+def myPI : <a href="./TDCSG/Basic.html#PiecewiseIsometry">PiecewiseIsometry</a> ℝ := <a href="./TDCSG/Properties.html#PiecewiseIsometry.id">PiecewiseIsometry.id</a>
+
+-- Work with interval exchange transformations
+def myIET : IntervalExchangeTransformation 3 := ...
+</code></pre><h3 class="markdown-heading" id="Work-with-two-disk-systems">Work with two-disk systems <a class="hover-link" href="#Work-with-two-disk-systems">#</a></h3><pre><code class="language-lean">import <a href="./TDCSG.html">TDCSG</a>
+
+-- Define a two-disk system
+def myGG : TwoDiskSystem := GG_5(2.15)  -- GG₅ near critical radius
+
+-- Access generators
+#check myGG.genA  -- Left disk rotation
+#check myGG.genB  -- Right disk rotation
+
+-- The critical GG₅ system
+#check GG5_critical  -- At r = √(3 + φ)
+
+-- Main Theorem 2
+#check GG5_critical_radius  -- CriticalRadius 5 5 = √(3 + φ)
+</code></pre><h2 class="markdown-heading" id="Project-Status">Project Status <a class="hover-link" href="#Project-Status">#</a></h2><p><strong>Phase:</strong> Scaffolding complete - all files compile with type-correct definitions
+<strong>Next:</strong> Fill in proofs starting from geometric lemmas toward Theorem 2
+<strong>Build tool:</strong> Use <code>./check_lean.sh --errors-only</code> for fast iteration (99% token reduction)</p><h2 class="markdown-heading" id="References">References <a class="hover-link" href="#References">#</a></h2><ul>
+<li>Paper: <em>Two-Disk Compound Symmetry Groups</em> [arXiv:2302.12950v1]</li>
+<li>See README.md for detailed development plan and rigor standards</li>
+</ul></div></main>
+<nav class="nav"><iframe src="./navbar.html" class="navframe" frameBorder="0"></iframe></nav></body></html>
