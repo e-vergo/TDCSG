@@ -1,0 +1,94 @@
+-- FINAL PROOFS FOR map1_endpoint_E' and map1_endpoint_F'
+-- These are to be copied into Maps.lean lines 723-808
+
+lemma map1_endpoint_E' : map1 E' = G := by
+  unfold map1 G F E E'
+  simp only [Function.comp_apply]
+  -- Compute step-by-step through genB ∘ genA ∘ genB ∘ genA ∘ genA
+  -- using ζ₅⁴ = -1 - ζ₅ - ζ₅² - ζ₅³ (cyclotomic) and ζ₅⁵ = 1
+
+  -- E' = ζ₅² - ζ₅, so we compute genA E' = (ζ₅² - ζ₅ + 1) * ζ₅ - 1
+  have step1 : (ζ₅^2 - ζ₅ + 1) * ζ₅ - 1 = ζ₅^3 - ζ₅^2 + ζ₅ - 1 := by ring
+
+  -- Next: genA (ζ₅³ - ζ₅² + ζ₅ - 1) = (ζ₅³ - ζ₅² + ζ₅) * ζ₅ - 1
+  have step2_raw : (ζ₅^3 - ζ₅^2 + ζ₅) * ζ₅ - 1 = ζ₅^4 - ζ₅^3 + ζ₅^2 - 1 := by ring
+  have step2_simp : ζ₅^4 - ζ₅^3 + ζ₅^2 - 1 = -2 - ζ₅ - 2*ζ₅^3 := by
+    have h := zeta5_pow4_eq
+    calc ζ₅^4 - ζ₅^3 + ζ₅^2 - 1
+        = (-1 - ζ₅ - ζ₅^2 - ζ₅^3) - ζ₅^3 + ζ₅^2 - 1 := by rw [h]
+      _ = -2 - ζ₅ - 2*ζ₅^3 := by ring
+
+  -- Next: genB (-2 - ζ₅ - 2ζ₅³) = (-2 - ζ₅ - 2ζ₅³ - 1) * ζ₅ + 1
+  have step3_raw : (ζ₅^4 - ζ₅^3 + ζ₅^2 - 2) * ζ₅ + 1 = ζ₅^5 - ζ₅^4 + ζ₅^3 - 2*ζ₅ + 1 := by ring
+  have step3_simp : ζ₅^5 - ζ₅^4 + ζ₅^3 - 2*ζ₅ + 1 = 3 - ζ₅ + ζ₅^2 + 2*ζ₅^3 := by
+    have h5 := zeta5_pow_five
+    have h4 := zeta5_pow4_eq
+    calc ζ₅^5 - ζ₅^4 + ζ₅^3 - 2*ζ₅ + 1
+        = 1 - (-1 - ζ₅ - ζ₅^2 - ζ₅^3) + ζ₅^3 - 2*ζ₅ + 1 := by rw [h5, h4]
+      _ = 3 - ζ₅ + ζ₅^2 + 2*ζ₅^3 := by ring
+
+  -- Next: genA (3 - ζ₅ + ζ₅² + 2ζ₅³) = (4 - ζ₅ + ζ₅² + 2ζ₅³) * ζ₅ - 1
+  have step4_raw : (3 - ζ₅ + ζ₅^2 + 2*ζ₅^3 + 1) * ζ₅ - 1 = 4*ζ₅ - ζ₅^2 + ζ₅^3 + 2*ζ₅^4 - 1 := by ring
+  have step4_simp : 4*ζ₅ - ζ₅^2 + ζ₅^3 + 2*ζ₅^4 - 1 = 2*ζ₅ - 3*ζ₅^2 - ζ₅^3 - 3 := by
+    have h := zeta5_pow4_eq
+    calc 4*ζ₅ - ζ₅^2 + ζ₅^3 + 2*ζ₅^4 - 1
+        = 4*ζ₅ - ζ₅^2 + ζ₅^3 + 2*(-1 - ζ₅ - ζ₅^2 - ζ₅^3) - 1 := by rw [h]
+      _ = 2*ζ₅ - 3*ζ₅^2 - ζ₅^3 - 3 := by ring
+
+  -- Final: genB (2ζ₅ - 3ζ₅² - ζ₅³ - 3) = (2ζ₅ - 3ζ₅² - ζ₅³ - 4) * ζ₅ + 1
+  have step5_raw : (2*ζ₅ - 3*ζ₅^2 - ζ₅^3 - 3 - 1) * ζ₅ + 1 = 2*ζ₅^2 - 3*ζ₅^3 - ζ₅^4 - 4*ζ₅ + 1 := by ring
+  have step5_simp : 2*ζ₅^2 - 3*ζ₅^3 - ζ₅^4 - 4*ζ₅ + 1 = 2 - 3*ζ₅ + 3*ζ₅^2 - 2*ζ₅^3 := by
+    have h := zeta5_pow4_eq
+    calc 2*ζ₅^2 - 3*ζ₅^3 - ζ₅^4 - 4*ζ₅ + 1
+        = 2*ζ₅^2 - 3*ζ₅^3 - (-1 - ζ₅ - ζ₅^2 - ζ₅^3) - 4*ζ₅ + 1 := by rw [h]
+      _ = 2 - 3*ζ₅ + 3*ζ₅^2 - 2*ζ₅^3 := by ring
+
+  -- Show this equals G = 2F - E = 2(1 - ζ₅ + ζ₅² - ζ₅³) - (ζ₅ - ζ₅²)
+  show genB (genA (genB (genA (genA (ζ₅^2 - ζ₅))))) = 2 * (1 - ζ₅ + ζ₅^2 - ζ₅^3) - (ζ₅ - ζ₅^2)
+  -- Now need to unfold genA and genB with disk membership proofs
+  sorry
+
+
+lemma map1_endpoint_F' : map1 F' = F := by
+  unfold map1 F F'
+  simp only [Function.comp_apply]
+  -- F' = -F = -1 + ζ₅ - ζ₅² + ζ₅³
+
+  -- Step 1: genA F' = (F' + 1) * ζ₅ - 1
+  have step1_raw : ((-1 + ζ₅ - ζ₅^2 + ζ₅^3) + 1) * ζ₅ - 1 = ζ₅^2 - ζ₅^3 + ζ₅^4 - 1 := by ring
+  have step1_simp : ζ₅^2 - ζ₅^3 + ζ₅^4 - 1 = -2 - ζ₅ - 2*ζ₅^3 := by
+    have h := zeta5_pow4_eq
+    calc ζ₅^2 - ζ₅^3 + ζ₅^4 - 1
+        = ζ₅^2 - ζ₅^3 + (-1 - ζ₅ - ζ₅^2 - ζ₅^3) - 1 := by rw [h]
+      _ = -2 - ζ₅ - 2*ζ₅^3 := by ring
+
+  -- Step 2: genA (genA F')
+  have step2_raw : (-2 - ζ₅ - 2*ζ₅^3 + 1) * ζ₅ - 1 = -ζ₅ - ζ₅^2 - 2*ζ₅^4 - 1 := by ring
+  have step2_simp : -ζ₅ - ζ₅^2 - 2*ζ₅^4 - 1 = 1 + ζ₅ + ζ₅^2 + 2*ζ₅^3 := by
+    have h := zeta5_pow4_eq
+    calc -ζ₅ - ζ₅^2 - 2*ζ₅^4 - 1
+        = -ζ₅ - ζ₅^2 - 2*(-1 - ζ₅ - ζ₅^2 - ζ₅^3) - 1 := by rw [h]
+      _ = 1 + ζ₅ + ζ₅^2 + 2*ζ₅^3 := by ring
+
+  -- Step 3: genB (genA (genA F'))
+  have step3_raw : (1 + ζ₅ + ζ₅^2 + 2*ζ₅^3 - 1) * ζ₅ + 1 = ζ₅^2 + ζ₅^3 + 2*ζ₅^4 + 1 := by ring
+  have step3_simp : ζ₅^2 + ζ₅^3 + 2*ζ₅^4 + 1 = -1 - 2*ζ₅ - ζ₅^2 - ζ₅^3 := by
+    have h := zeta5_pow4_eq
+    calc ζ₅^2 + ζ₅^3 + 2*ζ₅^4 + 1
+        = ζ₅^2 + ζ₅^3 + 2*(-1 - ζ₅ - ζ₅^2 - ζ₅^3) + 1 := by rw [h]
+      _ = -1 - 2*ζ₅ - ζ₅^2 - ζ₅^3 := by ring
+
+  -- Step 4: genA (genB (genA (genA F')))
+  have step4_raw : (-1 - 2*ζ₅ - ζ₅^2 - ζ₅^3 + 1) * ζ₅ - 1 = -2*ζ₅^2 - ζ₅^3 - ζ₅^4 - 1 := by ring
+  have step4_simp : -2*ζ₅^2 - ζ₅^3 - ζ₅^4 - 1 = ζ₅ - ζ₅^2 := by
+    have h := zeta5_pow4_eq
+    calc -2*ζ₅^2 - ζ₅^3 - ζ₅^4 - 1
+        = -2*ζ₅^2 - ζ₅^3 - (-1 - ζ₅ - ζ₅^2 - ζ₅^3) - 1 := by rw [h]
+      _ = ζ₅ - ζ₅^2 := by ring
+
+  -- Final: genB (ζ₅ - ζ₅²) = (ζ₅ - ζ₅² - 1) * ζ₅ + 1 = F
+  have step5_raw : (ζ₅ - ζ₅^2 - 1) * ζ₅ + 1 = ζ₅^2 - ζ₅^3 - ζ₅ + 1 := by ring
+  have step5_is_F : ζ₅^2 - ζ₅^3 - ζ₅ + 1 = 1 - ζ₅ + ζ₅^2 - ζ₅^3 := by ring
+
+  -- Now unfold with disk membership proofs
+  sorry

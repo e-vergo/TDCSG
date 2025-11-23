@@ -150,6 +150,22 @@ lemma zeta5_abs : ‖ζ₅‖ = 1 := by
     ring]
   exact Complex.norm_exp_ofReal_mul_I (2 * π / 5)
 
+/-! ### Primitive Root Infrastructure -/
+
+/-- ζ₅ is a primitive 5th root of unity. -/
+lemma zeta5_isPrimitiveRoot : IsPrimitiveRoot ζ₅ 5 := by
+  unfold ζ₅
+  rw [show (2 : ℂ) * π * I / 5 = 2 * π * I / (5 : ℂ) by norm_cast]
+  exact Complex.isPrimitiveRoot_exp 5 (by norm_num)
+
+/-- Powers of ζ₅ less than 5 are not equal to 1. -/
+lemma zeta5_pow_ne_one {k : ℕ} (hk : k ≠ 0) (hk5 : k < 5) : ζ₅ ^ k ≠ 1 :=
+  zeta5_isPrimitiveRoot.pow_ne_one_of_pos_of_lt hk hk5
+
+/-- ζ₅^k = 1 if and only if 5 divides k. -/
+lemma zeta5_pow_eq_one_iff {k : ℕ} : ζ₅ ^ k = 1 ↔ 5 ∣ k := by
+  exact zeta5_isPrimitiveRoot.pow_eq_one_iff_dvd k
+
 /-! ### Trigonometric Identities -/
 
 /-- The identity cos(2π/5) = (φ - 1)/2. -/
@@ -290,6 +306,58 @@ lemma zeta5_sq_mul_inv : ζ₅^2 * ζ₅⁻¹ = ζ₅ := by
 lemma zeta5_pow4_mul_sq : ζ₅^4 * ζ₅^2 = ζ₅ := by
   rw [← pow_add]
   have : ζ₅^6 = ζ₅^(6 % 5) := zeta5_pow_reduce 6
+  norm_num at this
+  exact this
+
+/-- The 5th cyclotomic polynomial relation: 1 + ζ₅ + ζ₅² + ζ₅³ + ζ₅⁴ = 0.
+    Since ζ₅^5 = 1 and ζ₅ ≠ 1, we have (ζ₅ - 1)(ζ₅⁴ + ζ₅³ + ζ₅² + ζ₅ + 1) = 0 -/
+lemma cyclotomic5_sum : 1 + ζ₅ + ζ₅^2 + ζ₅^3 + ζ₅^4 = 0 := by
+  have h1 : ζ₅^5 = 1 := zeta5_pow_five
+  have h2 : ζ₅ ≠ 1 := zeta5_ne_one
+  have h3 : ζ₅ - 1 ≠ 0 := sub_ne_zero_of_ne h2
+  -- Use the factorization: ζ₅^5 - 1 = (ζ₅ - 1)(ζ₅⁴ + ζ₅³ + ζ₅² + ζ₅ + 1)
+  have h_factor : ζ₅^5 - 1 = (ζ₅ - 1) * (ζ₅^4 + ζ₅^3 + ζ₅^2 + ζ₅ + 1) := by ring
+  rw [h1] at h_factor
+  have h_zero : (ζ₅ - 1) * (ζ₅^4 + ζ₅^3 + ζ₅^2 + ζ₅ + 1) = 0 := by
+    calc (ζ₅ - 1) * (ζ₅^4 + ζ₅^3 + ζ₅^2 + ζ₅ + 1)
+        = ζ₅^5 - 1 := by ring
+      _ = 1 - 1 := by rw [h1]
+      _ = 0 := by ring
+  have : ζ₅^4 + ζ₅^3 + ζ₅^2 + ζ₅ + 1 = 0 := by
+    have := mul_eq_zero.mp h_zero
+    cases this with
+    | inl h => exact absurd h h3
+    | inr h => exact h
+  calc 1 + ζ₅ + ζ₅^2 + ζ₅^3 + ζ₅^4
+      = ζ₅^4 + ζ₅^3 + ζ₅^2 + ζ₅ + 1 := by ring
+    _ = 0 := this
+
+/-- Express ζ₅⁴ in terms of lower powers using the cyclotomic polynomial -/
+lemma zeta5_pow4_eq : ζ₅^4 = -1 - ζ₅ - ζ₅^2 - ζ₅^3 := by
+  have h := cyclotomic5_sum
+  -- From 1 + ζ₅ + ζ₅² + ζ₅³ + ζ₅⁴ = 0, we get ζ₅⁴ = -(1 + ζ₅ + ζ₅² + ζ₅³)
+  have h2 : ζ₅^4 + (1 + ζ₅ + ζ₅^2 + ζ₅^3) = 0 := by
+    calc ζ₅^4 + (1 + ζ₅ + ζ₅^2 + ζ₅^3)
+        = 1 + ζ₅ + ζ₅^2 + ζ₅^3 + ζ₅^4 := by ring
+      _ = 0 := h
+  calc ζ₅^4 = -(1 + ζ₅ + ζ₅^2 + ζ₅^3) + (ζ₅^4 + (1 + ζ₅ + ζ₅^2 + ζ₅^3)) := by ring
+    _ = -(1 + ζ₅ + ζ₅^2 + ζ₅^3) + 0 := by rw [h2]
+    _ = -(1 + ζ₅ + ζ₅^2 + ζ₅^3) := by ring
+    _ = -1 - ζ₅ - ζ₅^2 - ζ₅^3 := by ring
+
+/-- Helper lemmas for reducing higher powers of ζ₅ -/
+lemma zeta5_pow_six : ζ₅^6 = ζ₅ := by
+  have : ζ₅^6 = ζ₅^(6 % 5) := zeta5_pow_reduce 6
+  norm_num at this
+  exact this
+
+lemma zeta5_pow_seven : ζ₅^7 = ζ₅^2 := by
+  have : ζ₅^7 = ζ₅^(7 % 5) := zeta5_pow_reduce 7
+  norm_num at this
+  exact this
+
+lemma zeta5_pow_eight : ζ₅^8 = ζ₅^3 := by
+  have : ζ₅^8 = ζ₅^(8 % 5) := zeta5_pow_reduce 8
   norm_num at this
   exact this
 
@@ -1068,6 +1136,39 @@ lemma E'_in_left_disk : ‖E' - (-1)‖ ≤ r_crit := by
   rw [show ((-E : ℂ) - (-1 : ℂ)) = -(E - 1) by ring]
   rw [norm_neg]
   exact E_in_right_disk
+
+/-- Compute real part of E -/
+private lemma E_re : E.re = Real.cos (2 * π / 5) - Real.cos (4 * π / 5) := by
+  unfold E
+  have h1 := zeta5_eq
+  have h2 := zeta5_sq_eq
+  calc (ζ₅ - ζ₅ ^ 2).re
+      = ((↑(Real.cos (2 * π / 5)) + I * ↑(Real.sin (2 * π / 5))) -
+        (↑(Real.cos (4 * π / 5)) + I * ↑(Real.sin (4 * π / 5)))).re := by
+        rw [← h1, ← h2]
+    _ = Real.cos (2 * π / 5) - Real.cos (4 * π / 5) := by
+      simp only [Complex.sub_re, Complex.add_re, Complex.ofReal_re,
+        Complex.mul_re, Complex.I_re, Complex.I_im, Complex.ofReal_im]
+      ring
+
+/-- Point E has positive real part.
+This is a computationally verifiable fact using E = ζ₅ - ζ₅². -/
+lemma E_re_pos : 0 < E.re := by
+  rw [E_re, cos_four_pi_fifth, cos_two_pi_fifth, Real.cos_pi_div_five]
+  unfold Real.goldenRatio
+  -- E.re = (φ - 1)/2 - (-cos(π/5)) = ((1+√5)/2 - 1)/2 + (1+√5)/4
+  --      = (√5 - 1)/4 + (1+√5)/4 = √5/2 > 0
+  have h : ((1 + Real.sqrt 5) / 2 - 1) / 2 - -((1 + Real.sqrt 5) / 4) = Real.sqrt 5 / 2 := by
+    field_simp; ring
+  rw [h]
+  have sqrt5_pos : 0 < Real.sqrt 5 := Real.sqrt_pos.mpr (by norm_num : (0 : ℝ) < 5)
+  linarith
+
+/-- Point E' has negative real part.
+This follows immediately from E' = -E and E_re_pos. -/
+lemma E'_re_neg : E'.re < 0 := by
+  unfold E'
+  simp [E_re_pos]
 
 /-- Points on segment E'E lie in the disk intersection. -/
 lemma segment_in_disk_intersection (t : ℝ)
