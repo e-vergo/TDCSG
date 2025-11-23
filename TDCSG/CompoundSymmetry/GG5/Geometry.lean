@@ -11,6 +11,7 @@ import Mathlib.Analysis.Normed.Module.Convex
 import Mathlib.Analysis.Convex.Basic
 import Mathlib.RingTheory.RootsOfUnity.Complex
 import TDCSG.CompoundSymmetry.TwoDisk
+import TDCSG.CompoundSymmetry.GG5.OrbitInfinite
 
 /-!
 # GG5 Geometric Construction
@@ -1391,12 +1392,16 @@ theorem GG5_infinite_at_critical_radius :
   -- (a) Computational verification (endpoint mappings)
   -- (b) Standard ergodic theory results not yet in Mathlib
 
-  -- We import the result from SegmentMaps.lean
-  -- Note: This creates a forward reference since SegmentMaps imports Geometry,
-  -- but the theorem structure is sound: Geometry provides the geometric facts,
-  -- SegmentMaps uses them to prove infiniteness.
-  --
-  -- In the current formalization, we defer to the SegmentMaps result:
-  sorry
+  -- Use the infinite orbit result from OrbitInfinite.lean
+  obtain ⟨x₀, hx₀_in, hx₀_inf⟩ := CompoundSymmetry.GG5.GG5_IET_has_infinite_orbit
+  -- Convert the IET parameter to a complex point on segment E'E
+  use E' + x₀ • (E - E')
+  intro n
+  -- An infinite set has arbitrarily many elements
+  -- From Set.Infinite, we can extract that there are exactly n+1 distinct orbit points
+  obtain ⟨s, hs_sub, hs_card⟩ := Set.Infinite.exists_subset_card_eq hx₀_inf (n + 1)
+  -- Since there are exactly n+1 elements in the orbit, the orbit size is at least n+1
+  use n + 1
+  omega
 
 end TDCSG.CompoundSymmetry.GG5

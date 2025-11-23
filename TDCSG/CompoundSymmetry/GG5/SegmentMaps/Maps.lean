@@ -1094,10 +1094,30 @@ theorem map1_bijection_E'F'_to_GF :
           rw [this, dist_comm, dist_lineMap_left, Real.norm_of_nonneg hs_mem.1]
         have hGF_ne : G ≠ F := by
           intro h
-          unfold G F E at h
-          -- If 2*F - E = F, then F = E
-          -- Full proof requires cyclotomic polynomial analysis
-          sorry
+          -- Use segment_ordering: F and G lie on segment E'E with different parameters
+          obtain ⟨t_F', t_G', ht_G_pos, ht_G_lt_t_F, ht_F_lt_one, hF_param, hG_param⟩ := segment_ordering
+          -- If G = F, then t_G' = t_F' (since both parameterize the same point)
+          -- But we know t_G' < t_F', contradiction
+          have ht_eq : t_G' = t_F' := by
+            -- From G = F and the parameterizations
+            rw [h] at hG_param
+            have h1 := hG_param.symm.trans hF_param
+            have h2 : t_G' • (E - E') = t_F' • (E - E') := add_left_cancel h1
+            -- Since E ≠ E', we have E - E' ≠ 0
+            have hE_ne_E' : E - E' ≠ 0 := by
+              intro hcontr
+              have h3 : (2 : ℂ) • E = 0 := by
+                have h4 : E - (-E) = 0 := by unfold E' at hcontr; exact hcontr
+                simp only [sub_neg_eq_add] at h4
+                calc (2 : ℂ) • E = E + E := two_smul ℂ E
+                  _ = 0 := h4
+              have h5 : E = 0 := by simpa using h3
+              exact E_ne_zero h5
+            -- From scalar multiplication equality
+            have h6 : (t_G' - t_F') • (E - E') = 0 := by rw [sub_smul, h2, sub_self]
+            have h7 : t_G' - t_F' = 0 ∨ E - E' = 0 := smul_eq_zero.mp h6
+            exact sub_eq_zero.mp (h7.resolve_right hE_ne_E')
+          exact absurd ht_eq (ne_of_lt ht_G_lt_t_F)
         have hGF_pos : 0 < dist G F := dist_pos.mpr hGF_ne
         calc s
             = s * dist G F / dist G F := by
@@ -1734,15 +1754,80 @@ theorem map2_bijection_FpG_to_FE :
           rw [this, dist_comm, dist_lineMap_left, Real.norm_of_nonneg hs_mem.1]
         -- Therefore t * dist(F, E) = s * dist(F, E)
         -- Since F ≠ E (which we need to prove), dist(F, E) > 0, so t = s
-        -- Axiom: F and E are distinct points on segment E'E
+        -- Show F ≠ E by proving the constant term differs
         have hFE_ne : F ≠ E := by
           intro h
           unfold F E at h
-          -- If 1 - ζ₅ + ζ₅^2 - ζ₅^3 = ζ₅ - ζ₅^2, then simplifying gives
-          --  1 - 2ζ₅ + 2ζ₅^2 - ζ₅^3 = 0
-          -- This contradicts the minimal polynomial of ζ₅
-          -- Full proof requires detailed cyclotomic polynomial analysis
-          sorry
+          -- F - E = 1 - 2ζ₅ + 2ζ₅² - ζ₅³, so if F = E then this equals 0
+          have h_diff : 1 - 2 * ζ₅ + 2 * ζ₅^2 - ζ₅^3 = 0 := by
+            linear_combination h
+          -- Multiply both sides by (ζ₅ - 1)
+          have h_mul : (ζ₅ - 1) * (1 - 2 * ζ₅ + 2 * ζ₅^2 - ζ₅^3) = 0 := by
+            rw [h_diff]; ring
+          -- Expand the LHS
+          have h_expand : (ζ₅ - 1) * (1 - 2 * ζ₅ + 2 * ζ₅^2 - ζ₅^3) =
+              ζ₅ - 2 * ζ₅^2 + 2 * ζ₅^3 - ζ₅^4 - 1 + 2 * ζ₅ - 2 * ζ₅^2 + ζ₅^3 := by
+            ring
+          rw [h_expand] at h_mul
+          -- Simplify: -1 + 3ζ₅ - 4ζ₅² + 3ζ₅³ - ζ₅⁴ = 0
+          have h_simp : -1 + 3 * ζ₅ - 4 * ζ₅^2 + 3 * ζ₅^3 - ζ₅^4 = 0 := by
+            linear_combination h_mul
+          -- Use ζ₅⁴ = -1 - ζ₅ - ζ₅² - ζ₅³
+          have h4 := zeta5_pow4_eq
+          rw [h4] at h_simp
+          -- Now: -1 + 3ζ₅ - 4ζ₅² + 3ζ₅³ - (-1 - ζ₅ - ζ₅² - ζ₅³) = 0
+          -- Simplify: 4ζ₅ - 3ζ₅² + 4ζ₅³ = 0
+          -- Factor out ζ₅: ζ₅(4 - 3ζ₅ + 4ζ₅²) = 0
+          have h_factored : ζ₅ * (4 - 3 * ζ₅ + 4 * ζ₅^2) = 0 := by
+            linear_combination h_simp
+          -- Since ζ₅ ≠ 0, we must have 4 - 3ζ₅ + 4ζ₅² = 0
+          have h_quad : 4 - 3 * ζ₅ + 4 * ζ₅^2 = 0 := by
+            exact (mul_eq_zero.mp h_factored).resolve_left zeta5_ne_zero
+          -- Multiply by ζ₅²: 4ζ₅² - 3ζ₅³ + 4ζ₅⁴ = 0
+          have h_quad2 : 4 * ζ₅^2 - 3 * ζ₅^3 + 4 * ζ₅^4 = 0 := by
+            have := congr_arg (fun x => x * ζ₅^2) h_quad
+            linear_combination this
+          -- Use ζ₅⁴ = -1 - ζ₅ - ζ₅² - ζ₅³
+          rw [zeta5_pow4_eq] at h_quad2
+          -- Now: 4ζ₅² - 3ζ₅³ + 4(-1 - ζ₅ - ζ₅² - ζ₅³) = 0
+          -- Simplify: -4 - 4ζ₅ - 7ζ₅³ = 0
+          have h_simp2 : -4 - 4 * ζ₅ - 7 * ζ₅^3 = 0 := by
+            linear_combination h_quad2
+          -- So 4 + 4ζ₅ + 7ζ₅³ = 0, i.e., ζ₅³ = -(4 + 4ζ₅)/7
+          have h3_new : ζ₅^3 = -(4 + 4 * ζ₅) / 7 := by
+            field_simp at h_simp2 ⊢
+            linear_combination -h_simp2
+          -- But from h_quad: ζ₅² = (3ζ₅ - 4)/4
+          have h2_val : ζ₅^2 = (3 * ζ₅ - 4) / 4 := by
+            have h_temp : 4 * ζ₅^2 = 3 * ζ₅ - 4 := by rw [← sub_eq_zero]; linear_combination h_quad
+            rw [eq_div_iff (by norm_num : (4 : ℂ) ≠ 0), mul_comm, h_temp]
+          -- We derived two expressions for ζ₅³:
+          -- From h_diff: ζ₅³ = 1 - 2ζ₅ + 2ζ₅²
+          have h3_val : ζ₅^3 = 1 - 2 * ζ₅ + 2 * ζ₅^2 := by
+            linear_combination -h_diff
+          -- From h_simp2: ζ₅³ = -(4 + 4ζ₅)/7
+          -- These should be equal
+          have h3_eq : 1 - 2 * ζ₅ + 2 * ζ₅^2 = -(4 + 4 * ζ₅) / 7 := by
+            rw [←h3_val, h3_new]
+          -- Multiply through by 7: 7 - 14ζ₅ + 14ζ₅² = -4 - 4ζ₅
+          have h3_cleared : 7 - 14 * ζ₅ + 14 * ζ₅^2 = -4 - 4 * ζ₅ := by
+            rw [← sub_eq_zero]; linear_combination 7 * h3_eq
+          -- Rearrange: 11 - 10ζ₅ + 14ζ₅² = 0
+          have h_final : 11 - 10 * ζ₅ + 14 * ζ₅^2 = 0 := by
+            linear_combination h3_cleared
+          -- But from h2_val: ζ₅² = (3ζ₅ - 4)/4
+          rw [h2_val] at h_final
+          -- So: 11 - 10ζ₅ + 14(3ζ₅ - 4)/4 = 0
+          -- Multiply by 4: 44 - 40ζ₅ + 42ζ₅ - 56 = 0
+          -- Simplify: -12 + 2ζ₅ = 0, so ζ₅ = 6
+          have h_zeta_val : ζ₅ = 6 := by
+            field_simp at h_final
+            linear_combination h_final / 2
+          -- But |ζ₅| = 1, so |6| = 6 ≠ 1, contradiction
+          have : ‖(6 : ℂ)‖ = 6 := by norm_num
+          rw [←h_zeta_val] at this
+          have : ‖ζ₅‖ = 1 := zeta5_abs
+          linarith
 
         have hFE_pos : 0 < dist F E := by
           exact dist_pos.mpr hFE_ne
@@ -2260,10 +2345,17 @@ theorem map3_bijection_GpE_to_E'G :
           rw [this, dist_comm, dist_lineMap_left, Real.norm_of_nonneg hs_mem.1]
         have hE'G_ne : E' ≠ G := by
           intro h
-          unfold E' G F E at h
-          -- If -E = 2*F - E, then 2*F = 0, so F = 0
-          -- Full proof requires cyclotomic polynomial analysis
-          sorry
+          -- E' = -E and G = 2*F - E
+          -- If E' = G, then -E = 2*F - E, so 0 = 2*F
+          unfold E' G at h
+          have h2F : (2 : ℂ) * F = 0 := by
+            calc (2 : ℂ) * F = 2 * F - E + E := by ring
+              _ = -E + E := by rw [←h]
+              _ = 0 := by ring
+          have hF : F = 0 := by
+            have h2_ne : (2 : ℂ) ≠ 0 := two_ne_zero
+            exact (mul_eq_zero.mp h2F).resolve_left h2_ne
+          exact F_ne_zero hF
         have hE'G_pos : 0 < dist E' G := dist_pos.mpr hE'G_ne
         calc s
             = s * dist E' G / dist E' G := by
