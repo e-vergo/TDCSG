@@ -1346,7 +1346,7 @@ lemma r_crit_minimal_poly :
     as a sorry placeholder documenting the complete proof strategy.
 -/
 theorem GG5_infinite_at_critical_radius :
-    ∃ (point : ℂ), ∀ (n : ℕ),
+    ∃ (_ : ℂ), ∀ (n : ℕ),
       ∃ (orbit_size : ℕ), n < orbit_size := by
   -- This theorem establishes that GG5 is infinite at the critical radius
   -- r_crit = sqrt(3 + φ).
