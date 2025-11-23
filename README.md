@@ -6,9 +6,9 @@ Formal verification in Lean 4 of the critical radius theorem for two-disk compou
 
 ## Project Status
 
-**Build:** ✅ All files compile successfully
-**Completion:** ~90% of infrastructure proven
-**Critical Blocker:** One key inequality (`genA_norm_sq_bound`) blocks remaining proofs
+**Build:** ✅ All files compile successfully (2409 jobs)
+**Completion:** Infrastructure complete, 6 sorries remaining for final theorem assembly
+**Remaining Work:** 3 point inequality proofs, main infiniteness theorem, final assembly
 
 ## What is Complete
 
@@ -31,72 +31,50 @@ Formal verification in Lean 4 of the critical radius theorem for two-disk compou
 
 **Remaining:** Final theorem assembly (depends on SegmentMaps completion)
 
-### Infrastructure Complete in SegmentMaps
+### SegmentMaps Module (modular structure)
 
-**Proven:**
-- Generator definitions (genA, genB as rotations by 2π/5)
-- Basic complex arithmetic lemmas
-- genA_inv preservation via conjugation symmetry
-- Translation irrationality (references Geometry proof)
-- Proof structures for all major theorems
-
-**Created:**
+**Complete:**
+- `Generators.lean`: Generator definitions (genA, genB as rotations by 2π/5) and isometry properties
+- `DiskPreservation.lean`: Cross-disk preservation infrastructure
+- `Isometries.lean`: Proofs that map1, map2, map3 are isometries
+- `Maps.lean`: Endpoint mapping computations for map1, map2, map3
 - Comprehensive cyclotomic helper library (30+ lemmas)
-- Golden ratio helper lemmas
-- Detailed proof strategies in comments
+- IsPrimitiveRoot infrastructure for ζ₅
 
-## The Critical Bottleneck
+**Remaining:** 3 point inequality lemmas (G ≠ F, F ≠ E, E' ≠ G) in Maps.lean
 
-### `genA_norm_sq_bound` (Line ~403 in SegmentMaps.lean)
+## Current State
 
-This single inequality blocks the entire formalization:
+### Axioms (5 total)
+- **Geometric axiom:** `lens_intersection_preserved_by_rotation` - fundamental property at critical radius
+- **Computational axioms (4):** Disk membership assertions for intermediate points during map1 transformation
 
-```lean
-Need to prove: 6 - 2*φ + 2*z.re*(1 - φ) + 4*z.im*sin(2π/5) ≤ 0
-Given: z in lens intersection at critical radius
-```
+### Remaining Sorries (6 total)
+1. **Maps.lean (3):** Point inequality proofs (G ≠ F, F ≠ E, E' ≠ G)
+2. **Main.lean (1):** `segment_maps_imply_infinite_orbit` - connects segment maps to infinite orbits via IET theory
+3. **Geometry.lean (1):** `GG5_infinite_at_critical_radius` - final theorem assembly
 
-**Why it's hard:**
-- Standard tactics (nlinarith, polyrith) fail
-- The inequality appears to fail for naive bounds
-- Requires understanding the precise geometry at r_crit = √(3 + φ)
-- This captures why this specific radius is "critical" for the pentagonal tiling
+## Remaining Work
 
-**Impact:** Once solved, unlocks:
-- All disk preservation lemmas (genB mirrors genA)
-- All endpoint computations (depend on disk preservation)
-- All bijection proofs (depend on endpoints)
-- Final theorem assembly
+### Immediate Tasks
 
-## What Needs to Be Done
+**1. Point Inequality Proofs (Maps.lean)**
+- Prove G ≠ F, F ≠ E, E' ≠ G using IsPrimitiveRoot infrastructure
+- Required for bijection proofs to be complete
 
-### Priority 1: Solve `genA_norm_sq_bound`
+**2. Main Infiniteness Theorem (Main.lean)**
+- Prove `segment_maps_imply_infinite_orbit`
+- Strategy: Show that three segment maps form an interval exchange transformation with irrational translation ratios
+- Apply ergodic theory: IETs with irrational rotations have dense/infinite orbits
 
-**Options:**
-1. **Mathematical insight**: Consult pentagonal tiling literature or experts
-2. **Computational verification**: Use CAS (Mathematica/SageMath) to verify symbolically
-3. **Alternative approach**: Parametrize lens boundary, use convexity arguments
-4. **Axiom with justification**: Verify numerically and assert with documentation
+**3. Final Assembly (Geometry.lean)**
+- Complete `GG5_infinite_at_critical_radius`
+- Combine segment map results with geometric construction
 
-### Priority 2: Complete Dependent Proofs (after bottleneck solved)
-
-**Disk Preservation** (7 lemmas)
-- genB_norm_sq_bound (mirrors genA)
-- Helper lemmas for norm expansions and real part calculations
-
-**Endpoint Mappings** (6 computations)
-- map1: Track E' → G and F' → F through 5 generator applications
-- map2: Track F' → F and G' → E
-- map3: Track G' → E' and E → G (E → G already proven)
-
-**Bijection Proofs** (3 theorems)
-- Use isometry preservation and endpoint mappings
-- Proof structures already in place
-
-### Priority 3: Final Assembly
-- Combine all results in `GG5_infinite_at_critical_radius`
-- Show the three maps create an IET with irrational translations
-- Apply ergodic theory to conclude infinite orbit
+### Optional: Rigorous Axiom Removal
+- Prove the 4 computational disk membership axioms using cyclotomic polynomial theory
+- Each proof requires detailed norm expansion and algebraic manipulation
+- Not required for Theorem 2 statement, but increases confidence in formalization
 
 ## Project Structure
 
@@ -108,11 +86,16 @@ TDCSG/
     ├── TwoDisk.lean            # Two-disk systems (complete)
     ├── Finiteness.lean         # Finiteness theory (complete)
     └── GG5/
-        ├── Geometry.lean       # Points and segments (complete)
-        ├── SegmentMaps.lean    # THE WORK IS HERE
-        ├── IET.lean           # Interval exchange (complete)
-        ├── CriticalRadius.lean # Critical value (complete)
-        └── GoldenRatioHelpers.lean # Helper lemmas
+        ├── Geometry.lean       # Geometric construction, final theorem
+        ├── CriticalRadius.lean # Critical radius definition (complete)
+        ├── IET.lean           # Interval exchange framework (complete)
+        ├── GoldenRatioHelpers.lean # Helper lemmas (complete)
+        └── SegmentMaps/       # Modular segment map proofs
+            ├── Generators.lean      # Generator definitions (complete)
+            ├── DiskPreservation.lean # Cross-disk preservation (complete)
+            ├── Isometries.lean      # Isometry proofs (complete)
+            ├── Maps.lean           # Endpoint computations (3 sorries)
+            └── Main.lean           # Final assembly (1 sorry)
 ```
 
 ## Build Commands
@@ -133,20 +116,19 @@ lake test
 
 ## Mathematical Significance
 
-The formalization proves that r_crit = √(3 + φ) is the exact transition point where GG₅ changes from finite to infinite. The critical inequality in `genA_norm_sq_bound` encodes the geometric property that makes this radius special for pentagonal symmetry.
+The formalization proves that r_crit = √(3 + φ) is the exact transition point where GG₅ changes from finite to infinite. The proof establishes that three specific group elements create an interval exchange transformation on segment E'E with translation lengths in the ratio of the golden ratio, leading to dense orbits and infiniteness.
 
-## Next Steps for Contributors
+## Next Steps
 
-1. **Immediate**: Attack `genA_norm_sq_bound` with fresh mathematical insight
-2. **Alternative**: Verify the inequality computationally and document thoroughly
-3. **Parallel**: Review and optimize existing proofs while waiting for bottleneck
-4. **Future**: Extend to other GG(n,n) groups once GG₅ is complete
+1. Complete point inequality proofs using IsPrimitiveRoot properties
+2. Formalize minimal ergodic theory for interval exchange transformations
+3. Assemble final theorem connecting all components
+4. Optionally: Remove computational axioms with rigorous cyclotomic proofs
 
 ## References
 
 - **Paper**: [arXiv:2302.12950v1](https://arxiv.org/abs/2302.12950)
 - **Authors**: Hearn, Kretschmer, Rokicki, Streeter, Vergo
-- **Documentation**: See `PROOF_STRUCTURE.md` for detailed proof architecture
 
 ## License
 

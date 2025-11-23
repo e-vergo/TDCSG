@@ -130,7 +130,7 @@ it's acceptable to inline the reasoning in each of the three bijection proofs.
 lemma isometry_maps_segment_bij (f : ℂ → ℂ) (A B C D : ℂ)
     (hiso : ∀ z w, ‖f z - f w‖ = ‖z - w‖)
     (hA : f A = C) (hB : f B = D)
-    (hAB : A ≠ B) (hCD : C ≠ D) :
+    (hCD : C ≠ D) :
     ∀ t ∈ Set.Icc (0 : ℝ) 1,
       ∃! s ∈ Set.Icc (0 : ℝ) 1,
         f (A + t • (B - A)) = C + s • (D - C) := by
