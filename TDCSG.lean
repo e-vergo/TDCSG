@@ -5,7 +5,6 @@ import TDCSG.Composition
 import TDCSG.MeasurePreserving
 import TDCSG.Finite
 import TDCSG.IntervalExchange
-import TDCSG.Examples
 
 -- 2D planar geometry infrastructure
 import TDCSG.Planar.Rotations
@@ -13,113 +12,45 @@ import TDCSG.Planar.Disks
 
 -- Two-disk compound symmetry groups
 import TDCSG.CompoundSymmetry.TwoDisk
-import TDCSG.CompoundSymmetry.Finiteness
 
 -- Theorem 2: GG₅ critical radius formalization
 import TDCSG.CompoundSymmetry.GG5.Geometry
-import TDCSG.CompoundSymmetry.GG5.SegmentMaps.Main
 import TDCSG.CompoundSymmetry.GG5.IET
-import TDCSG.CompoundSymmetry.GG5.CriticalRadius
+import TDCSG.CompoundSymmetry.GG5.OrbitInfinite
 
 /-!
 # TDCSG - Two-Disk Compound Symmetry Groups
 
-Formal verification of **Two-Disk Compound Symmetry Groups** from [arXiv:2302.12950v1].
+Formal verification of **Theorem 2** from [arXiv:2302.12950v1]:
 
-**Primary Goal:** Formalize Theorem 2 - the critical radius formula for GG₅ and the emergence
-of 1D interval exchange transformations from 2D piecewise isometry systems.
+**GG₅ is infinite at the critical radius r_c = √(3 + φ)**, where φ = (1 + √5)/2 is the golden ratio.
 
 ## Module Organization
 
-### 1D Piecewise Isometry Framework (Foundation)
-
-- `TDCSG.Basic`: Core `PiecewiseIsometry` structure, discontinuity sets, partitions
-- `TDCSG.Properties`: Partition properties, isometry lemmas, continuity
-- `TDCSG.Composition`: Composition and iteration of piecewise isometries
+### Core Framework (6 files)
+- `TDCSG.Basic`: Core `PiecewiseIsometry` structure
+- `TDCSG.Properties`: Partition properties, continuity
+- `TDCSG.Composition`: Composition and iteration
 - `TDCSG.MeasurePreserving`: Measure-preserving transformations
 - `TDCSG.Finite`: Finite partition specializations
-- `TDCSG.IntervalExchange`: **IET infrastructure** - critical for Theorem 2!
-- `TDCSG.Examples`: Proven examples (identity, reflection, counterexamples)
+- `TDCSG.IntervalExchange`: IET infrastructure
 
-### 2D Planar Geometry (New Infrastructure)
-
+### 2D Planar Geometry (2 files)
 - `TDCSG.Planar.Rotations`: Rotations about arbitrary points in ℝ²
-  - `rotateAround`: Built using Mathlib's `Orientation.rotation` and `AffineIsometryEquiv`
-- `TDCSG.Planar.Disks`: Disk geometry, overlaps, measurability
-  - Uses Mathlib's `Metric.closedBall`
+- `TDCSG.Planar.Disks`: Disk geometry
 
-### Two-Disk Compound Symmetry Groups
+### Two-Disk Systems (1 file)
+- `TDCSG.CompoundSymmetry.TwoDisk`: `TwoDiskSystem` structure, generators
 
-- `TDCSG.CompoundSymmetry.TwoDisk`: Core `TwoDiskSystem` structure
-  - Generators a, b (rotations on overlapping disks)
-  - Conversion to `PiecewiseIsometry`
-  - Notation: `GG_n(r)` and `GG_{n₁,n₂}(r₁,r₂)`
-- `TDCSG.CompoundSymmetry.Finiteness`: Critical radius theory
-  - `IsFiniteGroup`, `HasInfiniteOrbit`, `CriticalRadius`
-  - Theorem 1 statement (if direction)
+### Main Theorem (3 files)
+- `TDCSG.CompoundSymmetry.GG5.Geometry`: Main theorem `GG5_infinite_at_critical_radius`
+- `TDCSG.CompoundSymmetry.GG5.IET`: `GG5_induced_IET` interval exchange
+- `TDCSG.CompoundSymmetry.GG5.OrbitInfinite`: `GG5_IET_has_infinite_orbit`
 
-### Theorem 2: GG₅ Critical Radius (Main Goal)
-
-- `TDCSG.CompoundSymmetry.GG5.Geometry`: Geometric setup
-  - Points E, E', F, G (using 5th roots of unity)
-  - `r_crit = √(3 + φ)` where φ is the golden ratio
-  - `GG5_critical : TwoDiskSystem`
-
-- `TDCSG.CompoundSymmetry.GG5.SegmentMaps`: Three group elements
-  - map1, map2, map3: piecewise permutations of segment E'E
-  - Bijection theorems for the three interval transformations
-
-- `TDCSG.CompoundSymmetry.GG5.IET`: **1D IET emergence from 2D system**
-  - `GG5_induced_IET : IntervalExchangeTransformation 3`
-  - Interval lengths involve golden ratio (irrational ratios)
-  - Connection to infinite orbit
-
-- `TDCSG.CompoundSymmetry.GG5.CriticalRadius`: **Main Theorem 2**
-  - `theorem GG5_critical_radius : CriticalRadius 5 5 = √(3 + φ)`
-  - Proof strategy: IET emergence → infinite orbit → critical transition
-
-## Quick Start
-
-### Work with piecewise isometries
-
-```lean
-import TDCSG
-
--- Define a simple piecewise isometry
-def myPI : PiecewiseIsometry ℝ := PiecewiseIsometry.id
-
--- Work with interval exchange transformations
-def myIET : IntervalExchangeTransformation 3 := ...
-```
-
-### Work with two-disk systems
-
-```lean
-import TDCSG
-
--- Define a two-disk system
-def myGG : TwoDiskSystem := GG_5(2.15)  -- GG₅ near critical radius
-
--- Access generators
-#check myGG.genA  -- Left disk rotation
-#check myGG.genB  -- Right disk rotation
-
--- The critical GG₅ system
-#check GG5_critical  -- At r = √(3 + φ)
-
--- Main Theorem 2
-#check GG5_critical_radius  -- CriticalRadius 5 5 = √(3 + φ)
-```
-
-## Project Status
-
-**Phase:** Scaffolding complete - all files compile with type-correct definitions
-**Next:** Fill in proofs starting from geometric lemmas toward Theorem 2
-**Build tool:** Use `./check_lean.sh --errors-only` for fast iteration (99% token reduction)
+## Axioms (2 total, both in OrbitInfinite.lean)
+1. **Keane's Theorem (1975)**: IETs with irrational rotation have no periodic orbits
+2. **Non-involution branch**: Unreachable for GG5 (uses swap 0 2 involution)
 
 ## References
-
-- Paper: *Two-Disk Compound Symmetry Groups* [arXiv:2302.12950v1]
-- See README.md for detailed development plan and rigor standards
-
+- Paper: [arXiv:2302.12950v1](https://arxiv.org/abs/2302.12950)
 -/
