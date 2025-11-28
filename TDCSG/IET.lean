@@ -3,6 +3,7 @@ Copyright (c) 2025-10-18 Eric Moffat. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Moffat
 -/
+import TDCSG.Definitions.IET
 import TDCSG.IntervalExchange
 import Mathlib.NumberTheory.Real.GoldenRatio
 import Mathlib.Data.Real.Basic
@@ -15,12 +16,11 @@ This file establishes the connection between the compound symmetry
 system GG(5,5) and interval exchange transformations (IETs) that
 emerge at the critical radius.
 
+The fundamental definitions (length1, length2, length3, displacements)
+are in TDCSG.Definitions.IET.
+
 ## Main definitions
 
-* `segmentParam`: Parameter defining segment lengths in the
-  emergent IET
-* `length1`, `length2`, `length3`: Three fundamental lengths for
-  the 3-interval IET
 * `GG5_induced_IET`: 3-interval exchange transformation induced by
   GG(5,5) dynamics
 * `HasEmergentIET`: Predicate for when an IET emerges from system
@@ -28,11 +28,6 @@ emerge at the critical radius.
 
 ## Main results
 
-* `length1_golden_ratio`: First length involves golden ratio
-* `length2_golden_ratio`: Second length involves golden ratio
-* `length3_golden_ratio`: Third length involves golden ratio
-* `lengths_sum_to_one`: The three lengths partition the unit
-  interval
 * `GG5_becomes_IET_at_critical`: At critical radius, GG(5,5)
   dynamics reduce to an IET
 * `IET_structure_golden_ratio`: The emergent IET structure
@@ -58,106 +53,48 @@ cross-sections of the phase space.
 
 namespace CompoundSymmetry.GG5
 
-open PiecewiseIsometry Real
+open PiecewiseIsometry Real TDCSG.Definitions
 
-/-- Segment parameter for the emergent IET. -/
-noncomputable def segmentParam : ℝ := goldenRatio
+/-! ### Basic properties of interval lengths -/
 
-/-- First fundamental length in the emergent 3-interval IET. -/
-noncomputable def length1 : ℝ :=
-  1 / (1 + goldenRatio + goldenRatio ^ 2)
-
-/-- Second fundamental length in the emergent 3-interval IET. -/
-noncomputable def length2 : ℝ :=
-  goldenRatio / (1 + goldenRatio + goldenRatio ^ 2)
-
-/-- Third fundamental length in the emergent 3-interval IET. -/
-noncomputable def length3 : ℝ :=
-  (goldenRatio ^ 2) / (1 + goldenRatio + goldenRatio ^ 2)
-
-/-- The lengths are all positive. -/
-theorem length1_pos : 0 < length1 := by
-  unfold length1
-  apply div_pos
-  · norm_num
-  · apply add_pos
-    · apply add_pos
-      · norm_num
-      · exact Real.goldenRatio_pos
-    · apply sq_pos_of_pos
-      exact Real.goldenRatio_pos
-
-theorem length2_pos : 0 < length2 := by
-  unfold length2
-  apply div_pos
-  · exact Real.goldenRatio_pos
-  · apply add_pos
-    · apply add_pos
-      · norm_num
-      · exact Real.goldenRatio_pos
-    · apply sq_pos_of_pos
-      exact Real.goldenRatio_pos
-
-theorem length3_pos : 0 < length3 := by
-  unfold length3
-  apply div_pos
-  · apply sq_pos_of_pos
-    exact Real.goldenRatio_pos
-  · apply add_pos
-    · apply add_pos
-      · norm_num
-      · exact Real.goldenRatio_pos
-    · apply sq_pos_of_pos
-      exact Real.goldenRatio_pos
-
-/-- The three lengths partition the unit interval. -/
-theorem lengths_sum_to_one :
-    length1 + length2 + length3 = 1 := by
-  unfold length1 length2 length3
-  field_simp
-
-/-- First length involves golden ratio. -/
-theorem length1_golden_ratio :
-    length1 * (1 + goldenRatio + goldenRatio ^ 2) = 1 := by
-  unfold length1
-  field_simp
-
-/-- Second length involves golden ratio. -/
-theorem length2_golden_ratio :
-    length2 * (1 + goldenRatio + goldenRatio ^ 2) = goldenRatio := by
-  unfold length2
-  field_simp
-
-/-- Third length involves golden ratio. -/
-theorem length3_golden_ratio :
-    length3 * (1 + goldenRatio + goldenRatio ^ 2) =
-      goldenRatio ^ 2 := by
-  unfold length3
-  field_simp
-
-/-- First length is less than 1. -/
-theorem length1_lt_one : length1 < 1 := by
-  unfold length1
-  have h_denom_pos : 0 < 1 + goldenRatio + goldenRatio ^ 2 := by
-    apply add_pos
-    · apply add_pos
-      · norm_num
-      · exact Real.goldenRatio_pos
-    · apply sq_pos_of_pos
-      exact Real.goldenRatio_pos
-  rw [div_lt_one h_denom_pos]
-  calc 1 < 1 + goldenRatio := by
-          have : 0 < goldenRatio := Real.goldenRatio_pos
-          linarith
-       _ < 1 + goldenRatio + goldenRatio ^ 2 := by
-          have : 0 < goldenRatio ^ 2 := sq_pos_of_pos Real.goldenRatio_pos
-          linarith
-
-/-- Sum of first two lengths is less than 1. -/
-theorem length12_lt_one : length1 + length2 < 1 := by
-  have h_sum := lengths_sum_to_one
-  have h3_pos := length3_pos
+/-- The denominator 1 + φ + φ² is positive. -/
+private lemma denom_pos : 0 < 1 + goldenRatio + goldenRatio ^ 2 := by
+  have h1 : 0 < goldenRatio := goldenRatio_pos
+  have h2 : 0 < goldenRatio ^ 2 := by positivity
   linarith
+
+/-- The first interval length is positive. -/
+lemma length1_pos : 0 < length1 := by
+  unfold length1
+  exact div_pos one_pos denom_pos
+
+/-- The second interval length is positive. -/
+lemma length2_pos : 0 < length2 := by
+  unfold length2
+  exact div_pos goldenRatio_pos denom_pos
+
+/-- The third interval length is positive. -/
+lemma length3_pos : 0 < length3 := by
+  unfold length3
+  have h : 0 < goldenRatio ^ 2 := by positivity
+  exact div_pos h denom_pos
+
+/-- The three interval lengths sum to one. -/
+lemma lengths_sum_to_one : length1 + length2 + length3 = 1 := by
+  unfold length1 length2 length3
+  have h_denom_ne : 1 + goldenRatio + goldenRatio ^ 2 ≠ 0 := by
+    linarith [denom_pos]
+  field_simp [h_denom_ne]
+
+/-- length1 < 1 -/
+lemma length1_lt_one : length1 < 1 := by
+  have h := lengths_sum_to_one
+  linarith [length2_pos, length3_pos]
+
+/-- length1 + length2 < 1 -/
+lemma length12_lt_one : length1 + length2 < 1 := by
+  have h := lengths_sum_to_one
+  linarith [length3_pos]
 
 /-- The 3-interval exchange transformation induced by GG(5,5)
 dynamics at criticality. -/
@@ -232,6 +169,44 @@ theorem interval_lengths_golden_ratio_relations :
     field_simp
   · unfold length2 length3
     field_simp
+
+/-! ### Displacement formulas in terms of golden ratio -/
+
+/-- The denominator 1 + φ + φ² equals 2(1 + φ) using φ² = φ + 1. -/
+lemma denom_eq_two_one_plus_phi :
+    1 + goldenRatio + goldenRatio ^ 2 = 2 * (1 + goldenRatio) := by
+  have h := Real.goldenRatio_sq  -- φ² = φ + 1
+  rw [h]
+  ring
+
+/-- Displacement 0 formula: d₀ = (1 + 2φ)/(2(1+φ)). -/
+lemma displacement0_formula :
+    displacement0 = (1 + 2 * goldenRatio) / (2 * (1 + goldenRatio)) := by
+  unfold displacement0 length1
+  rw [denom_eq_two_one_plus_phi]
+  have h_pos : 0 < 1 + goldenRatio := by linarith [goldenRatio_pos]
+  have h_ne : 2 * (1 + goldenRatio) ≠ 0 := by linarith
+  field_simp
+  ring
+
+/-- Displacement 1 formula: d₁ = φ/(2(1+φ)).
+    Note: length3 - length1 = (φ² - 1)/(2(1+φ)) = φ/(2(1+φ)) using φ² - 1 = φ. -/
+lemma displacement1_formula :
+    displacement1 = goldenRatio / (2 * (1 + goldenRatio)) := by
+  unfold displacement1 length3 length1
+  rw [denom_eq_two_one_plus_phi]
+  -- φ² - 1 = φ by the golden ratio property φ² = φ + 1
+  have h_sq : goldenRatio ^ 2 = goldenRatio + 1 := Real.goldenRatio_sq
+  have h_sq' : goldenRatio ^ 2 - 1 = goldenRatio := by linarith [h_sq]
+  rw [← sub_div, h_sq']
+
+/-- Displacement 2 formula: d₂ = -(1+φ)/(2(1+φ)) = -1/2. -/
+lemma displacement2_formula :
+    displacement2 = -(1 + goldenRatio) / (2 * (1 + goldenRatio)) := by
+  unfold displacement2
+  have h_pos : 0 < 1 + goldenRatio := by linarith [goldenRatio_pos]
+  have h_ne : 2 * (1 + goldenRatio) ≠ 0 := by linarith
+  field_simp
 
 /-- The emergent IET has golden ratio structure. -/
 theorem emergent_IET_golden_structure

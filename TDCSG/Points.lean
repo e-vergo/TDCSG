@@ -3,33 +3,25 @@ Copyright (c) 2025 Eric Hearn. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Hearn
 -/
+import TDCSG.Definitions.Cyclotomic
+import TDCSG.Definitions.Points
 import TDCSG.Zeta5
 
 /-!
-# Fundamental Points for GG(5,5)
+# Fundamental Points for GG(5,5) - Proofs
 
-Defines the key points E, E', F, G in the complex plane and their properties.
+This file contains the proofs about the points E, E', F, G.
+The definitions themselves are in TDCSG.Definitions.Points.
+
+Contains proofs about:
+- Point membership in disks
+- Segment parameterization
+- Ordering properties
 -/
 
 namespace TDCSG.CompoundSymmetry.GG5
 
-open Complex Real
-
-/-! ### Key Geometric Points -/
-
-/-- Point E: E = zeta5 - zeta5^2.
-    CRITICAL: Per the paper (Theorem 2, page 4), |E + 1| = r_crit,
-    meaning E lies on the LEFT disk boundary, not the right! -/
-noncomputable def E : ℂ := ζ₅ - ζ₅^2
-
-/-- Point E': the negation of E. -/
-noncomputable def E' : ℂ := -E
-
-/-- Point F on segment E'E: F = 1 - zeta5 + zeta5^2 - zeta5^3. -/
-noncomputable def F : ℂ := 1 - ζ₅ + ζ₅^2 - ζ₅^3
-
-/-- Point G on segment E'E: G = 2F - E. -/
-noncomputable def G : ℂ := 2 * F - E
+open Complex Real TDCSG.Definitions
 
 /-! ### Point Properties -/
 
@@ -213,17 +205,6 @@ lemma E_in_right_disk : ‖E - 1‖ ≤ r_crit := by
   exact this.le
 
 /-! ### Segment Parameter Values -/
-
-/-- The positive golden conjugate: psi = (sqrt5-1)/2 approx 0.618.
-    Note: This is DIFFERENT from Real.goldenConj = (1-sqrt5)/2 which is negative!
-    In fact, psi = -Real.goldenConj. -/
-noncomputable def psi : ℝ := (Real.sqrt 5 - 1) / 2
-
-/-- The parameter value for F on segment E'E: t_F = (1 + sqrt5)/4 approx 0.809 -/
-noncomputable def t_F : ℝ := (1 + Real.sqrt 5) / 4
-
-/-- The parameter value for G on segment E'E: t_G = (sqrt5 - 1)/2 approx 0.618 -/
-noncomputable def t_G : ℝ := (Real.sqrt 5 - 1) / 2
 
 /-- Helper: 1 < sqrt5 -/
 lemma sqrt5_gt_one : 1 < Real.sqrt 5 := by

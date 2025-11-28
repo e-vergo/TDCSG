@@ -3,10 +3,8 @@ Copyright (c) 2025 Eric Hearn. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Hearn
 -/
-import Mathlib.Analysis.InnerProductSpace.PiL2
-import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
-import Mathlib.Data.Complex.Basic
-import Mathlib.NumberTheory.Real.GoldenRatio
+import TDCSG.Definitions.Core
+import TDCSG.Definitions.Geometry
 
 /-!
 # Statement of Main Theorem
@@ -14,7 +12,7 @@ import Mathlib.NumberTheory.Real.GoldenRatio
 This file contains the complete statement of Theorem 2 from "Two-Disk Compound Symmetry Groups"
 (arXiv:2302.12950v1): **GG5 is infinite at the critical radius**.
 
-All definitions needed to understand the theorem are provided here, importing only from Mathlib.
+All definitions needed to understand the theorem are imported from the Definitions modules.
 The proof is in `ProofOfMainTheorem.lean`.
 
 ## Mathematical Background
@@ -29,7 +27,7 @@ The group GG5 = GG(5,5) uses 5-fold rotations on both disks.
 The critical radius r_crit = √(3 + φ) (where φ is the golden ratio) is the exact value
 where the group transitions from finite to infinite.
 
-## Main definitions
+## Main definitions (from TDCSG.Definitions)
 
 * `Plane` : The Euclidean plane ℝ²
 * `φ` : The golden ratio (1 + √5)/2
@@ -47,46 +45,7 @@ where the group transitions from finite to infinite.
   arXiv:2302.12950v1
 -/
 
-open Real Classical
-
-/-! ### Geometric Definitions -/
-
-/-- The Euclidean plane ℝ². -/
-abbrev Plane := EuclideanSpace ℝ (Fin 2)
-
-/-- The golden ratio φ = (1 + √5)/2. -/
-noncomputable def φ : ℝ := Real.goldenRatio
-
-/-- The critical radius for GG5: r_crit = √(3 + φ). -/
-noncomputable def r_crit : ℝ := Real.sqrt (3 + φ)
-
-/-- Center of the left disk, positioned at (-1, 0). -/
-noncomputable def leftCenter : Plane := ![-1, 0]
-
-/-- Center of the right disk, positioned at (1, 0). -/
-noncomputable def rightCenter : Plane := ![1, 0]
-
-/-- A closed disk in the plane with given center and radius. -/
-def closedDisk (center : Plane) (radius : ℝ) : Set Plane :=
-  Metric.closedBall center radius
-
-/-- The left disk with radius r centered at (-1, 0). -/
-noncomputable def leftDisk (r : ℝ) : Set Plane := closedDisk leftCenter r
-
-/-- The right disk with radius r centered at (1, 0). -/
-noncomputable def rightDisk (r : ℝ) : Set Plane := closedDisk rightCenter r
-
-/-- Rotation matrix in ℝ² by angle θ. -/
-noncomputable def rotationMatrix (θ : ℝ) : Matrix (Fin 2) (Fin 2) ℝ :=
-  !![cos θ, -sin θ; sin θ, cos θ]
-
-/-- Apply a 2×2 matrix to a point in ℝ². -/
-noncomputable def applyMatrix (M : Matrix (Fin 2) (Fin 2) ℝ) (p : Plane) : Plane :=
-  fun i => ∑ j, M i j * p j
-
-/-- Rotation about a given center point by angle θ. -/
-noncomputable def rotateAround (center : Plane) (θ : ℝ) (p : Plane) : Plane :=
-  center + applyMatrix (rotationMatrix θ) (p - center)
+open Real Classical TDCSG.Definitions
 
 /-- Generator A: rotation by 2π/5 about the left disk center.
     Acts as the identity outside the left disk. -/
@@ -100,10 +59,7 @@ noncomputable def genB (r : ℝ) (p : Plane) : Plane :=
 
 /-! ### Group Action and Orbits -/
 
-/-- A word in generators A, B and their inverses.
-    First component: false = A, true = B.
-    Second component: true = generator, false = inverse. -/
-abbrev Word := List (Bool × Bool)
+-- Word is now imported from TDCSG.Definitions.Core
 
 /-- Apply a generator or its inverse to a point. -/
 noncomputable def applyGen (r : ℝ) (p : Plane) (g : Bool × Bool) : Plane :=

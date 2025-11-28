@@ -7,6 +7,7 @@ import Mathlib.Analysis.InnerProductSpace.PiL2
 import Mathlib.Geometry.Euclidean.Angle.Oriented.Basic
 import Mathlib.Geometry.Euclidean.Angle.Oriented.Rotation
 import Mathlib.LinearAlgebra.Orientation
+import TDCSG.Definitions.Geometry
 
 /-!
 # Planar Rotations
@@ -58,12 +59,10 @@ noncomputable def rotation2D (θ : Real.Angle) : ℝ² ≃ₗᵢ[ℝ] ℝ² :=
 noncomputable def translate (v : ℝ²) : ℝ² ≃ᵃⁱ[ℝ] ℝ² :=
   AffineIsometryEquiv.constVAdd ℝ ℝ² v
 
-/-- Rotation by angle θ about an arbitrary point c in ℝ² -/
-noncomputable def rotateAround (c : ℝ²) (θ : Real.Angle) :
-    ℝ² ≃ᵃⁱ[ℝ] ℝ² :=
-  (translate (-c)).trans <|
-    (rotation2D θ).toAffineIsometryEquiv.trans <|
-      translate c
+/-- Rotation about an arbitrary point c by angle θ in ℝ².
+    This is: translate to origin, rotate, translate back. -/
+noncomputable def rotateAround (c : ℝ²) (θ : Real.Angle) : ℝ² ≃ᵃⁱ[ℝ] ℝ² :=
+  (translate (-c)).trans ((rotation2D θ).toAffineIsometryEquiv.trans (translate c))
 
 /-- Rotation about a point preserves distances -/
 theorem rotateAround_dist (c : ℝ²) (θ : Real.Angle) (x y : ℝ²) :

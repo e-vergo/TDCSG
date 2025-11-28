@@ -3,6 +3,8 @@ Copyright (c) 2025-10-18 Eric Hearn. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Hearn
 -/
+import TDCSG.Definitions.Core
+import TDCSG.Definitions.Cyclotomic
 import Mathlib.Analysis.SpecialFunctions.Exp
 import Mathlib.NumberTheory.Real.GoldenRatio
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Complex
@@ -10,15 +12,18 @@ import Mathlib.RingTheory.RootsOfUnity.Complex
 import Mathlib.Analysis.Normed.Module.Convex
 
 /-!
-# Fifth Roots of Unity and Critical Radius
+# Fifth Roots of Unity
 
-This file defines the primitive 5th root of unity ζ₅ and the critical radius r_crit,
-along with all algebraic identities needed for the GG5 proof.
+This file provides all algebraic identities for ζ₅ needed for the GG5 proof.
+
+The core definition `zeta5` is in TDCSG.Definitions.Cyclotomic.
+Here we provide the Unicode alias `ζ₅` and all the lemmas.
+
+The critical radius r_crit is imported from TDCSG.Definitions.Core.
 
 ## Main Definitions
 
-* `ζ₅`: The primitive 5th root of unity e^(2πi/5)
-* `r_crit`: The critical radius √(3 + φ)
+* `ζ₅`: Unicode alias for `zeta5`, the primitive 5th root of unity e^(2πi/5)
 
 ## Main Results
 
@@ -31,23 +36,16 @@ along with all algebraic identities needed for the GG5 proof.
 namespace TDCSG.CompoundSymmetry.GG5
 
 open scoped Complex
-open Complex Real
+open Complex Real TDCSG.Definitions
 
-/-! ### Critical Radius -/
+/-- Unicode alias for zeta5 from Definitions/Cyclotomic.lean -/
+noncomputable abbrev ζ₅ : ℂ := zeta5
 
-/-- The critical radius for GG5, equal to √(3 + φ). -/
-noncomputable def r_crit : ℝ :=
-  Real.sqrt (3 + Real.goldenRatio)
-
-/-- The critical radius is positive. -/
-lemma r_crit_pos : 0 < r_crit := by
-  unfold r_crit
-  apply Real.sqrt_pos.mpr
-  linarith [Real.goldenRatio_pos]
+/-! ### Critical Radius Lemmas -/
 
 /-- The critical radius satisfies 2.148 < r_crit < 2.150. -/
 lemma r_crit_approx : 2.148 < r_crit ∧ r_crit < 2.150 := by
-  unfold r_crit
+  unfold r_crit φ
   constructor
   · rw [show (2.148 : ℝ) = Real.sqrt (2.148 ^ 2) by
       rw [Real.sqrt_sq]; norm_num]
@@ -56,13 +54,13 @@ lemma r_crit_approx : 2.148 < r_crit ∧ r_crit < 2.150 := by
     have h_sq : (2.148 : ℝ) ^ 2 = 4.613904 := by norm_num
     rw [h_sq]
     have φ_lower : (1.613904 : ℝ) < Real.goldenRatio := by
-      unfold Real.goldenRatio
       have h1 : (2.227808 : ℝ) ^ 2 < 5 := by norm_num
       have h2 : (2.227808 : ℝ) < Real.sqrt 5 := by
         rw [show (2.227808 : ℝ) =
             Real.sqrt (2.227808 ^ 2) by
           rw [Real.sqrt_sq]; norm_num]
         exact Real.sqrt_lt_sqrt (by norm_num) h1
+      unfold Real.goldenRatio
       linarith
     linarith
   · rw [show (2.150 : ℝ) = Real.sqrt (2.150 ^ 2) by
@@ -85,19 +83,16 @@ lemma r_crit_approx : 2.148 < r_crit ∧ r_crit < 2.150 := by
 
 /-! ### 5th Roots of Unity -/
 
-/-- The primitive 5th root of unity: e^(2πi/5) -/
-noncomputable def ζ₅ : ℂ := exp (2 * π * I / 5)
-
 /-- ζ₅ is a 5th root of unity. -/
 lemma zeta5_pow_five : ζ₅ ^ 5 = 1 := by
-  unfold ζ₅
+  unfold ζ₅ zeta5
   rw [← Complex.exp_nat_mul]
   convert Complex.exp_two_pi_mul_I using 2
   ring
 
 /-- ζ₅ is not equal to 1. -/
 lemma zeta5_ne_one : ζ₅ ≠ 1 := by
-  unfold ζ₅
+  unfold ζ₅ zeta5
   have : (2 : ℝ) * π / 5 ≠ 0 := by
     apply div_ne_zero
     apply mul_ne_zero
@@ -133,7 +128,7 @@ lemma zeta5_ne_one : ζ₅ ≠ 1 := by
 
 /-- |ζ₅| = 1 -/
 lemma zeta5_abs : ‖ζ₅‖ = 1 := by
-  unfold ζ₅
+  unfold ζ₅ zeta5
   rw [show (2 : ℂ) * π * I / 5 = (2 * π / 5 : ℝ) * I by
     simp [div_eq_mul_inv]
     ring]
@@ -143,7 +138,7 @@ lemma zeta5_abs : ‖ζ₅‖ = 1 := by
 
 /-- ζ₅ is a primitive 5th root of unity. -/
 lemma zeta5_isPrimitiveRoot : IsPrimitiveRoot ζ₅ 5 := by
-  unfold ζ₅
+  unfold ζ₅ zeta5
   rw [show (2 : ℂ) * π * I / 5 = 2 * π * I / (5 : ℂ) by norm_cast]
   exact Complex.isPrimitiveRoot_exp 5 (by norm_num)
 
@@ -186,7 +181,7 @@ lemma cos_two_pi_fifth :
 /-- The conjugate of ζ₅ equals ζ₅⁴. -/
 lemma zeta5_conj : starRingEnd ℂ ζ₅ = ζ₅^4 := by
   have h5 : ζ₅ ^ 5 = 1 := zeta5_pow_five
-  unfold ζ₅
+  unfold ζ₅ zeta5
   rw [← Complex.exp_conj]
   rw [map_div₀, map_mul, map_mul]
   simp only [map_ofNat, Complex.conj_ofReal, Complex.conj_I]
@@ -194,7 +189,7 @@ lemma zeta5_conj : starRingEnd ℂ ζ₅ = ζ₅^4 := by
   rw [Complex.exp_neg, ← Complex.exp_nat_mul]
   norm_num
   field_simp [Complex.exp_ne_zero]
-  unfold ζ₅ at h5
+  unfold ζ₅ zeta5 at h5
   rw [← Complex.exp_nat_mul] at h5
   ring_nf at h5 ⊢
   rw [← Complex.exp_add]
@@ -334,28 +329,28 @@ lemma zeta5_pow_eight : ζ₅^8 = ζ₅^3 := by
 
 /-- ζ₅.re = cos(2π/5). -/
 lemma zeta5_re_eq_cos : ζ₅.re = Real.cos (2 * π / 5) := by
-  unfold ζ₅
+  unfold ζ₅ zeta5
   rw [show (2 : ℂ) * π * I / 5 = (2 * π / 5 : ℝ) * I by
     simp [div_eq_mul_inv]; ring]
   exact Complex.exp_ofReal_mul_I_re (2 * π / 5)
 
 /-- ζ₅.im = sin(2π/5). -/
 lemma zeta5_im_eq_sin : ζ₅.im = Real.sin (2 * π / 5) := by
-  unfold ζ₅
+  unfold ζ₅ zeta5
   rw [show (2 : ℂ) * π * I / 5 = (2 * π / 5 : ℝ) * I by
     simp [div_eq_mul_inv]; ring]
   exact Complex.exp_ofReal_mul_I_im (2 * π / 5)
 
 /-- Helper: express ζ₅ in terms of cos and sin -/
 lemma zeta5_eq : ζ₅ = ↑(Real.cos (2 * π / 5)) + I * ↑(Real.sin (2 * π / 5)) := by
-  unfold ζ₅
+  unfold ζ₅ zeta5
   rw [show (2 : ℂ) * π * I / 5 = (2 * π / 5 : ℝ) * I by push_cast; field_simp]
   rw [Complex.exp_mul_I,  Complex.ofReal_cos, Complex.ofReal_sin]
   ring
 
 /-- Helper: express ζ₅² in terms of cos and sin -/
 lemma zeta5_sq_eq : ζ₅^2 = ↑(Real.cos (4 * π / 5)) + I * ↑(Real.sin (4 * π / 5)) := by
-  unfold ζ₅
+  unfold ζ₅ zeta5
   rw [sq, show (exp (2 * ↑π * I / 5) : ℂ) * exp (2 * ↑π * I / 5) =
       exp ((2 * π / 5 : ℝ) * I + (2 * π / 5 : ℝ) * I) by
     rw [← Complex.exp_add]; congr 1; push_cast; field_simp]

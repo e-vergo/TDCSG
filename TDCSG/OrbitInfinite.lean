@@ -3,6 +3,7 @@ Copyright (c) 2025-11-22 Eric Moffat. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Moffat
 -/
+import TDCSG.Definitions.IET
 import TDCSG.IET
 import TDCSG.Orbit
 import Mathlib.NumberTheory.Real.GoldenRatio
@@ -15,6 +16,9 @@ import Mathlib.Data.Set.Function
 This file establishes foundational infrastructure for proving that the interval
 exchange transformation emerging from the GG(5,5) compound symmetry system
 has infinite orbits.
+
+The fundamental IET definitions (length1, length2, length3, displacements)
+are in TDCSG.Definitions.IET.
 
 ## Main results
 
@@ -53,7 +57,7 @@ measure-theoretic arguments beyond current Mathlib ergodic theory coverage.
 
 namespace CompoundSymmetry.GG5
 
-open PiecewiseIsometry Real Function Set Orbit
+open PiecewiseIsometry Real Function Set Orbit TDCSG.Definitions
 
 /-! ### Irrationality results -/
 
@@ -158,42 +162,9 @@ In terms of φ where 1 + φ + φ² = 2(1+φ):
 - d₀ = (1 + 2φ)/(2(1+φ))
 - d₁ = φ/(2(1+φ))
 - d₂ = -(1+φ)/(2(1+φ))
+
+The displacements are defined in TDCSG.Definitions.IET.
 -/
-
-/-- Displacement for interval 0: d₀ = 1 - length1 -/
-noncomputable def displacement0 : ℝ := 1 - length1
-
-/-- Displacement for interval 1: d₁ = length3 - length1 -/
-noncomputable def displacement1 : ℝ := length3 - length1
-
-/-- Displacement for interval 2: d₂ = -1/2 -/
-noncomputable def displacement2 : ℝ := -1/2
-
-/-- d₀ = (1 + 2φ)/(2(1+φ)) -/
-theorem displacement0_formula : displacement0 = (1 + 2 * goldenRatio) / (2 * (1 + goldenRatio)) := by
-  unfold displacement0 length1
-  have h_sq : goldenRatio ^ 2 = goldenRatio + 1 := Real.goldenRatio_sq
-  have h_denom : 1 + goldenRatio + goldenRatio ^ 2 = 2 * (1 + goldenRatio) := by rw [h_sq]; ring
-  rw [h_denom]
-  field_simp
-  ring
-
-/-- d₁ = φ/(2(1+φ)) -/
-theorem displacement1_formula : displacement1 = goldenRatio / (2 * (1 + goldenRatio)) := by
-  unfold displacement1 length1 length3
-  have h_sq : goldenRatio ^ 2 = goldenRatio + 1 := Real.goldenRatio_sq
-  have h_denom : 1 + goldenRatio + goldenRatio ^ 2 = 2 * (1 + goldenRatio) := by rw [h_sq]; ring
-  rw [h_denom]
-  have h_key : goldenRatio ^ 2 - 1 = goldenRatio := by rw [h_sq]; ring
-  rw [div_sub_div_same, h_key]
-
-/-- d₂ = -(1+φ)/(2(1+φ)) = -1/2 -/
-theorem displacement2_formula : displacement2 = -(1 + goldenRatio) / (2 * (1 + goldenRatio)) := by
-  unfold displacement2
-  have h : (1 + goldenRatio) ≠ 0 := by
-    have : 0 < goldenRatio := goldenRatio_pos
-    linarith
-  field_simp
 
 /-- GG5 domain boundaries -/
 theorem GG5_domainLeft_0 : GG5_induced_IET.domainLeft 0 = 0 := by
@@ -493,13 +464,6 @@ theorem denom_pos : 0 < 1 + goldenRatio + goldenRatio ^ 2 := by
   have h1 : 0 < goldenRatio := goldenRatio_pos
   have h2 : 0 < goldenRatio ^ 2 := sq_pos_of_pos h1
   linarith
-
-/-- The denominator 1 + φ + φ² equals 2(1 + φ) using φ² = φ + 1. -/
-theorem denom_eq_two_one_plus_phi :
-    1 + goldenRatio + goldenRatio ^ 2 = 2 * (1 + goldenRatio) := by
-  have h := Real.goldenRatio_sq  -- φ² = φ + 1
-  rw [h]
-  ring
 
 /-- length1 = 1 / (2 * (1 + φ)) -/
 theorem length1_alt : length1 = 1 / (2 * (1 + goldenRatio)) := by

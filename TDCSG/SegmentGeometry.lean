@@ -3,17 +3,20 @@ Copyright (c) 2025 Eric Hearn. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Hearn
 -/
+import TDCSG.Definitions.Conversions
 import TDCSG.Points
 
 /-!
 # Segment Geometry for GG(5,5)
 
 Defines segment lengths, ratios, and proves key irrationality results.
+
+The conversion functions (toR2, E_R2, etc.) are imported from TDCSG.Definitions.Conversions.
 -/
 
 namespace TDCSG.CompoundSymmetry.GG5
 
-open Complex Real
+open Complex Real TDCSG.Definitions
 
 /-! ### Helper Lemmas for F and G Relationships -/
 
@@ -77,14 +80,8 @@ lemma G_eq_coeff_times_E : G = ((Real.sqrt 5 - 2) : ℝ) • E := by
 
 /-! ### Translation Lengths -/
 
-/-- The translation length |F - (-F)|. -/
-noncomputable def translation_length_1 : ℝ := ‖F - (-F)‖
-
-/-- The translation length |E - G|. -/
-noncomputable def translation_length_2 : ℝ := ‖E - G‖
-
-/-- The total segment length |E - E'|. -/
-noncomputable def segment_length : ℝ := ‖E - E'‖
+-- The definitions translation_length_1, translation_length_2, and segment_length
+-- are imported from TDCSG.Definitions.Conversions
 
 /-- E is nonzero. -/
 lemma E_ne_zero : E ≠ 0 := by
@@ -331,19 +328,6 @@ lemma translations_irrational : ∀ (q r : ℤ),
 
 /-! ### Conversion to ℝ² -/
 
-/-- Convert complex number to ℝ² coordinates. -/
-noncomputable def toR2 (z : ℂ) : ℝ × ℝ := (z.re, z.im)
-
-/-- E in ℝ². -/
-noncomputable def E_R2 : ℝ × ℝ := toR2 E
-
-/-- E' in ℝ². -/
-noncomputable def E'_R2 : ℝ × ℝ := toR2 E'
-
-/-- F in ℝ². -/
-noncomputable def F_R2 : ℝ × ℝ := toR2 F
-
-/-- G in ℝ². -/
-noncomputable def G_R2 : ℝ × ℝ := toR2 G
+-- The conversion functions (toR2, E_R2, E'_R2, F_R2, G_R2) are now in TDCSG.Definitions.Conversions
 
 end TDCSG.CompoundSymmetry.GG5

@@ -6,6 +6,8 @@ Authors: Eric Hearn
 import TDCSG.WordCorrespondence
 import TDCSG.OrbitInfinite
 import TDCSG.TwoDisk
+import TDCSG.Definitions.Core
+import TDCSG.Definitions.Points
 
 /-!
 # GG5 Geometry Module
@@ -30,7 +32,15 @@ The GG5 geometric construction has been refactored into:
 
 namespace TDCSG.CompoundSymmetry.GG5
 
-open Complex Real
+open Complex Real TDCSG.Definitions
+
+/-! ### Basic lemmas -/
+
+/-- The critical radius is positive. -/
+lemma r_crit_pos : 0 < r_crit := by
+  unfold r_crit φ
+  apply Real.sqrt_pos_of_pos
+  linarith [Real.goldenRatio_pos]
 
 /-! ### TwoDiskSystem Definition -/
 

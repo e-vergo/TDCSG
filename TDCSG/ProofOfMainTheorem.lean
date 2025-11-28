@@ -53,7 +53,7 @@ theorem mainTheorem : StatementOfTheorem := by
   -- Get x₀ ∈ [0,1) with infinite IET orbit
   obtain ⟨x₀, hx₀_mem, hx₀_inf⟩ := CompoundSymmetry.GG5.GG5_IET_has_infinite_orbit
   -- The point on segment E'E corresponding to x₀
-  let p := TDCSG.CompoundSymmetry.GG5.segmentPointPlane x₀
+  let p := TDCSG.Definitions.segmentPointPlane x₀
   use p
   -- The IET orbit being infinite implies the group orbit is infinite
   exact TDCSG.CompoundSymmetry.GG5.IET_orbit_infinite_implies_group_orbit_infinite x₀ hx₀_mem hx₀_inf

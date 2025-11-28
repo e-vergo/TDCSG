@@ -6,6 +6,7 @@ Authors: Eric Moffat
 import TDCSG.Basic
 import TDCSG.Rotations
 import TDCSG.Disks
+import TDCSG.Definitions.Geometry
 
 /-!
 # Two-Disk Compound Symmetry Groups
@@ -32,6 +33,7 @@ This file formalizes the two-disk compound symmetry group construction.
 open scoped RealInnerProductSpace
 open Planar
 open Classical
+open TDCSG.Definitions
 
 namespace CompoundSymmetry
 
@@ -58,21 +60,13 @@ namespace TwoDiskSystem
 
 variable (sys : TwoDiskSystem)
 
-/-- The center of the left disk (positioned at (-r1, 0)) -/
-noncomputable def leftCenter : ℝ² :=
-  fun i => if i = 0 then -sys.r1 else 0
-
-/-- The center of the right disk (positioned at (r2, 0)) -/
-noncomputable def rightCenter : ℝ² :=
-  fun i => if i = 0 then sys.r2 else 0
-
 /-- The left disk -/
 noncomputable def leftDisk : Set ℝ² :=
-  TDCSG.Disk (leftCenter sys) sys.r1
+  TDCSG.Disk leftCenter sys.r1
 
 /-- The right disk -/
 noncomputable def rightDisk : Set ℝ² :=
-  TDCSG.Disk (rightCenter sys) sys.r2
+  TDCSG.Disk rightCenter sys.r2
 
 /-- The exterior region (outside both disks) -/
 noncomputable def exterior : Set ℝ² :=
@@ -89,14 +83,14 @@ noncomputable def angleB : Real.Angle :=
 /-- Generator A: rotation by 2π/n1 around the center of the left disk -/
 noncomputable def genA : ℝ² → ℝ² :=
   fun x => if x ∈ leftDisk sys then
-    rotateAround (leftCenter sys) (angleA sys) x
+    rotateAround leftCenter (angleA sys) x
   else
     x
 
 /-- Generator B: rotation by 2π/n2 around the center of the right disk -/
 noncomputable def genB : ℝ² → ℝ² :=
   fun x => if x ∈ rightDisk sys then
-    rotateAround (rightCenter sys) (angleB sys) x
+    rotateAround rightCenter (angleB sys) x
   else
     x
 
@@ -182,17 +176,17 @@ theorem basicPartition_nonempty : ∀ s ∈ basicPartition sys, s.Nonempty := by
   rcases hs with (rfl | rfl | rfl)
   · -- leftDisk is nonempty (contains its center)
     unfold leftDisk TDCSG.Disk
-    use leftCenter sys
+    use leftCenter
     simp only [Metric.mem_closedBall, dist_self, le_of_lt sys.r1_pos]
   · -- rightDisk is nonempty (contains its center)
     unfold rightDisk TDCSG.Disk
-    use rightCenter sys
+    use rightCenter
     simp only [Metric.mem_closedBall, dist_self, le_of_lt sys.r2_pos]
   · -- exterior is nonempty (contains a far away point)
     unfold exterior
-    -- Use a point on the x-axis far to the left: (-10*r1 - r2, 0)
-    -- This is clearly outside both disks
-    let x_coord := -(10 * sys.r1 + sys.r2)
+    -- Use a point on the x-axis far to the left: (-1 - 10*r1 - 10*r2, 0)
+    -- This is clearly outside both disks (centers at -1 and 1)
+    let x_coord := -1 - 10 * sys.r1 - 10 * sys.r2
     let p : ℝ² := fun i => if i = 0 then x_coord else 0
     use p
     simp only [Set.mem_compl_iff, Set.mem_union, not_or]
@@ -200,9 +194,9 @@ theorem basicPartition_nonempty : ∀ s ∈ basicPartition sys, s.Nonempty := by
     · -- Not in leftDisk
       unfold leftDisk TDCSG.Disk leftCenter
       simp only [Metric.mem_closedBall, not_le]
-      -- leftCenter = (-r1, 0), p = (-10r1 - r2, 0)
-      -- dist = |-10r1 - r2 - (-r1)| = |-9r1 - r2| = 9r1 + r2 > r1
-      have : sys.r1 < dist p (fun i => if i = 0 then -sys.r1 else 0) := by
+      -- leftCenter = (-1, 0), p = (-1 - 10r1 - 10r2, 0)
+      -- dist = |x_coord - (-1)| = |-10r1 - 10r2| = 10r1 + 10r2 > r1
+      have : sys.r1 < dist p (fun i => if i = 0 then -1 else 0) := by
         rw [dist_on_x_axis]
         simp only [x_coord]
         ring_nf
@@ -213,9 +207,9 @@ theorem basicPartition_nonempty : ∀ s ∈ basicPartition sys, s.Nonempty := by
     · -- Not in rightDisk
       unfold rightDisk TDCSG.Disk rightCenter
       simp only [Metric.mem_closedBall, not_le]
-      -- rightCenter = (r2, 0), p = (-10r1 - r2, 0)
-      -- dist = |r2 - (-10r1 - r2)| = |10r1 + 2r2| = 10r1 + 2r2 > r2
-      have : sys.r2 < dist p (fun i => if i = 0 then sys.r2 else 0) := by
+      -- rightCenter = (1, 0), p = (-1 - 10r1 - 10r2, 0)
+      -- dist = |x_coord - 1| = |-2 - 10r1 - 10r2| = 2 + 10r1 + 10r2 > r2
+      have : sys.r2 < dist p (fun i => if i = 0 then 1 else 0) := by
         rw [dist_on_x_axis]
         simp only [x_coord]
         ring_nf
@@ -272,8 +266,9 @@ theorem partitionA_nonempty : ∀ s ∈ partitionA sys, s.Nonempty := by
   rcases hs with (rfl | rfl)
   · -- leftDisk is nonempty (contains its center)
     unfold leftDisk TDCSG.Disk
-    use leftCenter sys
-    simp only [Metric.mem_closedBall, dist_self, le_of_lt sys.r1_pos]
+    use leftCenter
+    simp only [Metric.mem_closedBall, dist_self]
+    exact le_of_lt sys.r1_pos
   · -- complement is nonempty (contains a far right point)
     use (fun i : Fin 2 => if i = 0 then 10 * sys.r1 else 0)
     simp only [Set.mem_compl_iff]
@@ -333,8 +328,9 @@ theorem partitionB_nonempty : ∀ s ∈ partitionB sys, s.Nonempty := by
   rcases hs with (rfl | rfl)
   · -- rightDisk is nonempty (contains its center)
     unfold rightDisk TDCSG.Disk
-    use rightCenter sys
-    simp only [Metric.mem_closedBall, dist_self, le_of_lt sys.r2_pos]
+    use rightCenter
+    simp only [Metric.mem_closedBall, dist_self]
+    exact le_of_lt sys.r2_pos
   · -- complement is nonempty (contains a far left point)
     use (fun i : Fin 2 => if i = 0 then -10 * sys.r2 else 0)
     simp only [Set.mem_compl_iff]
@@ -354,7 +350,7 @@ theorem genA_isometry_on_leftDisk : ∀ x ∈ leftDisk sys, ∀ y ∈ leftDisk s
   -- Both x and y are in leftDisk, so the if conditions are true
   simp only [hx, hy, ite_true]
   -- rotateAround preserves distances
-  exact Planar.rotateAround_dist (leftCenter sys) (angleA sys) x y
+  exact Planar.rotateAround_dist leftCenter (angleA sys) x y
 
 /-- Generator B preserves distances on the right disk -/
 theorem genB_isometry_on_rightDisk : ∀ x ∈ rightDisk sys, ∀ y ∈ rightDisk sys,
@@ -364,7 +360,7 @@ theorem genB_isometry_on_rightDisk : ∀ x ∈ rightDisk sys, ∀ y ∈ rightDis
   -- Both x and y are in rightDisk, so the if conditions are true
   simp only [hx, hy, ite_true]
   -- rotateAround preserves distances
-  exact Planar.rotateAround_dist (rightCenter sys) (angleB sys) x y
+  exact Planar.rotateAround_dist rightCenter (angleB sys) x y
 
 /-- Generator A is the identity on the complement of the left disk -/
 theorem genA_eq_id_on_compl : ∀ x ∉ leftDisk sys, sys.genA x = x := by

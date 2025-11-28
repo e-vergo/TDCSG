@@ -6,6 +6,11 @@ Authors: Eric Hearn
 import TDCSG.PlaneConversion
 import TDCSG.Orbit
 import TDCSG.OrbitInfinite
+import TDCSG.MainTheorem
+import TDCSG.IET
+import TDCSG.Definitions.Core
+import TDCSG.Definitions.IET
+import TDCSG.Definitions.Conversions
 
 /-!
 # Word Correspondence for GG(5,5)
@@ -29,7 +34,7 @@ between IET orbits and group orbits.
 
 namespace TDCSG.CompoundSymmetry.GG5
 
-open Complex Real
+open Complex Real TDCSG.Definitions _root_.CompoundSymmetry.GG5
 
 /-! ### Group words corresponding to IET intervals
 
@@ -43,69 +48,69 @@ Note: applyWord uses foldl, so words are applied left-to-right.
 -/
 
 /-- Word 1: a⁻²b⁻¹a⁻¹b⁻¹ (for interval 0: [0, length1)) -/
-def word1 : _root_.Word :=
+def word1 : Word :=
   [(false, false), (false, false), (true, false), (false, false), (true, false)]
 
 /-- Word 2: abab² (for interval 1: [length1, length1 + length2)) -/
-def word2 : _root_.Word :=
+def word2 : Word :=
   [(false, true), (true, true), (false, true), (true, true), (true, true)]
 
 /-- Word 3: abab⁻¹a⁻¹b⁻¹ (for interval 2: [length1 + length2, 1)) -/
-def word3 : _root_.Word :=
+def word3 : Word :=
   [(false, true), (true, true), (false, true), (true, false), (false, false), (true, false)]
 
 /-! ### IET interval lemmas -/
 
 /-- Helper: IET.toFun for interval 0 equals x + displacement0 -/
-lemma IET_toFun_interval0 (x : ℝ) (hx_lo : 0 ≤ x) (hx_hi : x < CompoundSymmetry.GG5.length1) :
-    CompoundSymmetry.GG5.GG5_induced_IET.toFun x = x + CompoundSymmetry.GG5.displacement0 := by
+lemma IET_toFun_interval0 (x : ℝ) (hx_lo : 0 ≤ x) (hx_hi : x < length1) :
+    CompoundSymmetry.GG5.GG5_induced_IET.toFun x = x + displacement0 := by
   have hx_mem : x ∈ Set.Ico 0 1 := by
     constructor
     · exact hx_lo
-    · calc x < CompoundSymmetry.GG5.length1 := hx_hi
-           _ < 1 := CompoundSymmetry.GG5.length1_lt_one
+    · calc x < length1 := hx_hi
+           _ < 1 := length1_lt_one
   have h := CompoundSymmetry.GG5.GG5_displacement_eq_toFun_sub x hx_mem
   unfold CompoundSymmetry.GG5.GG5_displacement at h
   simp only [hx_hi, if_true] at h
   linarith
 
 /-- Helper: IET.toFun for interval 1 equals x + displacement1 -/
-lemma IET_toFun_interval1 (x : ℝ) (hx_lo : CompoundSymmetry.GG5.length1 ≤ x)
-    (hx_hi : x < CompoundSymmetry.GG5.length1 + CompoundSymmetry.GG5.length2) :
-    CompoundSymmetry.GG5.GG5_induced_IET.toFun x = x + CompoundSymmetry.GG5.displacement1 := by
+lemma IET_toFun_interval1 (x : ℝ) (hx_lo : length1 ≤ x)
+    (hx_hi : x < length1 + length2) :
+    CompoundSymmetry.GG5.GG5_induced_IET.toFun x = x + displacement1 := by
   have hx_mem : x ∈ Set.Ico 0 1 := by
     constructor
-    · calc 0 ≤ CompoundSymmetry.GG5.length1 := le_of_lt CompoundSymmetry.GG5.length1_pos
+    · calc 0 ≤ length1 := le_of_lt length1_pos
            _ ≤ x := hx_lo
-    · calc x < CompoundSymmetry.GG5.length1 + CompoundSymmetry.GG5.length2 := hx_hi
-           _ < 1 := CompoundSymmetry.GG5.length12_lt_one
+    · calc x < length1 + length2 := hx_hi
+           _ < 1 := length12_lt_one
   have h := CompoundSymmetry.GG5.GG5_displacement_eq_toFun_sub x hx_mem
   unfold CompoundSymmetry.GG5.GG5_displacement at h
-  have h_not_0 : ¬(x < CompoundSymmetry.GG5.length1) := not_lt.mpr hx_lo
+  have h_not_0 : ¬(x < length1) := not_lt.mpr hx_lo
   simp only [h_not_0, if_false, hx_hi, if_true] at h
   linarith
 
 /-- Helper: IET.toFun for interval 2 equals x + displacement2 -/
 lemma IET_toFun_interval2 (x : ℝ)
-    (hx_lo : CompoundSymmetry.GG5.length1 + CompoundSymmetry.GG5.length2 ≤ x) (hx_hi : x < 1) :
-    CompoundSymmetry.GG5.GG5_induced_IET.toFun x = x + CompoundSymmetry.GG5.displacement2 := by
+    (hx_lo : length1 + length2 ≤ x) (hx_hi : x < 1) :
+    CompoundSymmetry.GG5.GG5_induced_IET.toFun x = x + displacement2 := by
   have hx_mem : x ∈ Set.Ico 0 1 := by
     constructor
-    · calc 0 ≤ CompoundSymmetry.GG5.length1 + CompoundSymmetry.GG5.length2 := by
-            have h1 := CompoundSymmetry.GG5.length1_pos
-            have h2 := CompoundSymmetry.GG5.length2_pos
+    · calc 0 ≤ length1 + length2 := by
+            have h1 := length1_pos
+            have h2 := length2_pos
             linarith
            _ ≤ x := hx_lo
     · exact hx_hi
   have h := CompoundSymmetry.GG5.GG5_displacement_eq_toFun_sub x hx_mem
   unfold CompoundSymmetry.GG5.GG5_displacement at h
-  have h_not_0 : ¬(x < CompoundSymmetry.GG5.length1) := by
+  have h_not_0 : ¬(x < length1) := by
     push_neg
-    calc CompoundSymmetry.GG5.length1 ≤ CompoundSymmetry.GG5.length1 + CompoundSymmetry.GG5.length2 := by
-          have h2 := CompoundSymmetry.GG5.length2_pos
+    calc length1 ≤ length1 + length2 := by
+          have h2 := length2_pos
           linarith
          _ ≤ x := hx_lo
-  have h_not_1 : ¬(x < CompoundSymmetry.GG5.length1 + CompoundSymmetry.GG5.length2) := not_lt.mpr hx_lo
+  have h_not_1 : ¬(x < length1 + length2) := not_lt.mpr hx_lo
   simp only [h_not_0, if_false, h_not_1, if_false] at h
   linarith
 
@@ -127,12 +132,12 @@ lemma word1_algebraic_identity :
       let step3 := (1 : ℂ) + ζ₅^4 * (step2 - 1)    -- B⁻¹
       let step4 := (-1 : ℂ) + ζ₅^4 * (step3 + 1)   -- A⁻¹
       (1 : ℂ) + ζ₅^4 * (step4 - 1)                 -- B⁻¹
-    result = z + (2 * CompoundSymmetry.GG5.displacement0) • E := by
+    result = z + (2 * displacement0) • E := by
   intro c hc
   -- The algebraic verification using ζ₅^5 = 1 and cyclotomic identities
   -- Expanding and simplifying gives the translation by 2*displacement0*E
   simp only
-  unfold CompoundSymmetry.GG5.displacement0 CompoundSymmetry.GG5.length1
+  unfold displacement0 length1
   -- Use the cyclotomic identity: 1 + ζ₅ + ζ₅² + ζ₅³ + ζ₅⁴ = 0
   -- and ζ₅⁵ = 1 to simplify the composition
   ring_nf
@@ -165,8 +170,8 @@ lemma word1_algebraic_identity :
 This is the computational core showing word1 = a⁻²b⁻¹a⁻¹b⁻¹ produces the correct IET translation.
 The proof uses the algebraic identity for the composition of rotations. -/
 lemma word1_produces_displacement0 (x : ℝ) (hx : x ∈ Set.Ico 0 1) :
-    _root_.applyWord _root_.r_crit word1 (segmentPointPlane x) =
-    segmentPointPlane (x + CompoundSymmetry.GG5.displacement0) := by
+    applyWord r_crit word1 (segmentPointPlane x) =
+    segmentPointPlane (x + displacement0) := by
   -- The deep unfolding of genA/genB/closedDisk causes kernel timeout.
   -- This lemma requires careful algebraic computation with ζ₅.
   sorry
@@ -175,34 +180,34 @@ lemma word1_produces_displacement0 (x : ℝ) (hx : x ∈ Set.Ico 0 1) :
 
 word2 = abab² produces the correct IET translation for interval 1. -/
 lemma word2_produces_displacement1 (x : ℝ) (hx : x ∈ Set.Ico 0 1) :
-    _root_.applyWord _root_.r_crit word2 (segmentPointPlane x) =
-    segmentPointPlane (x + CompoundSymmetry.GG5.displacement1) := by
+    applyWord r_crit word2 (segmentPointPlane x) =
+    segmentPointPlane (x + displacement1) := by
   sorry
 
 /-- Word 3 action on segment points: translates by displacement2.
 
 word3 = abab⁻¹a⁻¹b⁻¹ produces the correct IET translation for interval 2. -/
 lemma word3_produces_displacement2 (x : ℝ) (hx : x ∈ Set.Ico 0 1) :
-    _root_.applyWord _root_.r_crit word3 (segmentPointPlane x) =
-    segmentPointPlane (x + CompoundSymmetry.GG5.displacement2) := by
+    applyWord r_crit word3 (segmentPointPlane x) =
+    segmentPointPlane (x + displacement2) := by
   sorry
 
 /-! ### IET word selection and iteration -/
 
 /-- Select the word based on which IET interval x falls in. -/
-noncomputable def IET_word (x : ℝ) : _root_.Word :=
-  if x < CompoundSymmetry.GG5.length1 then word1
-  else if x < CompoundSymmetry.GG5.length1 + CompoundSymmetry.GG5.length2 then word2
+noncomputable def IET_word (x : ℝ) : Word :=
+  if x < length1 then word1
+  else if x < length1 + length2 then word2
   else word3
 
 /-- Concatenated word for n iterations of the IET starting from x₀.
 Each iteration applies the word corresponding to the current interval. -/
-noncomputable def wordForIterate (x₀ : ℝ) : ℕ → _root_.Word
+noncomputable def wordForIterate (x₀ : ℝ) : ℕ → Word
   | 0 => []
   | n + 1 => wordForIterate x₀ n ++ IET_word (CompoundSymmetry.GG5.GG5_induced_IET.toFun^[n] x₀)
 
 /-- Simplified version that doesn't track starting point - used in ProofOfMainTheorem. -/
-noncomputable def wordForIterate' : ℕ → _root_.Word
+noncomputable def wordForIterate' : ℕ → Word
   | 0 => []
   | n + 1 => wordForIterate' n ++ word1  -- Simplified: actual depends on orbit
 
@@ -216,7 +221,7 @@ This is the key correspondence between the group action and the IET:
 The proof follows from the geometric construction in SegmentMaps.lean, which shows that
 each word was specifically designed to map its interval's segment subsegment. -/
 theorem IET_step_word_correspondence (x : ℝ) (hx : x ∈ Set.Ico 0 1) :
-    _root_.applyWord _root_.r_crit (IET_word x) (segmentPointPlane x) =
+    applyWord r_crit (IET_word x) (segmentPointPlane x) =
     segmentPointPlane (CompoundSymmetry.GG5.GG5_induced_IET.toFun x) := by
   -- The IET has three intervals with permutation (swap 0 2):
   -- - Interval 0 [0, length1) maps to interval 2's position
@@ -239,7 +244,7 @@ theorem IET_step_word_correspondence (x : ℝ) (hx : x ∈ Set.Ico 0 1) :
   --
   -- Case analysis on which interval x falls in:
   unfold IET_word
-  by_cases h0 : x < CompoundSymmetry.GG5.length1
+  by_cases h0 : x < length1
   · -- Case: x in interval 0
     simp only [h0, ↓reduceIte]
     -- word1 translates by displacement0
@@ -247,7 +252,7 @@ theorem IET_step_word_correspondence (x : ℝ) (hx : x ∈ Set.Ico 0 1) :
     congr 1
     exact (IET_toFun_interval0 x hx.1 h0).symm
   · simp only [h0, ↓reduceIte]
-    by_cases h1 : x < CompoundSymmetry.GG5.length1 + CompoundSymmetry.GG5.length2
+    by_cases h1 : x < length1 + length2
     · -- Case: x in interval 1
       simp only [h1, ↓reduceIte]
       -- word2 translates by displacement1
@@ -275,28 +280,28 @@ theorem IET_iterate_mem_Ico (x₀ : ℝ) (hx₀ : x₀ ∈ Set.Ico 0 1) (n : ℕ
 
 /-- Core induction lemma: wordForIterate correctly computes the n-th iterate. -/
 theorem wordForIterate_correct (x₀ : ℝ) (hx₀ : x₀ ∈ Set.Ico 0 1) (n : ℕ) :
-    _root_.applyWord _root_.r_crit (wordForIterate x₀ n) (segmentPointPlane x₀) =
+    applyWord r_crit (wordForIterate x₀ n) (segmentPointPlane x₀) =
     segmentPointPlane (CompoundSymmetry.GG5.GG5_induced_IET.toFun^[n] x₀) := by
   induction n with
   | zero =>
     -- Base case: empty word, identity
-    simp only [Function.iterate_zero, id_eq, wordForIterate, _root_.applyWord, List.foldl_nil]
+    simp only [Function.iterate_zero, id_eq, wordForIterate, applyWord, List.foldl_nil]
   | succ n ih =>
     -- Inductive case
     simp only [Function.iterate_succ', Function.comp_apply]
-    rw [wordForIterate, _root_.applyWord, List.foldl_append]
+    rw [wordForIterate, applyWord, List.foldl_append]
     -- Goal: (IET_word ...).foldl (applyGen r) (foldl (applyGen r) p (wordForIterate n))
     --     = segmentPointPlane (IET (IET^[n] x₀))
     -- The inner foldl equals applyWord ... (wordForIterate n) p, which by IH equals segmentPointPlane (IET^[n] x₀)
-    have h_inner : List.foldl (_root_.applyGen _root_.r_crit) (segmentPointPlane x₀) (wordForIterate x₀ n) =
-        _root_.applyWord _root_.r_crit (wordForIterate x₀ n) (segmentPointPlane x₀) := rfl
+    have h_inner : List.foldl (applyGen r_crit) (segmentPointPlane x₀) (wordForIterate x₀ n) =
+        applyWord r_crit (wordForIterate x₀ n) (segmentPointPlane x₀) := rfl
     rw [h_inner, ih]
     -- Goal: (IET_word ...).foldl (applyGen r) (segmentPointPlane (IET^[n] x₀)) = segmentPointPlane (IET ...)
     -- Convert back to applyWord form
-    have h_outer : List.foldl (_root_.applyGen _root_.r_crit)
+    have h_outer : List.foldl (applyGen r_crit)
         (segmentPointPlane (CompoundSymmetry.GG5.GG5_induced_IET.toFun^[n] x₀))
         (IET_word (CompoundSymmetry.GG5.GG5_induced_IET.toFun^[n] x₀)) =
-        _root_.applyWord _root_.r_crit (IET_word (CompoundSymmetry.GG5.GG5_induced_IET.toFun^[n] x₀))
+        applyWord r_crit (IET_word (CompoundSymmetry.GG5.GG5_induced_IET.toFun^[n] x₀))
         (segmentPointPlane (CompoundSymmetry.GG5.GG5_induced_IET.toFun^[n] x₀)) := rfl
     rw [h_outer]
     exact IET_step_word_correspondence _ (IET_iterate_mem_Ico x₀ hx₀ n)
@@ -308,7 +313,7 @@ Every iterate of the IET corresponds to applying some sequence of group words
 to the initial point. Hence if the IET orbit is infinite, the group orbit is infinite. -/
 theorem IET_orbit_subset_group_orbit (x₀ : ℝ) (hx₀ : x₀ ∈ Set.Ico 0 1) :
     ∀ y ∈ Orbit.orbitSet CompoundSymmetry.GG5.GG5_induced_IET.toFun x₀,
-      ∃ w : _root_.Word, _root_.applyWord _root_.r_crit w (segmentPointPlane x₀) = segmentPointPlane y := by
+      ∃ w : Word, applyWord r_crit w (segmentPointPlane x₀) = segmentPointPlane y := by
   intro y hy
   rw [Orbit.orbitSet] at hy
   simp only [Set.mem_setOf_eq] at hy
@@ -320,18 +325,18 @@ theorem IET_orbit_subset_group_orbit (x₀ : ℝ) (hx₀ : x₀ ∈ Set.Ico 0 1)
 /-- If the IET orbit of x₀ is infinite, the group orbit of the corresponding Plane point is infinite. -/
 theorem IET_orbit_infinite_implies_group_orbit_infinite (x₀ : ℝ) (hx₀ : x₀ ∈ Set.Ico 0 1)
     (h_inf : (Orbit.orbitSet CompoundSymmetry.GG5.GG5_induced_IET.toFun x₀).Infinite) :
-    (_root_.orbit _root_.r_crit (segmentPointPlane x₀)).Infinite := by
+    (orbit r_crit (segmentPointPlane x₀)).Infinite := by
   -- The IET orbit is infinite means infinitely many distinct iterates
   -- Each iterate is in the group orbit (by IET_orbit_subset_group_orbit)
   -- The map from IET orbit to group orbit is injective (segmentPointPlane_injective)
   -- Therefore the group orbit is infinite
   -- Map from IET orbit to group orbit
   have h_subset : segmentPointPlane '' (Orbit.orbitSet CompoundSymmetry.GG5.GG5_induced_IET.toFun x₀) ⊆
-      _root_.orbit _root_.r_crit (segmentPointPlane x₀) := by
+      orbit r_crit (segmentPointPlane x₀) := by
     intro p hp
     rw [Set.mem_image] at hp
     obtain ⟨y, hy_mem, hy_eq⟩ := hp
-    rw [_root_.orbit]
+    rw [orbit]
     simp only [Set.mem_setOf_eq]
     obtain ⟨w, hw⟩ := IET_orbit_subset_group_orbit x₀ hx₀ y hy_mem
     use w

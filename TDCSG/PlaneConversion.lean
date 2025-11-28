@@ -3,14 +3,19 @@ Copyright (c) 2025 Eric Hearn. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Hearn
 -/
+import TDCSG.Definitions.Conversions
+import TDCSG.Definitions.Geometry
+import TDCSG.Definitions.Core
 import TDCSG.Points
 import TDCSG.MainTheorem
 
 /-!
-# Complex to Plane Conversion for GG(5,5)
+# Complex to Plane Conversion for GG(5,5) - Proofs
 
-Conversions between complex numbers and Plane (ℝ²), rotation correspondence,
+Proofs about conversions between complex numbers and Plane (ℝ²), rotation correspondence,
 and disk membership lemmas.
+
+The conversion definitions are in TDCSG.Definitions.Conversions.
 
 ## Main Definitions
 
@@ -34,7 +39,34 @@ and disk membership lemmas.
 namespace TDCSG.CompoundSymmetry.GG5
 
 open scoped Complex
-open Complex Real
+open Complex Real TDCSG.Definitions
+
+/-! ### Basic conversion lemmas -/
+
+/-- Addition in complex numbers corresponds to addition in Plane. -/
+lemma toPlane_add (z w : ℂ) : toPlane (z + w) = toPlane z + toPlane w := by
+  unfold toPlane
+  ext i
+  fin_cases i <;> simp [Complex.add_re, Complex.add_im]
+
+/-- Subtraction in complex numbers corresponds to subtraction in Plane. -/
+lemma toPlane_sub (z w : ℂ) : toPlane (z - w) = toPlane z - toPlane w := by
+  unfold toPlane
+  ext i
+  fin_cases i <;> simp [Complex.sub_re, Complex.sub_im]
+
+/-- Distance in Plane equals complex norm. -/
+lemma toPlane_dist_eq_complex_norm (z w : ℂ) : dist (toPlane z) (toPlane w) = ‖z - w‖ := by
+  unfold toPlane
+  rw [dist_comm, EuclideanSpace.dist_eq]
+  simp only [Fin.sum_univ_two]
+  simp only [Matrix.cons_val_zero, Matrix.cons_val_one]
+  rw [dist_comm (w.re), dist_comm (w.im)]
+  simp only [Real.dist_eq]
+  rw [Complex.norm_eq_sqrt_sq_add_sq]
+  simp only [Complex.sub_re, Complex.sub_im]
+  congr 1
+  simp only [sq_abs]
 
 /-! ### Disk Intersection -/
 
@@ -159,36 +191,13 @@ lemma segment_in_disk_intersection (t : ℝ)
 
 /-! ## Infrastructure for connecting IET orbits to group orbits -/
 
-/-- Convert a complex point to a Plane (ℝ²) point. -/
-noncomputable def toPlane (z : ℂ) : _root_.Plane := ![z.re, z.im]
-
-/-- toPlane distributes over addition. -/
-lemma toPlane_add (z w : ℂ) : toPlane (z + w) = toPlane z + toPlane w := by
-  simp only [toPlane, Complex.add_re, Complex.add_im]
-  ext i
-  fin_cases i <;> simp [Matrix.cons_val_zero, Matrix.cons_val_one]
-
-/-- toPlane distributes over subtraction. -/
-lemma toPlane_sub (z w : ℂ) : toPlane (z - w) = toPlane z - toPlane w := by
-  simp only [toPlane, Complex.sub_re, Complex.sub_im]
-  ext i
-  fin_cases i <;> simp [Matrix.cons_val_zero, Matrix.cons_val_one]
-
-
 /-- Complex multiplication as a matrix: multiplying by `a` is the same as
     applying the rotation-scale matrix [[a.re, -a.im], [a.im, a.re]]. -/
 lemma complex_mul_as_matrix (a z : ℂ) :
-    toPlane (a * z) = _root_.applyMatrix !![a.re, -a.im; a.im, a.re] (toPlane z) := by
-  unfold toPlane _root_.applyMatrix
+    TDCSG.Definitions.toPlane (a * z) = applyMatrix !![a.re, -a.im; a.im, a.re] (TDCSG.Definitions.toPlane z) := by
+  unfold TDCSG.Definitions.toPlane applyMatrix
   ext i
   fin_cases i <;> simp [Complex.mul_re, Complex.mul_im, Fin.sum_univ_two] <;> ring
-
-/-- Convert a Plane point to a complex number. -/
-noncomputable def fromPlane (p : _root_.Plane) : ℂ := ⟨p 0, p 1⟩
-
-/-- toPlane and fromPlane are inverses. -/
-theorem toPlane_fromPlane (z : ℂ) : fromPlane (toPlane z) = z := by
-  simp [toPlane, fromPlane]
 
 /-- Rotation in ℂ by ζ₅ corresponds to rotateAround in Plane.
 
@@ -202,9 +211,9 @@ The proof follows from:
 2. Complex multiplication by ζ₅ is rotation in ℝ²
 3. The rotation matrix [[cos θ, -sin θ], [sin θ, cos θ]] acts identically -/
 theorem zeta5_rotation_eq_rotateAround (z c : ℂ) :
-    toPlane (c + ζ₅ * (z - c)) = _root_.rotateAround (toPlane c) (2 * π / 5) (toPlane z) := by
+    TDCSG.Definitions.toPlane (c + ζ₅ * (z - c)) = rotateAround (TDCSG.Definitions.toPlane c) (2 * π / 5) (TDCSG.Definitions.toPlane z) := by
   -- Unfold rotateAround definition
-  unfold _root_.rotateAround
+  unfold rotateAround
   -- Use toPlane_add to split the LHS
   rw [toPlane_add]
   -- Now goal: toPlane c + toPlane (ζ₅ * (z - c)) = toPlane c + applyMatrix (rotationMatrix ...) (toPlane z - toPlane c)
@@ -219,35 +228,14 @@ theorem zeta5_rotation_eq_rotateAround (z c : ℂ) :
   --       applyMatrix (rotationMatrix (2*π/5)) (toPlane (z - c))
   congr 1
   -- Goal: !![ζ₅.re, -ζ₅.im; ζ₅.im, ζ₅.re] = rotationMatrix (2*π/5)
-  unfold _root_.rotationMatrix
+  unfold rotationMatrix
   -- Goal: !![ζ₅.re, -ζ₅.im; ζ₅.im, ζ₅.re] = !![cos(2*π/5), -sin(2*π/5); sin(2*π/5), cos(2*π/5)]
   rw [zeta5_re_eq_cos, zeta5_im_eq_sin]
 
 /-! ### Segment parameterization -/
 
-/-- Convert a parameter t ∈ [0,1] to the corresponding point on segment E'E. -/
-noncomputable def segmentPoint (t : ℝ) : ℂ := E' + t • (E - E')
-
-/-- Simplified form: segmentPoint(t) = (2t - 1) * E.
-    Since E' = -E, we have segmentPoint(t) = -E + t * 2E = (2t - 1) * E. -/
-lemma segmentPoint_eq_scalar_E (t : ℝ) : segmentPoint t = (2 * t - 1) • E := by
-  unfold segmentPoint E'
-  simp only [sub_neg_eq_add]
-  rw [show E + E = (2 : ℝ) • E by simp [two_smul]]
-  rw [smul_smul]
-  rw [show -E + (t * 2) • E = (-1 + t * 2) • E by rw [← neg_one_smul ℝ E, ← add_smul]]
-  ring_nf
-
-/-- Translation of segmentPoint: segmentPoint(t + d) = segmentPoint(t) + 2d * E. -/
-lemma segmentPoint_translate (t d : ℝ) :
-    segmentPoint (t + d) = segmentPoint t + (2 * d) • E := by
-  rw [segmentPoint_eq_scalar_E, segmentPoint_eq_scalar_E]
-  rw [show (2 * (t + d) - 1) = (2 * t - 1) + 2 * d by ring]
-  rw [add_smul]
-
-/-- Convert a parameter t ∈ [0,1] to the corresponding Plane point on segment E'E. -/
-noncomputable def segmentPointPlane (t : ℝ) : _root_.Plane :=
-  toPlane (segmentPoint t)
+-- Note: segmentPoint, segmentPointPlane, segmentPoint_eq_scalar_E, segmentPoint_translate
+-- are defined in TDCSG.Definitions.Conversions
 
 /-- E is nonzero. -/
 lemma E_ne_zero : E ≠ 0 := by
@@ -275,9 +263,9 @@ lemma E_ne_zero : E ≠ 0 := by
   exact zeta5_ne_one this
 
 /-- The segment parameterization is injective: different parameters give different points. -/
-theorem segmentPoint_injective : Function.Injective segmentPoint := by
+theorem segmentPoint_injective : Function.Injective TDCSG.Definitions.segmentPoint := by
   intro t₁ t₂ h
-  unfold segmentPoint at h
+  unfold TDCSG.Definitions.segmentPoint at h
   have hne : E - E' ≠ 0 := by
     unfold E'
     simp only [sub_neg_eq_add, ne_eq]
@@ -302,16 +290,16 @@ theorem segmentPoint_injective : Function.Injective segmentPoint := by
   exact hne this
 
 /-- The Plane parameterization is also injective. -/
-theorem segmentPointPlane_injective : Function.Injective segmentPointPlane := by
+theorem segmentPointPlane_injective : Function.Injective TDCSG.Definitions.segmentPointPlane := by
   intro t₁ t₂ h
   apply segmentPoint_injective
-  unfold segmentPointPlane toPlane at h
+  unfold TDCSG.Definitions.segmentPointPlane TDCSG.Definitions.toPlane at h
   -- If ![z₁.re, z₁.im] = ![z₂.re, z₂.im], then z₁ = z₂
-  have hre : (segmentPoint t₁).re = (segmentPoint t₂).re := by
+  have hre : (TDCSG.Definitions.segmentPoint t₁).re = (TDCSG.Definitions.segmentPoint t₂).re := by
     have := congrFun h 0
     simp only [Matrix.cons_val_zero] at this
     exact this
-  have him : (segmentPoint t₁).im = (segmentPoint t₂).im := by
+  have him : (TDCSG.Definitions.segmentPoint t₁).im = (TDCSG.Definitions.segmentPoint t₂).im := by
     have := congrFun h 1
     simp only [Matrix.cons_val_one] at this
     exact this
@@ -319,80 +307,73 @@ theorem segmentPointPlane_injective : Function.Injective segmentPointPlane := by
 
 /-! ### Disk membership for segment points -/
 
-/-- The norm in Plane equals the complex norm via toPlane. -/
-lemma toPlane_dist_eq_complex_norm (z w : ℂ) :
-    dist (toPlane z) (toPlane w) = ‖z - w‖ := by
-  unfold toPlane
-  simp only [EuclideanSpace.dist_eq, Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one,
-    Real.dist_eq, Complex.norm_eq_sqrt_sq_add_sq, Complex.sub_re, Complex.sub_im]
-  congr 1
-  rw [sq_abs, sq_abs]
+-- Note: toPlane_dist_eq_complex_norm is defined in TDCSG.Definitions.Conversions
 
 /-- leftCenter equals toPlane (-1). -/
-lemma leftCenter_eq_toPlane : _root_.leftCenter = toPlane (-1 : ℂ) := by
-  unfold _root_.leftCenter toPlane
+lemma leftCenter_eq_toPlane : leftCenter = TDCSG.Definitions.toPlane (-1 : ℂ) := by
+  unfold leftCenter TDCSG.Definitions.toPlane
   ext i
   fin_cases i <;> simp [Complex.neg_re, Complex.neg_im]
 
 /-- rightCenter equals toPlane (1). -/
-lemma rightCenter_eq_toPlane : _root_.rightCenter = toPlane (1 : ℂ) := by
-  unfold _root_.rightCenter toPlane
+lemma rightCenter_eq_toPlane : rightCenter = TDCSG.Definitions.toPlane (1 : ℂ) := by
+  unfold rightCenter TDCSG.Definitions.toPlane
   ext i
   fin_cases i <;> simp [Complex.one_re, Complex.one_im]
 
 /-- Segment points are in the left disk at r_crit. -/
 lemma segmentPointPlane_in_leftDisk (t : ℝ) (ht : t ∈ Set.Ico 0 1) :
-    segmentPointPlane t ∈ _root_.leftDisk _root_.r_crit := by
-  unfold _root_.leftDisk _root_.closedDisk
+    TDCSG.Definitions.segmentPointPlane t ∈ leftDisk r_crit := by
+  unfold leftDisk closedDisk
   rw [Metric.mem_closedBall]
   rw [leftCenter_eq_toPlane]
-  unfold segmentPointPlane
+  unfold TDCSG.Definitions.segmentPointPlane
   rw [toPlane_dist_eq_complex_norm]
-  rw [show segmentPoint t - (-1 : ℂ) = segmentPoint t + 1 by ring]
+  rw [show TDCSG.Definitions.segmentPoint t - (-1 : ℂ) = TDCSG.Definitions.segmentPoint t + 1 by ring]
   have h_mem := segment_in_disk_intersection t ⟨ht.1, le_of_lt ht.2⟩
-  unfold segmentPoint at h_mem ⊢
+  unfold TDCSG.Definitions.segmentPoint at h_mem ⊢
   exact h_mem.1
 
 /-- Segment points are in the right disk at r_crit. -/
 lemma segmentPointPlane_in_rightDisk (t : ℝ) (ht : t ∈ Set.Ico 0 1) :
-    segmentPointPlane t ∈ _root_.rightDisk _root_.r_crit := by
-  unfold _root_.rightDisk _root_.closedDisk
+    TDCSG.Definitions.segmentPointPlane t ∈ rightDisk r_crit := by
+  unfold rightDisk closedDisk
   rw [Metric.mem_closedBall]
   rw [rightCenter_eq_toPlane]
-  unfold segmentPointPlane
+  unfold TDCSG.Definitions.segmentPointPlane
   rw [toPlane_dist_eq_complex_norm]
-  rw [show segmentPoint t - (1 : ℂ) = segmentPoint t - 1 by ring]
+  rw [show TDCSG.Definitions.segmentPoint t - (1 : ℂ) = TDCSG.Definitions.segmentPoint t - 1 by ring]
   have h_mem := segment_in_disk_intersection t ⟨ht.1, le_of_lt ht.2⟩
-  unfold segmentPoint at h_mem ⊢
+  unfold TDCSG.Definitions.segmentPoint at h_mem ⊢
   exact h_mem.2
 
 /-! ### Generator actions in terms of complex multiplication -/
 
 /-- genA on a point in the left disk equals rotation by ζ₅ about -1 in complex coords. -/
-lemma genA_eq_zeta5_rotation (z : ℂ) (hz : toPlane z ∈ _root_.leftDisk _root_.r_crit) :
-    _root_.genA _root_.r_crit (toPlane z) = toPlane ((-1 : ℂ) + ζ₅ * (z - (-1))) := by
-  unfold _root_.genA
+lemma genA_eq_zeta5_rotation (z : ℂ) (hz : TDCSG.Definitions.toPlane z ∈ leftDisk r_crit) :
+    genA r_crit (TDCSG.Definitions.toPlane z) = TDCSG.Definitions.toPlane ((-1 : ℂ) + ζ₅ * (z - (-1))) := by
+  unfold genA
   rw [if_pos hz]
   rw [leftCenter_eq_toPlane]
   exact (zeta5_rotation_eq_rotateAround z (-1)).symm
 
 /-- genB on a point in the right disk equals rotation by ζ₅ about 1 in complex coords. -/
-lemma genB_eq_zeta5_rotation (z : ℂ) (hz : toPlane z ∈ _root_.rightDisk _root_.r_crit) :
-    _root_.genB _root_.r_crit (toPlane z) = toPlane ((1 : ℂ) + ζ₅ * (z - 1)) := by
-  unfold _root_.genB
+lemma genB_eq_zeta5_rotation (z : ℂ) (hz : TDCSG.Definitions.toPlane z ∈ rightDisk r_crit) :
+    genB r_crit (TDCSG.Definitions.toPlane z) = TDCSG.Definitions.toPlane ((1 : ℂ) + ζ₅ * (z - 1)) := by
+  unfold genB
   rw [if_pos hz]
   rw [rightCenter_eq_toPlane]
   exact (zeta5_rotation_eq_rotateAround z 1).symm
 
 /-- A⁻¹ = A⁴ means multiplying by ζ₅⁴. -/
 lemma genA_inv_eq_zeta5_pow4_rotation (z : ℂ)
-    (hz : toPlane z ∈ _root_.leftDisk _root_.r_crit)
-    (hz' : toPlane ((-1 : ℂ) + ζ₅ * (z + 1)) ∈ _root_.leftDisk _root_.r_crit)
-    (hz'' : toPlane ((-1 : ℂ) + ζ₅^2 * (z + 1)) ∈ _root_.leftDisk _root_.r_crit)
-    (hz''' : toPlane ((-1 : ℂ) + ζ₅^3 * (z + 1)) ∈ _root_.leftDisk _root_.r_crit) :
-    _root_.genA _root_.r_crit (_root_.genA _root_.r_crit (_root_.genA _root_.r_crit
-      (_root_.genA _root_.r_crit (toPlane z)))) =
-    toPlane ((-1 : ℂ) + ζ₅^4 * (z + 1)) := by
+    (hz : TDCSG.Definitions.toPlane z ∈ leftDisk r_crit)
+    (hz' : TDCSG.Definitions.toPlane ((-1 : ℂ) + ζ₅ * (z + 1)) ∈ leftDisk r_crit)
+    (hz'' : TDCSG.Definitions.toPlane ((-1 : ℂ) + ζ₅^2 * (z + 1)) ∈ leftDisk r_crit)
+    (hz''' : TDCSG.Definitions.toPlane ((-1 : ℂ) + ζ₅^3 * (z + 1)) ∈ leftDisk r_crit) :
+    genA r_crit (genA r_crit (genA r_crit
+      (genA r_crit (TDCSG.Definitions.toPlane z)))) =
+    TDCSG.Definitions.toPlane ((-1 : ℂ) + ζ₅^4 * (z + 1)) := by
   rw [genA_eq_zeta5_rotation z hz]
   rw [show -1 + ζ₅ * (z - -1) = -1 + ζ₅ * (z + 1) by ring]
   rw [genA_eq_zeta5_rotation _ hz']
@@ -404,13 +385,13 @@ lemma genA_inv_eq_zeta5_pow4_rotation (z : ℂ)
 
 /-- B⁻¹ = B⁴ means multiplying by ζ₅⁴. -/
 lemma genB_inv_eq_zeta5_pow4_rotation (z : ℂ)
-    (hz : toPlane z ∈ _root_.rightDisk _root_.r_crit)
-    (hz' : toPlane ((1 : ℂ) + ζ₅ * (z - 1)) ∈ _root_.rightDisk _root_.r_crit)
-    (hz'' : toPlane ((1 : ℂ) + ζ₅^2 * (z - 1)) ∈ _root_.rightDisk _root_.r_crit)
-    (hz''' : toPlane ((1 : ℂ) + ζ₅^3 * (z - 1)) ∈ _root_.rightDisk _root_.r_crit) :
-    _root_.genB _root_.r_crit (_root_.genB _root_.r_crit (_root_.genB _root_.r_crit
-      (_root_.genB _root_.r_crit (toPlane z)))) =
-    toPlane ((1 : ℂ) + ζ₅^4 * (z - 1)) := by
+    (hz : TDCSG.Definitions.toPlane z ∈ rightDisk r_crit)
+    (hz' : TDCSG.Definitions.toPlane ((1 : ℂ) + ζ₅ * (z - 1)) ∈ rightDisk r_crit)
+    (hz'' : TDCSG.Definitions.toPlane ((1 : ℂ) + ζ₅^2 * (z - 1)) ∈ rightDisk r_crit)
+    (hz''' : TDCSG.Definitions.toPlane ((1 : ℂ) + ζ₅^3 * (z - 1)) ∈ rightDisk r_crit) :
+    genB r_crit (genB r_crit (genB r_crit
+      (genB r_crit (TDCSG.Definitions.toPlane z)))) =
+    TDCSG.Definitions.toPlane ((1 : ℂ) + ζ₅^4 * (z - 1)) := by
   rw [genB_eq_zeta5_rotation z hz]
   rw [genB_eq_zeta5_rotation _ hz']
   rw [show 1 + ζ₅ * (1 + ζ₅ * (z - 1) - 1) = 1 + ζ₅^2 * (z - 1) by ring]

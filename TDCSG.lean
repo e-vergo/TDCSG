@@ -1,3 +1,11 @@
+-- Definitions modules (fundamental constants and types)
+import TDCSG.Definitions.Core
+import TDCSG.Definitions.Cyclotomic
+import TDCSG.Definitions.Points
+import TDCSG.Definitions.Geometry
+import TDCSG.Definitions.IET
+import TDCSG.Definitions.Conversions
+
 -- Core 1D piecewise isometry framework
 import TDCSG.Basic
 import TDCSG.Properties
