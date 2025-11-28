@@ -3,7 +3,7 @@ Copyright (c) 2025 Eric Moffat. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Moffat
 -/
-import TDCSG.CompoundSymmetry.GG5.IET
+import TDCSG.IET
 import Mathlib.Dynamics.PeriodicPts.Defs
 
 /-!

@@ -8,7 +8,7 @@ import Mathlib.Topology.MetricSpace.Pseudo.Defs
 import Mathlib.Topology.MetricSpace.Basic
 import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
 import Mathlib.MeasureTheory.Measure.Haar.OfBasis
-import TDCSG.Planar.Rotations
+import TDCSG.Rotations
 
 /-!
 # Planar Disks

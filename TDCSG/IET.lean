@@ -135,6 +135,30 @@ theorem length3_golden_ratio :
   unfold length3
   field_simp
 
+/-- First length is less than 1. -/
+theorem length1_lt_one : length1 < 1 := by
+  unfold length1
+  have h_denom_pos : 0 < 1 + goldenRatio + goldenRatio ^ 2 := by
+    apply add_pos
+    · apply add_pos
+      · norm_num
+      · exact Real.goldenRatio_pos
+    · apply sq_pos_of_pos
+      exact Real.goldenRatio_pos
+  rw [div_lt_one h_denom_pos]
+  calc 1 < 1 + goldenRatio := by
+          have : 0 < goldenRatio := Real.goldenRatio_pos
+          linarith
+       _ < 1 + goldenRatio + goldenRatio ^ 2 := by
+          have : 0 < goldenRatio ^ 2 := sq_pos_of_pos Real.goldenRatio_pos
+          linarith
+
+/-- Sum of first two lengths is less than 1. -/
+theorem length12_lt_one : length1 + length2 < 1 := by
+  have h_sum := lengths_sum_to_one
+  have h3_pos := length3_pos
+  linarith
+
 /-- The 3-interval exchange transformation induced by GG(5,5)
 dynamics at criticality. -/
 noncomputable def GG5_induced_IET : IntervalExchangeTransformation 3 where

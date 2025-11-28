@@ -4,8 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Moffat
 -/
 import TDCSG.Basic
-import TDCSG.Planar.Rotations
-import TDCSG.Planar.Disks
+import TDCSG.Rotations
+import TDCSG.Disks
 
 /-!
 # Two-Disk Compound Symmetry Groups

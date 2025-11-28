@@ -3,8 +3,8 @@ Copyright (c) 2025-11-22 Eric Moffat. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Moffat
 -/
-import TDCSG.CompoundSymmetry.GG5.IET
-import TDCSG.CompoundSymmetry.GG5.Orbit
+import TDCSG.IET
+import TDCSG.Orbit
 import Mathlib.NumberTheory.Real.GoldenRatio
 import Mathlib.NumberTheory.Real.Irrational
 import Mathlib.Data.Set.Function

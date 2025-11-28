@@ -132,7 +132,8 @@ theorem refinedPartitionPreimage_countable (p q : Set (Set α)) (g : α → α)
 theorem refinedPartitionPreimage_disjoint {α : Type u} (p q : Set (Set α)) (g : α → α)
     (hp : ∀ s ∈ p, ∀ t ∈ p, s ≠ t → Disjoint s t)
     (hq : ∀ s ∈ q, ∀ t ∈ q, s ≠ t → Disjoint s t) :
-    ∀ u ∈ refinedPartitionPreimage p q g, ∀ v ∈ refinedPartitionPreimage p q g, u ≠ v → Disjoint u v := by
+    ∀ u ∈ refinedPartitionPreimage p q g,
+      ∀ v ∈ refinedPartitionPreimage p q g, u ≠ v → Disjoint u v := by
   intro u hu v hv huv
   obtain ⟨s₁, hs₁, t₁, ht₁, rfl, _⟩ := hu
   obtain ⟨s₂, hs₂, t₂, ht₂, rfl, _⟩ := hv
@@ -258,7 +259,8 @@ section Composition
 /-- Composition of two piecewise isometries.
 
 The composition `f.comp g` applies `g` first, then `f`. The resulting partition uses
-preimage-based refinement to ensure g maps each refined piece into a single piece of f's partition. -/
+preimage-based refinement to ensure g maps each refined piece into a single piece of
+f's partition. -/
 def comp [BorelSpace α] (f g : PiecewiseIsometry α) : PiecewiseIsometry α where
   partition := refinedPartitionPreimage g.partition f.partition g.toFun
   partition_measurable := by
@@ -291,7 +293,8 @@ def comp [BorelSpace α] (f g : PiecewiseIsometry α) : PiecewiseIsometry α whe
       exact this
     -- Apply g first (isometric on s_g), then f (isometric on s_f)
     calc dist (f.toFun (g.toFun x)) (f.toFun (g.toFun y))
-        = dist (g.toFun x) (g.toFun y) := f.isometry_on_pieces s_f hs_f (g.toFun x) hgx (g.toFun y) hgy
+        = dist (g.toFun x) (g.toFun y) :=
+          f.isometry_on_pieces s_f hs_f (g.toFun x) hgx (g.toFun y) hgy
       _ = dist x y := g.isometry_on_pieces s_g hs_g x hx.1 y hy.1
 
 /-- Function application for composition. -/
@@ -514,7 +517,8 @@ theorem iterate_add [Nonempty α] [BorelSpace α] (f : PiecewiseIsometry α) (m 
     rw [Nat.succ_add, iterate_succ, iterate_succ, ih, comp_assoc]
 
 /-- Each iterate preserves the isometry property. -/
-theorem iterate_isometry_on_pieces [Nonempty α] [BorelSpace α] (f : PiecewiseIsometry α) (n : ℕ) (s : Set α)
+theorem iterate_isometry_on_pieces [Nonempty α] [BorelSpace α]
+    (f : PiecewiseIsometry α) (n : ℕ) (s : Set α)
     (hs : s ∈ (iterate f n).partition) (x y : α) (hx : x ∈ s) (hy : y ∈ s) :
     dist ((iterate f n) x) ((iterate f n) y) = dist x y :=
   (iterate f n).dist_eq_on_piece s hs x y hx hy
@@ -548,7 +552,8 @@ theorem discontinuitySet_comp_subset [BorelSpace α] (f g : PiecewiseIsometry α
   -- hx: x is in frontier of some piece of (f.comp g).partition
   obtain ⟨u, hu_partition, hx_frontier⟩ := hx
 
-  -- The composition partition is refined: u = s ∩ (g⁻¹' t) for some s ∈ g.partition, t ∈ f.partition
+  -- The composition partition is refined: u = s ∩ (g⁻¹' t)
+  -- for some s ∈ g.partition, t ∈ f.partition
   unfold comp refinedPartitionPreimage at hu_partition
   simp only [Set.mem_setOf_eq] at hu_partition
   obtain ⟨s, hs_g, t, ht_f, hu_eq, _⟩ := hu_partition
@@ -591,9 +596,11 @@ theorem discontinuitySet_comp_subset [BorelSpace α] (f g : PiecewiseIsometry α
             calc dist (g.toFun y) (g.toFun x)
                 = dist y x := g.isometry_on_pieces s hs_g y hy_s x hx_s
               _ < ε := hy_dist
-          -- Apply continuity: x ∈ closure (g⁻¹ t ∩ s) implies g(x) ∈ closure (g(g⁻¹ t ∩ s))
+          -- Apply continuity: x ∈ closure (g⁻¹ t ∩ s)
+          -- implies g(x) ∈ closure (g(g⁻¹ t ∩ s))
           have hx_closure_inter : x ∈ closure (g.toFun ⁻¹' t ∩ s) := by
-            -- x ∈ closure (g⁻¹ t) and x ∈ closure s, and s is in the partition (hence closed? No, not necessarily)
+            -- x ∈ closure (g⁻¹ t) and x ∈ closure s,
+            -- and s is in the partition (hence closed? No, not necessarily)
             -- Better: x ∈ interior s ⊆ s, and x ∈ closure (g⁻¹ t)
             -- We want to show x ∈ closure (g⁻¹ t ∩ s)
             -- Use: closure A ∩ B ⊆ closure (A ∩ B) when B is closed

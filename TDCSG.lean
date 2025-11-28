@@ -7,23 +7,36 @@ import TDCSG.Finite
 import TDCSG.IntervalExchange
 
 -- 2D planar geometry infrastructure
-import TDCSG.Planar.Rotations
-import TDCSG.Planar.Disks
+import TDCSG.Rotations
+import TDCSG.Disks
 
 -- Two-disk compound symmetry groups
-import TDCSG.CompoundSymmetry.TwoDisk
+import TDCSG.TwoDisk
 
--- Theorem 2: GG₅ critical radius formalization
-import TDCSG.CompoundSymmetry.GG5.Geometry
-import TDCSG.CompoundSymmetry.GG5.IET
-import TDCSG.CompoundSymmetry.GG5.OrbitInfinite
+-- GG5 IET analysis
+import TDCSG.IET
+import TDCSG.Orbit
+import TDCSG.OrbitInfinite
+
+-- GG5 Geometry (split modules)
+import TDCSG.Zeta5
+import TDCSG.Points
+import TDCSG.SegmentGeometry
+import TDCSG.PlaneConversion
+import TDCSG.WordCorrespondence
+
+-- Main theorem
+import TDCSG.Geometry
+import TDCSG.MainTheorem
+import TDCSG.ProofOfMainTheorem
 
 /-!
 # TDCSG - Two-Disk Compound Symmetry Groups
 
 Formal verification of **Theorem 2** from [arXiv:2302.12950v1]:
 
-**GG₅ is infinite at the critical radius r_c = √(3 + φ)**, where φ = (1 + √5)/2 is the golden ratio.
+**GG5 is infinite at the critical radius r_c = sqrt(3 + phi)**, where phi = (1 + sqrt5)/2
+is the golden ratio.
 
 ## Module Organization
 
@@ -36,20 +49,25 @@ Formal verification of **Theorem 2** from [arXiv:2302.12950v1]:
 - `TDCSG.IntervalExchange`: IET infrastructure
 
 ### 2D Planar Geometry (2 files)
-- `TDCSG.Planar.Rotations`: Rotations about arbitrary points in ℝ²
-- `TDCSG.Planar.Disks`: Disk geometry
+- `TDCSG.Rotations`: Rotations about arbitrary points in R^2
+- `TDCSG.Disks`: Disk geometry
 
 ### Two-Disk Systems (1 file)
-- `TDCSG.CompoundSymmetry.TwoDisk`: `TwoDiskSystem` structure, generators
+- `TDCSG.TwoDisk`: `TwoDiskSystem` structure, generators
 
-### Main Theorem (3 files)
-- `TDCSG.CompoundSymmetry.GG5.Geometry`: Main theorem `GG5_infinite_at_critical_radius`
-- `TDCSG.CompoundSymmetry.GG5.IET`: `GG5_induced_IET` interval exchange
-- `TDCSG.CompoundSymmetry.GG5.OrbitInfinite`: `GG5_IET_has_infinite_orbit`
+### GG5 Geometry (5 files)
+- `TDCSG.Zeta5`: ζ₅ algebra, critical radius
+- `TDCSG.Points`: E, E', F, G point definitions and properties
+- `TDCSG.SegmentGeometry`: Segment lengths, ratios, irrationality
+- `TDCSG.PlaneConversion`: Complex↔Plane conversion, disk membership
+- `TDCSG.WordCorrespondence`: Group words, IET correspondence
 
-## Axioms (2 total, both in OrbitInfinite.lean)
-1. **Keane's Theorem (1975)**: IETs with irrational rotation have no periodic orbits
-2. **Non-involution branch**: Unreachable for GG5 (uses swap 0 2 involution)
+### Main Theorem (5 files)
+- `TDCSG.IET`: `GG5_induced_IET` interval exchange
+- `TDCSG.Orbit`: Orbit definitions
+- `TDCSG.OrbitInfinite`: `GG5_IET_has_infinite_orbit`
+- `TDCSG.Geometry`: Main theorem infrastructure
+- `TDCSG.MainTheorem` / `TDCSG.ProofOfMainTheorem`: Kim Morrison Standard
 
 ## References
 - Paper: [arXiv:2302.12950v1](https://arxiv.org/abs/2302.12950)
