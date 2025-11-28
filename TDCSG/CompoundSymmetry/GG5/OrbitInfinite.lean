@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Moffat
 -/
 import TDCSG.CompoundSymmetry.GG5.IET
+import TDCSG.CompoundSymmetry.GG5.Orbit
 import Mathlib.NumberTheory.Real.GoldenRatio
 import Mathlib.NumberTheory.Real.Irrational
 import Mathlib.Data.Set.Function
@@ -52,7 +53,7 @@ measure-theoretic arguments beyond current Mathlib ergodic theory coverage.
 
 namespace CompoundSymmetry.GG5
 
-open PiecewiseIsometry Real Function Set
+open PiecewiseIsometry Real Function Set Orbit
 
 /-! ### Irrationality results -/
 
@@ -77,121 +78,19 @@ theorem GG5_IET_rotation_irrational :
   rw [mul_div_assoc, div_self h1_ne, mul_one]
   exact goldenRatio_irrational
 
-/-! ### Orbit definitions and basic properties -/
-
-/-- The orbit set of a point x under iteration of f. -/
-def orbitSet (f : ℝ → ℝ) (x : ℝ) : Set ℝ :=
-  {y | ∃ (n : ℕ), (f^[n]) x = y}
-
-/-- A point is periodic under f if some positive iterate returns to it. -/
-def IsPeriodic (f : ℝ → ℝ) (x : ℝ) : Prop :=
-  ∃ (k : ℕ), k > 0 ∧ (f^[k]) x = x
-
-/-- A point has infinite orbit if for any n, there exists m > n with f^[m] x ≠ x. -/
-def HasInfiniteOrbit (f : ℝ → ℝ) (x : ℝ) : Prop :=
-  ∀ (n : ℕ), ∃ (m : ℕ), m > n ∧ (f^[m]) x ≠ x
-
-/-- The orbit of x contains x itself. -/
-theorem mem_orbitSet_self (f : ℝ → ℝ) (x : ℝ) : x ∈ orbitSet f x := by
-  use 0
-  simp
-
-/-- If f^[n] x = y, then y is in the orbit of x. -/
-theorem mem_orbitSet_of_iterate (f : ℝ → ℝ) (x y : ℝ) (n : ℕ) (h : (f^[n]) x = y) :
-    y ∈ orbitSet f x :=
-  ⟨n, h⟩
-
-/-- Orbits are closed under forward iteration. -/
-theorem orbitSet_iterate (f : ℝ → ℝ) (x : ℝ) (n : ℕ) :
-    (f^[n]) x ∈ orbitSet f x :=
-  ⟨n, rfl⟩
-
-/-- If the orbit set is finite, then there exist distinct indices with equal iterates. -/
-theorem finite_orbit_has_collision (f : ℝ → ℝ) (x : ℝ) (h_fin : (orbitSet f x).Finite) :
-    ∃ (i j : ℕ), i < j ∧ (f^[i]) x = (f^[j]) x := by
-  -- Get a finset representation
-  obtain ⟨s, hs⟩ := Set.Finite.exists_finset_coe h_fin
-  let n := s.card
-  -- Consider the first n+1 iterates: f^[0] x, f^[1] x, ..., f^[n] x
-  -- All must be in s (which has n elements), so by pigeonhole, two must be equal
-  have h_all_in_s : ∀ k ≤ n, (f^[k]) x ∈ s := by
-    intro k _
-    have : (f^[k]) x ∈ orbitSet f x := orbitSet_iterate f x k
-    rw [← hs] at this
-    exact this
-  -- Use pigeonhole principle
-  -- Among n+1 elements mapping into a set of size n, two must collide
-  by_contra h_no_collision
-  push_neg at h_no_collision
-  -- All f^[k] x for k ≤ n are distinct
-  have h_all_distinct : ∀ i j, i ≤ n → j ≤ n → i ≠ j → (f^[i]) x ≠ (f^[j]) x := by
-    intro i j hi hj hij
-    by_cases h : i < j
-    · intro heq
-      exact h_no_collision i j h heq
-    · intro heq
-      push_neg at h
-      have hji : j < i := Nat.lt_of_le_of_ne h (Ne.symm hij)
-      exact h_no_collision j i hji heq.symm
-  -- The image {f^[k] x | k ≤ n} has size exactly n+1
-  -- But this image is contained in s which has size n - contradiction
-  have h_image_size : (Finset.image (fun k : Fin (n+1) => (f^[k.val]) x) Finset.univ).card = n + 1 := by
-    rw [Finset.card_image_of_injective]
-    · simp
-    · intro ⟨i, hi⟩ ⟨j, hj⟩ heq
-      simp at heq
-      by_contra hij_ne
-      simp at hij_ne
-      have : (f^[i]) x ≠ (f^[j]) x :=
-        h_all_distinct i j (Nat.lt_succ_iff.mp hi) (Nat.lt_succ_iff.mp hj) hij_ne
-      exact this heq
-  have h_image_subset : Finset.image (fun k : Fin (n+1) => (f^[k.val]) x) Finset.univ ⊆ s := by
-    intro y hy
-    obtain ⟨k, _, hk⟩ := Finset.mem_image.mp hy
-    rw [← hk]
-    exact h_all_in_s k.val (Nat.lt_succ_iff.mp k.isLt)
-  have : (Finset.image (fun k : Fin (n+1) => (f^[k.val]) x) Finset.univ).card ≤ s.card :=
-    Finset.card_le_card h_image_subset
-  omega
-
-/-- If the orbit set is finite, the point is eventually periodic. -/
-theorem finite_orbit_implies_periodic (f : ℝ → ℝ) (x : ℝ)
-    (h_fin : (orbitSet f x).Finite) :
-    ∃ (i k : ℕ), k > 0 ∧ (f^[i + k]) x = (f^[i]) x := by
-  obtain ⟨i, j, hij, heq⟩ := finite_orbit_has_collision f x h_fin
-  use i, j - i
-  constructor
-  · omega
-  · calc (f^[i + (j - i)]) x = (f^[j]) x := by congr 1; omega
-      _ = (f^[i]) x := heq.symm
-
-/-- If x has a finite orbit, then either x itself is periodic,
-    or some iterate of x is periodic. -/
-theorem finite_orbit_has_periodic_point (f : ℝ → ℝ) (x : ℝ)
-    (h_fin : (orbitSet f x).Finite) :
-    ∃ (m p : ℕ), p > 0 ∧ (f^[p]) ((f^[m]) x) = (f^[m]) x := by
-  obtain ⟨i, k, hk_pos, hk⟩ := finite_orbit_implies_periodic f x h_fin
-  use i, k
-  constructor
-  · exact hk_pos
-  · -- f^[i + k] x = f^[i] x means f^[k] (f^[i] x) = f^[i] x
-    calc (f^[k]) ((f^[i]) x) = (f^[k + i]) x := by rw [Function.iterate_add_apply]
-      _ = (f^[i + k]) x := by congr 1; omega
-      _ = (f^[i]) x := hk
-
 /-! ### Main theorems -/
 
 /-- The orbit contains at least one point (the starting point itself). -/
 theorem GG5_IET_orbit_nonempty (x : ℝ) (_ : x ∈ Ico 0 1) :
-    (orbitSet GG5_induced_IET.toFun x).Nonempty :=
-  ⟨x, mem_orbitSet_self _ _⟩
+    (Orbit.orbitSet GG5_induced_IET.toFun x).Nonempty :=
+  ⟨x, Orbit.mem_orbitSet_self _ _⟩
 
 /-- For any n, we can construct a finite set of orbit points.
     This provides infrastructure for ergodic theory analysis. -/
 theorem GG5_IET_orbit_finite_subset (n : ℕ) :
     ∃ (x : ℝ), x ∈ Ico 0 1 ∧
       ∃ (pts : Finset ℝ), pts.Nonempty ∧
-        (∀ y ∈ pts, y ∈ orbitSet GG5_induced_IET.toFun x) := by
+        (∀ y ∈ pts, y ∈ Orbit.orbitSet GG5_induced_IET.toFun x) := by
   use length1 / 2
   constructor
   · constructor
@@ -212,7 +111,7 @@ theorem GG5_IET_orbit_finite_subset (n : ℕ) :
     · intro y hy
       obtain ⟨k, _, hk⟩ := Finset.mem_image.mp hy
       rw [← hk]
-      exact orbitSet_iterate _ _ _
+      exact Orbit.orbitSet_iterate _ _ _
 
 /-- Main infrastructure theorem: The GG5 IET has points with nonempty orbit segments.
 
@@ -221,7 +120,7 @@ theorem GG5_IET_orbit_finite_subset (n : ℕ) :
 
     **Note**: The full theorem "orbits are infinite" requires proving that IETs with
     irrational rotation ratios have no periodic orbits (Keane 1975). That deep result
-    would immediately imply orbit sets are infinite via `finite_orbit_implies_periodic`.
+    would immediately imply orbit sets are infinite via `Orbit.finite_orbit_implies_periodic`.
     The infrastructure here supports future completion of that proof.
 
     We have proven:
@@ -233,18 +132,281 @@ theorem GG5_IET_orbit_finite_subset (n : ℕ) :
     rotation to non-periodicity in IETs. -/
 theorem GG5_IET_has_orbit_structure :
     ∀ (_ : ℕ), ∃ (x : ℝ) (_ : x ∈ Ico 0 1) (pts : Finset ℝ),
-      pts.Nonempty ∧ (∀ y ∈ pts, y ∈ orbitSet GG5_induced_IET.toFun x) := by
+      pts.Nonempty ∧ (∀ y ∈ pts, y ∈ Orbit.orbitSet GG5_induced_IET.toFun x) := by
   intro n
   obtain ⟨x, hx, pts, h_ne, h_in⟩ := GG5_IET_orbit_finite_subset n
   exact ⟨x, hx, pts, h_ne, h_in⟩
 
 /-! ### GG5-Specific No Periodic Orbits Theorem -/
 
-/-- The denominator 1 + φ + φ² is positive. -/
-theorem denom_pos : 0 < 1 + goldenRatio + goldenRatio ^ 2 := by
-  have h1 : 0 < goldenRatio := goldenRatio_pos
-  have h2 : 0 < goldenRatio ^ 2 := sq_pos_of_pos h1
+/-! #### Displacement computations for GG5 IET
+
+The GG5 IET has permutation `swap 0 2`, meaning:
+- Interval 0 maps to position 2
+- Interval 1 stays at position 1
+- Interval 2 maps to position 0
+
+The displacement for a point x in interval i is:
+  f(x) - x = rangeLeft(permutation i) - domainLeft i
+
+Computing explicitly:
+- d₀ = rangeLeft 2 - domainLeft 0 = (length3 + length2) - 0 = 1 - length1
+- d₁ = rangeLeft 1 - domainLeft 1 = length3 - length1
+- d₂ = rangeLeft 0 - domainLeft 2 = 0 - (length1 + length2) = -1/2
+
+In terms of φ where 1 + φ + φ² = 2(1+φ):
+- d₀ = (1 + 2φ)/(2(1+φ))
+- d₁ = φ/(2(1+φ))
+- d₂ = -(1+φ)/(2(1+φ))
+-/
+
+/-- Displacement for interval 0: d₀ = 1 - length1 -/
+noncomputable def displacement0 : ℝ := 1 - length1
+
+/-- Displacement for interval 1: d₁ = length3 - length1 -/
+noncomputable def displacement1 : ℝ := length3 - length1
+
+/-- Displacement for interval 2: d₂ = -1/2 -/
+noncomputable def displacement2 : ℝ := -1/2
+
+/-- d₀ = (1 + 2φ)/(2(1+φ)) -/
+theorem displacement0_formula : displacement0 = (1 + 2 * goldenRatio) / (2 * (1 + goldenRatio)) := by
+  unfold displacement0 length1
+  have h_sq : goldenRatio ^ 2 = goldenRatio + 1 := Real.goldenRatio_sq
+  have h_denom : 1 + goldenRatio + goldenRatio ^ 2 = 2 * (1 + goldenRatio) := by rw [h_sq]; ring
+  rw [h_denom]
+  field_simp
+  ring
+
+/-- d₁ = φ/(2(1+φ)) -/
+theorem displacement1_formula : displacement1 = goldenRatio / (2 * (1 + goldenRatio)) := by
+  unfold displacement1 length1 length3
+  have h_sq : goldenRatio ^ 2 = goldenRatio + 1 := Real.goldenRatio_sq
+  have h_denom : 1 + goldenRatio + goldenRatio ^ 2 = 2 * (1 + goldenRatio) := by rw [h_sq]; ring
+  rw [h_denom]
+  have h_key : goldenRatio ^ 2 - 1 = goldenRatio := by rw [h_sq]; ring
+  rw [div_sub_div_same, h_key]
+
+/-- d₂ = -(1+φ)/(2(1+φ)) = -1/2 -/
+theorem displacement2_formula : displacement2 = -(1 + goldenRatio) / (2 * (1 + goldenRatio)) := by
+  unfold displacement2
+  have h : (1 + goldenRatio) ≠ 0 := by
+    have : 0 < goldenRatio := goldenRatio_pos
+    linarith
+  field_simp
+
+/-- GG5 domain boundaries -/
+theorem GG5_domainLeft_0 : GG5_induced_IET.domainLeft 0 = 0 := by
+  unfold IntervalExchangeTransformation.domainLeft
+  simp
+
+theorem GG5_domainLeft_1 : GG5_induced_IET.domainLeft 1 = length1 := by
+  unfold IntervalExchangeTransformation.domainLeft GG5_induced_IET
+  simp
+
+theorem GG5_domainLeft_2 : GG5_induced_IET.domainLeft 2 = length1 + length2 := by
+  unfold IntervalExchangeTransformation.domainLeft GG5_induced_IET
+  simp [Fin.sum_univ_two]
+
+/-- GG5 range boundaries (accounting for permutation swap 0 2) -/
+theorem GG5_rangeLeft_0 : GG5_induced_IET.rangeLeft 0 = 0 := by
+  unfold IntervalExchangeTransformation.rangeLeft
+  simp
+
+theorem GG5_rangeLeft_1 : GG5_induced_IET.rangeLeft 1 = length3 := by
+  unfold IntervalExchangeTransformation.rangeLeft GG5_induced_IET
+  simp
+
+theorem GG5_rangeLeft_2 : GG5_induced_IET.rangeLeft 2 = length3 + length2 := by
+  unfold IntervalExchangeTransformation.rangeLeft GG5_induced_IET
+  simp [Fin.sum_univ_two, Equiv.swap_apply_of_ne_of_ne, Equiv.swap_apply_left]
+
+/-- GG5 permutation values -/
+@[simp] theorem GG5_perm_0 : GG5_induced_IET.permutation 0 = 2 := rfl
+
+@[simp] theorem GG5_perm_1 : GG5_induced_IET.permutation 1 = 1 := rfl
+
+@[simp] theorem GG5_perm_2 : GG5_induced_IET.permutation 2 = 0 := rfl
+
+/-- The actual displacement for interval 0 matches displacement0 -/
+theorem GG5_actual_displacement_interval0 :
+    GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation 0) - GG5_induced_IET.domainLeft 0 = displacement0 := by
+  simp only [GG5_perm_0, GG5_rangeLeft_2, GG5_domainLeft_0]
+  unfold displacement0
+  have h := lengths_sum_to_one
   linarith
+
+/-- The actual displacement for interval 1 matches displacement1 -/
+theorem GG5_actual_displacement_interval1 :
+    GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation 1) - GG5_induced_IET.domainLeft 1 = displacement1 := by
+  simp only [GG5_perm_1, GG5_rangeLeft_1, GG5_domainLeft_1]
+  unfold displacement1
+  ring
+
+/-- The actual displacement for interval 2 matches displacement2 -/
+theorem GG5_actual_displacement_interval2 :
+    GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation 2) - GG5_induced_IET.domainLeft 2 = displacement2 := by
+  simp only [GG5_perm_2, GG5_rangeLeft_0, GG5_domainLeft_2]
+  unfold displacement2
+  -- length1 + length2 = 1/2, so 0 - (length1 + length2) = -1/2
+  have h_sq : goldenRatio ^ 2 = goldenRatio + 1 := Real.goldenRatio_sq
+  have h_denom : 1 + goldenRatio + goldenRatio ^ 2 = 2 * (1 + goldenRatio) := by rw [h_sq]; ring
+  unfold length1 length2
+  rw [h_denom]
+  have h_pos : 0 < 1 + goldenRatio := by have := goldenRatio_pos; linarith
+  field_simp
+  ring
+
+/-- The displacement function for the GG5 IET: f(x) - x for x in [0,1).
+    Takes value d_i when x is in interval i. -/
+noncomputable def GG5_displacement (x : ℝ) : ℝ :=
+  if x < length1 then displacement0
+  else if x < length1 + length2 then displacement1
+  else displacement2
+
+/-- The displacement function equals f(x) - x for any x in [0,1). -/
+theorem GG5_displacement_eq_toFun_sub (x : ℝ) (hx : x ∈ Set.Ico 0 1) :
+    GG5_displacement x = GG5_induced_IET.toFun x - x := by
+  unfold GG5_displacement
+  -- Case analysis on which interval x is in
+  by_cases h0 : x < length1
+  · -- x in interval 0: [0, length1)
+    simp only [h0, if_true]
+    -- Need to compute GG5_induced_IET.toFun x for x in interval 0
+    unfold IntervalExchangeTransformation.toFun
+    have h_in_0 : x ∈ GG5_induced_IET.interval 0 := by
+      unfold IntervalExchangeTransformation.interval IntervalExchangeTransformation.domainRight
+      rw [GG5_domainLeft_0]
+      simp only [GG5_induced_IET, Set.mem_Ico]
+      constructor
+      · exact hx.1
+      · simp; exact h0
+    -- The epsilon chooses output for interval 0
+    have h_ex : ∃ y, ∃ i, x ∈ GG5_induced_IET.interval i ∧
+        y = GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation i) + (x - GG5_induced_IET.domainLeft i) := by
+      use GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation 0) + (x - GG5_induced_IET.domainLeft 0), 0
+
+    have h_unique : ∀ y, (∃ i, x ∈ GG5_induced_IET.interval i ∧
+        y = GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation i) + (x - GG5_induced_IET.domainLeft i)) →
+        y = GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation 0) + (x - GG5_induced_IET.domainLeft 0) := by
+      intro y ⟨i, hi_mem, hi_eq⟩
+      have : i = 0 := by
+        by_contra h_ne
+        have h_disj := GG5_induced_IET.intervals_disjoint (Set.mem_range_self 0) (Set.mem_range_self i)
+                         (by intro heq; exact h_ne (GG5_induced_IET.interval_injective heq).symm)
+        have : x ∈ GG5_induced_IET.interval 0 ∩ GG5_induced_IET.interval i := ⟨h_in_0, hi_mem⟩
+        exact Set.disjoint_iff_inter_eq_empty.mp h_disj |>.subset this
+      rw [this] at hi_eq
+      exact hi_eq
+    -- Apply epsilon_eq_of_forall
+    have h_eps : Classical.epsilon (fun y => ∃ i, x ∈ GG5_induced_IET.interval i ∧
+        y = GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation i) + (x - GG5_induced_IET.domainLeft i)) =
+        GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation 0) + (x - GG5_induced_IET.domainLeft 0) := by
+      have h_spec := Classical.epsilon_spec h_ex
+      exact h_unique _ h_spec
+    rw [h_eps, GG5_domainLeft_0]
+    -- Goal: displacement0 = rangeLeft (permutation 0) + (x - 0) - x
+    -- Simplify x - 0 - x = 0, then use GG5_actual_displacement_interval0
+    have h_simp : GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation 0) + (x - 0) - x =
+                  GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation 0) := by ring
+    rw [h_simp]
+    -- Now goal: displacement0 = rangeLeft (permutation 0)
+    have h := GG5_actual_displacement_interval0
+    simp only [GG5_domainLeft_0, sub_zero] at h
+    exact h.symm
+  · by_cases h1 : x < length1 + length2
+    · -- x in interval 1: [length1, length1 + length2)
+      simp only [h0, h1, if_false, if_true]
+      unfold IntervalExchangeTransformation.toFun
+      have h_in_1 : x ∈ GG5_induced_IET.interval 1 := by
+        unfold IntervalExchangeTransformation.interval IntervalExchangeTransformation.domainRight
+        rw [GG5_domainLeft_1]
+        simp only [GG5_induced_IET, Set.mem_Ico]
+        constructor
+        · push_neg at h0; exact h0
+        · simp; exact h1
+      have h_ex : ∃ y, ∃ i, x ∈ GG5_induced_IET.interval i ∧
+          y = GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation i) + (x - GG5_induced_IET.domainLeft i) := by
+        use GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation 1) + (x - GG5_induced_IET.domainLeft 1), 1
+
+      have h_unique : ∀ y, (∃ i, x ∈ GG5_induced_IET.interval i ∧
+          y = GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation i) + (x - GG5_induced_IET.domainLeft i)) →
+          y = GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation 1) + (x - GG5_induced_IET.domainLeft 1) := by
+        intro y ⟨i, hi_mem, hi_eq⟩
+        have : i = 1 := by
+          by_contra h_ne
+          have h_disj := GG5_induced_IET.intervals_disjoint (Set.mem_range_self 1) (Set.mem_range_self i)
+                           (by intro heq; exact h_ne (GG5_induced_IET.interval_injective heq).symm)
+          have : x ∈ GG5_induced_IET.interval 1 ∩ GG5_induced_IET.interval i := ⟨h_in_1, hi_mem⟩
+          exact Set.disjoint_iff_inter_eq_empty.mp h_disj |>.subset this
+        rw [this] at hi_eq
+        exact hi_eq
+      have h_eps : Classical.epsilon (fun y => ∃ i, x ∈ GG5_induced_IET.interval i ∧
+          y = GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation i) + (x - GG5_induced_IET.domainLeft i)) =
+          GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation 1) + (x - GG5_induced_IET.domainLeft 1) := by
+        have h_spec := Classical.epsilon_spec h_ex
+        exact h_unique _ h_spec
+      rw [h_eps, GG5_domainLeft_1]
+      rw [← GG5_actual_displacement_interval1, GG5_domainLeft_1]
+      ring
+    · -- x in interval 2: [length1 + length2, 1)
+      simp only [h0, h1, if_false]
+      unfold IntervalExchangeTransformation.toFun
+      have h_in_2 : x ∈ GG5_induced_IET.interval 2 := by
+        unfold IntervalExchangeTransformation.interval IntervalExchangeTransformation.domainRight
+        rw [GG5_domainLeft_2]
+        simp only [GG5_induced_IET, Set.mem_Ico]
+        constructor
+        · push_neg at h1; exact h1
+        · have h_sum := lengths_sum_to_one
+          simp
+          linarith [hx.2]
+      have h_ex : ∃ y, ∃ i, x ∈ GG5_induced_IET.interval i ∧
+          y = GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation i) + (x - GG5_induced_IET.domainLeft i) := by
+        use GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation 2) + (x - GG5_induced_IET.domainLeft 2), 2
+      have h_unique : ∀ y, (∃ i, x ∈ GG5_induced_IET.interval i ∧
+          y = GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation i) + (x - GG5_induced_IET.domainLeft i)) →
+          y = GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation 2) + (x - GG5_induced_IET.domainLeft 2) := by
+        intro y ⟨i, hi_mem, hi_eq⟩
+        have : i = 2 := by
+          by_contra h_ne
+          have h_disj := GG5_induced_IET.intervals_disjoint (Set.mem_range_self 2) (Set.mem_range_self i)
+                           (by intro heq; exact h_ne (GG5_induced_IET.interval_injective heq).symm)
+          have : x ∈ GG5_induced_IET.interval 2 ∩ GG5_induced_IET.interval i := ⟨h_in_2, hi_mem⟩
+          exact Set.disjoint_iff_inter_eq_empty.mp h_disj |>.subset this
+        rw [this] at hi_eq
+        exact hi_eq
+      have h_eps : Classical.epsilon (fun y => ∃ i, x ∈ GG5_induced_IET.interval i ∧
+          y = GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation i) + (x - GG5_induced_IET.domainLeft i)) =
+          GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation 2) + (x - GG5_induced_IET.domainLeft 2) := by
+        have h_spec := Classical.epsilon_spec h_ex
+        exact h_unique _ h_spec
+      rw [h_eps, GG5_domainLeft_2]
+      rw [← GG5_actual_displacement_interval2, GG5_domainLeft_2]
+      ring
+
+/-- The cumulative displacement over n iterates starting from y. -/
+noncomputable def cumulative_displacement (y : ℝ) (n : ℕ) : ℝ :=
+  ∑ k ∈ Finset.range n, GG5_displacement ((GG5_induced_IET.toFun^[k]) y)
+
+/-- For a point y in [0,1), the cumulative displacement over n iterations
+    equals f^[n](y) - y, using telescope sum. -/
+theorem cumulative_displacement_telescope (y : ℝ)
+    (n : ℕ) (hn : ∀ k < n, (GG5_induced_IET.toFun^[k]) y ∈ Set.Ico 0 1) :
+    cumulative_displacement y n = (GG5_induced_IET.toFun^[n]) y - y := by
+  induction n with
+  | zero =>
+    simp [cumulative_displacement]
+  | succ k ih =>
+    rw [cumulative_displacement, Finset.sum_range_succ]
+    have hk : ∀ j < k, (GG5_induced_IET.toFun^[j]) y ∈ Set.Ico 0 1 := by
+      intro j hj; exact hn j (Nat.lt_trans hj (Nat.lt_succ_self k))
+    have h_fk_mem : (GG5_induced_IET.toFun^[k]) y ∈ Set.Ico 0 1 := hn k (Nat.lt_succ_self k)
+    rw [GG5_displacement_eq_toFun_sub _ h_fk_mem]
+    simp only [cumulative_displacement] at ih
+    rw [ih hk]
+    simp only [Function.iterate_succ_apply']
+    ring
 
 /-- If a + b*φ = 0 for integers a, b, then a = b = 0.
     This is the linear independence of {1, φ} over ℤ. -/
@@ -270,6 +432,67 @@ theorem int_add_int_mul_phi_eq_zero (a b : ℤ)
     rw [Rat.cast_div, Rat.cast_intCast, Rat.cast_intCast]
     push_cast
     exact hφ.symm
+
+/-- Key algebraic lemma: For any natural numbers n₀, n₁, n₂ with sum > 0,
+    the weighted displacement sum n₀*d₀ + n₁*d₁ + n₂*d₂ ≠ 0.
+
+    This is the core constraint that prevents periodic orbits in the GG5 IET. -/
+theorem displacement_sum_ne_zero (n₀ n₁ n₂ : ℕ) (h_sum : 0 < n₀ + n₁ + n₂) :
+    n₀ * displacement0 + n₁ * displacement1 + n₂ * displacement2 ≠ 0 := by
+  intro h_zero
+  -- Express in terms of φ
+  have h_denom_pos : 0 < 2 * (1 + goldenRatio) := by
+    have : 0 < goldenRatio := goldenRatio_pos
+    linarith
+  have h_denom_ne : 2 * (1 + goldenRatio) ≠ 0 := ne_of_gt h_denom_pos
+  -- Rewrite using the displacement formulas
+  rw [displacement0_formula, displacement1_formula, displacement2_formula] at h_zero
+  -- The equation is:
+  -- n₀ * (1 + 2φ)/(2(1+φ)) + n₁ * φ/(2(1+φ)) + n₂ * (-(1+φ))/(2(1+φ)) = 0
+  -- Multiply by 2(1+φ) to clear denominators:
+  -- n₀(1 + 2φ) + n₁φ - n₂(1+φ) = 0
+  have h_clear : (n₀ : ℝ) * (1 + 2 * goldenRatio) + (n₁ : ℝ) * goldenRatio -
+                 (n₂ : ℝ) * (1 + goldenRatio) = 0 := by
+    have h_eq := h_zero
+    have h1 : (n₀ : ℝ) * ((1 + 2 * goldenRatio) / (2 * (1 + goldenRatio))) =
+              (n₀ : ℝ) * (1 + 2 * goldenRatio) / (2 * (1 + goldenRatio)) := by ring
+    have h2 : (n₁ : ℝ) * (goldenRatio / (2 * (1 + goldenRatio))) =
+              (n₁ : ℝ) * goldenRatio / (2 * (1 + goldenRatio)) := by ring
+    have h3 : (n₂ : ℝ) * (-(1 + goldenRatio) / (2 * (1 + goldenRatio))) =
+              -(n₂ : ℝ) * (1 + goldenRatio) / (2 * (1 + goldenRatio)) := by ring
+    rw [h1, h2, h3] at h_eq
+    have h_combined : ((n₀ : ℝ) * (1 + 2 * goldenRatio) + (n₁ : ℝ) * goldenRatio -
+                      (n₂ : ℝ) * (1 + goldenRatio)) / (2 * (1 + goldenRatio)) = 0 := by
+      field_simp at h_eq ⊢
+      linarith
+    exact div_eq_zero_iff.mp h_combined |>.resolve_right h_denom_ne
+  -- Expand: n₀ + 2n₀φ + n₁φ - n₂ - n₂φ = 0
+  -- Group by 1 and φ: (n₀ - n₂) + (2n₀ + n₁ - n₂)φ = 0
+  have h_coeff : (n₀ : ℝ) - n₂ + ((2 : ℝ) * n₀ + n₁ - n₂) * goldenRatio = 0 := by
+    have h := h_clear
+    ring_nf at h ⊢
+    linarith
+  -- Apply int_add_int_mul_phi_eq_zero
+  -- Cast to integers properly
+  have h_int := int_add_int_mul_phi_eq_zero ((n₀ : ℤ) - n₂) (2 * n₀ + n₁ - n₂)
+    (by push_cast; convert h_coeff using 2)
+  -- Extract: n₀ - n₂ = 0 and 2n₀ + n₁ - n₂ = 0
+  have h1 : (n₀ : ℤ) = n₂ := by linarith [h_int.1]
+  have h2 : (2 * (n₀ : ℤ) + n₁ : ℤ) = n₂ := by linarith [h_int.2]
+  -- From h1 and h2: 2n₀ + n₁ = n₀, so n₀ + n₁ = 0
+  have h3 : (n₀ : ℤ) + n₁ = 0 := by linarith
+  -- Since n₀, n₁ ≥ 0, we have n₀ = n₁ = 0
+  have hn0 : n₀ = 0 := by omega
+  have hn1 : n₁ = 0 := by omega
+  have hn2 : n₂ = 0 := by omega
+  -- But n₀ + n₁ + n₂ > 0, contradiction
+  omega
+
+/-- The denominator 1 + φ + φ² is positive. -/
+theorem denom_pos : 0 < 1 + goldenRatio + goldenRatio ^ 2 := by
+  have h1 : 0 < goldenRatio := goldenRatio_pos
+  have h2 : 0 < goldenRatio ^ 2 := sq_pos_of_pos h1
+  linarith
 
 /-- The denominator 1 + φ + φ² equals 2(1 + φ) using φ² = φ + 1. -/
 theorem denom_eq_two_one_plus_phi :
@@ -315,206 +538,6 @@ theorem length1_lt_half : length1 < 1 / 2 := by
   rw [h_denom]
   rw [one_div_lt_one_div h_denom_pos (by norm_num : (0 : ℝ) < 2)]
   linarith
-
-/-- The GG5 IET has no periodic orbits.
-
-This is a special case of Keane's theorem (1975) for IETs with irrational
-rotation ratio. For the GG5 system with golden ratio lengths, the algebraic
-structure ensures no periodic orbits exist.
-
-**Proof outline:**
-For a periodic orbit of period k, the total displacement must be an integer.
-The displacement is n₁/φ² - n₂/φ where n₁, n₂ count visits to intervals 1, 2.
-By irrationality of φ, this requires n₁ = n₂ = 0. But then the orbit only
-visits interval 0, which maps outside itself - contradiction.
--/
-theorem GG5_IET_no_periodic_orbits :
-    ∀ x ∈ Set.Ico 0 1, ¬IsPeriodic GG5_induced_IET.toFun x := by
-  intro x hx hper
-  obtain ⟨k, hk_pos, hk_eq⟩ := hper
-
-  -- We'll use a different strategy: Show that for ANY point x in [0,1),
-  -- the displacement after k applications involves irrational numbers
-  -- in a way that cannot sum to zero (mod 1).
-
-  -- The key insight: The GG5 IET with swap 0 2 permutation creates
-  -- displacements involving φ. For a periodic orbit, the total displacement
-  -- must be an integer. But the golden ratio structure prevents this.
-
-  -- Simplified approach: Use that the system is minimal (orbits are dense)
-  -- which follows from irrationality. Any periodic orbit contradicts minimality.
-
-  -- Actually, let's prove this more directly using the interval structure.
-  -- Key fact: length1 + length2 = 1/2
-  have h_half : length1 + length2 = 1 / 2 := interval2_image_bound
-
-  -- From this and lengths_sum_to_one, we get length3 = 1/2
-  have h_length3_half : length3 = 1 / 2 := by
-    have h := lengths_sum_to_one
-    linarith
-
-  -- Also length1 < 1/2 (use the lemma we proved)
-  have h_length1_lt_half : length1 < 1 / 2 := length1_lt_half
-
-  -- The intervals are:
-  -- I₀ = [0, length1) with length1 < 1/2
-  -- I₁ = [length1, 1/2) with length length2 = 1/2 - length1
-  -- I₂ = [1/2, 1) with length 1/2
-
-  -- Under swap 0 2:
-  -- I₀ → position 2 (maps to [length2 + length3, length2 + length3 + length1) = [1 - length1, 1))
-  -- I₁ → position 1 (maps to [length3, length3 + length2) = [1/2, 1 - length1))
-  -- I₂ → position 0 (maps to [0, length3) = [0, 1/2))
-
-  -- Key observation: Each application of toFun creates a specific displacement pattern
-  -- that depends on φ through the length ratios.
-
-  -- For a complete proof, we would track the symbolic dynamics (which interval
-  -- is visited at each step) and show that the displacement after k steps
-  -- cannot equal 0 mod 1 for any k > 0.
-
-  -- This requires detailed computation of:
-  -- 1. The displacement function for each interval
-  -- 2. The visit counts to each interval in a k-periodic orbit
-  -- 3. Using int_add_int_mul_phi_eq_zero to show the only solution is trivial
-
-  -- The full proof is technically involved but follows from:
-  -- - The lengths involve φ in an essential way (length2 = φ * length1)
-  -- - Any integer linear combination must respect int_add_int_mul_phi_eq_zero
-  -- - This forces contradictory visit patterns
-
-  -- Complete algebraic proof using int_add_int_mul_phi_eq_zero:
-  --
-  -- Strategy: Show that the specific structure of GG5 IET (golden ratio lengths with swap 0 2)
-  -- creates displacement patterns that cannot close to form a periodic orbit.
-  --
-  -- Key facts:
-  -- - Intervals: [0, ℓ₁), [ℓ₁, ℓ₁+ℓ₂), [ℓ₁+ℓ₂, 1) with ℓ₁+ℓ₂ = 1/2
-  -- - Permutation: swap 0 2, so: 0→2, 1→1, 2→0
-  -- - Displacements involve φ in a way that prevents exact periodicity
-
-  -- The core argument: for periodic orbit, total displacement over k steps must be 0 mod 1.
-  -- But the golden ratio structure makes this impossible.
-
-  -- Use the fact that interval 2 has length 1/2 and maps to [0, 1/2)
-  -- Meanwhile intervals 0 and 1 together have length 1/2 and map to [1/2, 1)
-  -- This creates an asymmetry incompatible with periodicity given the φ-structure
-
-  -- For a more direct approach: use that if f^k(x) = x, then x must map to itself
-  -- after cycling through the permutation. But the swap structure with golden ratio
-  -- lengths prevents this.
-
-  -- Simplified argument using interval structure:
-  -- Since swap 0 2 is an involution and length₃ = length₁ + length₂ (by φ² = φ + 1 structure),
-  -- but length₃ = 1/2 ≠ length₁ (since length₁ < 1/2), we get asymmetry.
-
-  -- Formal proof: Use that the three intervals have irrational length ratios
-  have h_length1_irr : length1 ≠ 0 := ne_of_gt length1_pos
-  have h_length3_ne_length1 : length3 ≠ length1 := by
-    intro h_eq
-    have : length3 = 1 / 2 := h_length3_half
-    rw [this] at h_eq
-    have : length1 < 1 / 2 := h_length1_lt_half
-    linarith
-
-  -- The key: interval 2 (length 1/2) maps to interval 0 position
-  -- Interval 0 (length < 1/2) maps to interval 2 position
-  -- After two iterations, a point in interval 2 would need to return to interval 2
-  -- But the length mismatch prevents exact return
-
-  -- Actually, let's use a more direct argument:
-  -- If x has period k, then we can track which interval contains f^j(x) for j = 0,...,k-1
-  -- The swap structure means: if x ∈ I₀, then f(x) ∈ I₂, then f²(x) ∈ I₀ (potentially different position)
-  -- Similarly for x ∈ I₂. For x ∈ I₁, it stays in I₁.
-
-  -- Case analysis on which interval x is in
-  have hx_in_some_interval : ∃ i : Fin 3, x ∈ GG5_induced_IET.interval i := by
-    have : x ∈ ⋃ i, GG5_induced_IET.interval i := by
-      rw [GG5_induced_IET.intervals_cover]
-      exact hx
-    obtain ⟨i, hi⟩ := Set.mem_iUnion.mp this
-    exact ⟨i, hi⟩
-
-  obtain ⟨i₀, hi₀⟩ := hx_in_some_interval
-
-  -- Now we'll derive a contradiction by showing the periodicity constraint is impossible
-  -- The detailed proof requires computing displacements and using int_add_int_mul_phi_eq_zero
-
-  -- For now, we use the fact that the golden ratio structure with swap 0 2
-  -- creates incommensurable displacements.
-
-  -- The key algebraic fact: lengths involve φ with denominat or 1+φ+φ²
-  -- After k applications, displacement is a linear combination of these lengths
-  -- For f^k(x) = x, we need: (displacement) ∈ ℤ
-  -- But displacement = (integer linear combination of lengths) involves φ/(1+φ+φ²)
-  -- By int_add_int_mul_phi_eq_zero structure, this forces k = 0
-
-  -- Complete argument using irrationality:
-  -- The rotation number (in the sense of interval exchange) is φ
-  -- This is irrational (we proved GG5_IET_rotation_irrational)
-  -- For IETs with irrational rotation, no periodic orbits exist (Keane's theorem)
-
-  -- Direct proof sketch:
-  -- Displacement from interval i to its image involves shifting by rangeLeft(perm(i)) - domainLeft(i)
-  -- For GG5 with swap 0 2:
-  --   - Interval 0: shift by rangeLeft(2) - domainLeft(0) = (ℓ₁+ℓ₂) - 0 = 1/2
-  --   - Interval 1: shift by rangeLeft(1) - domainLeft(1) = ℓ₃ - ℓ₁
-  --   - Interval 2: shift by rangeLeft(0) - domainLeft(2) = 0 - (ℓ₁+ℓ₂) = -1/2
-
-  -- For periodic orbit: sum of shifts over k steps must be integer
-  -- Let n_i = number of times orbit visits interval i
-  -- Then: n₀(1/2) + n₁(ℓ₃ - ℓ₁) + n₂(-1/2) = integer
-  -- Simplify: (n₀ - n₂)/2 + n₁(ℓ₃ - ℓ₁) = integer
-
-  -- Now ℓ₃ = φ²/(1+φ+φ²), ℓ₁ = 1/(1+φ+φ²)
-  -- So ℓ₃ - ℓ₁ = (φ² - 1)/(1+φ+φ²) = φ/(1+φ+φ²) using φ² = φ + 1
-
-  -- Therefore: (n₀ - n₂)/2 + n₁ φ/(1+φ+φ²) = integer
-  -- Multiply by (1+φ+φ²): (n₀ - n₂)(1+φ+φ²)/2 + n₁ φ = integer × (1+φ+φ²)
-
-  -- Since 1+φ+φ² = 2(1+φ) (we proved denom_eq_two_one_plus_phi):
-  -- (n₀ - n₂)(1+φ) + n₁ φ = integer × 2(1+φ)
-  -- (n₀ - n₂) + (n₀ - n₂)φ + n₁ φ = 2×integer×(1+φ)
-  -- (n₀ - n₂) + (n₀ - n₂ + n₁)φ = 2×integer + 2×integer×φ
-
-  -- By int_add_int_mul_phi_eq_zero applied to the difference:
-  -- (n₀ - n₂ - 2×integer) + (n₀ - n₂ + n₁ - 2×integer)φ = 0
-  -- This forces: n₀ - n₂ = 2×integer and n₀ - n₂ + n₁ = 2×integer
-  -- So n₁ = 0
-
-  -- But also n₀ + n₁ + n₂ = k and n_i ≥ 0 (each is a count)
-  -- With n₁ = 0 and n₀ - n₂ = 2m for some integer m:
-  -- If m ≥ 0: n₀ = n₂ + 2m, so k = n₂ + 2m + 0 + n₂ = 2n₂ + 2m = 2(n₂ + m)
-  -- If m < 0: n₂ = n₀ - 2m = n₀ + 2|m|, so k = n₀ + 0 + n₀ + 2|m| = 2n₀ + 2|m| = 2(n₀ + |m|)
-
-  -- So k must be even. But this still doesn't give contradiction.
-
-  -- Let me reconsider. The issue is that the orbit might alternate between intervals
-  -- in a way compatible with k being even.
-
-  -- More careful analysis: A point in interval 1 stays in interval 1 (since perm(1) = 1)
-  -- with a shift. But what is that shift exactly?
-
-  -- Let me compute the actual displacements more carefully using the IET structure.
-
-  sorry
-
-/-- If no point in the orbit of x is periodic, then the orbit is infinite -/
-theorem no_orbit_point_periodic_implies_infinite
-    (f : ℝ → ℝ) (x : ℝ)
-    (h_no_periodic : ∀ y ∈ orbitSet f x, ¬IsPeriodic f y) :
-    (orbitSet f x).Infinite := by
-  by_contra h_finite
-  -- h_finite : ¬(orbitSet f x).Infinite, which means it's finite
-  rw [Set.not_infinite] at h_finite
-  -- If orbit is finite, some iterate of x is periodic
-  obtain ⟨m, p, hp_pos, hp⟩ := finite_orbit_has_periodic_point f x h_finite
-  -- But f^[m] x is in the orbit of x
-  have hm_in_orbit : (f^[m]) x ∈ orbitSet f x := orbitSet_iterate f x m
-  -- And it's periodic
-  have : IsPeriodic f ((f^[m]) x) := ⟨p, hp_pos, hp⟩
-  -- Contradiction
-  exact h_no_periodic ((f^[m]) x) hm_in_orbit this
 
 /-- The GG5 induced IET uses an involution permutation (swap 0 2). -/
 theorem GG5_induced_IET_is_involution :
@@ -607,43 +630,6 @@ theorem IET_maps_to_self (iet : IntervalExchangeTransformation 3)
               Equiv.sum_comp iet.permutation iet.lengths
             exact this
         _ = 1 := iet.lengths_sum
-    -- rangeLeft (perm j) + (x - domainLeft j) < rangeLeft (perm j) + lengths j = rangeRight (perm j) ≤ 1
-    -- But wait: rangeRight uses lengths (perm (perm j)), not lengths j. Need to be more careful.
-    -- Actually, the key is: x - domainLeft j < lengths j
-    -- And we want: rangeLeft (perm j) + (x - domainLeft j) < 1
-    -- We have: rangeLeft (perm j) + lengths (perm j) ≤ 1
-    -- But we need: rangeLeft (perm j) + lengths j < something
-    -- Wait, I need to reconsider. The interval j maps to interval perm j.
-    -- The offset within interval j is preserved.
-    -- So: if x is at offset d from domainLeft j, output is at offset d from rangeLeft (perm j).
-    -- The constraint is: d < lengths j.
-    -- We need: rangeLeft (perm j) + d < 1.
-    -- We know: rangeLeft (perm j) + lengths (perm j) ≤ 1.
-    -- But lengths (perm j) is NOT necessarily equal to lengths j!
-    -- Actually wait, let me check the IET definition again...
-
-    -- Looking at IntervalExchange.lean rangeLeft definition:
-    -- rangeLeft i = sum of lengths (perm j) for j < i
-    -- So rangeRight (perm j) = rangeLeft (perm j) + lengths (perm (perm j))
-    -- This is NOT what we want!
-
-    -- Let me reconsider the whole approach. The key insight:
-    -- For x in interval j, the output is rangeLeft (perm j) + (x - domainLeft j).
-    -- We know x - domainLeft j < lengths j (the width of interval j).
-    -- We need to show rangeLeft (perm j) + lengths j ≤ 1.
-
-    -- Actually, this is wrong! The IET permutes intervals of potentially DIFFERENT lengths.
-    -- Interval j has length lengths[j].
-    -- It maps to position perm(j) in the output.
-    -- The output interval also has length lengths[j] (the same!).
-    -- So rangeLeft (perm j) + lengths j is where interval j ends after permutation.
-
-    -- Since all intervals are accounted for and sum to 1, we have:
-    -- rangeLeft (perm j) + lengths j ≤ 1.
-
-    -- But rangeRight is defined differently in the code!
-    -- Let me prove directly that rangeLeft (perm j) + lengths j ≤ 1.
-
     have h_sum_le : iet.rangeLeft (iet.permutation j) + iet.lengths j ≤ 1 := by
       -- Strategy: Use h_rangeRight_le which gives us:
       -- rangeLeft (perm j) + lengths (perm (perm j)) ≤ 1
@@ -652,35 +638,6 @@ theorem IET_maps_to_self (iet : IntervalExchangeTransformation 3)
       unfold IntervalExchangeTransformation.rangeRight at h_rangeRight_le
       -- h_rangeRight_le : rangeLeft (perm j) + lengths (perm (perm j)) ≤ 1
 
-      -- We need: rangeLeft (perm j) + lengths j ≤ rangeLeft (perm j) + lengths (perm (perm j))
-      -- i.e., lengths j ≤ lengths (perm (perm j))
-
-      -- Key observation for involution permutations:
-      -- If perm (perm j) = j (involution), then lengths j = lengths (perm (perm j))
-      -- and rangeRight (perm j) = rangeLeft (perm j) + lengths j, so we're immediately done.
-
-      -- For general permutations, we need lengths j ≤ lengths (perm (perm j)).
-      -- This is NOT always true! Consider a 3-cycle where lengths are [0.5, 0.3, 0.2].
-      -- Then for j where perm(perm(j)) maps to the smallest length, we'd have
-      -- lengths j > lengths (perm (perm j)).
-
-      -- However, there's an alternative approach: prove directly that
-      -- rangeLeft (perm j) + lengths j ≤ 1 by showing that this sum equals
-      -- the sum of lengths of a SUBSET of all intervals.
-
-      -- Since j maps to position perm j, and the offset within interval j is preserved,
-      -- the output lies in [rangeLeft (perm j), rangeLeft (perm j) + lengths j).
-      -- For this to be in [0,1), we need rangeLeft (perm j) + lengths j ≤ 1.
-
-      -- ISSUE: The current IET definitions appear to be designed for INVOLUTION permutations,
-      -- where perm ∘ perm = id. All examples (swap 0 1, swap 0 2) are involutions.
-      -- For involutions, rangeRight is correctly defined and the proof works.
-
-      -- For this specific theorem on general IETs, the proof requires either:
-      -- (a) Additional constraints on the IET structure, OR
-      -- (b) A corrected definition of rangeRight as rangeLeft i + lengths (perm⁻¹ i), OR
-      -- (c) Exhaustive case analysis on all 3! = 6 permutations of Fin 3
-
       -- Use the involution hypothesis: perm (perm j) = j
       calc iet.rangeLeft (iet.permutation j) + iet.lengths j
           = iet.rangeLeft (iet.permutation j) + iet.lengths (iet.permutation (iet.permutation j)) := by rw [h_inv j]
@@ -688,50 +645,312 @@ theorem IET_maps_to_self (iet : IntervalExchangeTransformation 3)
 
     linarith [h_sum_le, h_offset_lt]
 
+/-- length1/2 is in the unit interval [0,1). -/
+theorem length1_half_mem_Ico : length1 / 2 ∈ Set.Ico 0 1 := by
+  constructor
+  · apply le_of_lt
+    apply div_pos; exact length1_pos; norm_num
+  · calc length1 / 2 = length1 * (1 / 2) := by ring
+      _ < length1 * 1 := by
+        apply mul_lt_mul_of_pos_left
+        · norm_num
+        · exact length1_pos
+      _ = length1 := by ring
+      _ < 1 := by
+        have : length1 + length2 + length3 = 1 := lengths_sum_to_one
+        linarith [length2_pos, length3_pos]
+
+/-- All iterates of length1/2 under the GG5 IET remain in [0,1). -/
+theorem GG5_IET_iterate_mem_Ico (n : ℕ) :
+    (GG5_induced_IET.toFun^[n]) (length1 / 2) ∈ Set.Ico 0 1 := by
+  induction n with
+  | zero => simp; exact length1_half_mem_Ico
+  | succ k ih =>
+    simp only [Function.iterate_succ_apply']
+    apply IET_maps_to_self _ GG5_induced_IET_is_involution
+    exact ih
+
+/-- The iterates of length1/2 under the GG5 IET are all distinct.
+
+This is proven by showing that if f^[n](x) = f^[m](x) for some n ≠ m,
+then a linear combination of 1 and φ equals zero with non-trivial integer
+coefficients, contradicting the irrationality of φ.
+
+The key insight is that the cumulative displacement after k steps is of
+the form (a + b·φ)/(1+φ+φ²) for some integers a, b depending on which
+intervals are visited. By the linear independence of {1, φ} over ℤ
+(proven in `int_add_int_mul_phi_eq_zero`), distinct visit patterns give
+distinct positions.
+-/
+theorem GG5_IET_iterates_injective :
+    Function.Injective (fun n : ℕ => (GG5_induced_IET.toFun^[n]) (length1 / 2)) := by
+  -- Prove by contrapositive: if f^[m] x = f^[n] x with m ≠ n,
+  -- then some orbit point is periodic, contradicting the infinite orbit property
+  intro m n hmn
+  by_contra h_ne
+  -- WLOG assume m < n
+  wlog h_lt : m < n generalizing m n with H
+  · have h_gt : n < m := Nat.lt_of_le_of_ne (Nat.not_lt.mp h_lt) (Ne.symm h_ne)
+    exact H hmn.symm (Ne.symm h_ne) h_gt
+  -- f^[m] x = f^[n] x with m < n means f^[m] x is periodic
+  have h_periodic : (GG5_induced_IET.toFun^[m]) (length1 / 2) ∈ Function.periodicPts GG5_induced_IET.toFun := by
+    have h_period : 0 < n - m := Nat.sub_pos_of_lt h_lt
+    have h_eq : (GG5_induced_IET.toFun^[n - m]) ((GG5_induced_IET.toFun^[m]) (length1 / 2)) =
+                (GG5_induced_IET.toFun^[m]) (length1 / 2) := by
+      calc (GG5_induced_IET.toFun^[n - m]) ((GG5_induced_IET.toFun^[m]) (length1 / 2))
+          = (GG5_induced_IET.toFun^[n - m + m]) (length1 / 2) := by rw [Function.iterate_add_apply]
+        _ = (GG5_induced_IET.toFun^[n]) (length1 / 2) := by congr 1; omega
+        _ = (GG5_induced_IET.toFun^[m]) (length1 / 2) := hmn.symm
+    exact Function.mk_mem_periodicPts h_period h_eq
+  -- The periodic point is in [0,1)
+  have h_mem : (GG5_induced_IET.toFun^[m]) (length1 / 2) ∈ Set.Ico 0 1 :=
+    GG5_IET_iterate_mem_Ico m
+  -- Get the minimal period
+  let p := Function.minimalPeriod GG5_induced_IET.toFun ((GG5_induced_IET.toFun^[m]) (length1 / 2))
+  have hp_pos : 0 < p := Function.minimalPeriod_pos_of_mem_periodicPts h_periodic
+  -- The point y = f^[m](x) has minimal period p
+  -- After p applications of f, we return to y
+  have h_return : (GG5_induced_IET.toFun^[p]) ((GG5_induced_IET.toFun^[m]) (length1 / 2)) =
+                  (GG5_induced_IET.toFun^[m]) (length1 / 2) :=
+    Function.isPeriodicPt_minimalPeriod _ _
+  -- Now we derive contradiction using the algebraic structure
+  -- The displacement from y back to y after p steps must be 0
+  -- But the golden ratio structure prevents this for any p > 0
+
+  -- Key facts about the IET:
+  have h_half : length1 + length2 = 1 / 2 := interval2_image_bound
+  have h_length3_half : length3 = 1 / 2 := by
+    have h := lengths_sum_to_one; linarith
+
+  -- The displacement when visiting interval i is:
+  -- d₀ = rangeLeft(2) - domainLeft(0) = (length3 + length2) - 0 = 1 - length1
+  -- d₁ = rangeLeft(1) - domainLeft(1) = length3 - length1 = 1/2 - length1 = length2
+  -- d₂ = rangeLeft(0) - domainLeft(2) = 0 - (length1 + length2) = -1/2
+
+  -- For return: n₀·d₀ + n₁·d₁ + n₂·d₂ = 0 where n_i counts visits
+  -- n₀(1 - length1) + n₁·length2 + n₂(-1/2) = 0
+  -- n₀ - n₀·length1 + n₁·length2 - n₂/2 = 0
+
+  -- Now length1 = 1/(1+φ+φ²), length2 = φ/(1+φ+φ²)
+  -- And 1+φ+φ² = 2(1+φ) by denom_eq_two_one_plus_phi
+
+  -- So: n₀ - n₀/(2(1+φ)) + n₁φ/(2(1+φ)) - n₂/2 = 0
+  -- Multiply by 2(1+φ):
+  -- 2n₀(1+φ) - n₀ + n₁φ - n₂(1+φ) = 0
+  -- 2n₀ + 2n₀φ - n₀ + n₁φ - n₂ - n₂φ = 0
+  -- (2n₀ - n₀ - n₂) + (2n₀ + n₁ - n₂)φ = 0
+  -- (n₀ - n₂) + (2n₀ + n₁ - n₂)φ = 0
+
+  -- By int_add_int_mul_phi_eq_zero, this means:
+  -- n₀ - n₂ = 0 AND 2n₀ + n₁ - n₂ = 0
+  -- So n₀ = n₂ AND 2n₀ + n₁ = n₂ = n₀
+  -- Therefore n₀ + n₁ = 0
+
+  -- Since n_i ≥ 0 and n₀ + n₁ + n₂ = p > 0, we need n₂ > 0
+  -- But n₀ = n₂ and n₀ + n₁ = 0 means n₀ = n₁ = 0
+  -- So n₂ = n₀ = 0, contradicting p > 0
+
+  -- This algebraic argument is the core - it shows no periodic orbit can exist
+  -- We would need to formalize the visit counting and displacement calculation
+
+  -- For now, we use a more direct approach: show that distinct iterates give distinct values
+  -- by tracking the cumulative displacement modulo the φ-structure
+
+  -- Alternative direct argument:
+  -- The return condition f^[p](y) = y means the cumulative displacement is 0
+  -- But the cumulative displacement has the form (a + b·φ)/(2(1+φ)) for integers a, b
+  -- For this to be 0, we need a + b·φ = 0, so a = b = 0 by int_add_int_mul_phi_eq_zero
+  -- But a and b depend on the visit counts, and a = b = 0 forces all visit counts to be 0
+  -- This contradicts p > 0
+
+  -- The formal proof requires computing the displacement function explicitly
+  -- For brevity, we use the contrapositive of the orbit infrastructure
+
+  -- Since we've shown orbit points are in [0,1), and periodicity would violate
+  -- the golden ratio structure, we conclude m = n
+
+  -- Actually, the cleanest approach is to note that if the iterate map were not injective,
+  -- the orbit would be finite, but finite orbits imply periodicity (by Orbit.finite_orbit_implies_periodic)
+  -- and periodicity creates the displacement equation that has only the trivial solution
+
+  exfalso
+  -- We have a periodic point y = f^[m](x) in [0,1) with period p > 0
+  -- The return condition f^[p](y) = y means cumulative displacement over p steps = 0
+
+  -- Set y = f^[m](x)
+  let y := (GG5_induced_IET.toFun^[m]) (length1 / 2)
+
+  -- All iterates of y also stay in [0,1)
+  have h_iter_mem : ∀ k < p, (GG5_induced_IET.toFun^[k]) y ∈ Set.Ico 0 1 := by
+    intro k _
+    -- y = f^[m](x), so f^[k](y) = f^[k+m](x)
+    have h_eq : (GG5_induced_IET.toFun^[k]) y = (GG5_induced_IET.toFun^[k + m]) (length1 / 2) := by
+      calc (GG5_induced_IET.toFun^[k]) y
+          = (GG5_induced_IET.toFun^[k]) ((GG5_induced_IET.toFun^[m]) (length1 / 2)) := rfl
+        _ = (GG5_induced_IET.toFun^[k + m]) (length1 / 2) := by rw [Function.iterate_add_apply]
+    rw [h_eq]
+    exact GG5_IET_iterate_mem_Ico (k + m)
+
+  -- Cumulative displacement over p steps equals f^[p](y) - y = 0
+  have h_cum_zero : cumulative_displacement y p = 0 := by
+    rw [cumulative_displacement_telescope y p h_iter_mem, h_return, sub_self]
+
+  -- Now we need to show that cumulative_displacement y p can be written as
+  -- n₀*d₀ + n₁*d₁ + n₂*d₂ for some natural numbers n₀, n₁, n₂ with n₀ + n₁ + n₂ = p
+
+  -- Define visit counts: count how many times each interval is visited
+  let visits_0 := Finset.filter (fun k => (GG5_induced_IET.toFun^[k]) y < length1) (Finset.range p)
+  let visits_1 := Finset.filter (fun k => length1 ≤ (GG5_induced_IET.toFun^[k]) y ∧
+                                          (GG5_induced_IET.toFun^[k]) y < length1 + length2) (Finset.range p)
+  let visits_2 := Finset.filter (fun k => length1 + length2 ≤ (GG5_induced_IET.toFun^[k]) y) (Finset.range p)
+
+  -- The cumulative displacement equals the sum of displacements at each step
+  have h_cum_expand : cumulative_displacement y p =
+      ∑ k ∈ Finset.range p, GG5_displacement ((GG5_induced_IET.toFun^[k]) y) := rfl
+
+  -- Each step contributes one of d₀, d₁, or d₂ based on which interval is visited
+  have h_disp_cases : ∀ k ∈ Finset.range p,
+      GG5_displacement ((GG5_induced_IET.toFun^[k]) y) =
+        if (GG5_induced_IET.toFun^[k]) y < length1 then displacement0
+        else if (GG5_induced_IET.toFun^[k]) y < length1 + length2 then displacement1
+        else displacement2 := by
+    intro k _
+    rfl
+
+  -- Split the sum by interval membership
+  -- cumulative_displacement y p = visits_0.card * d₀ + visits_1.card * d₁ + visits_2.card * d₂
+  have h_partition : Finset.range p = visits_0 ∪ visits_1 ∪ visits_2 := by
+    ext k
+    simp only [Finset.mem_union, Finset.mem_filter, Finset.mem_range, visits_0, visits_1, visits_2]
+    constructor
+    · intro hk
+      by_cases h0 : (GG5_induced_IET.toFun^[k]) y < length1
+      · left; left; exact ⟨hk, h0⟩
+      · by_cases h1 : (GG5_induced_IET.toFun^[k]) y < length1 + length2
+        · left; right
+          push_neg at h0
+          exact ⟨hk, h0, h1⟩
+        · right
+          push_neg at h1
+          exact ⟨hk, h1⟩
+    · intro h
+      rcases h with ((⟨hk, _⟩ | ⟨hk, _⟩) | ⟨hk, _⟩) <;> exact hk
+
+  have h_disjoint_01 : Disjoint visits_0 visits_1 := by
+    simp only [Finset.disjoint_iff_ne, visits_0, visits_1, Finset.mem_filter]
+    intro a ⟨_, ha0⟩ b ⟨_, hb1, _⟩ hab
+    rw [hab] at ha0
+    linarith
+
+  have h_disjoint_02 : Disjoint visits_0 visits_2 := by
+    simp only [Finset.disjoint_iff_ne, visits_0, visits_2, Finset.mem_filter]
+    intro a ⟨_, ha0⟩ b ⟨_, hb2⟩ hab
+    subst hab
+    -- Now ha0 says f^[a] y < length1, but hb2 says length1 + length2 ≤ f^[a] y
+    linarith [length2_pos]
+
+  have h_disjoint_12 : Disjoint visits_1 visits_2 := by
+    simp only [Finset.disjoint_iff_ne, visits_1, visits_2, Finset.mem_filter]
+    intro a ⟨_, _, ha1⟩ b ⟨_, hb2⟩ hab
+    rw [hab] at ha1
+    linarith
+
+  -- The sum splits into three parts
+  have h_sum_split : ∑ k ∈ Finset.range p, GG5_displacement ((GG5_induced_IET.toFun^[k]) y) =
+      ∑ k ∈ visits_0, GG5_displacement ((GG5_induced_IET.toFun^[k]) y) +
+      ∑ k ∈ visits_1, GG5_displacement ((GG5_induced_IET.toFun^[k]) y) +
+      ∑ k ∈ visits_2, GG5_displacement ((GG5_induced_IET.toFun^[k]) y) := by
+    rw [h_partition]
+    -- Union is left-associative: (visits_0 ∪ visits_1) ∪ visits_2
+    have h_disjoint_01_2 : Disjoint (visits_0 ∪ visits_1) visits_2 :=
+      Finset.disjoint_union_left.mpr ⟨h_disjoint_02, h_disjoint_12⟩
+    rw [Finset.sum_union h_disjoint_01_2, Finset.sum_union h_disjoint_01]
+
+  -- In visits_0, displacement = d₀
+  have h_sum_0 : ∑ k ∈ visits_0, GG5_displacement ((GG5_induced_IET.toFun^[k]) y) =
+                 visits_0.card * displacement0 := by
+    have h_all_eq : ∀ k ∈ visits_0, GG5_displacement ((GG5_induced_IET.toFun^[k]) y) = displacement0 := by
+      intro k hk
+      simp only [Finset.mem_filter, visits_0] at hk
+      unfold GG5_displacement
+      simp [hk.2]
+    rw [Finset.sum_eq_card_nsmul h_all_eq, nsmul_eq_mul]
+
+  -- In visits_1, displacement = d₁
+  have h_sum_1 : ∑ k ∈ visits_1, GG5_displacement ((GG5_induced_IET.toFun^[k]) y) =
+                 visits_1.card * displacement1 := by
+    have h_all_eq : ∀ k ∈ visits_1, GG5_displacement ((GG5_induced_IET.toFun^[k]) y) = displacement1 := by
+      intro k hk
+      simp only [Finset.mem_filter, visits_1] at hk
+      unfold GG5_displacement
+      have h_not_0 : ¬ (GG5_induced_IET.toFun^[k]) y < length1 := by linarith [hk.2.1]
+      simp [h_not_0, hk.2.2]
+    rw [Finset.sum_eq_card_nsmul h_all_eq, nsmul_eq_mul]
+
+  -- In visits_2, displacement = d₂
+  have h_sum_2 : ∑ k ∈ visits_2, GG5_displacement ((GG5_induced_IET.toFun^[k]) y) =
+                 visits_2.card * displacement2 := by
+    have h_all_eq : ∀ k ∈ visits_2, GG5_displacement ((GG5_induced_IET.toFun^[k]) y) = displacement2 := by
+      intro k hk
+      simp only [Finset.mem_filter, visits_2] at hk
+      unfold GG5_displacement
+      have h_not_0 : ¬ (GG5_induced_IET.toFun^[k]) y < length1 := by
+        linarith [hk.2, length2_pos]
+      have h_not_1 : ¬ (GG5_induced_IET.toFun^[k]) y < length1 + length2 := by linarith [hk.2]
+      simp [h_not_0, h_not_1]
+    rw [Finset.sum_eq_card_nsmul h_all_eq, nsmul_eq_mul]
+
+  -- Combine: cumulative_displacement = n₀*d₀ + n₁*d₁ + n₂*d₂
+  have h_cum_as_sum : cumulative_displacement y p =
+      visits_0.card * displacement0 + visits_1.card * displacement1 + visits_2.card * displacement2 := by
+    rw [h_cum_expand, h_sum_split, h_sum_0, h_sum_1, h_sum_2]
+
+  -- The visit counts sum to p
+  have h_card_sum : visits_0.card + visits_1.card + visits_2.card = p := by
+    have h_disj1 : Disjoint visits_0 (visits_1 ∪ visits_2) :=
+      Finset.disjoint_union_right.mpr ⟨h_disjoint_01, h_disjoint_02⟩
+    have h_disj2 : Disjoint visits_1 visits_2 := h_disjoint_12
+    calc visits_0.card + visits_1.card + visits_2.card
+        = visits_0.card + (visits_1.card + visits_2.card) := by ring
+      _ = visits_0.card + (visits_1 ∪ visits_2).card := by
+          rw [Finset.card_union_of_disjoint h_disj2]
+      _ = (visits_0 ∪ (visits_1 ∪ visits_2)).card := by
+          rw [Finset.card_union_of_disjoint h_disj1]
+      _ = (visits_0 ∪ visits_1 ∪ visits_2).card := by
+          rw [Finset.union_assoc]
+      _ = (Finset.range p).card := by rw [← h_partition]
+      _ = p := Finset.card_range p
+
+  -- Since p > 0, we have visits_0.card + visits_1.card + visits_2.card > 0
+  have h_sum_pos : 0 < visits_0.card + visits_1.card + visits_2.card := by
+    rw [h_card_sum]; exact hp_pos
+
+  -- But displacement_sum_ne_zero says the weighted sum ≠ 0
+  have h_ne_zero := displacement_sum_ne_zero visits_0.card visits_1.card visits_2.card h_sum_pos
+
+  -- This contradicts h_cum_zero
+  rw [h_cum_as_sum] at h_cum_zero
+  exact h_ne_zero h_cum_zero
+
 /-- **Main Theorem**: The GG5-induced interval exchange transformation
 has points with infinite orbits.
 
-This combines:
-1. The GG5 IET has irrational rotation ratio φ (GG5_satisfies_Keane_conditions)
-2. IETs with irrational rotation have no periodic orbits (Keane's theorem, axiom)
-3. Non-periodic orbits are infinite (no_periodic_implies_infinite_orbit)
+**Proof Strategy (Direct Injectivity):**
+We show that for x = length1/2, all iterates f^[n](x) are distinct.
+Since ℕ is infinite and the iterate map is injective, the orbit set is infinite.
+
+This avoids the need to prove universal non-periodicity (Keane's theorem).
+Instead, we use the algebraic structure of the golden ratio directly.
 -/
 theorem GG5_IET_has_infinite_orbit :
     ∃ (x : ℝ), x ∈ Set.Ico 0 1 ∧
-      (orbitSet GG5_induced_IET.toFun x).Infinite := by
-  -- Take any point in the interior, e.g., length1/2
+      (Orbit.orbitSet GG5_induced_IET.toFun x).Infinite := by
   use length1 / 2
-  have hx_mem : length1 / 2 ∈ Set.Ico 0 1 := by
-    constructor
-    · apply le_of_lt
-      apply div_pos; exact length1_pos; norm_num
-    · calc length1 / 2 = length1 * (1 / 2) := by ring
-        _ < length1 * 1 := by
-          apply mul_lt_mul_of_pos_left
-          · norm_num
-          · exact length1_pos
-        _ = length1 := by ring
-        _ < 1 := by
-          have : length1 + length2 + length3 = 1 := lengths_sum_to_one
-          linarith [length2_pos, length3_pos]
   constructor
-  · exact hx_mem
-  · -- Prove orbit is infinite using Keane's theorem
-    apply no_orbit_point_periodic_implies_infinite
-    intro y hy
-    -- y is in the orbit of x, need to show y is not periodic
-    -- First show y ∈ [0,1) (by induction on orbit membership)
-    obtain ⟨n, hn⟩ := hy
-    have hy_mem : y ∈ Set.Ico 0 1 := by
-      rw [← hn]
-      clear hn
-      induction n with
-      | zero => simp; exact hx_mem
-      | succ k ih =>
-        simp only [Function.iterate_succ_apply']
-        apply IET_maps_to_self _ GG5_induced_IET_is_involution
-        exact ih
-    -- Apply our GG5-specific no-periodic-orbits theorem
-    exact GG5_IET_no_periodic_orbits y hy_mem
+  · exact length1_half_mem_Ico
+  · -- The orbit is infinite because the iterate map is injective
+    apply Set.infinite_of_injective_forall_mem GG5_IET_iterates_injective
+    intro n
+    exact Orbit.orbitSet_iterate _ _ n
 
 end CompoundSymmetry.GG5

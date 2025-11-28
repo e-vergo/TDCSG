@@ -9,12 +9,10 @@ Formal verification in Lean 4 of the critical radius theorem for two-disk compou
 | Metric | Value |
 |--------|-------|
 | Build | ✅ Compiles |
-| Sorries | 1 |
+| Sorries | 0 |
 | Axioms | 0 |
 
-**Gap:** `GG5_IET_no_periodic_orbits` (OrbitInfinite.lean:500) — ~80 lines to complete.
-
-See [STATUS.md](STATUS.md) for completion roadmap.
+**Complete.** All theorems fully proven with no gaps.
 
 ## Project Structure
 
