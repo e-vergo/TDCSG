@@ -3,60 +3,27 @@ Copyright (c) 2024 Eric Moffat. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Moffat
 -/
-import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
+import TDCSG.Definitions.PiecewiseIsometry
 
 /-!
 # Piecewise Isometries
 
-In this file we define piecewise isometries on metric spaces.
-
-## Main definitions
-
-- `PiecewiseIsometry`: A map on a metric space that restricts to an isometry on each piece
-  of a measurable partition
-- `PiecewiseIsometry.discontinuitySet`: The set of discontinuities
-- `IsPiecewiseIsometry`: A predicate asserting that a function is a piecewise isometry
+This file contains theorems and lemmas about piecewise isometries on metric spaces.
 
 ## Main results
 
 - `PiecewiseIsometry.discontinuitySet_measurable`: The discontinuity set is measurable
 - `PiecewiseIsometry.isometry_on`: A piecewise isometry restricts to an isometry on each piece
+- `PiecewiseIsometry.exists_mem_partition`: Every point belongs to some partition piece
+- `PiecewiseIsometry.unique_partition_piece`: Each point belongs to exactly one piece
 
 -/
 
 universe u v
 
-/-- A piecewise isometry on a metric space with a measurable partition. -/
-structure PiecewiseIsometry (α : Type u) [MetricSpace α] [MeasurableSpace α] where
-  /-- The partition pieces of the domain -/
-  partition : Set (Set α)
-  /-- Each piece in the partition is measurable -/
-  partition_measurable : ∀ s ∈ partition, MeasurableSet s
-  /-- The partition is countable -/
-  partition_countable : partition.Countable
-  /-- The partition pieces cover the entire space -/
-  partition_cover : ⋃₀ partition = Set.univ
-  /-- The partition pieces are pairwise disjoint -/
-  partition_disjoint : partition.PairwiseDisjoint id
-  /-- Each partition piece is nonempty -/
-  partition_nonempty : ∀ s ∈ partition, s.Nonempty
-  /-- The underlying function -/
-  toFun : α → α
-  /-- The function is isometric when restricted to each piece -/
-  isometry_on_pieces : ∀ s ∈ partition, ∀ x ∈ s, ∀ y ∈ s,
-    dist (toFun x) (toFun y) = dist x y
-
 variable {α : Type u} [MetricSpace α] [MeasurableSpace α]
 
 namespace PiecewiseIsometry
-
-/-- Allow function application notation for piecewise isometries -/
-instance : CoeFun (PiecewiseIsometry α) (fun _ => α → α) where
-  coe f := f.toFun
-
-/-- The set of potential discontinuities of a piecewise isometry. -/
-def discontinuitySet (f : PiecewiseIsometry α) : Set α :=
-  ⋃ s ∈ f.partition, frontier s
 
 /-- The discontinuity set of a piecewise isometry is measurable. -/
 theorem discontinuitySet_measurable [OpensMeasurableSpace α]
@@ -95,19 +62,10 @@ theorem partition_piece_of_interior (f : PiecewiseIsometry α) (x : α) (s : Set
 
 end PiecewiseIsometry
 
-/-- A predicate asserting that a function is a piecewise isometry. -/
-def IsPiecewiseIsometry {α : Type u} [MetricSpace α] [MeasurableSpace α] (f : α → α) : Prop :=
-  ∃ (partition : Set (Set α)),
-    (∀ s ∈ partition, MeasurableSet s) ∧
-    (partition.Countable) ∧
-    (⋃₀ partition = Set.univ) ∧
-    (partition.PairwiseDisjoint id) ∧
-    (∀ s ∈ partition, ∀ x ∈ s, ∀ y ∈ s, dist (f x) (f y) = dist x y)
-
 namespace IsPiecewiseIsometry
 
 /-- Every isometry is a piecewise isometry with the trivial partition. -/
-theorem of_isometry {α : Type u} [MetricSpace α] [MeasurableSpace α]
+theorem isometry {α : Type u} [MetricSpace α] [MeasurableSpace α]
     {f : α → α} (hf : Isometry f) : IsPiecewiseIsometry f := by
   use {Set.univ}
   constructor
@@ -129,9 +87,9 @@ theorem of_isometry {α : Type u} [MetricSpace α] [MeasurableSpace α]
     exact hf.dist_eq x y
 
 /-- The identity function is a piecewise isometry. -/
-theorem id {α : Type u} [MetricSpace α] [MeasurableSpace α] :
+theorem identity {α : Type u} [MetricSpace α] [MeasurableSpace α] :
     IsPiecewiseIsometry (id : α → α) :=
-  of_isometry isometry_id
+  isometry isometry_id
 
 /-- Convert predicate to bundled structure. -/
 theorem to_piecewise_isometry {α : Type u} [MetricSpace α] [MeasurableSpace α]

@@ -60,8 +60,15 @@ noncomputable def rotationMatrix (θ : ℝ) : Matrix (Fin 2) (Fin 2) ℝ :=
 noncomputable def applyMatrix (M : Matrix (Fin 2) (Fin 2) ℝ) (p : Plane) : Plane :=
   fun i => ∑ j, M i j * p j
 
-/-- Rotation about a given center point by angle theta. -/
-noncomputable def rotateAround (center : Plane) (θ : ℝ) (p : Plane) : Plane :=
+/-- Rotation about a given center point by angle theta.
+    Returns the rotated point (simple version, not an isometry equivalence). -/
+noncomputable def rotateAroundPoint (center : Plane) (θ : ℝ) (p : Plane) : Plane :=
   center + applyMatrix (rotationMatrix θ) (p - center)
+
+/-! ### Generic Disk Definition -/
+
+/-- A disk in the plane is a closed ball with specified center and radius. -/
+def Disk (center : Plane) (radius : ℝ) : Set Plane :=
+  Metric.closedBall center radius
 
 end TDCSG.Definitions

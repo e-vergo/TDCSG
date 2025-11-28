@@ -38,8 +38,7 @@ namespace TDCSG.CompoundSymmetry.GG5
 open scoped Complex
 open Complex Real TDCSG.Definitions
 
-/-- Unicode alias for zeta5 from Definitions/Cyclotomic.lean -/
-noncomputable abbrev ζ₅ : ℂ := zeta5
+-- ζ₅ is imported from TDCSG.Definitions.Cyclotomic via the open statement below
 
 /-! ### Critical Radius Lemmas -/
 

@@ -8,6 +8,7 @@ import TDCSG.Definitions.Geometry
 import TDCSG.Definitions.Core
 import TDCSG.Points
 import TDCSG.MainTheorem
+import TDCSG.SegmentGeometry
 
 /-!
 # Complex to Plane Conversion for GG(5,5) - Proofs
@@ -30,7 +31,7 @@ The conversion definitions are in TDCSG.Definitions.Conversions.
 * `E'_in_left_disk` : E' is in the left disk
 * `segment_in_disk_intersection` : Points on segment E'E lie in both disks
 * `toPlane_fromPlane` : toPlane and fromPlane are inverses
-* `zeta5_rotation_eq_rotateAround` : ζ₅ multiplication corresponds to rotation
+* `zeta5_rotation_eq_rotateAroundPoint` : ζ₅ multiplication corresponds to rotation
 * `genA_eq_zeta5_rotation` : genA equals ζ₅ rotation about -1
 * `genB_eq_zeta5_rotation` : genB equals ζ₅ rotation about 1
 
@@ -199,21 +200,21 @@ lemma complex_mul_as_matrix (a z : ℂ) :
   ext i
   fin_cases i <;> simp [Complex.mul_re, Complex.mul_im, Fin.sum_univ_two] <;> ring
 
-/-- Rotation in ℂ by ζ₅ corresponds to rotateAround in Plane.
+/-- Rotation in ℂ by ζ₅ corresponds to rotateAroundPoint in Plane.
 
 This is the key lemma connecting complex multiplication to plane rotation:
 - In ℂ: rotation around c by 2π/5 maps z to c + ζ₅ * (z - c)
-- In Plane: rotateAround center (2π/5) p uses the rotation matrix
+- In Plane: rotateAroundPoint center (2π/5) p uses the rotation matrix
 Both are equivalent when we identify ℂ with ℝ² via toPlane/fromPlane.
 
 The proof follows from:
 1. ζ₅ = exp(2πi/5) = cos(2π/5) + i·sin(2π/5)
 2. Complex multiplication by ζ₅ is rotation in ℝ²
 3. The rotation matrix [[cos θ, -sin θ], [sin θ, cos θ]] acts identically -/
-theorem zeta5_rotation_eq_rotateAround (z c : ℂ) :
-    TDCSG.Definitions.toPlane (c + ζ₅ * (z - c)) = rotateAround (TDCSG.Definitions.toPlane c) (2 * π / 5) (TDCSG.Definitions.toPlane z) := by
-  -- Unfold rotateAround definition
-  unfold rotateAround
+theorem zeta5_rotation_eq_rotateAroundPoint (z c : ℂ) :
+    TDCSG.Definitions.toPlane (c + ζ₅ * (z - c)) = rotateAroundPoint (TDCSG.Definitions.toPlane c) (2 * π / 5) (TDCSG.Definitions.toPlane z) := by
+  -- Unfold rotateAroundPoint definition
+  unfold rotateAroundPoint
   -- Use toPlane_add to split the LHS
   rw [toPlane_add]
   -- Now goal: toPlane c + toPlane (ζ₅ * (z - c)) = toPlane c + applyMatrix (rotationMatrix ...) (toPlane z - toPlane c)
@@ -236,31 +237,7 @@ theorem zeta5_rotation_eq_rotateAround (z c : ℂ) :
 
 -- Note: segmentPoint, segmentPointPlane, segmentPoint_eq_scalar_E, segmentPoint_translate
 -- are defined in TDCSG.Definitions.Conversions
-
-/-- E is nonzero. -/
-lemma E_ne_zero : E ≠ 0 := by
-  -- E = ζ₅ - ζ₅². If E = 0, then ζ₅ = ζ₅², so ζ₅(1 - ζ₅) = 0.
-  -- Since ζ₅ ≠ 0 (it's a root of unity), we have ζ₅ = 1, contradicting zeta5_ne_one.
-  intro h
-  unfold E at h
-  have h2 : ζ₅ * (1 - ζ₅) = 0 := by
-    calc ζ₅ * (1 - ζ₅) = ζ₅ - ζ₅^2 := by ring
-                     _ = 0 := h
-  have h3 : ζ₅ ≠ 0 := by
-    intro h0
-    have : (0 : ℂ) ^ 5 = 1 := by
-      calc (0 : ℂ) ^ 5 = ζ₅ ^ 5 := by rw [← h0]
-                     _ = 1 := zeta5_pow_five
-    norm_num at this
-  have h4 : 1 - ζ₅ = 0 := by
-    exact (mul_eq_zero.mp h2).resolve_left h3
-  have : ζ₅ = 1 := by
-    have h5 : 1 = ζ₅ := by
-      calc 1 = 1 - 0 := by simp
-           _ = 1 - (1 - ζ₅) := by rw [← h4]
-           _ = ζ₅ := by simp
-    exact h5.symm
-  exact zeta5_ne_one this
+-- E_ne_zero is imported from TDCSG.SegmentGeometry
 
 /-- The segment parameterization is injective: different parameters give different points. -/
 theorem segmentPoint_injective : Function.Injective TDCSG.Definitions.segmentPoint := by
@@ -355,7 +332,7 @@ lemma genA_eq_zeta5_rotation (z : ℂ) (hz : TDCSG.Definitions.toPlane z ∈ lef
   unfold genA
   rw [if_pos hz]
   rw [leftCenter_eq_toPlane]
-  exact (zeta5_rotation_eq_rotateAround z (-1)).symm
+  exact (zeta5_rotation_eq_rotateAroundPoint z (-1)).symm
 
 /-- genB on a point in the right disk equals rotation by ζ₅ about 1 in complex coords. -/
 lemma genB_eq_zeta5_rotation (z : ℂ) (hz : TDCSG.Definitions.toPlane z ∈ rightDisk r_crit) :
@@ -363,7 +340,7 @@ lemma genB_eq_zeta5_rotation (z : ℂ) (hz : TDCSG.Definitions.toPlane z ∈ rig
   unfold genB
   rw [if_pos hz]
   rw [rightCenter_eq_toPlane]
-  exact (zeta5_rotation_eq_rotateAround z 1).symm
+  exact (zeta5_rotation_eq_rotateAroundPoint z 1).symm
 
 /-- A⁻¹ = A⁴ means multiplying by ζ₅⁴. -/
 lemma genA_inv_eq_zeta5_pow4_rotation (z : ℂ)

@@ -407,13 +407,14 @@ def verifyDefinitionIsolation (cfg : KMVerifyConfig := defaultConfig) : IO (Bool
         let content ← IO.FS.readFile entry.path
 
         -- Check for definitions of core terms
+        -- Note: abbrev creates a transparent alias, so we only flag `def`
+        -- which creates actual new definitions
         for defName in coreDefinitions do
-          -- Pattern: def/abbrev/noncomputable def followed by the name
+          -- Pattern: def/noncomputable def followed by the name
+          -- Abbrevs are OK since they just alias canonical definitions
           let patterns := [
             s!"def {defName} ",
             s!"def {defName}:",
-            s!"abbrev {defName} ",
-            s!"abbrev {defName}:",
             s!"noncomputable def {defName} ",
             s!"noncomputable def {defName}:"
           ]

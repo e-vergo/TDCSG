@@ -4,8 +4,6 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Moffat
 -/
 import TDCSG.Basic
-import Mathlib.Topology.MetricSpace.Isometry
-import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
 
 /-!
 # Properties of Piecewise Isometries
@@ -15,11 +13,6 @@ This file develops basic properties and lemmas for working with piecewise isomet
 - Relationships between piecewise isometries and standard isometries
 - Helper lemmas for reasoning about partition pieces
 - Continuity properties in the interior of pieces
-
-## Main definitions
-
-- `PiecewiseIsometry.restrictToPiece`: Restriction of a piecewise isometry to a single piece
-- `PiecewiseIsometry.isometry_of_piece`: Extract an isometry from a partition piece
 
 ## Main results
 
@@ -59,7 +52,7 @@ theorem partition_cover_iff (f : PiecewiseIsometry α) :
 /-- Disjointness of partition pieces. -/
 theorem partition_disjoint_iff (f : PiecewiseIsometry α) :
     (∀ s ∈ f.partition, ∀ t ∈ f.partition, s ≠ t → Disjoint s t) ↔
-    f.partition.PairwiseDisjoint id := by
+    f.partition.PairwiseDisjoint _root_.id := by
   rfl
 
 /-- If two pieces share a point, they must be equal. -/
@@ -154,76 +147,6 @@ theorem discontinuitySet_subset_boundaries (f : PiecewiseIsometry α) :
 
 end ContinuityProperties
 
-section ConstructorHelpers
-
-/-- Constructor for piecewise isometries from a set partition. -/
-def mk_of_set {partition : Set (Set α)}
-    (h_meas : ∀ s ∈ partition, MeasurableSet s)
-    (h_countable : partition.Countable)
-    (h_cover : ⋃₀ partition = Set.univ)
-    (h_disj : partition.PairwiseDisjoint id)
-    (h_nonempty : ∀ s ∈ partition, s.Nonempty)
-    (f : α → α)
-    (h_iso : ∀ s ∈ partition, ∀ x ∈ s, ∀ y ∈ s, dist (f x) (f y) = dist x y) :
-    PiecewiseIsometry α where
-  partition := partition
-  partition_measurable := h_meas
-  partition_countable := h_countable
-  partition_cover := h_cover
-  partition_disjoint := h_disj
-  partition_nonempty := h_nonempty
-  toFun := f
-  isometry_on_pieces := h_iso
-
-/-- Constructor for piecewise isometries from two pieces. -/
-def mk_two_pieces (s t : Set α)
-    (hs_meas : MeasurableSet s) (ht_meas : MeasurableSet t)
-    (hs_nonempty : s.Nonempty) (ht_nonempty : t.Nonempty)
-    (h_disj : Disjoint s t)
-    (h_cover : s ∪ t = Set.univ)
-    (f : α → α)
-    (h_iso_s : ∀ x ∈ s, ∀ y ∈ s, dist (f x) (f y) = dist x y)
-    (h_iso_t : ∀ x ∈ t, ∀ y ∈ t, dist (f x) (f y) = dist x y) :
-    PiecewiseIsometry α where
-  partition := {s, t}
-  partition_measurable := by
-    intro u hu
-    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hu
-    cases hu with
-    | inl h => rw [h]; exact hs_meas
-    | inr h => rw [h]; exact ht_meas
-  partition_countable := Set.to_countable {s, t}
-  partition_cover := by
-    simp only [Set.sUnion_insert, Set.sUnion_singleton]
-    exact h_cover
-  partition_nonempty := by
-    intro u hu
-    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hu
-    cases hu with
-    | inl h => rw [h]; exact hs_nonempty
-    | inr h => rw [h]; exact ht_nonempty
-  partition_disjoint := by
-    intro u hu v hv huv
-    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hu hv
-    cases hu with
-    | inl hu_eq =>
-      cases hv with
-      | inl hv_eq => rw [hu_eq, hv_eq] at huv; exact absurd rfl huv
-      | inr hv_eq => rw [hu_eq, hv_eq]; exact h_disj
-    | inr hu_eq =>
-      cases hv with
-      | inl hv_eq => rw [hu_eq, hv_eq]; exact h_disj.symm
-      | inr hv_eq => rw [hu_eq, hv_eq] at huv; exact absurd rfl huv
-  toFun := f
-  isometry_on_pieces := by
-    intro u hu x hx y hy
-    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hu
-    cases hu with
-    | inl hu_eq => rw [hu_eq] at hx hy; exact h_iso_s x hx y hy
-    | inr hu_eq => rw [hu_eq] at hx hy; exact h_iso_t x hx y hy
-
-end ConstructorHelpers
-
 section RelationToIsometry
 
 /-- If the partition is trivial (just the whole space), then the piecewise isometry is a global
@@ -237,57 +160,6 @@ theorem isometry_of_trivial_partition (f : PiecewiseIsometry α)
     f.dist_eq_on_piece Set.univ h_univ x y (Set.mem_univ x) (Set.mem_univ y)
   rw [edist_dist, edist_dist]
   exact ENNReal.ofReal_eq_ofReal_iff dist_nonneg dist_nonneg |>.mpr this
-
-/-- An isometry can be viewed as a piecewise isometry with trivial partition. -/
-def of_isometry (f : α → α) [Nonempty α] (hf : Isometry f) : PiecewiseIsometry α where
-  partition := {Set.univ}
-  partition_measurable := by
-    intro s hs
-    simp only [Set.mem_singleton_iff] at hs
-    rw [hs]
-    exact MeasurableSet.univ
-  partition_countable := Set.countable_singleton Set.univ
-  partition_cover := by simp only [Set.sUnion_singleton]
-  partition_nonempty := by
-    intro s hs
-    simp only [Set.mem_singleton_iff] at hs
-    rw [hs]
-    exact Set.univ_nonempty
-  partition_disjoint := by
-    intro s hs t ht hst
-    simp only [Set.mem_singleton_iff] at hs ht
-    rw [hs, ht] at hst
-    exact absurd rfl hst
-  toFun := f
-  isometry_on_pieces := by
-    intro s hs x _ y _
-    simp only [Set.mem_singleton_iff] at hs
-    exact hf.dist_eq x y
-
-/-- The identity map as a piecewise isometry. -/
-def id [Nonempty α] : PiecewiseIsometry α :=
-  { partition := {Set.univ}
-    partition_measurable := by
-      intro s hs
-      simp only [Set.mem_singleton_iff] at hs
-      rw [hs]
-      exact MeasurableSet.univ
-    partition_countable := Set.countable_singleton Set.univ
-    partition_cover := by simp only [Set.sUnion_singleton]
-    partition_disjoint := by
-      intro s hs t ht hst
-      simp only [Set.mem_singleton_iff] at hs ht
-      rw [hs, ht] at hst
-      exact absurd rfl hst
-    partition_nonempty := by
-      intro s hs
-      simp only [Set.mem_singleton_iff] at hs
-      rw [hs]
-      exact Set.univ_nonempty
-    toFun := _root_.id
-    isometry_on_pieces := by
-      intro s hs x _ y _
-      rfl }
 
 /-- Applying a piecewise isometry to itself at a point. -/
 @[simp]

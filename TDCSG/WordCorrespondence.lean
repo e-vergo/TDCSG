@@ -11,18 +11,12 @@ import TDCSG.IET
 import TDCSG.Definitions.Core
 import TDCSG.Definitions.IET
 import TDCSG.Definitions.Conversions
+import TDCSG.Definitions.WordCorrespondence
 
 /-!
 # Word Correspondence for GG(5,5)
 
-Defines group words that implement IET steps and proves the correspondence
-between IET orbits and group orbits.
-
-## Main Definitions
-
-- `word1`, `word2`, `word3`: Group words corresponding to IET intervals
-- `IET_word`: Selects the appropriate word based on which interval x falls in
-- `wordForIterate`: Concatenated word for n iterations of the IET
+Proves the correspondence between IET orbits and group orbits.
 
 ## Main Results
 
@@ -35,29 +29,6 @@ between IET orbits and group orbits.
 namespace TDCSG.CompoundSymmetry.GG5
 
 open Complex Real TDCSG.Definitions _root_.CompoundSymmetry.GG5
-
-/-! ### Group words corresponding to IET intervals
-
-The IET on segment E'E is induced by three group words:
-- word1: a⁻²b⁻¹a⁻¹b⁻¹ maps E'F' → GF (interval 0)
-- word2: abab² maps F'G' → FE (interval 1)
-- word3: abab⁻¹a⁻¹b⁻¹ maps G'E → E'G (interval 2)
-
-Word encoding: (false, true) = A, (false, false) = A⁻¹, (true, true) = B, (true, false) = B⁻¹
-Note: applyWord uses foldl, so words are applied left-to-right.
--/
-
-/-- Word 1: a⁻²b⁻¹a⁻¹b⁻¹ (for interval 0: [0, length1)) -/
-def word1 : Word :=
-  [(false, false), (false, false), (true, false), (false, false), (true, false)]
-
-/-- Word 2: abab² (for interval 1: [length1, length1 + length2)) -/
-def word2 : Word :=
-  [(false, true), (true, true), (false, true), (true, true), (true, true)]
-
-/-- Word 3: abab⁻¹a⁻¹b⁻¹ (for interval 2: [length1 + length2, 1)) -/
-def word3 : Word :=
-  [(false, true), (true, true), (false, true), (true, false), (false, false), (true, false)]
 
 /-! ### IET interval lemmas -/
 
@@ -119,43 +90,43 @@ lemma IET_toFun_interval2 (x : ℝ)
 These lemmas show that each word produces the correct displacement when applied to a segment point.
 The proofs are computational verifications tracking the point through each rotation. -/
 
-/-- Key algebraic identity for word1 = A⁻²B⁻¹A⁻¹B⁻¹ acting on E-multiples.
+/-- Key algebraic identity for word1 = A^{-2}B^{-1}A^{-1}B^{-1} acting on E-multiples.
 
 For any point of the form c*E on segment E'E, applying word1 translates it by 2*displacement0*E.
-This is the core algebraic fact verified by computing through the ζ₅ rotations. -/
+This is the core algebraic fact verified by computing through the zeta5 rotations. -/
 lemma word1_algebraic_identity :
     ∀ c : ℝ, c ∈ Set.Icc (-1 : ℝ) 1 →
     let z := (c : ℂ) • E
-    let result := -- A⁻¹ A⁻¹ B⁻¹ A⁻¹ B⁻¹ applied in complex form
-      let step1 := (-1 : ℂ) + ζ₅^4 * (z + 1)       -- A⁻¹
-      let step2 := (-1 : ℂ) + ζ₅^4 * (step1 + 1)   -- A⁻¹
-      let step3 := (1 : ℂ) + ζ₅^4 * (step2 - 1)    -- B⁻¹
-      let step4 := (-1 : ℂ) + ζ₅^4 * (step3 + 1)   -- A⁻¹
-      (1 : ℂ) + ζ₅^4 * (step4 - 1)                 -- B⁻¹
+    let result := -- A^{-1} A^{-1} B^{-1} A^{-1} B^{-1} applied in complex form
+      let step1 := (-1 : ℂ) + ζ₅^4 * (z + 1)       -- A^{-1}
+      let step2 := (-1 : ℂ) + ζ₅^4 * (step1 + 1)   -- A^{-1}
+      let step3 := (1 : ℂ) + ζ₅^4 * (step2 - 1)    -- B^{-1}
+      let step4 := (-1 : ℂ) + ζ₅^4 * (step3 + 1)   -- A^{-1}
+      (1 : ℂ) + ζ₅^4 * (step4 - 1)                 -- B^{-1}
     result = z + (2 * displacement0) • E := by
   intro c hc
-  -- The algebraic verification using ζ₅^5 = 1 and cyclotomic identities
+  -- The algebraic verification using zeta5^5 = 1 and cyclotomic identities
   -- Expanding and simplifying gives the translation by 2*displacement0*E
   simp only
   unfold displacement0 length1
-  -- Use the cyclotomic identity: 1 + ζ₅ + ζ₅² + ζ₅³ + ζ₅⁴ = 0
-  -- and ζ₅⁵ = 1 to simplify the composition
+  -- Use the cyclotomic identity: 1 + zeta5 + zeta5^2 + zeta5^3 + zeta5^4 = 0
+  -- and zeta5^5 = 1 to simplify the composition
   ring_nf
-  -- Reduce powers of ζ₅ using ζ₅^5 = 1
+  -- Reduce powers of zeta5 using zeta5^5 = 1
   have h8 : ζ₅^8 = ζ₅^3 := zeta5_pow_eight
   have h12 : ζ₅^12 = ζ₅^2 := by rw [show (12 : ℕ) = 5 + 5 + 2 by norm_num, pow_add, pow_add, zeta5_pow_five]; ring
   have h20 : ζ₅^20 = 1 := by rw [show (20 : ℕ) = 5 * 4 by norm_num, pow_mul, zeta5_pow_five]; ring
   rw [h8, h12, h20]
-  -- Now ζ₅^20 = 1, so 1 * c • E = c • E
+  -- Now zeta5^20 = 1, so 1 * c * E = c * E
   simp only [one_mul]
-  -- The remaining goal is a polynomial identity in ζ₅
+  -- The remaining goal is a polynomial identity in zeta5
   apply Complex.ext
   · -- Real part: simplify re 2 = 2, im 2 = 0
     simp only [Complex.add_re, Complex.mul_re, Complex.sub_re, Complex.ofReal_re,
                Complex.ofReal_im, Complex.one_re, smul_eq_mul]
     norm_num [Complex.re, Complex.im]
-    -- Goal: 2 - (ζ₅^4).re*2 + 2*(ζ₅^3).re - 2*(ζ₅^2).re + c*E.re =
-    --       c*E.re + (2 - (3+√5)/normSq(3+√5)*2)*E.re
+    -- Goal: 2 - (zeta5^4).re*2 + 2*(zeta5^3).re - 2*(zeta5^2).re + c*E.re =
+    --       c*E.re + (2 - (3+sqrt5)/normSq(3+sqrt5)*2)*E.re
     ring_nf
     sorry
   · -- Imaginary part: simplify re 2 = 2, im 2 = 0
@@ -167,18 +138,18 @@ lemma word1_algebraic_identity :
 
 /-- Word 1 action on segment points: translates by displacement0.
 
-This is the computational core showing word1 = a⁻²b⁻¹a⁻¹b⁻¹ produces the correct IET translation.
+This is the computational core showing word1 = a^{-2}b^{-1}a^{-1}b^{-1} produces the correct IET translation.
 The proof uses the algebraic identity for the composition of rotations. -/
 lemma word1_produces_displacement0 (x : ℝ) (hx : x ∈ Set.Ico 0 1) :
     applyWord r_crit word1 (segmentPointPlane x) =
     segmentPointPlane (x + displacement0) := by
   -- The deep unfolding of genA/genB/closedDisk causes kernel timeout.
-  -- This lemma requires careful algebraic computation with ζ₅.
+  -- This lemma requires careful algebraic computation with zeta5.
   sorry
 
 /-- Word 2 action on segment points: translates by displacement1.
 
-word2 = abab² produces the correct IET translation for interval 1. -/
+word2 = abab^2 produces the correct IET translation for interval 1. -/
 lemma word2_produces_displacement1 (x : ℝ) (hx : x ∈ Set.Ico 0 1) :
     applyWord r_crit word2 (segmentPointPlane x) =
     segmentPointPlane (x + displacement1) := by
@@ -186,30 +157,11 @@ lemma word2_produces_displacement1 (x : ℝ) (hx : x ∈ Set.Ico 0 1) :
 
 /-- Word 3 action on segment points: translates by displacement2.
 
-word3 = abab⁻¹a⁻¹b⁻¹ produces the correct IET translation for interval 2. -/
+word3 = abab^{-1}a^{-1}b^{-1} produces the correct IET translation for interval 2. -/
 lemma word3_produces_displacement2 (x : ℝ) (hx : x ∈ Set.Ico 0 1) :
     applyWord r_crit word3 (segmentPointPlane x) =
     segmentPointPlane (x + displacement2) := by
   sorry
-
-/-! ### IET word selection and iteration -/
-
-/-- Select the word based on which IET interval x falls in. -/
-noncomputable def IET_word (x : ℝ) : Word :=
-  if x < length1 then word1
-  else if x < length1 + length2 then word2
-  else word3
-
-/-- Concatenated word for n iterations of the IET starting from x₀.
-Each iteration applies the word corresponding to the current interval. -/
-noncomputable def wordForIterate (x₀ : ℝ) : ℕ → Word
-  | 0 => []
-  | n + 1 => wordForIterate x₀ n ++ IET_word (CompoundSymmetry.GG5.GG5_induced_IET.toFun^[n] x₀)
-
-/-- Simplified version that doesn't track starting point - used in ProofOfMainTheorem. -/
-noncomputable def wordForIterate' : ℕ → Word
-  | 0 => []
-  | n + 1 => wordForIterate' n ++ word1  -- Simplified: actual depends on orbit
 
 /-- Fundamental step lemma: applying IET_word to a segment point gives the IET-mapped point.
 
@@ -229,13 +181,13 @@ theorem IET_step_word_correspondence (x : ℝ) (hx : x ∈ Set.Ico 0 1) :
   -- - Interval 2 [length1+length2, 1) maps to interval 0's position
   --
   -- Each word was specifically constructed to implement this mapping:
-  -- - word1 = a⁻²b⁻¹a⁻¹b⁻¹: maps E'F' → GF (interval 0 → 2 geometrically)
-  -- - word2 = abab²: maps F'G' → FE (interval 1 → 1 geometrically)
-  -- - word3 = abab⁻¹a⁻¹b⁻¹: maps G'E → E'G (interval 2 → 0 geometrically)
+  -- - word1 = a^{-2}b^{-1}a^{-1}b^{-1}: maps E'F' -> GF (interval 0 -> 2 geometrically)
+  -- - word2 = abab^2: maps F'G' -> FE (interval 1 -> 1 geometrically)
+  -- - word3 = abab^{-1}a^{-1}b^{-1}: maps G'E -> E'G (interval 2 -> 0 geometrically)
   --
   -- The proof requires:
-  -- 1. Disk membership: segment_in_disk_intersection proves E'E ⊆ both disks
-  -- 2. Rotation correspondence: rotateAround with angle 2π/5 = ζ₅ multiplication
+  -- 1. Disk membership: segment_in_disk_intersection proves E'E is in both disks
+  -- 2. Rotation correspondence: rotateAround with angle 2*pi/5 = zeta5 multiplication
   -- 3. Word computation: each word sequence produces correct translation
   --
   -- The full proof is computational verification that the 5 or 6 rotation
@@ -291,12 +243,12 @@ theorem wordForIterate_correct (x₀ : ℝ) (hx₀ : x₀ ∈ Set.Ico 0 1) (n : 
     simp only [Function.iterate_succ', Function.comp_apply]
     rw [wordForIterate, applyWord, List.foldl_append]
     -- Goal: (IET_word ...).foldl (applyGen r) (foldl (applyGen r) p (wordForIterate n))
-    --     = segmentPointPlane (IET (IET^[n] x₀))
-    -- The inner foldl equals applyWord ... (wordForIterate n) p, which by IH equals segmentPointPlane (IET^[n] x₀)
+    --     = segmentPointPlane (IET (IET^[n] x0))
+    -- The inner foldl equals applyWord ... (wordForIterate n) p, which by IH equals segmentPointPlane (IET^[n] x0)
     have h_inner : List.foldl (applyGen r_crit) (segmentPointPlane x₀) (wordForIterate x₀ n) =
         applyWord r_crit (wordForIterate x₀ n) (segmentPointPlane x₀) := rfl
     rw [h_inner, ih]
-    -- Goal: (IET_word ...).foldl (applyGen r) (segmentPointPlane (IET^[n] x₀)) = segmentPointPlane (IET ...)
+    -- Goal: (IET_word ...).foldl (applyGen r) (segmentPointPlane (IET^[n] x0)) = segmentPointPlane (IET ...)
     -- Convert back to applyWord form
     have h_outer : List.foldl (applyGen r_crit)
         (segmentPointPlane (CompoundSymmetry.GG5.GG5_induced_IET.toFun^[n] x₀))
@@ -322,7 +274,7 @@ theorem IET_orbit_subset_group_orbit (x₀ : ℝ) (hx₀ : x₀ ∈ Set.Ico 0 1)
   rw [← hn]
   exact wordForIterate_correct x₀ hx₀ n
 
-/-- If the IET orbit of x₀ is infinite, the group orbit of the corresponding Plane point is infinite. -/
+/-- If the IET orbit of x0 is infinite, the group orbit of the corresponding Plane point is infinite. -/
 theorem IET_orbit_infinite_implies_group_orbit_infinite (x₀ : ℝ) (hx₀ : x₀ ∈ Set.Ico 0 1)
     (h_inf : (Orbit.orbitSet CompoundSymmetry.GG5.GG5_induced_IET.toFun x₀).Infinite) :
     (orbit r_crit (segmentPointPlane x₀)).Infinite := by

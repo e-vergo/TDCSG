@@ -3,8 +3,7 @@ Copyright (c) 2025-11-22 Eric Moffat. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Moffat
 -/
-import TDCSG.Definitions.IET
-import TDCSG.IET
+import TDCSG.Definitions.Orbit
 import TDCSG.Orbit
 import Mathlib.NumberTheory.Real.GoldenRatio
 import Mathlib.NumberTheory.Real.Irrational
@@ -228,13 +227,6 @@ theorem GG5_actual_displacement_interval2 :
   field_simp
   ring
 
-/-- The displacement function for the GG5 IET: f(x) - x for x in [0,1).
-    Takes value d_i when x is in interval i. -/
-noncomputable def GG5_displacement (x : ℝ) : ℝ :=
-  if x < length1 then displacement0
-  else if x < length1 + length2 then displacement1
-  else displacement2
-
 /-- The displacement function equals f(x) - x for any x in [0,1). -/
 theorem GG5_displacement_eq_toFun_sub (x : ℝ) (hx : x ∈ Set.Ico 0 1) :
     GG5_displacement x = GG5_induced_IET.toFun x - x := by
@@ -355,10 +347,6 @@ theorem GG5_displacement_eq_toFun_sub (x : ℝ) (hx : x ∈ Set.Ico 0 1) :
       rw [h_eps, GG5_domainLeft_2]
       rw [← GG5_actual_displacement_interval2, GG5_domainLeft_2]
       ring
-
-/-- The cumulative displacement over n iterates starting from y. -/
-noncomputable def cumulative_displacement (y : ℝ) (n : ℕ) : ℝ :=
-  ∑ k ∈ Finset.range n, GG5_displacement ((GG5_induced_IET.toFun^[k]) y)
 
 /-- For a point y in [0,1), the cumulative displacement over n iterations
     equals f^[n](y) - y, using telescope sum. -/

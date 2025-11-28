@@ -8,6 +8,7 @@ import TDCSG.OrbitInfinite
 import TDCSG.TwoDisk
 import TDCSG.Definitions.Core
 import TDCSG.Definitions.Points
+import TDCSG.Definitions.GG5
 
 /-!
 # GG5 Geometry Module
@@ -41,20 +42,6 @@ lemma r_crit_pos : 0 < r_crit := by
   unfold r_crit φ
   apply Real.sqrt_pos_of_pos
   linarith [Real.goldenRatio_pos]
-
-/-! ### TwoDiskSystem Definition -/
-
-/-- The GG5 two-disk system at the critical radius. -/
-noncomputable def GG5_critical :
-    CompoundSymmetry.TwoDiskSystem where
-  r1 := r_crit
-  r2 := r_crit
-  n1 := 5
-  n2 := 5
-  r1_pos := r_crit_pos
-  r2_pos := r_crit_pos
-  n1_ge := by norm_num
-  n2_ge := by norm_num
 
 /-! ### Main Results -/
 

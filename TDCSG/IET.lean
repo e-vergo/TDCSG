@@ -96,48 +96,6 @@ lemma length12_lt_one : length1 + length2 < 1 := by
   have h := lengths_sum_to_one
   linarith [length3_pos]
 
-/-- The 3-interval exchange transformation induced by GG(5,5)
-dynamics at criticality. -/
-noncomputable def GG5_induced_IET : IntervalExchangeTransformation 3 where
-  n_pos := by norm_num
-  lengths := fun i =>
-    if i = 0 then length1
-    else if i = 1 then length2
-    else length3
-  lengths_pos := by
-    intro i
-    fin_cases i
-    · simp; exact length1_pos
-    · simp; exact length2_pos
-    · simp; exact length3_pos
-  lengths_sum := by
-    have h_univ : (Finset.univ : Finset (Fin 3)) = {0, 1, 2} :=
-      by decide
-    rw [h_univ]
-    rw [Finset.sum_insert, Finset.sum_insert,
-      Finset.sum_singleton]
-    · simp
-      have h := lengths_sum_to_one
-      linarith
-    · decide
-    · decide
-  permutation := Equiv.swap 0 2
-
-/-- Predicate: an IET emerges from the system dynamics at
-radius r. -/
-def HasEmergentIET (r : ℝ) : Prop :=
-  r = sqrt (3 + goldenRatio)
-
-/-- The emergent IET at a given radius. -/
-noncomputable def EmergentIET (r : ℝ)
-    (_ : HasEmergentIET r) :
-    IntervalExchangeTransformation 3 :=
-  GG5_induced_IET
-
-/-- The critical radius for GG(5,5). -/
-noncomputable def criticalRadius : ℝ :=
-  sqrt (3 + goldenRatio)
-
 /-- At the critical radius, the GG(5,5) system dynamics reduce to
 an IET. -/
 theorem GG5_becomes_IET_at_critical :

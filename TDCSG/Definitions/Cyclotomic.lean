@@ -27,4 +27,7 @@ open Complex Real
 /-- The primitive 5th root of unity: e^(2 pi i/5) -/
 noncomputable def zeta5 : Complex := exp (2 * Real.pi * Complex.I / 5)
 
+/-- Unicode alias for the primitive 5th root of unity -/
+noncomputable abbrev ζ₅ : Complex := zeta5
+
 end TDCSG.Definitions

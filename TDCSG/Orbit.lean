@@ -3,19 +3,13 @@ Copyright (c) 2025 Eric Moffat. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Moffat
 -/
-import TDCSG.IET
-import Mathlib.Dynamics.PeriodicPts.Defs
+import TDCSG.Definitions.Orbit
 
 /-!
 # Orbit Theory for Real Functions
 
-This file provides generic definitions and lemmas about orbits of real-valued functions.
+This file provides lemmas about orbits of real-valued functions.
 These results are not specific to interval exchange transformations or GG5.
-
-## Main definitions
-
-* `orbitSet`: The orbit set of a point x under iteration of f
-* `HasInfiniteOrbit`: A point has infinite orbit if it is not periodic (not in `periodicPts`)
 
 ## Main results
 
@@ -30,15 +24,6 @@ These results are not specific to interval exchange transformations or GG5.
 namespace Orbit
 
 open Function Set
-
-/-- The orbit set of a point x under iteration of f. -/
-def orbitSet (f : ℝ → ℝ) (x : ℝ) : Set ℝ :=
-  {y | ∃ (n : ℕ), (f^[n]) x = y}
-
-/-- A point has infinite orbit if no point in its orbit is periodic.
-    This is equivalent to the orbit set being infinite. -/
-def HasInfiniteOrbit (f : ℝ → ℝ) (x : ℝ) : Prop :=
-  ∀ y ∈ orbitSet f x, y ∉ Function.periodicPts f
 
 /-- The orbit of x contains x itself. -/
 theorem mem_orbitSet_self (f : ℝ → ℝ) (x : ℝ) : x ∈ orbitSet f x := by

@@ -5,6 +5,7 @@ import TDCSG.Definitions.Points
 import TDCSG.Definitions.Geometry
 import TDCSG.Definitions.IET
 import TDCSG.Definitions.Conversions
+import TDCSG.Definitions.Rotations
 
 -- Core 1D piecewise isometry framework
 import TDCSG.Basic

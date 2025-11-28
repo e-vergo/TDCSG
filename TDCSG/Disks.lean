@@ -9,16 +9,15 @@ import Mathlib.Topology.MetricSpace.Basic
 import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
 import Mathlib.MeasureTheory.Measure.Haar.OfBasis
 import TDCSG.Rotations
+import TDCSG.Definitions.Geometry
 
 /-!
-# Planar Disks
+# Planar Disk Theorems
 
-This file defines planar disks (closed balls in ℝ²) and establishes their
-key properties for the TDCSG formalization.
+This file contains theorems about planar disks (closed balls in ℝ²)
+for the TDCSG formalization.
 
-## Main Definitions
-
-* `Disk`: A closed disk in ℝ² defined as a closed ball in the metric space.
+The `Disk` definition is in `TDCSG.Definitions.Geometry`.
 
 ## Main Results
 
@@ -39,9 +38,8 @@ namespace TDCSG
 -- Import the ℝ² notation from Planar namespace
 open Planar
 
-/-- A disk in ℝ² is a closed ball with specified center and radius. -/
-def Disk (center : ℝ²) (radius : ℝ) : Set ℝ² :=
-  Metric.closedBall center radius
+-- Disk definition imported from TDCSG.Definitions.Geometry
+open TDCSG.Definitions
 
 namespace Disk
 

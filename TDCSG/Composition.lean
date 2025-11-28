@@ -5,19 +5,15 @@ Authors: Eric Moffat
 -/
 import TDCSG.Basic
 import TDCSG.Properties
+import TDCSG.Definitions.Composition
 import Mathlib.Topology.MetricSpace.Isometry
 
 /-!
 # Composition and Iteration of Piecewise Isometries
 
-This file defines composition and iteration for piecewise isometries. The key challenge in
-composition is that the resulting partition must be a refinement of both input partitions.
-
-## Main definitions
-
-- `PiecewiseIsometry.comp`: Composition of two piecewise isometries
-- `PiecewiseIsometry.iterate`: Iteration of a piecewise isometry
-- `PiecewiseIsometry.refinedPartition`: The common refinement of two partitions
+This file contains theorems and lemmas for composition and iteration of piecewise isometries.
+The key challenge in composition is that the resulting partition must be a refinement of
+both input partitions.
 
 ## Main results
 
@@ -42,18 +38,6 @@ namespace PiecewiseIsometry
 variable {α : Type u} [MetricSpace α] [MeasurableSpace α]
 
 section Refinement
-
-/-- The refined partition obtained by intersecting pieces from two partitions with preimage.
-
-Given partitions p (for g) and q (for f), and function g, the preimage-based refinement consists
-of all nonempty intersections s ∩ g⁻¹(t) where s ∈ p and t ∈ q.
-This ensures g maps each refined piece entirely into a single piece of f's partition. -/
-def refinedPartitionPreimage (p q : Set (Set α)) (g : α → α) : Set (Set α) :=
-  {u | ∃ s ∈ p, ∃ t ∈ q, u = s ∩ (g ⁻¹' t) ∧ (s ∩ (g ⁻¹' t)).Nonempty}
-
-/-- The naive refined partition (kept for potential use in other contexts). -/
-def refinedPartition (p q : Set (Set α)) : Set (Set α) :=
-  {u | ∃ s ∈ p, ∃ t ∈ q, u = s ∩ t ∧ (s ∩ t).Nonempty}
 
 /-- Elements of the refined partition are measurable if both original partitions are measurable. -/
 theorem refinedPartition_measurable {α : Type u} [MeasurableSpace α] (p q : Set (Set α))
@@ -256,47 +240,6 @@ end Extensionality
 
 section Composition
 
-/-- Composition of two piecewise isometries.
-
-The composition `f.comp g` applies `g` first, then `f`. The resulting partition uses
-preimage-based refinement to ensure g maps each refined piece into a single piece of
-f's partition. -/
-def comp [BorelSpace α] (f g : PiecewiseIsometry α) : PiecewiseIsometry α where
-  partition := refinedPartitionPreimage g.partition f.partition g.toFun
-  partition_measurable := by
-    apply refinedPartitionPreimage_measurable
-    · exact g.partition_measurable
-    · exact f.partition_measurable
-    · exact piecewiseIsometry_measurable g
-  partition_countable := refinedPartitionPreimage_countable g.partition f.partition g.toFun
-    g.partition_countable f.partition_countable
-  partition_cover := refinedPartitionPreimage_cover g.partition f.partition g.toFun
-    g.partition_cover f.partition_cover
-  partition_disjoint := refinedPartitionPreimage_disjoint g.partition f.partition g.toFun
-    g.partition_disjoint f.partition_disjoint
-  partition_nonempty := by
-    intro u hu
-    obtain ⟨s, hs, t, ht, rfl, hnonempty⟩ := hu
-    exact hnonempty
-  toFun := f.toFun ∘ g.toFun
-  isometry_on_pieces := by
-    intro s hs x hx y hy
-    -- s is an intersection from refinedPartitionPreimage
-    obtain ⟨s_g, hs_g, s_f, hs_f, rfl, _⟩ := hs
-    simp only [Function.comp_apply]
-    -- Key insight: x, y ∈ s_g ∩ (g⁻¹' s_f) means g(x), g(y) ∈ s_f
-    have hgx : g.toFun x ∈ s_f := by
-      have : x ∈ g.toFun ⁻¹' s_f := hx.2
-      exact this
-    have hgy : g.toFun y ∈ s_f := by
-      have : y ∈ g.toFun ⁻¹' s_f := hy.2
-      exact this
-    -- Apply g first (isometric on s_g), then f (isometric on s_f)
-    calc dist (f.toFun (g.toFun x)) (f.toFun (g.toFun y))
-        = dist (g.toFun x) (g.toFun y) :=
-          f.isometry_on_pieces s_f hs_f (g.toFun x) hgx (g.toFun y) hgy
-      _ = dist x y := g.isometry_on_pieces s_g hs_g x hx.1 y hy.1
-
 /-- Function application for composition. -/
 @[simp]
 theorem comp_apply [BorelSpace α] (f g : PiecewiseIsometry α) (x : α) :
@@ -471,13 +414,6 @@ theorem comp_id_right [Nonempty α] [BorelSpace α] (f : PiecewiseIsometry α) :
 end Composition
 
 section Iteration
-
-/-- The nth iterate of a piecewise isometry.
-
-`iterate f n` applies `f` a total of `n` times. By convention, `iterate f 0` is the identity. -/
-def iterate [Nonempty α] [BorelSpace α] (f : PiecewiseIsometry α) : ℕ → PiecewiseIsometry α
-  | 0 => id
-  | n + 1 => f.comp (iterate f n)
 
 /-- Characterization of iterate at successor. -/
 theorem iterate_succ [Nonempty α] [BorelSpace α] (f : PiecewiseIsometry α) (n : ℕ) :

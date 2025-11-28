@@ -6,6 +6,7 @@ Authors: Eric Moffat
 import TDCSG.Basic
 import TDCSG.Properties
 import TDCSG.Composition
+import TDCSG.Definitions.MeasurePreserving
 import Mathlib.Dynamics.Ergodic.MeasurePreserving
 import Mathlib.MeasureTheory.Measure.MeasureSpaceDef
 import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
@@ -20,20 +21,29 @@ three-tiered structure pattern.
 
 ## Main definitions
 
+See `TDCSG.Definitions.MeasurePreserving` for definitions:
 - `MeasurePreservingPiecewiseIsometry α μ`: A piecewise isometry on `α` that preserves the
   measure `μ`
-- `MeasurePreservingPiecewiseIsometry.toMeasurePreserving`: Extract the measure-preserving
-  property as a `MeasureTheory.MeasurePreserving` instance
+- `IsInvariant`: A set is forward-invariant under the map
+- `IsCompletelyInvariant`: A set is mapped onto itself bijectively
+- `idMeasurePreserving`: The identity as a measure-preserving piecewise isometry
+- `compMP`: Composition of measure-preserving piecewise isometries
+- `iterateMP`: Iteration of a measure-preserving piecewise isometry
+- `toPiecewiseIsometry_of_measurePreserving`: Constructor from a piecewise isometry
 
 ## Main results
 
-- `measurePreserving_of_null_discontinuities`: A piecewise isometry with measure-zero
-  discontinuities is measure-preserving if measurable
+- `toMeasurePreserving`: Extract the measure-preserving property
+- `measurable`: The function is measurable
 - `measure_preimage_piece`: The measure of a preimage can be computed piece-by-piece
-- `comp_preserves_measure`: Composition of measure-preserving piecewise isometries preserves
-  measure
-- `iterate_preserves_measure`: Iteration of a measure-preserving piecewise isometry preserves
-  measure
+- `compMP_apply`: Function application for composition
+- `compMP_assoc_fun`: Composition is associative up to functional equality
+- `iterateMP_zero`: Iterate at zero is identity
+- `iterateMP_succ`: Iterate at successor
+- `iterateMP_preserves_measure`: Each iterate preserves measure
+- `measure_eq_of_invariant`: Measure of invariant set equals measure of its image
+- `measure_preimage_eq_of_completely_invariant`: Measure of preimage of completely invariant set
+- `borel_measurable_of_continuous_pieces`: Piecewise continuous implies measurable
 
 ## Implementation notes
 
@@ -48,25 +58,9 @@ namespace PiecewiseIsometry
 
 variable {α : Type u} [MetricSpace α] [MeasurableSpace α]
 
-/-- A measure-preserving piecewise isometry.
-
-This structure extends `PiecewiseIsometry` by requiring that the underlying function is
-measurable and preserves a specified measure `μ`. -/
-structure MeasurePreservingPiecewiseIsometry (α : Type u)
-    [MetricSpace α] [MeasurableSpace α] (μ : MeasureTheory.Measure α)
-    extends PiecewiseIsometry α where
-  /-- The underlying function is measurable -/
-  measurable_toFun : Measurable toFun
-  /-- The function preserves the measure μ -/
-  measure_preserving : MeasureTheory.MeasurePreserving toFun μ μ
-
 namespace MeasurePreservingPiecewiseIsometry
 
 variable {μ : MeasureTheory.Measure α}
-
-/-- Allow function application notation. -/
-instance : CoeFun (MeasurePreservingPiecewiseIsometry α μ) (fun _ => α → α) where
-  coe f := f.toFun
 
 /-- Extract the measure-preserving property. -/
 theorem toMeasurePreserving (f : MeasurePreservingPiecewiseIsometry α μ) :
@@ -80,7 +74,7 @@ theorem measurable (f : MeasurePreservingPiecewiseIsometry α μ) :
 
 /-- Function application. -/
 @[simp]
-theorem apply_eq_toFun (f : MeasurePreservingPiecewiseIsometry α μ) (x : α) :
+theorem mp_apply (f : MeasurePreservingPiecewiseIsometry α μ) (x : α) :
     f x = f.toFun x := rfl
 
 /-- Extensionality for MeasurePreservingPiecewiseIsometry: two are equal if all their structure
@@ -167,43 +161,15 @@ theorem measure_preimage_piece (f : PiecewiseIsometry α)
 
 end MeasurePreservation
 
-section Constructors
-
-variable {μ : MeasureTheory.Measure α}
-
-/-- Construct a measure-preserving piecewise isometry from a piecewise isometry with
-additional properties. -/
-def toPiecewiseIsometry_of_measurePreserving (f : PiecewiseIsometry α)
-    (h_meas : Measurable f.toFun)
-    (h_mp : MeasureTheory.MeasurePreserving f.toFun μ μ) :
-    MeasurePreservingPiecewiseIsometry α μ where
-  toPiecewiseIsometry := f
-  measurable_toFun := h_meas
-  measure_preserving := h_mp
-
-/-- The identity as a measure-preserving piecewise isometry. -/
-def idMeasurePreserving [Nonempty α] : MeasurePreservingPiecewiseIsometry α μ where
-  toPiecewiseIsometry := PiecewiseIsometry.id
-  measurable_toFun := measurable_id
-  measure_preserving := MeasureTheory.MeasurePreserving.id μ
-
-end Constructors
-
 section Composition
 
 variable {μ : MeasureTheory.Measure α}
 
-/-- Composition of measure-preserving piecewise isometries preserves measure. -/
-def compMP [OpensMeasurableSpace α] [BorelSpace α] (f g : MeasurePreservingPiecewiseIsometry α μ) :
-    MeasurePreservingPiecewiseIsometry α μ where
-  toPiecewiseIsometry := f.toPiecewiseIsometry.comp g.toPiecewiseIsometry
-  measurable_toFun := f.measurable.comp g.measurable
-  measure_preserving := f.measure_preserving.comp g.measure_preserving
-
 /-- Function application for composition. -/
 @[simp]
-theorem compMP_apply [OpensMeasurableSpace α] [BorelSpace α] (f g : MeasurePreservingPiecewiseIsometry α μ) (x : α) :
-    (compMP f g).toFun x = f.toFun (g.toFun x) := rfl
+theorem compMP_apply [OpensMeasurableSpace α] [BorelSpace α]
+    (f g : MeasurePreservingPiecewiseIsometry α μ) (x : α) :
+    (MeasurePreservingPiecewiseIsometry.compMP f g).toFun x = f.toFun (g.toFun x) := rfl
 
 /-- Composition is associative up to functional equality.
 
@@ -217,7 +183,10 @@ representation would be required.
 -/
 theorem compMP_assoc_fun [OpensMeasurableSpace α] [BorelSpace α]
     (f g h : MeasurePreservingPiecewiseIsometry α μ) (x : α) :
-    (compMP (compMP f g) h).toFun x = (compMP f (compMP g h)).toFun x := by
+    (MeasurePreservingPiecewiseIsometry.compMP
+      (MeasurePreservingPiecewiseIsometry.compMP f g) h).toFun x =
+    (MeasurePreservingPiecewiseIsometry.compMP f
+      (MeasurePreservingPiecewiseIsometry.compMP g h)).toFun x := by
   -- Both sides compose functions in the same order: f ∘ g ∘ h
   simp only [compMP_apply]
   -- Definitionally equal: (f ∘ g) ∘ h = f ∘ (g ∘ h)
@@ -228,38 +197,32 @@ section Iteration
 
 variable {μ : MeasureTheory.Measure α}
 
-/-- The nth iterate of a measure-preserving piecewise isometry. -/
-def iterateMP [Nonempty α] [OpensMeasurableSpace α] [BorelSpace α] (f : MeasurePreservingPiecewiseIsometry α μ) : ℕ → MeasurePreservingPiecewiseIsometry α μ
-  | 0 => idMeasurePreserving
-  | n + 1 => compMP f (iterateMP f n)
-
 /-- Iterate at zero is identity. -/
 @[simp]
-theorem iterateMP_zero [Nonempty α] [OpensMeasurableSpace α] [BorelSpace α] (f : MeasurePreservingPiecewiseIsometry α μ) :
-    iterateMP f 0 = idMeasurePreserving := rfl
+theorem iterateMP_zero [Nonempty α] [OpensMeasurableSpace α] [BorelSpace α]
+    (f : MeasurePreservingPiecewiseIsometry α μ) :
+    MeasurePreservingPiecewiseIsometry.iterateMP f 0 =
+      MeasurePreservingPiecewiseIsometry.idMeasurePreserving := rfl
 
 /-- Iterate at successor. -/
-theorem iterateMP_succ [Nonempty α] [OpensMeasurableSpace α] [BorelSpace α] (f : MeasurePreservingPiecewiseIsometry α μ) (n : ℕ) :
-    iterateMP f (n + 1) = compMP f (iterateMP f n) := rfl
+theorem iterateMP_succ [Nonempty α] [OpensMeasurableSpace α] [BorelSpace α]
+    (f : MeasurePreservingPiecewiseIsometry α μ) (n : ℕ) :
+    MeasurePreservingPiecewiseIsometry.iterateMP f (n + 1) =
+      MeasurePreservingPiecewiseIsometry.compMP f
+        (MeasurePreservingPiecewiseIsometry.iterateMP f n) := rfl
 
 /-- Each iterate preserves measure. -/
-theorem iterateMP_preserves_measure [Nonempty α] [OpensMeasurableSpace α] [BorelSpace α] (f : MeasurePreservingPiecewiseIsometry α μ) (n : ℕ) :
-    MeasureTheory.MeasurePreserving (iterateMP f n).toFun μ μ :=
-  (iterateMP f n).measure_preserving
+theorem iterateMP_preserves_measure [Nonempty α] [OpensMeasurableSpace α] [BorelSpace α]
+    (f : MeasurePreservingPiecewiseIsometry α μ) (n : ℕ) :
+    MeasureTheory.MeasurePreserving
+      (MeasurePreservingPiecewiseIsometry.iterateMP f n).toFun μ μ :=
+  (MeasurePreservingPiecewiseIsometry.iterateMP f n).measure_preserving
 
 end Iteration
 
 section InvariantSets
 
 variable {μ : MeasureTheory.Measure α}
-
-/-- A set is forward-invariant if it is mapped into itself. -/
-def IsInvariant (f : MeasurePreservingPiecewiseIsometry α μ) (s : Set α) : Prop :=
-  f.toFun '' s ⊆ s
-
-/-- A set is completely invariant if it is mapped onto itself bijectively. -/
-def IsCompletelyInvariant (f : MeasurePreservingPiecewiseIsometry α μ) (s : Set α) : Prop :=
-  f.toFun '' s = s
 
 /-- The measure of an invariant set equals the measure of its image.
 
@@ -269,7 +232,7 @@ from the Lusin-Souslin theorem (Mathlib's `MeasurableSet.image_of_measurable_inj
 -/
 theorem measure_eq_of_invariant [MeasurableSpace.CountablySeparated α] [StandardBorelSpace α]
     (f : MeasurePreservingPiecewiseIsometry α μ)
-    (s : Set α) (hs : MeasurableSet s) (_h_inv : IsInvariant f s)
+    (s : Set α) (hs : MeasurableSet s) (_h_inv : MeasurePreservingPiecewiseIsometry.IsInvariant f s)
     (h_bij : Function.Bijective f.toFun) :
     μ (f.toFun '' s) = μ s := by
   -- Use bijectivity to show f⁻¹(f '' s) = s
@@ -298,7 +261,7 @@ theorem measure_eq_of_invariant [MeasurableSpace.CountablySeparated α] [Standar
 /-- A completely invariant measurable set has the same measure as its preimage. -/
 theorem measure_preimage_eq_of_completely_invariant
     (f : MeasurePreservingPiecewiseIsometry α μ) (s : Set α) (hs : MeasurableSet s)
-    (_h_inv : IsCompletelyInvariant f s) :
+    (_h_inv : MeasurePreservingPiecewiseIsometry.IsCompletelyInvariant f s) :
     μ (f.toFun ⁻¹' s) = μ s := by
   -- Directly use measure preservation
   exact f.measure_preserving.measure_preimage hs.nullMeasurableSet
