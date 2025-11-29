@@ -3,7 +3,6 @@ Copyright (c) 2025 Eric Moffat. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Moffat
 -/
-import TDCSG.Definitions.Rotations
 import TDCSG.Definitions.Geometry
 
 /-!
@@ -14,13 +13,17 @@ This file contains the core definitions for the two-disk compound symmetry group
 ## Main definitions
 
 - `TwoDiskSystem`: Two disks with specified radii and rotation orders
-- `TwoDiskSystem.diskL`: The left disk in the system
-- `TwoDiskSystem.diskR`: The right disk in the system
+- `TwoDiskSystem.diskL`: The left disk in the system (in ℂ)
+- `TwoDiskSystem.diskR`: The right disk in the system (in ℂ)
 - `TwoDiskSystem.exterior`: The exterior region (outside both disks)
 - `TwoDiskSystem.angleA`: The rotation angle for the left disk
 - `TwoDiskSystem.angleB`: The rotation angle for the right disk
 - `TwoDiskSystem.rotationA`: Rotation A (on left disk)
 - `TwoDiskSystem.rotationB`: Rotation B (on right disk)
+
+## Note
+
+All definitions use ℂ as the primary representation.
 
 ## References
 
@@ -28,8 +31,6 @@ This file contains the core definitions for the two-disk compound symmetry group
 
 -/
 
-open scoped RealInnerProductSpace
-open Planar
 open Classical
 open TDCSG.Definitions
 
@@ -58,41 +59,36 @@ namespace TwoDiskSystem
 
 variable (sys : TwoDiskSystem)
 
-/-- The left disk (method on TwoDiskSystem) -/
-noncomputable def diskL : Set ℝ² :=
-  closedDisk leftCenterPlane sys.r1
+/-- The left disk in ℂ (method on TwoDiskSystem) -/
+def diskL : Set ℂ := leftDisk sys.r1
 
-/-- The right disk (method on TwoDiskSystem) -/
-noncomputable def diskR : Set ℝ² :=
-  closedDisk rightCenterPlane sys.r2
+/-- The right disk in ℂ (method on TwoDiskSystem) -/
+def diskR : Set ℂ := rightDisk sys.r2
 
 /-- The exterior region (outside both disks) -/
-noncomputable def exterior : Set ℝ² :=
-  (diskL sys ∪ diskR sys)ᶜ
+def exterior : Set ℂ := (diskL sys ∪ diskR sys)ᶜ
 
-/-- The rotation angle for the left disk generator -/
-noncomputable def angleA : Real.Angle :=
-  (2 * Real.pi / sys.n1 : ℝ)
+/-- The rotation angle for the left disk generator (in radians) -/
+noncomputable def angleA : ℝ := 2 * Real.pi / sys.n1
 
-/-- The rotation angle for the right disk generator -/
-noncomputable def angleB : Real.Angle :=
-  (2 * Real.pi / sys.n2 : ℝ)
+/-- The rotation angle for the right disk generator (in radians) -/
+noncomputable def angleB : ℝ := 2 * Real.pi / sys.n2
 
-/-- Rotation A: rotation by 2π/n1 around the center of the left disk.
-    This is the TwoDiskSystem version; see MainTheorem.genA for the simplified theorem API. -/
-noncomputable def rotationA : ℝ² → ℝ² :=
-  fun x => if x ∈ diskL sys then
-    rotateAround leftCenterPlane (angleA sys) x
+/-- Rotation A: rotation by 2π/n1 around the center of the left disk in ℂ.
+    This is the TwoDiskSystem version; see GroupAction.genA for the simplified theorem API. -/
+noncomputable def rotationA (z : ℂ) : ℂ :=
+  if z ∈ diskL sys then
+    rotateAboutC leftCenter (angleA sys) z
   else
-    x
+    z
 
-/-- Rotation B: rotation by 2π/n2 around the center of the right disk.
-    This is the TwoDiskSystem version; see MainTheorem.genB for the simplified theorem API. -/
-noncomputable def rotationB : ℝ² → ℝ² :=
-  fun x => if x ∈ diskR sys then
-    rotateAround rightCenterPlane (angleB sys) x
+/-- Rotation B: rotation by 2π/n2 around the center of the right disk in ℂ.
+    This is the TwoDiskSystem version; see GroupAction.genB for the simplified theorem API. -/
+noncomputable def rotationB (z : ℂ) : ℂ :=
+  if z ∈ diskR sys then
+    rotateAboutC rightCenter (angleB sys) z
   else
-    x
+    z
 
 end TwoDiskSystem
 
