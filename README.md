@@ -57,18 +57,21 @@ TDCSG/
   MainTheorem.lean          # Statement + GG5_critical definition
   ProofOfMainTheorem.lean   # Proof of main theorem
   Definitions/              # All definitions (no proofs)
-    Core.lean               # φ, r_crit, Plane, Word
+    Core.lean               # φ, ψ, r_crit, Plane, Word
     Geometry.lean           # Disk geometry, rotations
     GroupAction.lean        # genA, genB, orbit
     TwoDisk.lean            # TwoDiskSystem structure
     IET.lean                # Interval exchange transformations
-    ...
+    Points.lean             # E, E', F, G point definitions
+    Conversions.lean        # Complex ↔ R² conversions
   Proofs/                   # All supporting lemmas and proofs
+    Zeta5.lean              # ζ₅ identities, trig values (authoritative)
+    Points.lean             # Point properties, F/G scalar relations
     OrbitInfinite.lean      # GG5_IET_has_infinite_orbit
-    WordCorrespondence.lean # IET ↔ group word correspondence
-    Geometry.lean           # Geometric analysis
-    IntervalExchange.lean   # IET lemmas
-    ...
+    WordCorrespondence.lean # IET ↔ group word correspondence (11 sorries)
+    Geometry.lean           # r_crit lemmas, re-exports
+    SegmentGeometry.lean    # Segment lengths and ratios
+    PlaneConversion.lean    # Complex ↔ plane bridge lemmas
 KMVerify.lean               # Kim Morrison standard verification
 ```
 

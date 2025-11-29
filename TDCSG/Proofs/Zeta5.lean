@@ -321,28 +321,8 @@ lemma zeta5_pow_seven : ζ₅^7 = ζ₅^2 := by
   norm_num at this
   exact this
 
-lemma zeta5_pow_eight : ζ₅^8 = ζ₅^3 := by
-  have : ζ₅^8 = ζ₅^(8 % 5) := zeta5_pow_reduce 8
-  norm_num at this
-  exact this
-
-lemma zeta5_pow_nine : ζ₅^9 = ζ₅^4 := by
-  have : ζ₅^9 = ζ₅^(9 % 5) := zeta5_pow_reduce 9
-  norm_num at this
-  exact this
-
-lemma zeta5_pow_ten : ζ₅^10 = 1 := by
-  have : ζ₅^10 = ζ₅^(10 % 5) := zeta5_pow_reduce 10
-  norm_num at this
-  exact this
-
 lemma zeta5_pow_eleven : ζ₅^11 = ζ₅ := by
   have : ζ₅^11 = ζ₅^(11 % 5) := zeta5_pow_reduce 11
-  norm_num at this
-  exact this
-
-lemma zeta5_pow_twelve : ζ₅^12 = ζ₅^2 := by
-  have : ζ₅^12 = ζ₅^(12 % 5) := zeta5_pow_reduce 12
   norm_num at this
   exact this
 
@@ -417,11 +397,13 @@ lemma zeta5_im_pos : 0 < ζ₅.im := by
   · linarith [Real.pi_pos]
   · linarith [Real.pi_pos]
 
-/-- cos(4π/5) = -(√5 + 1)/4 = -φ/2 -/
-private lemma cos_four_pi_fifth' : Real.cos (4 * π / 5) = -(Real.sqrt 5 + 1) / 4 := by
-  rw [show (4 * π / 5 : ℝ) = π - π / 5 by ring]
-  rw [Real.cos_pi_sub]
-  rw [Real.cos_pi_div_five]
+/-- cos(4π/5) = -cos(π/5) (supplementary angle identity) -/
+lemma cos_four_pi_fifth : Real.cos (4 * π / 5) = -Real.cos (π / 5) := by
+  rw [show (4 * π / 5 : ℝ) = π - π / 5 by ring, Real.cos_pi_sub]
+
+/-- cos(4π/5) = -(√5 + 1)/4 = -φ/2 (explicit value) -/
+lemma cos_four_pi_fifth_val : Real.cos (4 * π / 5) = -(Real.sqrt 5 + 1) / 4 := by
+  rw [cos_four_pi_fifth, Real.cos_pi_div_five]
   ring
 
 /-- (ζ₅²).re = -(√5 + 1)/4 = -φ/2 -/
@@ -429,7 +411,7 @@ lemma zeta5_sq_re : (ζ₅^2).re = -(Real.sqrt 5 + 1) / 4 := by
   rw [zeta5_sq_eq]
   simp only [Complex.add_re, Complex.ofReal_re, Complex.mul_re,
              Complex.I_re, Complex.I_im, Complex.ofReal_im]
-  rw [cos_four_pi_fifth']
+  rw [cos_four_pi_fifth_val]
   ring
 
 /-- (ζ₅²).re in terms of φ -/

@@ -71,10 +71,6 @@ private lemma E_plus_one_im : (E + 1).im = Real.sin (2 * π / 5) - Real.sin (4 *
       simp only [Complex.add_im, Complex.sub_im, Complex.one_im, Complex.ofReal_im,
                  Complex.ofReal_re, Complex.mul_im, Complex.I_re, Complex.I_im, one_mul, zero_add, mul_zero]
 
-/-- Trigonometric identity: cos(4*pi/5) = -cos(pi/5) -/
-private lemma cos_four_pi_fifth : Real.cos (4 * π / 5) = -Real.cos (π / 5) := by
-  rw [show (4 * π / 5 : ℝ) = π - π / 5 by ring, Real.cos_pi_sub]
-
 /-- Trigonometric identity: sin(4*pi/5) = sin(pi/5) -/
 private lemma sin_four_pi_fifth : Real.sin (4 * π / 5) = Real.sin (π / 5) := by
   rw [show (4 * π / 5 : ℝ) = π - π / 5 by ring, Real.sin_pi_sub]
@@ -289,8 +285,8 @@ lemma t_F_lt_one : t_F < 1 := by
       < 1 + 3 := by linarith [sqrt5_lt_three]
     _ = 4 := by norm_num
 
-/-- Helper: zeta5 + zeta5^4 equals psi = (sqrt5-1)/2. -/
-private lemma zeta5_plus_zeta5_fourth : ζ₅ + ζ₅^4 = psi := by
+/-- ζ₅ + ζ₅⁴ = ψ = (√5-1)/2 (sum of primitive 5th roots of unity). -/
+lemma zeta5_plus_zeta5_fourth : ζ₅ + ζ₅^4 = psi := by
   -- zeta5 + zeta5^4 = e^(2*pi*i/5) + e^(-2*pi*i/5) = 2*cos(2*pi/5)
   conv_lhs => rw [show ζ₅^4 = starRingEnd ℂ ζ₅ from zeta5_conj.symm]
   have h1 : ζ₅ + starRingEnd ℂ ζ₅ = (2 * ζ₅.re : ℝ) := Complex.add_conj ζ₅
@@ -376,8 +372,8 @@ private lemma one_eq_phi_times_E_plus_zeta5_cube :
         simp only [goldenRatio_eq_one_add_psi]
         norm_cast
 
-/-- F equals psi times E: F = psi * E where psi = (sqrt5-1)/2. -/
-private lemma F_eq_psi_times_E : F = psi • E := by
+/-- F = ψ • E where ψ = (√5-1)/2 (scalar relationship between F and E). -/
+lemma F_eq_psi_times_E : F = psi • E := by
   unfold F E
   -- Strategy: Use the factorization (zeta5 + zeta5^4)(zeta5 - zeta5^2) = 1 - zeta5 + zeta5^2 - zeta5^3
   have h1 := zeta5_plus_zeta5_fourth
@@ -427,8 +423,8 @@ lemma F_on_segment_E'E :
     rw [h_param]
     exact F_eq_psi_times_E
 
-/-- G equals (sqrt5 - 2) times E. -/
-private lemma G_eq_coeff_times_E : G = ((Real.sqrt 5 - 2) : ℝ) • E := by
+/-- G = (√5 - 2) • E (scalar relationship between G and E). -/
+lemma G_eq_coeff_times_E : G = ((Real.sqrt 5 - 2) : ℝ) • E := by
   -- Use G = 2F - E and F = psi * E
   unfold G
   rw [F_eq_psi_times_E]

@@ -99,10 +99,6 @@ private lemma E_re_trig : E.re = Real.cos (2 * π / 5) - Real.cos (4 * π / 5) :
         Complex.mul_re, Complex.I_re, Complex.I_im, Complex.ofReal_im]
       ring
 
-/-- Trigonometric identity: cos(4*pi/5) = -cos(pi/5) -/
-private lemma cos_four_pi_fifth : Real.cos (4 * π / 5) = -Real.cos (π / 5) := by
-  rw [show (4 * π / 5 : ℝ) = π - π / 5 by ring, Real.cos_pi_sub]
-
 /-- Point E has positive real part.
 This is a computationally verifiable fact using E = ζ₅ - ζ₅². -/
 lemma E_re_pos : 0 < E.re := by
