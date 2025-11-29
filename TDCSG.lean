@@ -15,7 +15,6 @@ import TDCSG.Definitions.GroupAction
 import TDCSG.Proofs.Zeta5
 import TDCSG.Proofs.Points
 import TDCSG.Proofs.SegmentGeometry
-import TDCSG.Proofs.PlaneConversion
 import TDCSG.Proofs.IET
 import TDCSG.Proofs.Orbit
 import TDCSG.Proofs.OrbitInfinite

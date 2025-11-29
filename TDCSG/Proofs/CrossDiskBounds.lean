@@ -3,7 +3,7 @@ Copyright (c) 2025 Eric Hearn. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Hearn
 -/
-import TDCSG.Proofs.PlaneConversion
+import TDCSG.Proofs.SegmentGeometry
 import TDCSG.Proofs.Zeta5
 import Mathlib.Analysis.Convex.Mul
 
