@@ -3,7 +3,7 @@ Copyright (c) 2025 Eric Moffat. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Moffat
 -/
-import TDCSG.Definitions.Orbit
+import TDCSG.Definitions.RealDynamics
 import TDCSG.Proofs.IET
 
 /-!
@@ -22,7 +22,7 @@ These results are not specific to interval exchange transformations or GG5.
   an infinite orbit set
 -/
 
-namespace Orbit
+namespace RealDynamics
 
 open Function Set
 
@@ -234,13 +234,13 @@ theorem hasInfiniteOrbit_iff_orbitSet_infinite (f : ℝ → ℝ) (x : ℝ) :
   · exact no_orbit_point_periodic_implies_infinite f x
   · exact no_periodic_orbit_of_orbitSet_infinite f x
 
-end Orbit
+end RealDynamics
 
 /-! ## GG5 Orbit Definitions -/
 
 namespace TDCSG.CompoundSymmetry.GG5
 
-open Real Function Set Orbit TDCSG.Definitions
+open Real Function Set RealDynamics TDCSG.Definitions
 
 /-- The displacement function for the GG5 IET: f(x) - x for x in [0,1).
     Takes value d_i when x is in interval i. -/

@@ -3,7 +3,7 @@ Copyright (c) 2025-11-22 Eric Moffat. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Moffat
 -/
-import TDCSG.Definitions.Orbit
+import TDCSG.Definitions.RealDynamics
 import TDCSG.Definitions.IET
 import TDCSG.Proofs.Orbit
 import TDCSG.Proofs.IET
@@ -58,7 +58,7 @@ measure-theoretic arguments beyond current Mathlib ergodic theory coverage.
 
 namespace TDCSG.CompoundSymmetry.GG5
 
-open Real Function Set Orbit TDCSG.Definitions
+open Real Function Set RealDynamics TDCSG.Definitions
 
 /-! ### Irrationality results -/
 
@@ -125,15 +125,15 @@ theorem GG5_IET_rotation_irrational :
 
 /-- The orbit contains at least one point (the starting point itself). -/
 theorem GG5_IET_orbit_nonempty (x : ℝ) (_ : x ∈ Ico 0 1) :
-    (Orbit.orbitSet GG5_induced_IET.toFun x).Nonempty :=
-  ⟨x, Orbit.mem_orbitSet_self _ _⟩
+    (RealDynamics.orbitSet GG5_induced_IET.toFun x).Nonempty :=
+  ⟨x, RealDynamics.mem_orbitSet_self _ _⟩
 
 /-- For any n, we can construct a finite set of orbit points.
     This provides infrastructure for ergodic theory analysis. -/
 theorem GG5_IET_orbit_finite_subset (n : ℕ) :
     ∃ (x : ℝ), x ∈ Ico 0 1 ∧
       ∃ (pts : Finset ℝ), pts.Nonempty ∧
-        (∀ y ∈ pts, y ∈ Orbit.orbitSet GG5_induced_IET.toFun x) := by
+        (∀ y ∈ pts, y ∈ RealDynamics.orbitSet GG5_induced_IET.toFun x) := by
   use length1 / 2
   constructor
   · constructor
@@ -154,7 +154,7 @@ theorem GG5_IET_orbit_finite_subset (n : ℕ) :
     · intro y hy
       obtain ⟨k, _, hk⟩ := Finset.mem_image.mp hy
       rw [← hk]
-      exact Orbit.orbitSet_iterate _ _ _
+      exact RealDynamics.orbitSet_iterate _ _ _
 
 /-- Main infrastructure theorem: The GG5 IET has points with nonempty orbit segments.
 
@@ -163,7 +163,7 @@ theorem GG5_IET_orbit_finite_subset (n : ℕ) :
 
     **Note**: The full theorem "orbits are infinite" requires proving that IETs with
     irrational rotation ratios have no periodic orbits (Keane 1975). That deep result
-    would immediately imply orbit sets are infinite via `Orbit.finite_orbit_implies_periodic`.
+    would immediately imply orbit sets are infinite via `RealDynamics.finite_orbit_implies_periodic`.
     The infrastructure here supports future completion of that proof.
 
     We have proven:
@@ -175,7 +175,7 @@ theorem GG5_IET_orbit_finite_subset (n : ℕ) :
     rotation to non-periodicity in IETs. -/
 theorem GG5_IET_has_orbit_structure :
     ∀ (_ : ℕ), ∃ (x : ℝ) (_ : x ∈ Ico 0 1) (pts : Finset ℝ),
-      pts.Nonempty ∧ (∀ y ∈ pts, y ∈ Orbit.orbitSet GG5_induced_IET.toFun x) := by
+      pts.Nonempty ∧ (∀ y ∈ pts, y ∈ RealDynamics.orbitSet GG5_induced_IET.toFun x) := by
   intro n
   obtain ⟨x, hx, pts, h_ne, h_in⟩ := GG5_IET_orbit_finite_subset n
   exact ⟨x, hx, pts, h_ne, h_in⟩
@@ -870,13 +870,13 @@ Instead, we use the algebraic structure of the golden ratio directly.
 -/
 theorem GG5_IET_has_infinite_orbit :
     ∃ (x : ℝ), x ∈ Set.Ico 0 1 ∧
-      (Orbit.orbitSet GG5_induced_IET.toFun x).Infinite := by
+      (RealDynamics.orbitSet GG5_induced_IET.toFun x).Infinite := by
   use length1 / 2
   constructor
   · exact length1_half_mem_Ico
   · -- The orbit is infinite because the iterate map is injective
     apply Set.infinite_of_injective_forall_mem GG5_IET_iterates_injective
     intro n
-    exact Orbit.orbitSet_iterate _ _ n
+    exact RealDynamics.orbitSet_iterate _ _ n
 
 end TDCSG.CompoundSymmetry.GG5

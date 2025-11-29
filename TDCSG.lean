@@ -1,11 +1,10 @@
 -- Definitions modules (fundamental constants and types)
 import TDCSG.Definitions.Core
-import TDCSG.Definitions.Cyclotomic
 import TDCSG.Definitions.Points
 import TDCSG.Definitions.Geometry
 import TDCSG.Definitions.IET
 import TDCSG.Definitions.TwoDisk
-import TDCSG.Definitions.Orbit
+import TDCSG.Definitions.RealDynamics
 import TDCSG.Definitions.WordCorrespondence
 import TDCSG.Definitions.GroupAction
 
@@ -33,14 +32,13 @@ is the golden ratio.
 
 ## Module Organization
 
-### Definitions (9 files)
-- `Core`: Fundamental constants (r_c, generators, angles)
-- `Cyclotomic`: ζ₅ algebra, critical radius calculations
+### Definitions (8 files)
+- `Core`: Fundamental constants (r_c, generators, angles, ζ₅)
 - `Points`: E, E', F, G point definitions, segment parameterization
 - `Geometry`: Geometric primitives (disks, rotations)
 - `IET`: Interval exchange transformation structure
 - `TwoDisk`: Two-disk system structure
-- `Orbit`: Orbit set definitions
+- `RealDynamics`: Orbit set definitions
 - `WordCorrespondence`: Group word definitions
 - `GroupAction`: Group action on E'E segment
 

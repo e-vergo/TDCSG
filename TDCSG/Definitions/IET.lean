@@ -199,6 +199,23 @@ noncomputable def length2 : ℝ :=
 noncomputable def length3 : ℝ :=
   1 / goldenRatio
 
+/- Why displacement0 = displacement1:
+
+The IET describes a cyclic permutation (0 → 1 → 2 → 0). Under this permutation:
+- Interval 0 (at domain position 0) maps to range position 1
+- Interval 1 (at domain position 1) maps to range position 2
+- Interval 2 (at domain position 2) maps to range position 0
+
+Both intervals 0 and 1 move "forward" by one position in the range ordering,
+which geometrically means they both jump over interval 2 (of length ψ).
+Hence both receive displacement +ψ = length3.
+
+Interval 2 moves "backward" to position 0, jumping over both intervals 0 and 1
+(combined length ψ²). Hence it receives displacement -(length1 + length2) = -ψ².
+
+Note: displacement0 + displacement1 + displacement2 * (length3 / length1) = 0
+captures the measure-preserving property of the IET. -/
+
 /-- Displacement for interval 0: d_0 = length3 = ψ ≈ 0.618.
     Points in [E', F') are translated by ψ to [G, F). -/
 noncomputable def displacement0 : ℝ := length3

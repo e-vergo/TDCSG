@@ -75,7 +75,7 @@ structure KMVerifyConfig where
     "Basic.lean", "Properties.lean", "Composition.lean",
     "MeasurePreserving.lean", "Finite.lean", "IntervalExchange.lean",
     "Rotations.lean", "Disks.lean", "TwoDisk.lean",
-    "IET.lean", "Orbit.lean", "OrbitInfinite.lean", "Geometry.lean"
+    "IET.lean", "RealDynamics.lean", "OrbitInfinite.lean", "Geometry.lean"
   ]
   deriving Inhabited
 

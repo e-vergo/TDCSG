@@ -38,8 +38,7 @@ to any point on segment E'E produces translation by 2F = 2ψE, where F = ψE and
 /-- Word 1: a²bab = AABAB (for interval 0: [0, length1))
     This word produces translation by 2F = 2ψE where ψ = (√5-1)/2.
     Algebraically: (ζ₅ + ζ₅⁴)(ζ₅ - ζ₅²) = 1 - ζ₅ + ζ₅² - ζ₅³ = F. -/
-def word1 : Word :=
-  [TDCSG.Definitions.Generator.A, TDCSG.Definitions.Generator.A, TDCSG.Definitions.Generator.B, TDCSG.Definitions.Generator.A, TDCSG.Definitions.Generator.B]
+def word1 : Word := [.A, .A, .B, .A, .B]
 
 /-- Word 2: a⁻¹b⁻¹a⁻¹b⁻¹b⁻¹ = A⁻¹B⁻¹A⁻¹B⁻¹B⁻¹ (for interval 1: [length1, length1 + length2))
     This word produces translation by 2F = 2ψE where ψ = (√5-1)/2.
@@ -57,8 +56,7 @@ def word1 : Word :=
     z₄ = 1 + ζ₅⁴(z₃ - 1)
     z₅ = 1 + ζ₅⁴(z₄ - 1)
     The composition gives z₅ = z₀ + 2ψE. -/
-def word2 : Word :=
-  [TDCSG.Definitions.Generator.Ainv, TDCSG.Definitions.Generator.Binv, TDCSG.Definitions.Generator.Ainv, TDCSG.Definitions.Generator.Binv, TDCSG.Definitions.Generator.Binv]
+def word2 : Word := [.Ainv, .Binv, .Ainv, .Binv, .Binv]
 
 /-- Word 3: a⁻¹b⁻¹a⁻¹bab = A⁻¹B⁻¹A⁻¹BAB (for interval 2: [length1 + length2, 1))
     This word produces translation by -2ψ²E = 2·displacement2·E where ψ² = 1/(1+φ).
@@ -77,7 +75,6 @@ def word2 : Word :=
     Note: The original word ABAB⁻¹A⁻¹B⁻¹ produced translation 2 - 2ζ₅² + 4ζ₅³ - 4ζ₅⁴
     which equals 6 + 4ζ₅ + 2ζ₅² + 8ζ₅³ (using cyclotomic). This is NOT a scalar multiple
     of E = ζ₅ - ζ₅² and thus does not preserve segment membership. -/
-def word3 : Word :=
-  [TDCSG.Definitions.Generator.Ainv, TDCSG.Definitions.Generator.Binv, TDCSG.Definitions.Generator.Ainv, TDCSG.Definitions.Generator.B, TDCSG.Definitions.Generator.A, TDCSG.Definitions.Generator.B]
+def word3 : Word := [.Ainv, .Binv, .Ainv, .B, .A, .B]
 
 end TDCSG.CompoundSymmetry.GG5

@@ -5,6 +5,9 @@ Authors: Eric Hearn
 -/
 import Mathlib.Analysis.InnerProductSpace.PiL2
 import Mathlib.NumberTheory.Real.GoldenRatio
+import Mathlib.Analysis.SpecialFunctions.Exp
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.Complex
+import Mathlib.RingTheory.RootsOfUnity.Complex
 
 /-!
 # Core Definitions for TDCSG
@@ -47,5 +50,16 @@ noncomputable def φ : ℝ := Real.goldenRatio
 
 /-- The critical radius for GG5: r_crit = √(3 + φ). -/
 noncomputable def r_crit : ℝ := Real.sqrt (3 + φ)
+
+/-! ### 5th Roots of Unity -/
+
+open scoped Complex
+open Complex
+
+/-- The primitive 5th root of unity: e^(2 pi i/5) -/
+noncomputable def zeta5 : Complex := exp (2 * Real.pi * Complex.I / 5)
+
+/-- Unicode alias for the primitive 5th root of unity -/
+noncomputable abbrev ζ₅ : Complex := zeta5
 
 end TDCSG.Definitions

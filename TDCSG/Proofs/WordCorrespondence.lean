@@ -581,10 +581,10 @@ This is the key lemma connecting IET dynamics to group dynamics:
 Every iterate of the IET corresponds to applying some sequence of group words
 to the initial point. Hence if the IET orbit is infinite, the group orbit is infinite. -/
 theorem IET_orbit_subset_group_orbit (x₀ : ℝ) (hx₀ : x₀ ∈ Set.Ico 0 1) :
-    ∀ y ∈ Orbit.orbitSet CompoundSymmetry.GG5.GG5_induced_IET.toFun x₀,
+    ∀ y ∈ RealDynamics.orbitSet CompoundSymmetry.GG5.GG5_induced_IET.toFun x₀,
       ∃ w : Word, applyWord r_crit w (segmentPoint x₀) = segmentPoint y := by
   intro y hy
-  rw [Orbit.orbitSet] at hy
+  rw [RealDynamics.orbitSet] at hy
   simp only [Set.mem_setOf_eq] at hy
   obtain ⟨n, hn⟩ := hy
   use wordForIterate x₀ n
@@ -593,14 +593,14 @@ theorem IET_orbit_subset_group_orbit (x₀ : ℝ) (hx₀ : x₀ ∈ Set.Ico 0 1)
 
 /-- If the IET orbit of x0 is infinite, the group orbit of the corresponding point in ℂ is infinite. -/
 theorem IET_orbit_infinite_implies_group_orbit_infinite (x₀ : ℝ) (hx₀ : x₀ ∈ Set.Ico 0 1)
-    (h_inf : (Orbit.orbitSet CompoundSymmetry.GG5.GG5_induced_IET.toFun x₀).Infinite) :
+    (h_inf : (RealDynamics.orbitSet CompoundSymmetry.GG5.GG5_induced_IET.toFun x₀).Infinite) :
     (orbit r_crit (segmentPoint x₀)).Infinite := by
   -- The IET orbit is infinite means infinitely many distinct iterates
   -- Each iterate is in the group orbit (by IET_orbit_subset_group_orbit)
   -- The map from IET orbit to group orbit is injective (segmentPoint_injective)
   -- Therefore the group orbit is infinite
   -- Map from IET orbit to group orbit
-  have h_subset : segmentPoint '' (Orbit.orbitSet CompoundSymmetry.GG5.GG5_induced_IET.toFun x₀) ⊆
+  have h_subset : segmentPoint '' (RealDynamics.orbitSet CompoundSymmetry.GG5.GG5_induced_IET.toFun x₀) ⊆
       orbit r_crit (segmentPoint x₀) := by
     intro p hp
     rw [Set.mem_image] at hp
@@ -611,10 +611,10 @@ theorem IET_orbit_infinite_implies_group_orbit_infinite (x₀ : ℝ) (hx₀ : x�
     use w
     rw [← hy_eq, hw]
   -- The image of an infinite set under an injective function is infinite
-  have h_inj : Set.InjOn segmentPoint (Orbit.orbitSet CompoundSymmetry.GG5.GG5_induced_IET.toFun x₀) := by
+  have h_inj : Set.InjOn segmentPoint (RealDynamics.orbitSet CompoundSymmetry.GG5.GG5_induced_IET.toFun x₀) := by
     intro y₁ _ y₂ _ h
     exact segmentPoint_injective h
-  have h_image_inf : (segmentPoint '' (Orbit.orbitSet CompoundSymmetry.GG5.GG5_induced_IET.toFun x₀)).Infinite :=
+  have h_image_inf : (segmentPoint '' (RealDynamics.orbitSet CompoundSymmetry.GG5.GG5_induced_IET.toFun x₀)).Infinite :=
     Set.Infinite.image h_inj h_inf
   exact Set.Infinite.mono h_subset h_image_inf
 

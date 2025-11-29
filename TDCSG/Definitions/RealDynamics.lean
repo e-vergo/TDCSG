@@ -6,7 +6,7 @@ Authors: Eric Moffat
 import Mathlib.Dynamics.PeriodicPts.Defs
 
 /-!
-# Orbit Definitions
+# Real Dynamics Definitions
 
 This file contains core definitions for orbit theory of real-valued functions.
 
@@ -17,7 +17,7 @@ This file contains core definitions for orbit theory of real-valued functions.
 
 -/
 
-namespace Orbit
+namespace RealDynamics
 
 open Function Set
 
@@ -30,4 +30,4 @@ def orbitSet (f : ℝ → ℝ) (x : ℝ) : Set ℝ :=
 def HasInfiniteOrbit (f : ℝ → ℝ) (x : ℝ) : Prop :=
   ∀ y ∈ orbitSet f x, y ∉ Function.periodicPts f
 
-end Orbit
+end RealDynamics
