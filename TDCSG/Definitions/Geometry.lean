@@ -4,7 +4,6 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Hearn
 -/
 import TDCSG.Definitions.Core
-import Mathlib.Analysis.InnerProductSpace.PiL2
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
 import Mathlib.Topology.MetricSpace.Basic
 import Mathlib.Analysis.Complex.Circle
@@ -20,9 +19,6 @@ The radius parameter determines disk size, not center position.
 - `closedDisk`, `leftDisk`, `rightDisk` : Disk sets
 - `rotateAboutC` : Rotation by angle θ about a center
 - `rotateAboutCircle` : Rotation using Circle element (unit complex number)
-- `toPlane` : Convert a complex number to a Plane point
-
-Note: `Plane` is defined in TDCSG.Definitions.Core
 -/
 
 namespace TDCSG.Definitions
@@ -90,12 +86,5 @@ lemma rotateAboutCircle_pow (c : ℂ) (a : Circle) (n : ℕ) (z : ℂ) :
   | succ n ih =>
     rw [Function.iterate_succ_apply', ih, pow_succ, mul_comm]
     exact (rotateAboutCircle_mul c a (a ^ n) z).symm
-
-/-! ### Complex to Plane Conversion -/
-
-/-- Convert a complex number to a Plane point (EuclideanSpace form). -/
-noncomputable def toPlane (z : ℂ) : Plane := ![z.re, z.im]
-
-
 
 end TDCSG.Definitions

@@ -19,7 +19,6 @@ that are critical for the interval exchange transformation analysis.
 - `psi` : Positive golden conjugate = -Real.goldenConj
 - `t_F`, `t_G` : Parametric coordinates (t_G = psi)
 - `segmentPoint` : Parametric representation of segment E'E in complex plane
-- `segmentPointPlane` : Parametric representation of segment E'E in Plane
 - `translation_length_1`, `translation_length_2`, `segment_length` : Segment lengths
 
 ## References
@@ -70,10 +69,6 @@ noncomputable abbrev t_G : ℝ := psi
     At t=0, this gives E'; at t=1, this gives E.
     The segment passes through F at t=t_F and G at t=t_G. -/
 noncomputable def segmentPoint (t : ℝ) : ℂ := E' + t • (E - E')
-
-/-- Segment parameterization in Plane coordinates. -/
-noncomputable def segmentPointPlane (t : ℝ) : Plane :=
-  toPlane (segmentPoint t)
 
 /-! ### Translation and Segment Lengths -/
 

@@ -18,7 +18,6 @@ All definitions here should be human-reviewable for mathematical correctness.
 ## Main definitions
 - `φ` : The golden ratio (1 + √5)/2
 - `r_crit` : The critical radius √(3 + φ)
-- `Plane` : The Euclidean plane ℝ²
 - `Word` : Group words as lists of generator indices
 -/
 
@@ -27,9 +26,6 @@ namespace TDCSG.Definitions
 open Real
 
 /-! ### Type Aliases -/
-
-/-- The Euclidean plane ℝ². -/
-abbrev Plane := EuclideanSpace ℝ (Fin 2)
 
 /-- Generator for the group action. -/
 inductive Generator where

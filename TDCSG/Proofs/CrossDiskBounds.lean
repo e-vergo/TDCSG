@@ -1224,17 +1224,225 @@ lemma A_w3_z1_at_c_lower : (ζ₅^4 - 2 : ℂ) + (c_lower_word3 : ℂ) * (1 - ζ
   push_cast
   ring
 
+/-- At c = 1: A + B = (ζ₅⁴ - 2) + (1 - ζ₅) = ζ₅⁴ - ζ₅ - 1 -/
+lemma A_w3_z1_at_c_one : (ζ₅^4 - 2 : ℂ) + (1 : ℂ) * (1 - ζ₅) = ζ₅^4 - ζ₅ - 1 := by ring
 
-/-! ### Word3 cross-disk bounds (sorry-stubs for now)
+/-- Re(ζ₅⁴ - ζ₅ - 1) = (√5-1)/4 - (√5-1)/4 - 1 = -1 -/
+lemma w3_z1_at_one_re : (ζ₅^4 - ζ₅ - 1 : ℂ).re = -1 := by
+  simp only [Complex.sub_re, Complex.one_re]
+  rw [zeta5_pow4_re, zeta5_re]
+  ring
+
+/-- Im(ζ₅⁴ - ζ₅ - 1) = -sin(2π/5) - sin(2π/5) = -2sin(2π/5) -/
+lemma w3_z1_at_one_im : (ζ₅^4 - ζ₅ - 1 : ℂ).im = -2 * Real.sin (2 * π / 5) := by
+  simp only [Complex.sub_im, Complex.one_im]
+  rw [zeta5_pow4_im', zeta5_im_eq_sin]
+  ring
+
+/-- |ζ₅⁴ - ζ₅ - 1|² = 1 + 4sin²(2π/5) = (7+√5)/2 = 3 + φ -/
+lemma normSq_w3_z1_at_one : Complex.normSq (ζ₅^4 - ζ₅ - 1) = 3 + φ := by
+  rw [Complex.normSq_apply, w3_z1_at_one_re, w3_z1_at_one_im]
+  have h_sqrt5_sq : √5^2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
+  have h_sin_sq : Real.sin (2 * π / 5)^2 = (5 + √5) / 8 := sin_sq_two_pi_div_5
+  simp only [← sq]
+  calc (-1)^2 + (-2 * Real.sin (2 * π / 5))^2
+      = 1 + 4 * Real.sin (2 * π / 5)^2 := by ring
+    _ = 1 + 4 * ((5 + √5) / 8) := by rw [h_sin_sq]
+    _ = 1 + (5 + √5) / 2 := by ring
+    _ = (7 + √5) / 2 := by ring
+    _ = 3 + (1 + √5) / 2 := by ring
+    _ = 3 + φ := by unfold φ Real.goldenRatio; ring
+
+/-- Re(ζ₅⁴ - (2-√5)ζ₅ - √5) = (√5-1)/4 - (2-√5)(√5-1)/4 - √5 = 3(1-√5)/2 -/
+lemma w3_z1_at_lower_re : (ζ₅^4 - (2 - √5)*ζ₅ - √5 : ℂ).re = 3 * (1 - √5) / 2 := by
+  have h_expr : (ζ₅^4 - (2 - √5)*ζ₅ - √5 : ℂ) = ζ₅^4 - ((2 - √5 : ℝ) : ℂ) * ζ₅ - (√5 : ℂ) := by
+    push_cast; ring
+  rw [h_expr]
+  simp only [Complex.sub_re, Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im, sub_zero, zero_mul]
+  rw [zeta5_pow4_re, zeta5_re]
+  have h_sqrt5_sq : √5^2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
+  nlinarith [h_sqrt5_sq]
+
+/-- Im(ζ₅⁴ - (2-√5)ζ₅ - √5) = -sin(2π/5) - (2-√5)sin(2π/5) = -(3-√5)sin(2π/5) -/
+lemma w3_z1_at_lower_im : (ζ₅^4 - (2 - √5)*ζ₅ - √5 : ℂ).im = -(3 - √5) * Real.sin (2 * π / 5) := by
+  have h_expr : (ζ₅^4 - (2 - √5)*ζ₅ - √5 : ℂ) = ζ₅^4 - ((2 - √5 : ℝ) : ℂ) * ζ₅ - (√5 : ℂ) := by
+    push_cast; ring
+  rw [h_expr]
+  simp only [Complex.sub_im, Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im, zero_mul, sub_zero]
+  rw [zeta5_pow4_im', zeta5_im_eq_sin]
+  ring
+
+/-- |ζ₅⁴ - (2-√5)ζ₅ - √5|² = (37 - 13√5)/2 < 3 + φ -/
+lemma normSq_w3_z1_at_lower : Complex.normSq (ζ₅^4 - (2 - √5)*ζ₅ - √5) ≤ 3 + φ := by
+  rw [Complex.normSq_apply, w3_z1_at_lower_re, w3_z1_at_lower_im]
+  have h_sqrt5_sq : √5^2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
+  have h_sin_sq : Real.sin (2 * π / 5)^2 = (5 + √5) / 8 := sin_sq_two_pi_div_5
+  simp only [← sq]
+  have h1 : (3 * (1 - √5) / 2)^2 = 9 * (6 - 2*√5) / 4 := by nlinarith [h_sqrt5_sq]
+  have h2 : (-(3 - √5) * Real.sin (2 * π / 5))^2 = (3 - √5)^2 * Real.sin (2 * π / 5)^2 := by ring
+  have h3 : (3 - √5)^2 = 14 - 6*√5 := by nlinarith [h_sqrt5_sq]
+  rw [h1, h2, h_sin_sq, h3]
+  have h4 : (14 - 6*√5) * ((5 + √5) / 8) = 5 - 2*√5 := by nlinarith [h_sqrt5_sq]
+  rw [h4]
+  unfold φ Real.goldenRatio
+  nlinarith [h_sqrt5_sq, Real.sqrt_nonneg 5]
+
+/-! ### Word3 cross-disk bounds
 
 These lemmas prove that intermediate points in word3 application stay within
 the disk intersection for c ∈ [2-√5, 1].
 -/
 
+set_option maxHeartbeats 1200000 in
 /-- z1 bound for word3: ‖(ζ₅⁴ - 2) + c*(1 - ζ₅)‖ ≤ r_crit for c ∈ [2-√5, 1] -/
 lemma cross_disk_w3_z1_bound (c : ℝ) (hc_lo : 2 - √5 ≤ c) (hc_hi : c ≤ 1) :
     ‖(ζ₅^4 - 2 : ℂ) + (c : ℂ) * (1 - ζ₅)‖ ≤ r_crit := by
-  sorry
+  set A : ℂ := ζ₅^4 - 2 with hA_def
+  set B : ℂ := 1 - ζ₅ with hB_def
+
+  rw [show r_crit = Real.sqrt (3 + φ) by unfold r_crit; rfl]
+  have h3φ_pos : 0 < 3 + φ := by unfold φ; linarith [goldenRatio_pos]
+  rw [Real.le_sqrt (norm_nonneg _) (le_of_lt h3φ_pos)]
+
+  have h_sqrt5_sq : √5^2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
+
+  have h_at_one : ‖A + (1 : ℂ) * B‖^2 = 3 + φ := by
+    rw [hA_def, hB_def]
+    rw [← Complex.normSq_eq_norm_sq]
+    have h_expr : (ζ₅^4 - 2 : ℂ) + (1 : ℂ) * (1 - ζ₅) = ζ₅^4 - ζ₅ - 1 := by ring
+    rw [h_expr]
+    exact normSq_w3_z1_at_one
+
+  have h_at_lower : ‖A + ((2 - √5 : ℝ) : ℂ) * B‖^2 ≤ 3 + φ := by
+    rw [hA_def, hB_def]
+    rw [← Complex.normSq_eq_norm_sq]
+    have h_expr : (ζ₅^4 - 2 : ℂ) + ((2 - √5 : ℝ) : ℂ) * (1 - ζ₅) = ζ₅^4 - (2 - √5)*ζ₅ - √5 := by
+      push_cast; ring
+    rw [h_expr]
+    exact normSq_w3_z1_at_lower
+
+  have h_re_AB := re_A_w3_z1_mul_conj_B
+  have h_normSq_B := normSq_B4
+  have h_normSq_A := normSq_A_w3_z1
+  have h_vertex := w3_z1_vertex
+  have h_vertex_in := w3_z1_vertex_in_interval
+
+  have h_normSq_expand : ∀ t : ℝ, Complex.normSq (A + (t : ℂ) * B) =
+      Complex.normSq A + 2 * t * (A * starRingEnd ℂ B).re + t^2 * Complex.normSq B := by
+    intro t
+    rw [Complex.normSq_add]
+    have h_conj_t : starRingEnd ℂ (t : ℂ) = (t : ℂ) := Complex.conj_ofReal t
+    have h_normSq_t : Complex.normSq (t : ℂ) = t^2 := by rw [Complex.normSq_ofReal]; ring
+    rw [Complex.normSq_mul, h_normSq_t]
+    simp only [map_mul, h_conj_t]
+    have h_re_scale : (A * ((t : ℂ) * starRingEnd ℂ B)).re = t * (A * starRingEnd ℂ B).re := by
+      have h_assoc : A * ((t : ℂ) * starRingEnd ℂ B) = (t : ℂ) * (A * starRingEnd ℂ B) := by ring
+      rw [h_assoc, Complex.re_ofReal_mul]
+    rw [h_re_scale]
+    ring
+
+  have h_normSq_B_pos : 0 < Complex.normSq B := by
+    rw [hB_def, h_normSq_B]
+    have h_sqrt5_lt5 : √5 < 5 := by nlinarith [h_sqrt5_sq]
+    linarith
+
+  rw [hA_def, hB_def]
+  rw [← Complex.normSq_eq_norm_sq]
+
+  have h_coeff_a : Complex.normSq (1 - ζ₅) = (5 - √5) / 2 := normSq_B4
+  have h_coeff_b : ((ζ₅^4 - 2 : ℂ) * starRingEnd ℂ (1 - ζ₅)).re = (2*√5 - 5) / 2 := re_A_w3_z1_mul_conj_B
+  have h_coeff_c : Complex.normSq (ζ₅^4 - 2) = 6 - √5 := normSq_A_w3_z1
+
+  have h_f_le_max : Complex.normSq ((ζ₅^4 - 2) + (c : ℂ) * (1 - ζ₅)) ≤ 3 + φ := by
+    rw [h_normSq_expand c]
+    rw [show A = ζ₅^4 - 2 by rfl, show B = 1 - ζ₅ by rfl]
+    rw [h_coeff_c, h_coeff_b, h_coeff_a]
+
+    have h_f_at_1 : 6 - √5 + 2 * 1 * ((2*√5 - 5) / 2) + 1^2 * ((5 - √5) / 2) = 3 + φ := by
+      unfold φ Real.goldenRatio
+      nlinarith [h_sqrt5_sq]
+
+    have h_diff : (6 - √5 + 2 * c * ((2*√5 - 5) / 2) + c^2 * ((5 - √5) / 2)) -
+                  (6 - √5 + 2 * 1 * ((2*√5 - 5) / 2) + 1^2 * ((5 - √5) / 2)) =
+                  (c - 1) * ((2*√5 - 5) + (c + 1) * ((5 - √5) / 2)) := by ring
+
+    have h_a_pos : (5 - √5) / 2 > 0 := by nlinarith [h_sqrt5_sq]
+
+    have h_lower : 2 - √5 = c_lower_word3 := by unfold c_lower_word3; rfl
+
+    have h_at_lower' : 6 - √5 + 2 * (2 - √5) * ((2*√5 - 5) / 2) + (2 - √5)^2 * ((5 - √5) / 2) ≤ 3 + φ := by
+      have h_eq : 6 - √5 + 2 * (2 - √5) * ((2*√5 - 5) / 2) + (2 - √5)^2 * ((5 - √5) / 2) =
+                  Complex.normSq (ζ₅^4 - (2 - √5)*ζ₅ - √5) := by
+        rw [Complex.normSq_apply, w3_z1_at_lower_re, w3_z1_at_lower_im]
+        simp only [← sq]
+        have h_sin_sq : Real.sin (2 * π / 5)^2 = (5 + √5) / 8 := sin_sq_two_pi_div_5
+        nlinarith [h_sqrt5_sq, Real.sin_nonneg_of_nonneg_of_le_pi
+          (by linarith [Real.pi_pos] : 0 ≤ 2 * π / 5)
+          (by linarith [Real.pi_pos] : 2 * π / 5 ≤ π), h_sin_sq]
+      rw [h_eq]
+      exact normSq_w3_z1_at_lower
+
+    by_cases hc_lt_vertex : c < (3 - √5) / 4
+    · have h_deriv_neg : c * ((5 - √5) / 2) * 2 + 2 * ((2*√5 - 5) / 2) < 0 := by
+        have h1 : c * ((5 - √5) / 2) * 2 + 2 * ((2*√5 - 5) / 2) = c * (5 - √5) + (2*√5 - 5) := by ring
+        rw [h1]
+        have h_5_minus_sqrt5_pos : 5 - √5 > 0 := by nlinarith [h_sqrt5_sq]
+        have h_vertex_eq : (5 - 2*√5) / (5 - √5) = (3 - √5) / 4 := by
+          field_simp
+          nlinarith [h_sqrt5_sq]
+        have h_ineq : c * (5 - √5) < 5 - 2*√5 := by
+          calc c * (5 - √5) < (3 - √5) / 4 * (5 - √5) := by
+                apply mul_lt_mul_of_pos_right hc_lt_vertex h_5_minus_sqrt5_pos
+            _ = (5 - 2*√5) := by nlinarith [h_sqrt5_sq]
+        linarith
+
+      have h_mono : ∀ c₁ c₂ : ℝ, 2 - √5 ≤ c₁ → c₁ ≤ c₂ → c₂ ≤ (3 - √5) / 4 →
+          6 - √5 + 2 * c₂ * ((2*√5 - 5) / 2) + c₂^2 * ((5 - √5) / 2) ≤
+          6 - √5 + 2 * c₁ * ((2*√5 - 5) / 2) + c₁^2 * ((5 - √5) / 2) := by
+        intro c₁ c₂ _ hc12 hc2v
+        have h_diff2 : (6 - √5 + 2 * c₂ * ((2*√5 - 5) / 2) + c₂^2 * ((5 - √5) / 2)) -
+                      (6 - √5 + 2 * c₁ * ((2*√5 - 5) / 2) + c₁^2 * ((5 - √5) / 2)) =
+                      (c₂ - c₁) * ((2*√5 - 5) + (c₁ + c₂) * ((5 - √5) / 2)) := by ring
+        have h_sum_bound : c₁ + c₂ ≤ 2 * (3 - √5) / 4 := by linarith
+        have h_factor_neg : (2*√5 - 5) + (c₁ + c₂) * ((5 - √5) / 2) ≤ 0 := by
+          have h_5_minus_sqrt5_pos : 5 - √5 > 0 := by nlinarith [h_sqrt5_sq]
+          have h_at_2v : (2*√5 - 5) + (2 * (3 - √5) / 4) * ((5 - √5) / 2) = 0 := by
+            nlinarith [h_sqrt5_sq]
+          calc (2*√5 - 5) + (c₁ + c₂) * ((5 - √5) / 2)
+              ≤ (2*√5 - 5) + (2 * (3 - √5) / 4) * ((5 - √5) / 2) := by gcongr
+            _ = 0 := h_at_2v
+        nlinarith [hc12, h_factor_neg]
+
+      calc 6 - √5 + 2 * c * ((2*√5 - 5) / 2) + c^2 * ((5 - √5) / 2)
+          ≤ 6 - √5 + 2 * (2 - √5) * ((2*√5 - 5) / 2) + (2 - √5)^2 * ((5 - √5) / 2) := by
+            apply h_mono (2 - √5) c (le_refl _) hc_lo (le_of_lt hc_lt_vertex)
+        _ ≤ 3 + φ := h_at_lower'
+
+    · push_neg at hc_lt_vertex
+
+      have h_mono : ∀ c₁ c₂ : ℝ, (3 - √5) / 4 ≤ c₁ → c₁ ≤ c₂ → c₂ ≤ 1 →
+          6 - √5 + 2 * c₁ * ((2*√5 - 5) / 2) + c₁^2 * ((5 - √5) / 2) ≤
+          6 - √5 + 2 * c₂ * ((2*√5 - 5) / 2) + c₂^2 * ((5 - √5) / 2) := by
+        intro c₁ c₂ hc1v hc12 _
+        have h_diff2 : (6 - √5 + 2 * c₂ * ((2*√5 - 5) / 2) + c₂^2 * ((5 - √5) / 2)) -
+                      (6 - √5 + 2 * c₁ * ((2*√5 - 5) / 2) + c₁^2 * ((5 - √5) / 2)) =
+                      (c₂ - c₁) * ((2*√5 - 5) + (c₁ + c₂) * ((5 - √5) / 2)) := by ring
+        have h_sum_bound : c₁ + c₂ ≥ 2 * (3 - √5) / 4 := by linarith
+        have h_factor_pos : (2*√5 - 5) + (c₁ + c₂) * ((5 - √5) / 2) ≥ 0 := by
+          have h_5_minus_sqrt5_pos : 5 - √5 > 0 := by nlinarith [h_sqrt5_sq]
+          have h_at_2v : (2*√5 - 5) + (2 * (3 - √5) / 4) * ((5 - √5) / 2) = 0 := by
+            nlinarith [h_sqrt5_sq]
+          calc (2*√5 - 5) + (c₁ + c₂) * ((5 - √5) / 2)
+              ≥ (2*√5 - 5) + (2 * (3 - √5) / 4) * ((5 - √5) / 2) := by gcongr
+            _ = 0 := h_at_2v
+        nlinarith [hc12, h_factor_pos]
+
+      calc 6 - √5 + 2 * c * ((2*√5 - 5) / 2) + c^2 * ((5 - √5) / 2)
+          ≤ 6 - √5 + 2 * 1 * ((2*√5 - 5) / 2) + 1^2 * ((5 - √5) / 2) := by
+            apply h_mono c 1 hc_lt_vertex hc_hi (le_refl 1)
+        _ = 3 + φ := h_f_at_1
+
+  exact h_f_le_max
 
 /-- z2 bound for word3: ‖(2 + ζ₅³ - 2*ζ₅⁴) + c*(ζ₅⁴ - 1)‖ ≤ r_crit for c ∈ [2-√5, 1] -/
 lemma cross_disk_w3_z2_bound (c : ℝ) (hc_lo : 2 - √5 ≤ c) (hc_hi : c ≤ 1) :
