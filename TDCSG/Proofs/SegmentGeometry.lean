@@ -25,26 +25,31 @@ open Complex Real TDCSG.Definitions
 
 /-- E is nonzero. -/
 lemma E_ne_zero : E ≠ 0 := by
-  -- E = ζ₅ - ζ₅². If E = 0, then ζ₅ = ζ₅², so ζ₅(1 - ζ₅) = 0.
-  -- Since ζ₅ ≠ 0 (it's a root of unity), we have ζ₅ = 1, contradicting zeta5_ne_one.
+  -- E = ζ₅⁴ - ζ₅³. If E = 0, then ζ₅⁴ = ζ₅³, so ζ₅³(ζ₅ - 1) = 0.
+  -- Since ζ₅³ ≠ 0 (ζ₅ is a root of unity), we have ζ₅ = 1, contradicting zeta5_ne_one.
   intro h
   unfold E at h
-  have h2 : ζ₅ * (1 - ζ₅) = 0 := by
-    calc ζ₅ * (1 - ζ₅) = ζ₅ - ζ₅^2 := by ring
+  have h2 : ζ₅^3 * (ζ₅ - 1) = 0 := by
+    calc ζ₅^3 * (ζ₅ - 1) = ζ₅^4 - ζ₅^3 := by ring
                      _ = 0 := h
-  have h3 : ζ₅ ≠ 0 := by
+  have h3 : ζ₅^3 ≠ 0 := by
     intro h0
     have : (0 : ℂ) ^ 5 = 1 := by
-      calc (0 : ℂ) ^ 5 = ζ₅ ^ 5 := by rw [← h0]
-                     _ = 1 := zeta5_pow_five
+      have h3_pow : (ζ₅^3)^5 = 1 := by
+        calc (ζ₅^3)^5 = ζ₅^15 := by ring
+          _ = (ζ₅^5)^3 := by ring
+          _ = 1^3 := by rw [zeta5_pow_five]
+          _ = 1 := by ring
+      calc (0 : ℂ) ^ 5 = (ζ₅^3) ^ 5 := by rw [← h0]
+                     _ = 1 := h3_pow
     norm_num at this
-  have h4 : 1 - ζ₅ = 0 := by
+  have h4 : ζ₅ - 1 = 0 := by
     exact (mul_eq_zero.mp h2).resolve_left h3
   have : ζ₅ = 1 := by
     have h5 : 1 = ζ₅ := by
-      calc 1 = 1 - 0 := by simp
-           _ = 1 - (1 - ζ₅) := by rw [← h4]
-           _ = ζ₅ := by simp
+      calc 1 = 0 + 1 := by simp
+           _ = (ζ₅ - 1) + 1 := by rw [← h4]
+           _ = ζ₅ := by ring
     exact h5.symm
   exact zeta5_ne_one this
 

@@ -12,7 +12,7 @@ This file defines the key geometric points E, E', F, G on segment E'E
 that are critical for the interval exchange transformation analysis.
 
 ## Main definitions
-- `E` : ζ₅ - ζ₅² - key point in complex plane
+- `E` : ζ₅⁴ - ζ₅³ - key point in complex plane (clockwise rotation convention)
 - `E'` : -E - reflection of E
 - `F`, `G` : Points on segment E'E
 - `psi` : Positive golden conjugate = -Real.goldenConj
@@ -29,16 +29,21 @@ open TDCSG.CompoundSymmetry.GG5
 
 /-! ### Key Geometric Points -/
 
-/-- Point E: E = zeta5 - zeta5^2.
+/-- Point E: E = ζ₅⁴ - ζ₅³ = ζ₅⁻¹ - ζ₅⁻².
+    This is the segment direction compatible with CLOCKWISE rotation convention.
     CRITICAL: Per the paper (Theorem 2, page 4), |E + 1| = r_crit,
-    meaning E lies on the LEFT disk boundary, not the right! -/
-noncomputable def E : ℂ := ζ₅ - ζ₅^2
+    meaning E lies on the LEFT disk boundary, not the right!
+
+    Note: This equals conj(ζ₅ - ζ₅²), the conjugate of the counterclockwise convention. -/
+noncomputable def E : ℂ := ζ₅^4 - ζ₅^3
 
 /-- Point E': the negation of E. -/
 noncomputable def E' : ℂ := -E
 
-/-- Point F on segment E'E: F = 1 - zeta5 + zeta5^2 - zeta5^3. -/
-noncomputable def F : ℂ := 1 - ζ₅ + ζ₅^2 - ζ₅^3
+/-- Point F on segment E'E: F = 1 - ζ₅⁴ + ζ₅³ - ζ₅².
+    This is compatible with clockwise rotation convention.
+    F = (1/φ) * E where φ is the golden ratio. -/
+noncomputable def F : ℂ := 1 - ζ₅^4 + ζ₅^3 - ζ₅^2
 
 /-- Point G on segment E'E: G = 2F - E. -/
 noncomputable def G : ℂ := 2 * F - E

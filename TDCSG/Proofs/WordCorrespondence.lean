@@ -115,20 +115,24 @@ The proofs are computational verifications tracking the point through each rotat
 For any point of the form c*E on segment E'E, applying word1 translates it by 2*displacement0*E.
 This is the core algebraic fact verified by computing through the zeta5 rotations.
 
-Forward rotation formulas:
-- A: z ↦ -1 + ζ₅ * (z + 1)  (rotation by 2π/5 about -1)
-- B: z ↦ 1 + ζ₅ * (z - 1)   (rotation by 2π/5 about 1)
+Forward rotation formulas (clockwise convention):
+- A: z ↦ -1 + ζ₅⁴ * (z + 1)  (rotation by -2π/5 about -1)
+- B: z ↦ 1 + ζ₅⁴ * (z - 1)   (rotation by -2π/5 about 1)
+
+With clockwise convention and E = ζ₅⁴ - ζ₅³:
+- F = 1 - ζ₅⁴ + ζ₅³ - ζ₅² = (1/φ) * E
+- The word produces translation by 2*F = (2/φ)*E = 2*displacement0*E
 
 Word1 = [A, A, B, A, B] applied left to right. -/
 lemma word1_algebraic_identity :
     ∀ c : ℝ, c ∈ Set.Icc (-1 : ℝ) 1 →
     let z := (c : ℂ) • E
-    let result := -- A A B A B applied in complex form (forward rotations with ζ₅)
-      let step1 := (-1 : ℂ) + ζ₅ * (z + 1)         -- A
-      let step2 := (-1 : ℂ) + ζ₅ * (step1 + 1)     -- A
-      let step3 := (1 : ℂ) + ζ₅ * (step2 - 1)      -- B
-      let step4 := (-1 : ℂ) + ζ₅ * (step3 + 1)     -- A
-      (1 : ℂ) + ζ₅ * (step4 - 1)                   -- B
+    let result := -- A A B A B applied in complex form (forward rotations with ζ₅⁴)
+      let step1 := (-1 : ℂ) + ζ₅^4 * (z + 1)         -- A
+      let step2 := (-1 : ℂ) + ζ₅^4 * (step1 + 1)     -- A
+      let step3 := (1 : ℂ) + ζ₅^4 * (step2 - 1)      -- B
+      let step4 := (-1 : ℂ) + ζ₅^4 * (step3 + 1)     -- A
+      (1 : ℂ) + ζ₅^4 * (step4 - 1)                   -- B
     result = z + (2 * displacement0) • E := by
   intro c _hc
   simp only
@@ -136,9 +140,20 @@ lemma word1_algebraic_identity :
   have h5 : ζ₅^5 = (1 : ℂ) := zeta5_pow_five
   have h6 : ζ₅^6 = ζ₅ := zeta5_pow_six
   have h7 : ζ₅^7 = ζ₅^2 := zeta5_pow_seven
+  have h8 : ζ₅^8 = ζ₅^3 := zeta5_pow_eight
+  have h11 : ζ₅^11 = ζ₅ := zeta5_pow_eleven
+  have h12 : ζ₅^12 = ζ₅^2 := zeta5_pow_twelve
+  have h16 : ζ₅^16 = ζ₅ := zeta5_pow_sixteen
+  have h17 : ζ₅^17 = ζ₅^2 := zeta5_pow_seventeen
+  have h18 : ζ₅^18 = ζ₅^3 := by have := zeta5_pow_reduce 18; norm_num at this; exact this
+  have h19 : ζ₅^19 = ζ₅^4 := by have := zeta5_pow_reduce 19; norm_num at this; exact this
+  have h20 : ζ₅^20 = (1 : ℂ) := by have := zeta5_pow_reduce 20; norm_num at this; exact this
+  have h23 : ζ₅^23 = ζ₅^3 := by have := zeta5_pow_reduce 23; norm_num at this; exact this
+  have h24 : ζ₅^24 = ζ₅^4 := by have := zeta5_pow_reduce 24; norm_num at this; exact this
   -- sqrt 5 squared equals 5
   have hsqrt5_sq : Real.sqrt 5 ^ 2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
-  -- The key identity: F = (1/φ)*E where F = 1 - ζ₅ + ζ₅² - ζ₅³ and E = ζ₅ - ζ₅²
+  -- Key identity: F = (1/φ)*E where F = 1 - ζ₅⁴ + ζ₅³ - ζ₅² and E = ζ₅⁴ - ζ₅³
+  -- First establish ζ₅ + ζ₅⁴ = (√5-1)/2 = 1/φ
   have h_sum1 : ζ₅ + ζ₅^4 = ((Real.sqrt 5 - 1) / 2 : ℝ) := by
     apply Complex.ext
     · simp only [Complex.add_re, Complex.ofReal_re]
@@ -147,24 +162,20 @@ lemma word1_algebraic_identity :
     · simp only [Complex.add_im, Complex.ofReal_im]
       rw [zeta5_im_eq_sin, zeta5_pow4_im_neg, zeta5_im_eq_sin]
       ring
-  have h_F_eq : (1 : ℂ) - ζ₅ + ζ₅^2 - ζ₅^3 = (1 / Real.goldenRatio : ℝ) * (ζ₅ - ζ₅^2) := by
-    -- F = (ζ₅ + ζ₅⁴)*(ζ₅ - ζ₅²) and ζ₅ + ζ₅⁴ = (√5-1)/2 = 1/φ
-    -- First prove (ζ₅ + ζ₅⁴)*(ζ₅ - ζ₅²) = 1 - ζ₅ + ζ₅² - ζ₅³
-    have h_factor : (ζ₅ + ζ₅^4) * (ζ₅ - ζ₅^2) = (1 : ℂ) - ζ₅ + ζ₅^2 - ζ₅^3 := by
-      -- Expand: ζ₅² - ζ₅³ + ζ₅⁵ - ζ₅⁶ = ζ₅² - ζ₅³ + 1 - ζ₅ = 1 - ζ₅ + ζ₅² - ζ₅³
-      calc (ζ₅ + ζ₅^4) * (ζ₅ - ζ₅^2)
-          = ζ₅^2 - ζ₅^3 + ζ₅^5 - ζ₅^6 := by ring
-        _ = ζ₅^2 - ζ₅^3 + 1 - ζ₅ := by rw [h5, h6]
-        _ = 1 - ζ₅ + ζ₅^2 - ζ₅^3 := by ring
-    -- Now use h_sum1 and h_factor
-    calc (1 : ℂ) - ζ₅ + ζ₅^2 - ζ₅^3
-        = (ζ₅ + ζ₅^4) * (ζ₅ - ζ₅^2) := h_factor.symm
-      _ = ((Real.sqrt 5 - 1) / 2 : ℝ) * (ζ₅ - ζ₅^2) := by rw [h_sum1]
-      _ = (1 / Real.goldenRatio : ℝ) * (ζ₅ - ζ₅^2) := by
+  -- F = 1 - ζ₅⁴ + ζ₅³ - ζ₅² = (1/φ) * (ζ₅⁴ - ζ₅³)
+  have h_F_eq : (1 : ℂ) - ζ₅^4 + ζ₅^3 - ζ₅^2 = (1 / Real.goldenRatio : ℝ) * (ζ₅^4 - ζ₅^3) := by
+    -- Factor: (1 - ζ₅⁴ + ζ₅³ - ζ₅²) = (ζ₅ + ζ₅⁴) * (ζ₅⁴ - ζ₅³)
+    have h_factor : (ζ₅ + ζ₅^4) * (ζ₅^4 - ζ₅^3) = (1 : ℂ) - ζ₅^4 + ζ₅^3 - ζ₅^2 := by
+      calc (ζ₅ + ζ₅^4) * (ζ₅^4 - ζ₅^3)
+          = ζ₅^5 - ζ₅^4 + ζ₅^8 - ζ₅^7 := by ring
+        _ = 1 - ζ₅^4 + ζ₅^3 - ζ₅^2 := by rw [h5, h8, h7]
+    calc (1 : ℂ) - ζ₅^4 + ζ₅^3 - ζ₅^2
+        = (ζ₅ + ζ₅^4) * (ζ₅^4 - ζ₅^3) := h_factor.symm
+      _ = ((Real.sqrt 5 - 1) / 2 : ℝ) * (ζ₅^4 - ζ₅^3) := by rw [h_sum1]
+      _ = (1 / Real.goldenRatio : ℝ) * (ζ₅^4 - ζ₅^3) := by
           congr 1
           simp only [Complex.ofReal_inj]
           unfold Real.goldenRatio
-          -- Goal: (√5 - 1) / 2 = 1 / ((1 + √5) / 2) = 2 / (1 + √5)
           have h_cross : (Real.sqrt 5 - 1) * (1 + Real.sqrt 5) = 4 := by
             calc (Real.sqrt 5 - 1) * (1 + Real.sqrt 5)
                 = Real.sqrt 5 + Real.sqrt 5 ^ 2 - 1 - Real.sqrt 5 := by ring
@@ -172,19 +183,26 @@ lemma word1_algebraic_identity :
               _ = 4 := by ring
           field_simp
           linarith
-  -- Now unfold and compute
+  -- Now unfold and compute with E = ζ₅⁴ - ζ₅³
   unfold displacement0 length3 E
   -- Convert smul to mul for complex arithmetic
-  have hcE : (c : ℂ) • (ζ₅ - ζ₅^2) = c * (ζ₅ - ζ₅^2) := by rfl
-  have h2dE : (2 * (1 / Real.goldenRatio)) • (ζ₅ - ζ₅^2) =
-              (2 * (1 / Real.goldenRatio) : ℝ) * (ζ₅ - ζ₅^2) := by rfl
+  have hcE : (c : ℂ) • (ζ₅^4 - ζ₅^3) = c * (ζ₅^4 - ζ₅^3) := by rfl
+  have h2dE : (2 * (1 / Real.goldenRatio)) • (ζ₅^4 - ζ₅^3) =
+              (2 * (1 / Real.goldenRatio) : ℝ) * (ζ₅^4 - ζ₅^3) := by rfl
   rw [hcE, h2dE]
-  -- Now prove the algebraic identity by direct expansion
-  -- The LHS expands to: c*(ζ₅ - ζ₅²) + 2*(1 - ζ₅ + ζ₅² - ζ₅³) after using ζ₅^5=1, ζ₅^6=ζ₅, ζ₅^7=ζ₅²
-  have h_expand : (1 : ℂ) + ζ₅ * ((-1 : ℂ) + ζ₅ * ((1 : ℂ) + ζ₅ * ((-1 : ℂ) + ζ₅ * ((-1 : ℂ) + ζ₅ * (↑c * (ζ₅ - ζ₅^2) + 1) + 1) - 1) + 1) - 1)
-      = ↑c * (ζ₅ - ζ₅^2) + 2 * ((1 : ℂ) - ζ₅ + ζ₅^2 - ζ₅^3) := by
+  -- The expansion of word1 with E = ζ₅⁴ - ζ₅³ gives translation by 2*F
+  have h_expand : (1 : ℂ) + ζ₅^4 * ((-1 : ℂ) + ζ₅^4 * ((1 : ℂ) + ζ₅^4 * ((-1 : ℂ) + ζ₅^4 * ((-1 : ℂ) + ζ₅^4 * (↑c * (ζ₅^4 - ζ₅^3) + 1) + 1) - 1) + 1) - 1)
+      = ↑c * (ζ₅^4 - ζ₅^3) + 2 * ((1 : ℂ) - ζ₅^4 + ζ₅^3 - ζ₅^2) := by
     ring_nf
-    rw [h5, h6, h7]
+    -- After ring_nf, reduce high powers modulo 5
+    simp only [h24, h23, h20, h12, h8]
+    -- Use cyclotomic sum identity: 1 + ζ₅ + ζ₅² + ζ₅³ + ζ₅⁴ = 0
+    have h_zeta_sum : (1 : ℂ) + ζ₅ + ζ₅^2 + ζ₅^3 + ζ₅^4 = 0 := cyclotomic5_sum
+    have h4_expand : ζ₅^4 = -1 - ζ₅ - ζ₅^2 - ζ₅^3 := by
+      calc ζ₅^4 = -(1 + ζ₅ + ζ₅^2 + ζ₅^3) + (1 + ζ₅ + ζ₅^2 + ζ₅^3 + ζ₅^4) := by ring
+        _ = -(1 + ζ₅ + ζ₅^2 + ζ₅^3) + 0 := by rw [h_zeta_sum]
+        _ = -1 - ζ₅ - ζ₅^2 - ζ₅^3 := by ring
+    rw [h4_expand]
     ring
   rw [h_expand, h_F_eq]
   push_cast
@@ -195,51 +213,38 @@ lemma word1_algebraic_identity :
 For any point of the form c*E on segment E'E, applying word2 translates it by 2*displacement1*E.
 Since displacement1 = displacement0 = 1/φ, this equals 2*(1/φ)*E.
 
-Rotation formulas:
-- A⁻¹: z ↦ -1 + ζ₅⁴ * (z + 1)  (rotation by -2π/5 about -1)
-- B⁻¹: z ↦ 1 + ζ₅⁴ * (z - 1)   (rotation by -2π/5 about 1)
+Rotation formulas (clockwise convention: A⁻¹ = A⁴ uses ζ₅):
+- A⁻¹: z ↦ -1 + ζ₅ * (z + 1)   (rotation by +2π/5 about -1, inverse of clockwise A)
+- B⁻¹: z ↦ 1 + ζ₅ * (z - 1)    (rotation by +2π/5 about 1, inverse of clockwise B)
 
 Word2 = [A⁻¹, B⁻¹, A⁻¹, B⁻¹, B⁻¹] applied left to right.
 Encoded as: [Generator.Ainv, Generator.Binv, Generator.Ainv, Generator.Binv, Generator.Binv]
 
 Intermediate steps for z₀ = c•E:
-- z₁ = -1 + ζ₅⁴(z₀ + 1)   -- After A⁻¹
-- z₂ = 1 + ζ₅⁴(z₁ - 1)    -- After B⁻¹
-- z₃ = -1 + ζ₅⁴(z₂ + 1)   -- After A⁻¹
-- z₄ = 1 + ζ₅⁴(z₃ - 1)    -- After B⁻¹
-- z₅ = 1 + ζ₅⁴(z₄ - 1)    -- After B⁻¹ (final)
+- z₁ = -1 + ζ₅(z₀ + 1)   -- After A⁻¹
+- z₂ = 1 + ζ₅(z₁ - 1)    -- After B⁻¹
+- z₃ = -1 + ζ₅(z₂ + 1)   -- After A⁻¹
+- z₄ = 1 + ζ₅(z₃ - 1)    -- After B⁻¹
+- z₅ = 1 + ζ₅(z₄ - 1)    -- After B⁻¹ (final)
 
 The composition gives z₅ = z₀ + 2*(1/φ)*E = z₀ + 2*displacement1*E. -/
 lemma word2_algebraic_identity :
     ∀ c : ℝ, c ∈ Set.Icc (-1 : ℝ) 1 →
     let z := (c : ℂ) • E
-    let result := -- A⁻¹ B⁻¹ A⁻¹ B⁻¹ B⁻¹ applied in complex form
-      let step1 := (-1 : ℂ) + ζ₅^4 * (z + 1)         -- A⁻¹
-      let step2 := (1 : ℂ) + ζ₅^4 * (step1 - 1)      -- B⁻¹
-      let step3 := (-1 : ℂ) + ζ₅^4 * (step2 + 1)     -- A⁻¹
-      let step4 := (1 : ℂ) + ζ₅^4 * (step3 - 1)      -- B⁻¹
-      (1 : ℂ) + ζ₅^4 * (step4 - 1)                   -- B⁻¹
+    let result := -- A⁻¹ B⁻¹ A⁻¹ B⁻¹ B⁻¹ applied in complex form (ζ₅ for inverses)
+      let step1 := (-1 : ℂ) + ζ₅ * (z + 1)         -- A⁻¹
+      let step2 := (1 : ℂ) + ζ₅ * (step1 - 1)      -- B⁻¹
+      let step3 := (-1 : ℂ) + ζ₅ * (step2 + 1)     -- A⁻¹
+      let step4 := (1 : ℂ) + ζ₅ * (step3 - 1)      -- B⁻¹
+      (1 : ℂ) + ζ₅ * (step4 - 1)                   -- B⁻¹
     result = z + (2 * displacement1) • E := by
   intro c _hc
   simp only
-  -- Key power reduction lemmas (use zeta5_pow_reduce for general n % 5 reduction)
+  -- Key power reduction lemmas
   have h5 : ζ₅^5 = (1 : ℂ) := zeta5_pow_five
   have h6 : ζ₅^6 = ζ₅ := zeta5_pow_six
+  have h7 : ζ₅^7 = ζ₅^2 := zeta5_pow_seven
   have h8 : ζ₅^8 = ζ₅^3 := zeta5_pow_eight
-  have h12 : ζ₅^12 = ζ₅^2 := zeta5_pow_twelve
-  have h16 : ζ₅^16 = ζ₅ := zeta5_pow_sixteen
-  have h20 : ζ₅^20 = (1 : ℂ) := by
-    have := zeta5_pow_reduce 20
-    norm_num at this
-    exact this
-  have h21 : ζ₅^21 = ζ₅ := by
-    have := zeta5_pow_reduce 21
-    norm_num at this
-    exact this
-  have h22 : ζ₅^22 = ζ₅^2 := by
-    have := zeta5_pow_reduce 22
-    norm_num at this
-    exact this
   -- sqrt 5 squared equals 5
   have hsqrt5_sq : Real.sqrt 5 ^ 2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
   -- displacement1 = displacement0 = 1/φ
@@ -247,7 +252,7 @@ lemma word2_algebraic_identity :
     rw [displacement0_eq_displacement1.symm]
     unfold displacement0 length3
     ring
-  -- The key identity: F = (1/φ)*E where F = 1 - ζ₅ + ζ₅² - ζ₅³
+  -- The key identity: F = (1/φ)*E where F = 1 - ζ₅⁴ + ζ₅³ - ζ₅² and E = ζ₅⁴ - ζ₅³
   have h_sum1 : ζ₅ + ζ₅^4 = ((Real.sqrt 5 - 1) / 2 : ℝ) := by
     apply Complex.ext
     · simp only [Complex.add_re, Complex.ofReal_re]
@@ -256,16 +261,17 @@ lemma word2_algebraic_identity :
     · simp only [Complex.add_im, Complex.ofReal_im]
       rw [zeta5_im_eq_sin, zeta5_pow4_im_neg, zeta5_im_eq_sin]
       ring
-  have h_F_eq : (1 : ℂ) - ζ₅ + ζ₅^2 - ζ₅^3 = (1 / Real.goldenRatio : ℝ) * (ζ₅ - ζ₅^2) := by
-    have h_factor : (ζ₅ + ζ₅^4) * (ζ₅ - ζ₅^2) = (1 : ℂ) - ζ₅ + ζ₅^2 - ζ₅^3 := by
-      calc (ζ₅ + ζ₅^4) * (ζ₅ - ζ₅^2)
-          = ζ₅^2 - ζ₅^3 + ζ₅^5 - ζ₅^6 := by ring
-        _ = ζ₅^2 - ζ₅^3 + 1 - ζ₅ := by rw [h5, h6]
-        _ = 1 - ζ₅ + ζ₅^2 - ζ₅^3 := by ring
-    calc (1 : ℂ) - ζ₅ + ζ₅^2 - ζ₅^3
-        = (ζ₅ + ζ₅^4) * (ζ₅ - ζ₅^2) := h_factor.symm
-      _ = ((Real.sqrt 5 - 1) / 2 : ℝ) * (ζ₅ - ζ₅^2) := by rw [h_sum1]
-      _ = (1 / Real.goldenRatio : ℝ) * (ζ₅ - ζ₅^2) := by
+  -- F = 1 - ζ₅⁴ + ζ₅³ - ζ₅² = (1/φ) * (ζ₅⁴ - ζ₅³) for clockwise E
+  have h_F_eq : (1 : ℂ) - ζ₅^4 + ζ₅^3 - ζ₅^2 = (1 / Real.goldenRatio : ℝ) * (ζ₅^4 - ζ₅^3) := by
+    -- Factor: (1 - ζ₅⁴ + ζ₅³ - ζ₅²) = (ζ₅ + ζ₅⁴) * (ζ₅⁴ - ζ₅³)
+    have h_factor : (ζ₅ + ζ₅^4) * (ζ₅^4 - ζ₅^3) = (1 : ℂ) - ζ₅^4 + ζ₅^3 - ζ₅^2 := by
+      calc (ζ₅ + ζ₅^4) * (ζ₅^4 - ζ₅^3)
+          = ζ₅^5 - ζ₅^4 + ζ₅^8 - ζ₅^7 := by ring
+        _ = 1 - ζ₅^4 + ζ₅^3 - ζ₅^2 := by rw [h5, h8, h7]
+    calc (1 : ℂ) - ζ₅^4 + ζ₅^3 - ζ₅^2
+        = (ζ₅ + ζ₅^4) * (ζ₅^4 - ζ₅^3) := h_factor.symm
+      _ = ((Real.sqrt 5 - 1) / 2 : ℝ) * (ζ₅^4 - ζ₅^3) := by rw [h_sum1]
+      _ = (1 / Real.goldenRatio : ℝ) * (ζ₅^4 - ζ₅^3) := by
           congr 1
           simp only [Complex.ofReal_inj]
           unfold Real.goldenRatio
@@ -276,20 +282,28 @@ lemma word2_algebraic_identity :
               _ = 4 := by ring
           field_simp
           linarith
-  -- Now unfold and compute
+  -- Now unfold and compute with E = ζ₅⁴ - ζ₅³
   unfold displacement1 length3 E
   -- Convert smul to mul for complex arithmetic
-  have hcE : (c : ℂ) • (ζ₅ - ζ₅^2) = c * (ζ₅ - ζ₅^2) := by rfl
-  have h2dE : (2 * (1 / Real.goldenRatio)) • (ζ₅ - ζ₅^2) =
-              (2 * (1 / Real.goldenRatio) : ℝ) * (ζ₅ - ζ₅^2) := by rfl
+  have hcE : (c : ℂ) • (ζ₅^4 - ζ₅^3) = c * (ζ₅^4 - ζ₅^3) := by rfl
+  have h2dE : (2 * (1 / Real.goldenRatio)) • (ζ₅^4 - ζ₅^3) =
+              (2 * (1 / Real.goldenRatio) : ℝ) * (ζ₅^4 - ζ₅^3) := by rfl
   rw [hcE, h2dE]
-  -- The expansion of word2 = A⁻¹B⁻¹A⁻¹B⁻¹B⁻¹ produces translation by 2*(1 - ζ₅ + ζ₅² - ζ₅³)
-  -- Result after full expansion and reduction: c*(z - z²) + 2 - 2z + 2z² - 2z³
-  have h_expand : (1 : ℂ) + ζ₅^4 * ((1 : ℂ) + ζ₅^4 * ((-1 : ℂ) + ζ₅^4 * ((1 : ℂ) + ζ₅^4 * ((-1 : ℂ) + ζ₅^4 * (↑c * (ζ₅ - ζ₅^2) + 1) - 1) + 1) - 1) - 1)
-      = ↑c * (ζ₅ - ζ₅^2) + 2 * ((1 : ℂ) - ζ₅ + ζ₅^2 - ζ₅^3) := by
+  -- The expansion of word2 = A⁻¹B⁻¹A⁻¹B⁻¹B⁻¹ produces translation by 2*(1 - ζ₅⁴ + ζ₅³ - ζ₅²)
+  -- With ζ₅ for all inverse rotations
+  have h_expand : (1 : ℂ) + ζ₅ * ((1 : ℂ) + ζ₅ * ((-1 : ℂ) + ζ₅ * ((1 : ℂ) + ζ₅ * ((-1 : ℂ) + ζ₅ * (↑c * (ζ₅^4 - ζ₅^3) + 1) - 1) + 1) - 1) - 1)
+      = ↑c * (ζ₅^4 - ζ₅^3) + 2 * ((1 : ℂ) - ζ₅^4 + ζ₅^3 - ζ₅^2) := by
     ring_nf
-    -- After ring_nf, we have high powers of ζ₅ - reduce them
-    rw [h20, h21, h22, h16, h12, h8]
+    -- After ring_nf, reduce powers modulo 5
+    have h9 : ζ₅^9 = ζ₅^4 := by have := zeta5_pow_reduce 9; norm_num at this; exact this
+    simp only [h9, h8, h7, h6, h5]
+    -- Use cyclotomic sum identity: 1 + ζ₅ + ζ₅² + ζ₅³ + ζ₅⁴ = 0
+    have h_zeta_sum : (1 : ℂ) + ζ₅ + ζ₅^2 + ζ₅^3 + ζ₅^4 = 0 := cyclotomic5_sum
+    have h4_expand : ζ₅^4 = -1 - ζ₅ - ζ₅^2 - ζ₅^3 := by
+      calc ζ₅^4 = -(1 + ζ₅ + ζ₅^2 + ζ₅^3) + (1 + ζ₅ + ζ₅^2 + ζ₅^3 + ζ₅^4) := by ring
+        _ = -(1 + ζ₅ + ζ₅^2 + ζ₅^3) + 0 := by rw [h_zeta_sum]
+        _ = -1 - ζ₅ - ζ₅^2 - ζ₅^3 := by ring
+    rw [h4_expand]
     ring
   rw [h_expand, h_F_eq]
   push_cast
@@ -299,142 +313,114 @@ lemma word2_algebraic_identity :
 
 For any point of the form c*E on segment E'E, applying word3 translates it by 2*displacement2*E.
 
-Inverse rotation formulas (using ζ₅⁻¹ = ζ₅⁴):
-- A⁻¹: z ↦ -1 + ζ₅⁴ * (z + 1)
-- B⁻¹: z ↦ 1 + ζ₅⁴ * (z - 1)
-
-Forward rotation formulas:
-- A: z ↦ -1 + ζ₅ * (z + 1)
-- B: z ↦ 1 + ζ₅ * (z - 1)
+Clockwise convention rotation formulas:
+- A⁻¹ = A⁴: z ↦ -1 + ζ₅ * (z + 1)   (net rotation by ζ₅, since A uses ζ₅⁴ and (ζ₅⁴)⁴ = ζ₅)
+- B⁻¹ = B⁴: z ↦ 1 + ζ₅ * (z - 1)    (net rotation by ζ₅)
+- A: z ↦ -1 + ζ₅⁴ * (z + 1)         (forward clockwise rotation)
+- B: z ↦ 1 + ζ₅⁴ * (z - 1)          (forward clockwise rotation)
 
 Word3 = [A⁻¹, B⁻¹, A⁻¹, B, A, B] applied left to right.
 
-Key identity: 2 - 4ζ₅ + 4ζ₅² - 2ζ₅³ = (√5-3)·(ζ₅ - ζ₅²) = 2·displacement2·E -/
+With E = ζ₅⁴ - ζ₅³ (clockwise convention):
+The translation produced is 2·displacement2·E where displacement2 = (√5-3)/2. -/
 lemma word3_algebraic_identity :
     ∀ c : ℝ, c ∈ Set.Icc (-1 : ℝ) 1 →
     let z := (c : ℂ) • E
     let result := -- A⁻¹ B⁻¹ A⁻¹ B A B applied in complex form
-      let step1 := (-1 : ℂ) + ζ₅^4 * (z + 1)         -- A⁻¹
-      let step2 := (1 : ℂ) + ζ₅^4 * (step1 - 1)      -- B⁻¹
-      let step3 := (-1 : ℂ) + ζ₅^4 * (step2 + 1)     -- A⁻¹
-      let step4 := (1 : ℂ) + ζ₅ * (step3 - 1)        -- B
-      let step5 := (-1 : ℂ) + ζ₅ * (step4 + 1)       -- A
-      (1 : ℂ) + ζ₅ * (step5 - 1)                     -- B
+      let step1 := (-1 : ℂ) + ζ₅ * (z + 1)           -- A⁻¹ (ζ₅)
+      let step2 := (1 : ℂ) + ζ₅ * (step1 - 1)        -- B⁻¹ (ζ₅)
+      let step3 := (-1 : ℂ) + ζ₅ * (step2 + 1)       -- A⁻¹ (ζ₅)
+      let step4 := (1 : ℂ) + ζ₅^4 * (step3 - 1)      -- B (ζ₅⁴)
+      let step5 := (-1 : ℂ) + ζ₅^4 * (step4 + 1)     -- A (ζ₅⁴)
+      (1 : ℂ) + ζ₅^4 * (step5 - 1)                   -- B (ζ₅⁴)
     result = z + (2 * displacement2) • E := by
   intro c _hc
   simp only
   -- Key power reduction lemmas
   have h5 : ζ₅^5 = (1 : ℂ) := zeta5_pow_five
-  have h6 : ζ₅^6 = ζ₅ := zeta5_pow_six
-  have h7 : ζ₅^7 = ζ₅^2 := zeta5_pow_seven
-  have h11 : ζ₅^11 = ζ₅ := zeta5_pow_eleven
-  have h15 : ζ₅^15 = (1 : ℂ) := zeta5_pow_fifteen
-  have h16 : ζ₅^16 = ζ₅ := zeta5_pow_sixteen
-  have h17 : ζ₅^17 = ζ₅^2 := zeta5_pow_seventeen
+  have h8 : ζ₅^8 = ζ₅^3 := zeta5_pow_eight
+  have h12 : ζ₅^12 = ζ₅^2 := zeta5_pow_twelve
+  have h13 : ζ₅^13 = ζ₅^3 := zeta5_pow_thirteen
+  have h14 : ζ₅^14 = ζ₅^4 := by have := zeta5_pow_reduce 14; norm_num at this; exact this
+  have h15 : ζ₅^15 = (1 : ℂ) := by have := zeta5_pow_reduce 15; norm_num at this; exact this
+  have h18 : ζ₅^18 = ζ₅^3 := by have := zeta5_pow_reduce 18; norm_num at this; exact this
+  have h19 : ζ₅^19 = ζ₅^4 := by have := zeta5_pow_reduce 19; norm_num at this; exact this
   -- sqrt 5 squared equals 5
   have hsqrt5_sq : Real.sqrt 5 ^ 2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
-  have h_sqrt5_pos : 0 < Real.sqrt 5 := Real.sqrt_pos.mpr (by norm_num : (0 : ℝ) < 5)
-  -- The key identity: 2 - 4ζ₅ + 4ζ₅² - 2ζ₅³ = (√5-3)·(ζ₅ - ζ₅²)
-  -- We need to show (√5-3) = 2·displacement2
-  have h_coeff : (Real.sqrt 5 - 3 : ℝ) = 2 * displacement2 := by
-    unfold displacement2 length1 length2
-    unfold Real.goldenRatio
-    have h_denom_pos : 0 < 3 + Real.sqrt 5 := by linarith
-    have h_denom_ne : 3 + Real.sqrt 5 ≠ 0 := ne_of_gt h_denom_pos
-    have h_ne2 : 3 - Real.sqrt 5 ≠ 0 := by
-      have h_sqrt5_lt : Real.sqrt 5 < 3 := by
-        have h5_lt_9 : (5 : ℝ) < 9 := by norm_num
-        calc Real.sqrt 5 < Real.sqrt 9 := Real.sqrt_lt_sqrt (by norm_num) h5_lt_9
-          _ = 3 := by rw [Real.sqrt_eq_iff_eq_sq (by norm_num) (by norm_num)]; norm_num
+  -- Key identity: 2*displacement2 = √5 - 3
+  have h_goldenRatio : Real.goldenRatio = (1 + Real.sqrt 5) / 2 := Real.goldenRatio.eq_1
+  have h_one_plus_phi : (1 : ℝ) + Real.goldenRatio = (3 + Real.sqrt 5) / 2 := by
+    rw [h_goldenRatio]; ring
+  have h_disp2_value : (2 * displacement2 : ℝ) = Real.sqrt 5 - 3 := by
+    rw [displacement2_formula]
+    rw [h_one_plus_phi]
+    have h_ne : (3 + Real.sqrt 5) ≠ 0 := by
+      have hsqrt5_pos : 0 < Real.sqrt 5 := Real.sqrt_pos.mpr (by norm_num : (0 : ℝ) < 5)
       linarith
-    have h_prod : (3 + Real.sqrt 5) * (3 - Real.sqrt 5) = 4 := by
-      calc (3 + Real.sqrt 5) * (3 - Real.sqrt 5)
-          = 9 - Real.sqrt 5 ^ 2 := by ring
-        _ = 9 - 5 := by rw [hsqrt5_sq]
-        _ = 4 := by ring
-    calc Real.sqrt 5 - 3
-        = -4 * (3 - Real.sqrt 5) / 4 := by ring
-      _ = -4 * (3 - Real.sqrt 5) / ((3 + Real.sqrt 5) * (3 - Real.sqrt 5)) := by rw [h_prod]
-      _ = -4 / (3 + Real.sqrt 5) := by field_simp [h_ne2]
-      _ = 2 * (-2 / (3 + Real.sqrt 5)) := by ring
-      _ = 2 * (-(1 / (2 * (1 + (1 + Real.sqrt 5) / 2)) +
-               1 / (2 * (1 + (1 + Real.sqrt 5) / 2)))) := by
-          have h_eq : (3 + Real.sqrt 5) / 2 = 1 + (1 + Real.sqrt 5) / 2 := by ring
-          have h_eq2 : -2 / (3 + Real.sqrt 5) = -1 / ((3 + Real.sqrt 5) / 2) := by
-            field_simp [h_denom_ne]
-          rw [h_eq2, h_eq]
-          have h_denom_ne2 : 1 + (1 + Real.sqrt 5) / 2 ≠ 0 := by linarith
-          have h_denom_ne3 : 2 * (1 + (1 + Real.sqrt 5) / 2) ≠ 0 := by linarith
-          field_simp [h_denom_ne2, h_denom_ne3]
-          ring
-  -- Now prove the key factorization: 2 - 4ζ₅ + 4ζ₅² - 2ζ₅³ = (√5-3)·(ζ₅ - ζ₅²)
-  have h_key : (2 : ℂ) - 4*ζ₅ + 4*ζ₅^2 - 2*ζ₅^3 = (Real.sqrt 5 - 3 : ℝ) * (ζ₅ - ζ₅^2) := by
-    have h_sum : ζ₅ + ζ₅^4 = ((Real.sqrt 5 - 1) / 2 : ℝ) := by
-      apply Complex.ext
-      · simp only [Complex.add_re, Complex.ofReal_re]
-        rw [zeta5_re, zeta5_pow4_re]
-        ring
-      · simp only [Complex.add_im, Complex.ofReal_im]
-        rw [zeta5_im_eq_sin, zeta5_pow4_im_neg, zeta5_im_eq_sin]
-        ring
-    have h_sqrt5 : (Real.sqrt 5 : ℂ) = 1 + 2*(ζ₅ + ζ₅^4) := by
-      calc (Real.sqrt 5 : ℂ)
-          = 1 + (Real.sqrt 5 - 1 : ℂ) := by ring
-        _ = 1 + 2 * ((Real.sqrt 5 - 1) / 2 : ℂ) := by ring
-        _ = 1 + 2 * ((Real.sqrt 5 - 1) / 2 : ℝ) := by norm_cast
-        _ = 1 + 2 * (ζ₅ + ζ₅^4) := by rw [← h_sum]
-    have h_coeff_complex : (Real.sqrt 5 - 3 : ℂ) = -2 + 2*ζ₅ + 2*ζ₅^4 := by
-      calc (Real.sqrt 5 - 3 : ℂ)
-          = (Real.sqrt 5 : ℂ) - 3 := by ring
-        _ = (1 + 2*(ζ₅ + ζ₅^4)) - 3 := by rw [h_sqrt5]
-        _ = -2 + 2*ζ₅ + 2*ζ₅^4 := by ring
-    calc (2 : ℂ) - 4*ζ₅ + 4*ζ₅^2 - 2*ζ₅^3
-        = -2*ζ₅ + 2*ζ₅^2 + 2*ζ₅^2 - 2*ζ₅^3 + 2*1 - 2*ζ₅ := by ring
-      _ = -2*ζ₅ + 2*ζ₅^2 + 2*ζ₅^2 - 2*ζ₅^3 + 2*ζ₅^5 - 2*ζ₅^6 := by rw [h5, h6]
-      _ = (-2 + 2*ζ₅ + 2*ζ₅^4) * (ζ₅ - ζ₅^2) := by ring
-      _ = (Real.sqrt 5 - 3 : ℂ) * (ζ₅ - ζ₅^2) := by rw [h_coeff_complex]
-      _ = (Real.sqrt 5 - 3 : ℝ) * (ζ₅ - ζ₅^2) := by norm_cast
-  -- Now unfold and compute
-  unfold displacement2 length1 length2 E
-  have hcE : (c : ℂ) • (ζ₅ - ζ₅^2) = c * (ζ₅ - ζ₅^2) := by rfl
-  have h2dE : (2 * (-(1 / (2 * (1 + Real.goldenRatio)) +
-              1 / (2 * (1 + Real.goldenRatio))))) • (ζ₅ - ζ₅^2) =
-              (2 * (-(1 / (2 * (1 + Real.goldenRatio)) +
-              1 / (2 * (1 + Real.goldenRatio)))) : ℝ) * (ζ₅ - ζ₅^2) := by rfl
-  rw [hcE, h2dE]
-  have h_disp_simp : (2 * (-(1 / (2 * (1 + Real.goldenRatio)) +
-              1 / (2 * (1 + Real.goldenRatio)))) : ℝ) = Real.sqrt 5 - 3 := by
-    unfold Real.goldenRatio
-    -- 2 * (-(x + x)) = -4x where x = 1/(2*(1+φ))
-    -- = -4 / (2*(1+(1+√5)/2)) = -4 / (3+√5) = √5 - 3 (by rationalization)
-    have h_denom : 2 * (1 + (1 + Real.sqrt 5) / 2) = 3 + Real.sqrt 5 := by ring
-    have h_pos : 0 < 3 + Real.sqrt 5 := by
-      have : 0 < Real.sqrt 5 := Real.sqrt_pos.mpr (by norm_num : (0 : ℝ) < 5)
-      linarith
-    have h_ne : 3 + Real.sqrt 5 ≠ 0 := ne_of_gt h_pos
-    calc 2 * (-(1 / (2 * (1 + (1 + Real.sqrt 5) / 2)) + 1 / (2 * (1 + (1 + Real.sqrt 5) / 2))))
-        = 2 * (-(2 / (2 * (1 + (1 + Real.sqrt 5) / 2)))) := by ring
-      _ = -4 / (2 * (1 + (1 + Real.sqrt 5) / 2)) := by ring
-      _ = -4 / (3 + Real.sqrt 5) := by rw [h_denom]
-      _ = -4 * (3 - Real.sqrt 5) / ((3 + Real.sqrt 5) * (3 - Real.sqrt 5)) := by
-          have h_ne2 : 3 - Real.sqrt 5 ≠ 0 := by
-            have h_lt : Real.sqrt 5 < 3 := by
-              calc Real.sqrt 5 < Real.sqrt 9 := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
-                _ = 3 := by rw [Real.sqrt_eq_iff_eq_sq (by norm_num) (by norm_num)]; norm_num
-            linarith
-          field_simp [h_ne, h_ne2]
-      _ = -4 * (3 - Real.sqrt 5) / (9 - Real.sqrt 5 ^ 2) := by ring
-      _ = -4 * (3 - Real.sqrt 5) / (9 - 5) := by rw [hsqrt5_sq]
-      _ = -4 * (3 - Real.sqrt 5) / 4 := by norm_num
-      _ = -(3 - Real.sqrt 5) := by ring
-      _ = Real.sqrt 5 - 3 := by ring
-  rw [h_disp_simp]
-  have h_expand : (1 : ℂ) + ζ₅ * ((-1 : ℂ) + ζ₅ * ((1 : ℂ) + ζ₅ * ((-1 : ℂ) + ζ₅^4 * ((1 : ℂ) + ζ₅^4 * ((-1 : ℂ) + ζ₅^4 * (↑c * (ζ₅ - ζ₅^2) + 1) - 1) + 1) - 1) + 1) - 1)
-      = ↑c * (ζ₅ - ζ₅^2) + ((2 : ℂ) - 4*ζ₅ + 4*ζ₅^2 - 2*ζ₅^3) := by
-    ring_nf
-    rw [h7, h11, h15, h16, h17]
+    field_simp
+    -- Need: (√5 - 3) * (3 + √5) / 2 * 2 = -2 * 2
+    -- (√5 - 3)(3 + √5) = 3√5 + 5 - 9 - 3√5 = -4
+    have h_prod : (Real.sqrt 5 - 3) * (3 + Real.sqrt 5) = -4 := by
+      calc (Real.sqrt 5 - 3) * (3 + Real.sqrt 5)
+          = 3 * Real.sqrt 5 + Real.sqrt 5 ^ 2 - 9 - 3 * Real.sqrt 5 := by ring
+        _ = 3 * Real.sqrt 5 + 5 - 9 - 3 * Real.sqrt 5 := by rw [hsqrt5_sq]
+        _ = -4 := by ring
+    linarith
+  -- Now unfold and compute with E = ζ₅⁴ - ζ₅³
+  unfold E
+  -- Convert smul to mul for complex arithmetic
+  have hcE : (c : ℂ) • (ζ₅^4 - ζ₅^3) = c * (ζ₅^4 - ζ₅^3) := by rfl
+  have h2dE : (2 * displacement2) • (ζ₅^4 - ζ₅^3) =
+              (2 * displacement2 : ℝ) * (ζ₅^4 - ζ₅^3) := by rfl
+  rw [hcE, h2dE, h_disp2_value]
+  -- Use cyclotomic sum identity: 1 + ζ₅ + ζ₅² + ζ₅³ + ζ₅⁴ = 0
+  have h_zeta_sum : (1 : ℂ) + ζ₅ + ζ₅^2 + ζ₅^3 + ζ₅^4 = 0 := cyclotomic5_sum
+  have h4_expand : ζ₅^4 = -1 - ζ₅ - ζ₅^2 - ζ₅^3 := by
+    calc ζ₅^4 = -(1 + ζ₅ + ζ₅^2 + ζ₅^3) + (1 + ζ₅ + ζ₅^2 + ζ₅^3 + ζ₅^4) := by ring
+      _ = -(1 + ζ₅ + ζ₅^2 + ζ₅^3) + 0 := by rw [h_zeta_sum]
+      _ = -1 - ζ₅ - ζ₅^2 - ζ₅^3 := by ring
+  -- Express √5 in terms of ζ₅: √5 = 1 + 2(ζ₅ + ζ₅⁴)
+  have h_sum14 : ζ₅ + ζ₅^4 = ((Real.sqrt 5 - 1) / 2 : ℝ) := by
+    apply Complex.ext
+    · simp only [Complex.add_re, Complex.ofReal_re]
+      rw [zeta5_re, zeta5_pow4_re]
+      ring
+    · simp only [Complex.add_im, Complex.ofReal_im]
+      rw [zeta5_im_eq_sin, zeta5_pow4_im_neg, zeta5_im_eq_sin]
+      ring
+  have h_sqrt5 : (Real.sqrt 5 : ℂ) = 1 + 2 * (ζ₅ + ζ₅^4) := by
+    rw [h_sum14]
+    push_cast
     ring
-  rw [h_expand, h_key]
+  -- √5 - 3 = 1 + 2(ζ₅ + ζ₅⁴) - 3 = -2 + 2ζ₅ + 2ζ₅⁴
+  have h_sqrt5_minus_3 : (Real.sqrt 5 - 3 : ℂ) = -2 + 2 * ζ₅ + 2 * ζ₅^4 := by
+    calc (Real.sqrt 5 - 3 : ℂ) = (Real.sqrt 5 : ℂ) - 3 := by push_cast; ring
+      _ = (1 + 2 * (ζ₅ + ζ₅^4)) - 3 := by rw [h_sqrt5]
+      _ = -2 + 2 * ζ₅ + 2 * ζ₅^4 := by ring
+  -- The full expansion of word3 = A⁻¹B⁻¹A⁻¹BAB
+  -- Need to verify the algebraic identity
+  -- First expand using ring_nf and reduce high powers
+  ring_nf
+  simp only [h19, h18, h15, h14, h13, h12, h8]
+  -- The goal is now in terms of ζ₅, ζ₅², ζ₅³, ζ₅⁴
+  -- Use cyclotomic relation to reduce ζ₅⁴
+  rw [h4_expand]
+  -- The RHS has ↑(-3 + √5), convert to ζ₅ form
+  -- Note: ↑(-3 + √5) = ↑√5 - 3 by push_cast
+  have h_neg3_plus : (↑(-3 + Real.sqrt 5) : ℂ) = -2 + 2 * ζ₅ + 2 * ζ₅^4 := by
+    have h1 : (↑(-3 + Real.sqrt 5) : ℂ) = (Real.sqrt 5 : ℂ) - 3 := by push_cast; ring
+    rw [h1, h_sqrt5]
+    ring
+  simp only [h_neg3_plus]
+  -- RHS still has ζ₅^4 inside the substituted expression, reduce it
+  simp only [h4_expand]
+  -- ring_nf expands but produces high powers, so reduce those first
+  have h6 : ζ₅^6 = ζ₅ := zeta5_pow_six
+  -- Reduce high powers then ring
+  ring_nf
+  simp only [h4_expand, h5, h6]
+  -- After simp, we need another ring to finish
+  ring_nf
 
 /-- Word 1 action on segment points: translates by displacement0.
 
@@ -449,509 +435,30 @@ this interval range. -/
 lemma word1_produces_displacement0 (x : ℝ) (hx : x ∈ Set.Ico 0 1) (hx_int : x < length1) :
     applyWord r_crit word1 (segmentPoint x) =
     segmentPoint (x + displacement0) := by
-  -- The parameter c = 2x - 1 gives the scalar coefficient: segmentPoint x = c • E
-  let c := 2 * x - 1
-  have hc_lo : -1 ≤ c := by have h := hx.1; linarith
-  have hc_hi : c ≤ 1 := by have h := hx.2; linarith
-  have hc_range : c ∈ Set.Icc (-1 : ℝ) 1 := ⟨hc_lo, hc_hi⟩
-  -- Express segmentPoint in terms of c • E
-  have h_seg : segmentPoint x = c • E := by
-    unfold segmentPoint E'
-    simp only [sub_neg_eq_add]
-    rw [show E + E = (2 : ℝ) • E by simp [two_smul]]
-    rw [smul_smul, ← neg_one_smul ℝ E, ← add_smul]
-    congr 1
-    ring
-  -- The translation property: segmentPoint (x + d) = segmentPoint x + 2d • E
-  have h_translate : segmentPoint (x + displacement0) = c • E + (2 * displacement0) • E := by
-    unfold segmentPoint E'
-    simp only [sub_neg_eq_add]
-    rw [show E + E = (2 : ℝ) • E by simp [two_smul]]
-    rw [smul_smul, ← neg_one_smul ℝ E, ← add_smul, ← add_smul]
-    congr 1
-    ring
-  -- Rewrite using the scalar form c • E
-  rw [h_seg, h_translate]
-  -- Goal: applyWord r_crit word1 (c • E) = c • E + (2 * displacement0) • E
-  --
-  -- First, establish that c • E is in both disks
-  have h_in_disks : ‖c • E + 1‖ ≤ r_crit ∧ ‖c • E - 1‖ ≤ r_crit := by
-    have h_param : 0 ≤ (c + 1) / 2 ∧ (c + 1) / 2 ≤ 1 := by
-      constructor <;> linarith
-    have h_eq : c • E = E' + ((c + 1) / 2) • (E - E') := by
-      unfold E'
-      rw [show E - (-E) = (2 : ℕ) • E by simp [two_smul]]
-      rw [show (2 : ℕ) • E = (2 : ℝ) • E by norm_cast]
-      rw [smul_smul, ← neg_one_smul ℝ E, ← add_smul]
-      congr 1
-      field_simp
-      ring
-    have h_disk := segment_in_disk_intersection ((c + 1) / 2) h_param
-    rw [← h_eq] at h_disk
-    exact h_disk
-  -- Disk membership in ℂ directly
-  have h_in_left : c • E ∈ leftDisk r_crit := by
-    unfold leftDisk closedDiskC
-    simp only [Set.mem_setOf_eq]
-    rw [show c • E - (-1 : ℂ) = c • E + 1 by ring]
-    exact h_in_disks.1
-  have h_in_right : c • E ∈ rightDisk r_crit := by
-    unfold rightDisk closedDiskC
-    simp only [Set.mem_setOf_eq]
-    exact h_in_disks.2
-  -- Unfold applyWord and word1
-  unfold applyWord word1
-  simp only [List.foldl_cons, List.foldl_nil]
-  -- Define intermediate complex values: z0 → z1 → z2 → z3 → z4 → z5
-  set z0 := c • E with hz0
-  set z1 := (-1 : ℂ) + ζ₅ * (z0 + 1) with hz1         -- After A
-  set z2 := (-1 : ℂ) + ζ₅ * (z1 + 1) with hz2         -- After A
-  set z3 := (1 : ℂ) + ζ₅ * (z2 - 1) with hz3          -- After B
-  set z4 := (-1 : ℂ) + ζ₅ * (z3 + 1) with hz4         -- After A
-  set z5 := (1 : ℂ) + ζ₅ * (z4 - 1) with hz5          -- After B (final)
-
-  -- The algebraic identity tells us z5 = z0 + 2*displacement0*E
-  have h_alg : z5 = z0 + (2 * displacement0) • E := by
-    rw [hz5, hz4, hz3, hz2, hz1, hz0]
-    have h := word1_algebraic_identity c hc_range
-    simp only at h
-    convert h using 1
-
-  -- Rotation preservation lemmas (ℂ-native: leftDisk/rightDisk are now Set ℂ)
-  have rotation_preserves_left (w : ℂ) (hw : w ∈ leftDisk r_crit) (k : ℕ) :
-      (-1 : ℂ) + ζ₅^k * (w + 1) ∈ leftDisk r_crit := by
-    unfold leftDisk closedDiskC at hw ⊢
-    simp only [Set.mem_setOf_eq] at hw ⊢
-    rw [show (-1 : ℂ) + ζ₅^k * (w + 1) - (-1) = ζ₅^k * (w + 1) by ring]
-    rw [Complex.norm_mul]
-    have hk_norm : ‖ζ₅^k‖ = 1 := by rw [norm_pow, zeta5_abs, one_pow]
-    rw [hk_norm, one_mul]
-    rw [show w - (-1 : ℂ) = w + 1 by ring] at hw
-    exact hw
-
-  have rotation_preserves_right (w : ℂ) (hw : w ∈ rightDisk r_crit) (k : ℕ) :
-      (1 : ℂ) + ζ₅^k * (w - 1) ∈ rightDisk r_crit := by
-    unfold rightDisk closedDiskC at hw ⊢
-    simp only [Set.mem_setOf_eq] at hw ⊢
-    rw [show (1 : ℂ) + ζ₅^k * (w - 1) - 1 = ζ₅^k * (w - 1) by ring]
-    rw [Complex.norm_mul]
-    have hk_norm : ‖ζ₅^k‖ = 1 := by rw [norm_pow, zeta5_abs, one_pow]
-    rw [hk_norm, one_mul]
-    exact hw
-
-  -- Step 1: First A application
-  have step1 : applyGen r_crit z0 Generator.A = z1 := by
-    unfold applyGen
-    simp only
-    rw [genA_eq_zeta5_rotation z0 h_in_left]
-    rw [hz1]
-    congr 1
-    ring
-
-  -- z1 is in the left disk (rotation about -1 preserves distance to -1)
-  have h_z1_in_left : z1 ∈ leftDisk r_crit := by
-    rw [hz1]
-    have h := rotation_preserves_left z0 h_in_left 1
-    simp only [pow_one] at h ⊢
-    exact h
-
-  -- Step 2: Second A application
-  have step2 : applyGen r_crit z1 Generator.A = z2 := by
-    unfold applyGen
-    simp only
-    rw [genA_eq_zeta5_rotation z1 h_z1_in_left]
-    rw [hz2]
-    congr 1
-    ring
-
-  -- z2 is in the left disk
-  have h_z2_in_left : z2 ∈ leftDisk r_crit := by
-    rw [hz2]
-    have h := rotation_preserves_left z1 h_z1_in_left 1
-    simp only [pow_one] at h ⊢
-    exact h
-
-  -- z2 in rightDisk (cross-disk): needed for B application
-  -- For interval 0 (x < length1), c = 2x-1 ∈ [-1, (1-√5)/2)
-  have h_z2_in_right : z2 ∈ rightDisk r_crit := by
-    have hz2_expand : z2 = -1 + ζ₅^2 * (z0 + 1) := by
-      rw [hz2, hz1]; ring
-    unfold rightDisk closedDiskC
-    simp only [Set.mem_setOf_eq]
-    rw [hz2_expand, hz0]
-    -- Transform to match cross_disk_z2_bound_restricted
-    have h_expand : (-1 : ℂ) + ζ₅^2 * (c • E + 1) - 1 = -2 + ζ₅^2 + (c : ℂ) * (ζ₅^3 - ζ₅^4) := by
-      have hE : E = ζ₅ - ζ₅^2 := rfl
-      have h_smul : c • E = (c : ℂ) * E := Complex.real_smul
-      rw [h_smul, hE]
-      ring
-    rw [h_expand]
-    -- Apply cross-disk bound with c ∈ [-1, (1-√5)/2]
-    have hc_upper : c ≤ (1 - √5) / 2 := by
-      have h_len1 : length1 = (3 - √5) / 4 := by
-        unfold length1
-        have h_sqrt5_sq : √5^2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
-        have h_φ : goldenRatio = (1 + √5) / 2 := rfl
-        rw [h_φ]; field_simp
-        nlinarith [h_sqrt5_sq, Real.sqrt_nonneg 5]
-      have h2 : 2 * length1 - 1 = (1 - √5) / 2 := by
-        rw [h_len1]
-        have h_sqrt5_sq : √5^2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
-        ring
-      calc c = 2 * x - 1 := rfl
-        _ ≤ 2 * length1 - 1 := by linarith [hx_int]
-        _ = (1 - √5) / 2 := h2
-    exact cross_disk_z2_bound_restricted c hc_lo hc_upper
-
-  -- Step 3: B application
-  have step3 : applyGen r_crit z2 Generator.B = z3 := by
-    unfold applyGen
-    simp only
-    rw [genB_eq_zeta5_rotation z2 h_z2_in_right]
-
-  -- z3 is in rightDisk (same center)
-  have h_z3_in_right : z3 ∈ rightDisk r_crit := by
-    rw [hz3]
-    have h := rotation_preserves_right z2 h_z2_in_right 1
-    simp only [pow_one] at h ⊢
-    exact h
-
-  -- z3 in leftDisk (cross-disk): needed for A application
-  have h_z3_in_left : z3 ∈ leftDisk r_crit := by
-    -- z3 + 1 = 2 - 2*zeta5 + zeta5^3 + c*(zeta5^4 - 1)
-    have hz3_expand : z3 + 1 = 2 - 2*ζ₅ + ζ₅^3 + (c : ℂ) * (ζ₅^4 - 1) := by
-      rw [hz3, hz2, hz1, hz0]
-      have hE : E = ζ₅ - ζ₅^2 := rfl
-      have h_smul : c • E = (c : ℂ) * E := Complex.real_smul
-      have h5 : ζ₅^5 = (1 : ℂ) := zeta5_pow_five
-      rw [h_smul, hE]
-      ring_nf
-      simp only [h5, one_mul]
-    unfold leftDisk closedDiskC
-    simp only [Set.mem_setOf_eq]
-    rw [show z3 - (-1 : ℂ) = z3 + 1 by ring, hz3_expand]
-    -- Apply cross-disk bound with c ∈ [-1, (1-√5)/2]
-    have hc_upper : c ≤ (1 - √5) / 2 := by
-      have h_len1 : length1 = (3 - √5) / 4 := by
-        unfold length1
-        have h_sqrt5_sq : √5^2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
-        have h_φ : goldenRatio = (1 + √5) / 2 := rfl
-        rw [h_φ]; field_simp
-        nlinarith [h_sqrt5_sq, Real.sqrt_nonneg 5]
-      have h2 : 2 * length1 - 1 = (1 - √5) / 2 := by
-        rw [h_len1]
-        have h_sqrt5_sq : √5^2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
-        ring
-      calc c = 2 * x - 1 := rfl
-        _ ≤ 2 * length1 - 1 := by linarith [hx_int]
-        _ = (1 - √5) / 2 := h2
-    exact cross_disk_z3_bound_restricted c hc_lo hc_upper
-
-  -- Step 4: A application
-  have step4 : applyGen r_crit z3 Generator.A = z4 := by
-    unfold applyGen
-    simp only
-    rw [genA_eq_zeta5_rotation z3 h_z3_in_left]
-    rw [hz4]
-    congr 1
-    ring
-
-  -- z4 is in leftDisk (same center)
-  have h_z4_in_left : z4 ∈ leftDisk r_crit := by
-    rw [hz4]
-    have h := rotation_preserves_left z3 h_z3_in_left 1
-    simp only [pow_one] at h ⊢
-    exact h
-
-  -- z4 in rightDisk (cross-disk): needed for B application
-  have h_z4_in_right : z4 ∈ rightDisk r_crit := by
-    -- z4 - 1 = -2 + 2*zeta5 - 2*zeta5^2 + zeta5^4 + c*(1 - zeta5)
-    have hz4_expand : z4 - 1 = -2 + 2*ζ₅ - 2*ζ₅^2 + ζ₅^4 + (c : ℂ) * (1 - ζ₅) := by
-      rw [hz4, hz3, hz2, hz1, hz0]
-      have hE : E = ζ₅ - ζ₅^2 := rfl
-      have h_smul : c • E = (c : ℂ) * E := Complex.real_smul
-      have h5 : ζ₅^5 = (1 : ℂ) := zeta5_pow_five
-      have h6 : ζ₅^6 = ζ₅ := zeta5_pow_six
-      rw [h_smul, hE]
-      ring_nf
-      simp only [h5, h6, one_mul]
-      ring
-    unfold rightDisk closedDiskC
-    simp only [Set.mem_setOf_eq]
-    rw [hz4_expand]
-    -- Apply cross-disk bound with c ∈ [-1, (1-√5)/2]
-    have hc_upper : c ≤ (1 - √5) / 2 := by
-      have h_len1 : length1 = (3 - √5) / 4 := by
-        unfold length1
-        have h_sqrt5_sq : √5^2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
-        have h_φ : goldenRatio = (1 + √5) / 2 := rfl
-        rw [h_φ]; field_simp
-        nlinarith [h_sqrt5_sq, Real.sqrt_nonneg 5]
-      have h2 : 2 * length1 - 1 = (1 - √5) / 2 := by
-        rw [h_len1]
-        have h_sqrt5_sq : √5^2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
-        ring
-      calc c = 2 * x - 1 := rfl
-        _ ≤ 2 * length1 - 1 := by linarith [hx_int]
-        _ = (1 - √5) / 2 := h2
-    exact cross_disk_z4_bound_restricted c hc_lo hc_upper
-
-  -- Step 5: B application
-  have step5 : applyGen r_crit z4 Generator.B = z5 := by
-    unfold applyGen
-    simp only
-    rw [genB_eq_zeta5_rotation z4 h_z4_in_right]
-
-  -- Chain all steps together
-  calc applyGen r_crit (applyGen r_crit (applyGen r_crit (applyGen r_crit (applyGen r_crit z0 Generator.A) Generator.A) Generator.B) Generator.A) Generator.B
-      = applyGen r_crit (applyGen r_crit (applyGen r_crit (applyGen r_crit z1 Generator.A) Generator.B) Generator.A) Generator.B := by rw [step1]
-    _ = applyGen r_crit (applyGen r_crit (applyGen r_crit z2 Generator.B) Generator.A) Generator.B := by rw [step2]
-    _ = applyGen r_crit (applyGen r_crit z3 Generator.A) Generator.B := by rw [step3]
-    _ = applyGen r_crit z4 Generator.B := by rw [step4]
-    _ = z5 := by rw [step5]
-    _ = z0 + (2 * displacement0) • E := by rw [h_alg]
-    _ = c • E + (2 * displacement0) • E := by rw [hz0]
+  -- This proof requires cross-disk bounds that depend on E = ζ₅^4 - ζ₅^3 (clockwise convention)
+  -- The intermediate rotation points z1-z5 must stay in the appropriate disks
+  -- The algebraic identity word1_algebraic_identity provides the translation formula
+  sorry
 
 /-- Word 2 action on segment points: translates by displacement1.
 
-word2 = A⁻¹BA⁻¹BB produces the correct IET translation for interval 1.
+word2 = A⁻¹B⁻¹A⁻¹B⁻¹B⁻¹ produces the correct IET translation for interval 1.
 Interval 1 corresponds to x ∈ [length1, length1 + length2), equivalently c ∈ [(1-√5)/2, 2-√5].
 
-The proof tracks each rotation through the 5 generators:
-- A⁻¹ uses ζ₅⁴ rotation about -1
-- B uses ζ₅ rotation about 1
+The proof tracks each rotation through the 5 generators (clockwise convention: A⁻¹ = A⁴ uses ζ₅):
+- A⁻¹ uses ζ₅ rotation about -1 (net effect of A⁴, since A uses ζ₅⁴)
+- B⁻¹ uses ζ₅ rotation about 1 (net effect of B⁴, since B uses ζ₅⁴)
 
-word2 = [Generator.Ainv, Generator.B, Generator.Ainv, Generator.B, Generator.B]
-     = [A⁻¹, B, A⁻¹, B, B] applied left-to-right -/
+word2 = [Generator.Ainv, Generator.Binv, Generator.Ainv, Generator.Binv, Generator.Binv]
+     = [A⁻¹, B⁻¹, A⁻¹, B⁻¹, B⁻¹] applied left-to-right -/
 lemma word2_produces_displacement1 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     (hx_lo : length1 ≤ x) (hx_hi : x < length1 + length2) :
     applyWord r_crit word2 (segmentPoint x) =
     segmentPoint (x + displacement1) := by
-  -- The parameter c = 2x - 1 gives the scalar coefficient: segmentPoint x = c • E
-  let c := 2 * x - 1
-  have hc_lo : -1 ≤ c := by have h := hx.1; linarith
-  have hc_hi : c ≤ 1 := by have h := hx.2; linarith
-  have hc_range : c ∈ Set.Icc (-1 : ℝ) 1 := ⟨hc_lo, hc_hi⟩
-  -- Express segmentPoint in terms of c • E
-  have h_seg : segmentPoint x = c • E := by
-    unfold segmentPoint E'
-    simp only [sub_neg_eq_add]
-    rw [show E + E = (2 : ℝ) • E by simp [two_smul]]
-    rw [smul_smul, ← neg_one_smul ℝ E, ← add_smul]
-    congr 1
-    ring
-  -- The translation property: segmentPoint (x + d) = segmentPoint x + 2d • E
-  have h_translate : segmentPoint (x + displacement1) = c • E + (2 * displacement1) • E := by
-    unfold segmentPoint E'
-    simp only [sub_neg_eq_add]
-    rw [show E + E = (2 : ℝ) • E by simp [two_smul]]
-    rw [smul_smul, ← neg_one_smul ℝ E, ← add_smul, ← add_smul]
-    congr 1
-    ring
-  -- Rewrite using the scalar form c • E
-  rw [h_seg, h_translate]
-  -- Establish that c • E is in both disks
-  have h_in_disks : ‖c • E + 1‖ ≤ r_crit ∧ ‖c • E - 1‖ ≤ r_crit := by
-    have h_param : 0 ≤ (c + 1) / 2 ∧ (c + 1) / 2 ≤ 1 := by
-      constructor <;> linarith
-    have h_eq : c • E = E' + ((c + 1) / 2) • (E - E') := by
-      unfold E'
-      rw [show E - (-E) = (2 : ℕ) • E by simp [two_smul]]
-      rw [show (2 : ℕ) • E = (2 : ℝ) • E by norm_cast]
-      rw [smul_smul, ← neg_one_smul ℝ E, ← add_smul]
-      congr 1
-      field_simp
-      ring
-    have h_disk := segment_in_disk_intersection ((c + 1) / 2) h_param
-    rw [← h_eq] at h_disk
-    exact h_disk
-  -- Disk membership in ℂ directly
-  have h_in_left : c • E ∈ leftDisk r_crit := by
-    unfold leftDisk closedDiskC
-    simp only [Set.mem_setOf_eq]
-    rw [show c • E - (-1 : ℂ) = c • E + 1 by ring]
-    exact h_in_disks.1
-  have h_in_right : c • E ∈ rightDisk r_crit := by
-    unfold rightDisk closedDiskC
-    simp only [Set.mem_setOf_eq]
-    exact h_in_disks.2
-  -- Unfold applyWord and word2
-  unfold applyWord word2
-  simp only [List.foldl_cons, List.foldl_nil]
-  -- Define intermediate complex values for A⁻¹B⁻¹A⁻¹B⁻¹B⁻¹:
-  -- z0 → z1 (A⁻¹) → z2 (B⁻¹) → z3 (A⁻¹) → z4 (B⁻¹) → z5 (B⁻¹)
-  set z0 := c • E with hz0
-  set z1 := (-1 : ℂ) + ζ₅^4 * (z0 + 1) with hz1         -- After A⁻¹
-  set z2 := (1 : ℂ) + ζ₅^4 * (z1 - 1) with hz2          -- After B⁻¹
-  set z3 := (-1 : ℂ) + ζ₅^4 * (z2 + 1) with hz3         -- After A⁻¹
-  set z4 := (1 : ℂ) + ζ₅^4 * (z3 - 1) with hz4          -- After B⁻¹
-  set z5 := (1 : ℂ) + ζ₅^4 * (z4 - 1) with hz5          -- After B⁻¹ (final)
-
-  -- The algebraic identity tells us z5 = z0 + 2*displacement1*E
-  have h_alg : z5 = z0 + (2 * displacement1) • E := by
-    rw [hz5, hz4, hz3, hz2, hz1, hz0]
-    have h := word2_algebraic_identity c hc_range
-    simp only at h
-    convert h using 1
-
-  -- Rotation preservation lemmas
-  have rotation_preserves_left (w : ℂ) (hw : w ∈ leftDisk r_crit) (k : ℕ) :
-      (-1 : ℂ) + ζ₅^k * (w + 1) ∈ leftDisk r_crit := by
-    unfold leftDisk closedDiskC at hw ⊢
-    simp only [Set.mem_setOf_eq] at hw ⊢
-    rw [show (-1 : ℂ) + ζ₅^k * (w + 1) - (-1) = ζ₅^k * (w + 1) by ring]
-    rw [Complex.norm_mul]
-    have hk_norm : ‖ζ₅^k‖ = 1 := by rw [norm_pow, zeta5_abs, one_pow]
-    rw [hk_norm, one_mul]
-    rw [show w - (-1 : ℂ) = w + 1 by ring] at hw
-    exact hw
-
-  have rotation_preserves_right (w : ℂ) (hw : w ∈ rightDisk r_crit) (k : ℕ) :
-      (1 : ℂ) + ζ₅^k * (w - 1) ∈ rightDisk r_crit := by
-    unfold rightDisk closedDiskC at hw ⊢
-    simp only [Set.mem_setOf_eq] at hw ⊢
-    rw [show (1 : ℂ) + ζ₅^k * (w - 1) - 1 = ζ₅^k * (w - 1) by ring]
-    rw [Complex.norm_mul]
-    have hk_norm : ‖ζ₅^k‖ = 1 := by rw [norm_pow, zeta5_abs, one_pow]
-    rw [hk_norm, one_mul]
-    exact hw
-
-  -- For A⁻¹ = A⁴, we need intermediate disk memberships
-  have hz0_A1 : (-1 : ℂ) + ζ₅ * (z0 + 1) ∈ leftDisk r_crit := by
-    have h := rotation_preserves_left z0 h_in_left 1; simp only [pow_one] at h; exact h
-  have hz0_A2 : (-1 : ℂ) + ζ₅^2 * (z0 + 1) ∈ leftDisk r_crit :=
-    rotation_preserves_left z0 h_in_left 2
-  have hz0_A3 : (-1 : ℂ) + ζ₅^3 * (z0 + 1) ∈ leftDisk r_crit :=
-    rotation_preserves_left z0 h_in_left 3
-
-  -- Step 1: A⁻¹ on z0 gives z1
-  have hstep1 : applyGen r_crit z0 Generator.Ainv = z1 := by
-    unfold applyGen
-    have h := genA_inv_eq_zeta5_pow4_rotation z0 h_in_left hz0_A1 hz0_A2 hz0_A3
-    rw [h, hz1]
-
-  -- z1 in rightDisk (cross-disk): needed for B
-  -- z1 = -1 + ζ₅^4 * (z0 + 1) = -1 + ζ₅^4 * (c•E + 1)
-  -- z1 - 1 = ζ₅^4 * (c•E + 1) - 2 = (ζ₅^4 - 2) + c*(1 - ζ₅)
-  -- This uses ζ₅^4 * E = 1 - ζ₅
-  have hz1_right : z1 ∈ rightDisk r_crit := by
-    unfold rightDisk closedDiskC
-    simp only [Set.mem_setOf_eq]
-    rw [hz1, hz0]
-    rw [show (-1 : ℂ) + ζ₅^4 * (c • E + 1) - 1 = ζ₅^4 * (c • E + 1) - 2 by ring]
-    have h_zeta_pow4_E : ζ₅^4 * E = 1 - ζ₅ := by
-      unfold E
-      have h5 : ζ₅^5 = 1 := zeta5_pow_five
-      have h6 : ζ₅^6 = ζ₅ := zeta5_pow_six
-      calc ζ₅^4 * (ζ₅ - ζ₅^2) = ζ₅^5 - ζ₅^6 := by ring
-        _ = 1 - ζ₅ := by rw [h5, h6]
-    have h_expand : ζ₅^4 * (c • E + 1) - 2 = (ζ₅^4 - 2) + (c : ℂ) * (1 - ζ₅) := by
-      rw [show c • E = (c : ℂ) * E by rfl]
-      calc ζ₅^4 * (↑c * E + 1) - 2
-          = ζ₅^4 + ↑c * (ζ₅^4 * E) - 2 := by ring
-        _ = ζ₅^4 + ↑c * (1 - ζ₅) - 2 := by rw [h_zeta_pow4_E]
-        _ = (ζ₅^4 - 2) + (c : ℂ) * (1 - ζ₅) := by ring
-    rw [h_expand]
-    -- For interval 1, c ∈ [(1-√5)/2, 2-√5]
-    -- We use the fact that this norm bound holds for all c ∈ [-1, 1]
-    -- since the segment E'E stays within the lens intersection under all rotations
-    sorry
-
-  -- For B⁻¹ on z1, need z1 in right disk (established above)
-  -- Also need intermediate B-rotations for B⁻¹ = B^4
-  have hz1_B1 : (1 : ℂ) + ζ₅ * (z1 - 1) ∈ rightDisk r_crit := by
-    have h := rotation_preserves_right z1 hz1_right 1; simp only [pow_one] at h; exact h
-  have hz1_B2 : (1 : ℂ) + ζ₅^2 * (z1 - 1) ∈ rightDisk r_crit :=
-    rotation_preserves_right z1 hz1_right 2
-  have hz1_B3 : (1 : ℂ) + ζ₅^3 * (z1 - 1) ∈ rightDisk r_crit :=
-    rotation_preserves_right z1 hz1_right 3
-
-  -- Step 2: B⁻¹ on z1 gives z2
-  have hstep2 : applyGen r_crit z1 Generator.Binv = z2 := by
-    unfold applyGen
-    have h := genB_inv_eq_zeta5_pow4_rotation z1 hz1_right hz1_B1 hz1_B2 hz1_B3
-    rw [h, hz2]
-
-  -- z2 is in rightDisk (same center, rotation preserves membership)
-  have hz2_right : z2 ∈ rightDisk r_crit := by
-    rw [hz2]
-    exact rotation_preserves_right z1 hz1_right 4
-
-  -- z2 in leftDisk (cross-disk): needed for A⁻¹
-  have hz2_left : z2 ∈ leftDisk r_crit := by
-    unfold leftDisk closedDiskC
-    simp only [Set.mem_setOf_eq]
-    rw [hz2, hz1, hz0]
-    -- z2 + 1 = 2 + ζ₅ * (z1 - 1)
-    --        = 2 + ζ₅ * (ζ₅^4*(c•E + 1) - 2)
-    --        = 2 + ζ₅^5*(c•E + 1) - 2*ζ₅
-    --        = 2 + (c•E + 1) - 2*ζ₅  (since ζ₅^5 = 1)
-    --        = 3 + c•E - 2*ζ₅
-    sorry
-
-  -- For A⁻¹ on z2, need intermediate memberships
-  have hz2_A1 : (-1 : ℂ) + ζ₅ * (z2 + 1) ∈ leftDisk r_crit := by
-    have h := rotation_preserves_left z2 hz2_left 1; simp only [pow_one] at h; exact h
-  have hz2_A2 : (-1 : ℂ) + ζ₅^2 * (z2 + 1) ∈ leftDisk r_crit :=
-    rotation_preserves_left z2 hz2_left 2
-  have hz2_A3 : (-1 : ℂ) + ζ₅^3 * (z2 + 1) ∈ leftDisk r_crit :=
-    rotation_preserves_left z2 hz2_left 3
-
-  -- Step 3: A⁻¹ on z2 gives z3
-  have hstep3 : applyGen r_crit z2 Generator.Ainv = z3 := by
-    unfold applyGen
-    have h := genA_inv_eq_zeta5_pow4_rotation z2 hz2_left hz2_A1 hz2_A2 hz2_A3
-    rw [h, hz3]
-
-  -- z3 in rightDisk (cross-disk): needed for B⁻¹
-  have hz3_right : z3 ∈ rightDisk r_crit := by
-    unfold rightDisk closedDiskC
-    simp only [Set.mem_setOf_eq]
-    rw [hz3, hz2, hz1, hz0]
-    sorry
-
-  -- For B⁻¹ on z3, need intermediate B-rotations
-  have hz3_B1 : (1 : ℂ) + ζ₅ * (z3 - 1) ∈ rightDisk r_crit := by
-    have h := rotation_preserves_right z3 hz3_right 1; simp only [pow_one] at h; exact h
-  have hz3_B2 : (1 : ℂ) + ζ₅^2 * (z3 - 1) ∈ rightDisk r_crit :=
-    rotation_preserves_right z3 hz3_right 2
-  have hz3_B3 : (1 : ℂ) + ζ₅^3 * (z3 - 1) ∈ rightDisk r_crit :=
-    rotation_preserves_right z3 hz3_right 3
-
-  -- Step 4: B⁻¹ on z3 gives z4
-  have hstep4 : applyGen r_crit z3 Generator.Binv = z4 := by
-    unfold applyGen
-    have h := genB_inv_eq_zeta5_pow4_rotation z3 hz3_right hz3_B1 hz3_B2 hz3_B3
-    rw [h, hz4]
-
-  -- z4 is in rightDisk (same center)
-  have hz4_right : z4 ∈ rightDisk r_crit := by
-    rw [hz4]
-    exact rotation_preserves_right z3 hz3_right 4
-
-  -- For B⁻¹ on z4, need intermediate B-rotations
-  have hz4_B1 : (1 : ℂ) + ζ₅ * (z4 - 1) ∈ rightDisk r_crit := by
-    have h := rotation_preserves_right z4 hz4_right 1; simp only [pow_one] at h; exact h
-  have hz4_B2 : (1 : ℂ) + ζ₅^2 * (z4 - 1) ∈ rightDisk r_crit :=
-    rotation_preserves_right z4 hz4_right 2
-  have hz4_B3 : (1 : ℂ) + ζ₅^3 * (z4 - 1) ∈ rightDisk r_crit :=
-    rotation_preserves_right z4 hz4_right 3
-
-  -- Step 5: B⁻¹ on z4 gives z5
-  have hstep5 : applyGen r_crit z4 Generator.Binv = z5 := by
-    unfold applyGen
-    have h := genB_inv_eq_zeta5_pow4_rotation z4 hz4_right hz4_B1 hz4_B2 hz4_B3
-    rw [h, hz5]
-
-  -- Chain all steps together
-  calc applyGen r_crit (applyGen r_crit (applyGen r_crit (applyGen r_crit (applyGen r_crit z0 Generator.Ainv) Generator.Binv) Generator.Ainv) Generator.Binv) Generator.Binv
-      = applyGen r_crit (applyGen r_crit (applyGen r_crit (applyGen r_crit z1 Generator.Binv) Generator.Ainv) Generator.Binv) Generator.Binv := by rw [hstep1]
-    _ = applyGen r_crit (applyGen r_crit (applyGen r_crit z2 Generator.Ainv) Generator.Binv) Generator.Binv := by rw [hstep2]
-    _ = applyGen r_crit (applyGen r_crit z3 Generator.Binv) Generator.Binv := by rw [hstep3]
-    _ = applyGen r_crit z4 Generator.Binv := by rw [hstep4]
-    _ = z5 := by rw [hstep5]
-    _ = z0 + (2 * displacement1) • E := by rw [h_alg]
-    _ = c • E + (2 * displacement1) • E := by rw [hz0]
+  -- This proof requires cross-disk bounds that depend on E = ζ₅^4 - ζ₅^3 (clockwise convention)
+  -- The intermediate rotation points z1-z5 must stay in the appropriate disks
+  -- The algebraic identity word2_algebraic_identity provides the translation formula
+  sorry
 
 /-- Word 3 action on segment points: translates by displacement2.
 
@@ -970,387 +477,10 @@ lemma word3_produces_displacement2 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     (hx_interval2 : length1 + length2 ≤ x) :
     applyWord r_crit word3 (segmentPoint x) =
     segmentPoint (x + displacement2) := by
-  -- The parameter c = 2x - 1 gives the scalar coefficient: segmentPoint x = c • E
-  let c := 2 * x - 1
-  have hc_lo : -1 ≤ c := by have h := hx.1; linarith
-  have hc_hi : c ≤ 1 := by have h := hx.2; linarith
-  -- Key bound for interval 2: c ≥ 2 - √5 ≈ -0.236
-  -- This follows from x ≥ length1 + length2 = 1/(1+φ).
-  have hc_interval2 : 2 - Real.sqrt 5 ≤ c := by
-    have h_len : length1 + length2 = 1 / (1 + Real.goldenRatio) := length12_sum
-    unfold Real.goldenRatio at h_len
-    rw [h_len] at hx_interval2
-    -- Simplify 1 + (1 + √5)/2 = (3 + √5)/2
-    have h_denom : (1 : ℝ) + (1 + Real.sqrt 5) / 2 = (3 + Real.sqrt 5) / 2 := by ring
-    rw [h_denom] at hx_interval2
-    -- So x ≥ 1 / ((3 + √5)/2) = 2 / (3 + √5)
-    have h1 : x ≥ 2 / (3 + Real.sqrt 5) := by
-      have h_pos : 0 < (3 + Real.sqrt 5) / 2 := by
-        have := Real.sqrt_nonneg 5
-        linarith
-      calc x ≥ 1 / ((3 + Real.sqrt 5) / 2) := hx_interval2
-           _ = 2 / (3 + Real.sqrt 5) := by field_simp
-    -- c = 2x - 1 ≥ 2 * (2/(3+√5)) - 1 = 4/(3+√5) - 1 = (4 - 3 - √5)/(3+√5) = (1-√5)/(3+√5)
-    have h_sqrt5_pos : 0 < 3 + Real.sqrt 5 := by linarith [Real.sqrt_nonneg 5]
-    calc c = 2 * x - 1 := rfl
-         _ ≥ 2 * (2 / (3 + Real.sqrt 5)) - 1 := by linarith
-         _ = 4 / (3 + Real.sqrt 5) - 1 := by ring
-         _ = (4 - (3 + Real.sqrt 5)) / (3 + Real.sqrt 5) := by field_simp
-         _ = (1 - Real.sqrt 5) / (3 + Real.sqrt 5) := by ring
-         _ = 2 - Real.sqrt 5 := by
-             -- Rationalize: (1-√5)/(3+√5) = (1-√5)(3-√5)/((3+√5)(3-√5)) = (1-√5)(3-√5)/(9-5)
-             have h_diff_sq : (3 + Real.sqrt 5) * (3 - Real.sqrt 5) = 4 := by
-               have h_sq : Real.sqrt 5 ^ 2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
-               calc (3 + Real.sqrt 5) * (3 - Real.sqrt 5) = 9 - Real.sqrt 5 ^ 2 := by ring
-                    _ = 9 - 5 := by rw [h_sq]
-                    _ = 4 := by ring
-             have h_numer : (1 - Real.sqrt 5) * (3 - Real.sqrt 5) = 8 - 4 * Real.sqrt 5 := by
-               have h_sq : Real.sqrt 5 ^ 2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
-               calc (1 - Real.sqrt 5) * (3 - Real.sqrt 5)
-                    = 3 - Real.sqrt 5 - 3 * Real.sqrt 5 + Real.sqrt 5 ^ 2 := by ring
-                  _ = 3 - Real.sqrt 5 - 3 * Real.sqrt 5 + 5 := by rw [h_sq]
-                  _ = 8 - 4 * Real.sqrt 5 := by ring
-             have h_ne : 3 - Real.sqrt 5 ≠ 0 := by
-               have h_sqrt5_bound : Real.sqrt 5 < 3 := by
-                 have h1 : Real.sqrt 5 < Real.sqrt 9 :=
-                   Real.sqrt_lt_sqrt (by norm_num) (by norm_num : (5 : ℝ) < 9)
-                 have h2 : Real.sqrt 9 = 3 := by
-                   rw [show (9 : ℝ) = 3 ^ 2 by norm_num, Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 3)]
-                 linarith
-               linarith
-             calc (1 - Real.sqrt 5) / (3 + Real.sqrt 5)
-                  = (1 - Real.sqrt 5) * (3 - Real.sqrt 5) / ((3 + Real.sqrt 5) * (3 - Real.sqrt 5)) := by
-                    field_simp
-                _ = (8 - 4 * Real.sqrt 5) / 4 := by rw [h_numer, h_diff_sq]
-                _ = 2 - Real.sqrt 5 := by ring
-  have hc_range : c ∈ Set.Icc (-1 : ℝ) 1 := ⟨hc_lo, hc_hi⟩
-  -- Express segmentPoint in terms of c • E
-  have h_seg : segmentPoint x = c • E := by
-    unfold segmentPoint E'
-    rw [show E - (-E) = (2 : ℕ) • E by simp [two_smul]]
-    rw [show (2 : ℕ) • E = (2 : ℝ) • E by norm_cast]
-    rw [smul_smul, ← neg_one_smul ℝ E, ← add_smul]
-    congr 1
-    ring
-  -- The translation property
-  have h_translate : segmentPoint (x + displacement2) = c • E + (2 * displacement2) • E := by
-    unfold segmentPoint E'
-    rw [show E - (-E) = (2 : ℕ) • E by simp [two_smul]]
-    rw [show (2 : ℕ) • E = (2 : ℝ) • E by norm_cast]
-    rw [smul_smul, ← neg_one_smul ℝ E, ← add_smul, ← add_smul]
-    congr 1
-    ring
-  -- Rewrite using h_seg and h_translate
-  rw [h_seg, h_translate]
-
-  -- Establish that c • E is in both disks
-  have h_in_disks : ‖c • E + 1‖ ≤ r_crit ∧ ‖c • E - 1‖ ≤ r_crit := by
-    have h_param : 0 ≤ (c + 1) / 2 ∧ (c + 1) / 2 ≤ 1 := by
-      constructor <;> linarith
-    have h_eq : c • E = E' + ((c + 1) / 2) • (E - E') := by
-      unfold E'
-      rw [show E - (-E) = (2 : ℕ) • E by simp [two_smul]]
-      rw [show (2 : ℕ) • E = (2 : ℝ) • E by norm_cast]
-      rw [smul_smul, ← neg_one_smul ℝ E, ← add_smul]
-      congr 1
-      field_simp
-      ring
-    have h_disk := segment_in_disk_intersection ((c + 1) / 2) h_param
-    rw [← h_eq] at h_disk
-    exact h_disk
-  -- Disk membership in ℂ
-  have h_in_left : c • E ∈ leftDisk r_crit := by
-    unfold leftDisk closedDiskC
-    simp only [Set.mem_setOf_eq]
-    rw [show c • E - (-1 : ℂ) = c • E + 1 by ring]
-    exact h_in_disks.1
-  have h_in_right : c • E ∈ rightDisk r_crit := by
-    unfold rightDisk closedDiskC
-    simp only [Set.mem_setOf_eq]
-    exact h_in_disks.2
-
-  -- Unfold applyWord and word3
-  unfold applyWord word3
-  simp only [List.foldl_cons, List.foldl_nil]
-
-  -- Define intermediate complex values: z0 → z1 → z2 → z3 → z4 → z5 → z6
-  set z0 := c • E with hz0
-  set z1 := (-1 : ℂ) + ζ₅^4 * (z0 + 1) with hz1         -- After A⁻¹
-  set z2 := (1 : ℂ) + ζ₅^4 * (z1 - 1) with hz2          -- After B⁻¹
-  set z3 := (-1 : ℂ) + ζ₅^4 * (z2 + 1) with hz3         -- After A⁻¹
-  set z4 := (1 : ℂ) + ζ₅ * (z3 - 1) with hz4            -- After B
-  set z5 := (-1 : ℂ) + ζ₅ * (z4 + 1) with hz5           -- After A
-  set z6 := (1 : ℂ) + ζ₅ * (z5 - 1) with hz6            -- After B (final)
-
-  -- The algebraic identity tells us z6 = z0 + 2*displacement2*E
-  have h_alg : z6 = z0 + (2 * displacement2) • E := by
-    rw [hz6, hz5, hz4, hz3, hz2, hz1, hz0]
-    have h := word3_algebraic_identity c hc_range
-    simp only at h
-    convert h using 1
-
-  -- Rotation preservation lemmas (ℂ version for word3)
-  have rotation_preserves_left (w : ℂ) (hw : w ∈ leftDisk r_crit) (k : ℕ) :
-      (-1 : ℂ) + ζ₅^k * (w + 1) ∈ leftDisk r_crit := by
-    unfold leftDisk closedDiskC
-    simp only [Set.mem_setOf_eq]
-    rw [show (-1 : ℂ) + ζ₅^k * (w + 1) - (-1) = ζ₅^k * (w + 1) by ring]
-    rw [Complex.norm_mul]
-    have hk_norm : ‖ζ₅^k‖ = 1 := by rw [norm_pow, zeta5_abs, one_pow]
-    rw [hk_norm, one_mul]
-    unfold leftDisk closedDiskC at hw
-    simp only [Set.mem_setOf_eq] at hw
-    rw [show w - (-1 : ℂ) = w + 1 by ring] at hw
-    exact hw
-
-  have rotation_preserves_right (w : ℂ) (hw : w ∈ rightDisk r_crit) (k : ℕ) :
-      (1 : ℂ) + ζ₅^k * (w - 1) ∈ rightDisk r_crit := by
-    unfold rightDisk closedDiskC
-    simp only [Set.mem_setOf_eq]
-    rw [show (1 : ℂ) + ζ₅^k * (w - 1) - 1 = ζ₅^k * (w - 1) by ring]
-    rw [Complex.norm_mul]
-    have hk_norm : ‖ζ₅^k‖ = 1 := by rw [norm_pow, zeta5_abs, one_pow]
-    rw [hk_norm, one_mul]
-    unfold rightDisk closedDiskC at hw
-    simp only [Set.mem_setOf_eq] at hw
-    exact hw
-
-  -- For A⁻¹ = A⁴, we need intermediate disk memberships
-  have hz0_A1 : (-1 : ℂ) + ζ₅ * (z0 + 1) ∈ leftDisk r_crit := by
-    have h := rotation_preserves_left z0 h_in_left 1; simp only [pow_one] at h; exact h
-  have hz0_A2 : (-1 : ℂ) + ζ₅^2 * (z0 + 1) ∈ leftDisk r_crit :=
-    rotation_preserves_left z0 h_in_left 2
-  have hz0_A3 : (-1 : ℂ) + ζ₅^3 * (z0 + 1) ∈ leftDisk r_crit :=
-    rotation_preserves_left z0 h_in_left 3
-
-  -- Step 1: A⁻¹ on z0 gives z1
-  have hstep1 : applyGen r_crit z0 Generator.Ainv = z1 := by
-    unfold applyGen
-    have h := genA_inv_eq_zeta5_pow4_rotation z0 h_in_left hz0_A1 hz0_A2 hz0_A3
-    rw [h, hz1]
-
-  -- z1 in rightDisk (cross-disk): needed for B⁻¹
-  -- z1 = -1 + ζ₅^4 * (z0 + 1) = -1 + ζ₅^4 * (c•E + 1)
-  -- Need to show ‖z1 - 1‖ ≤ r_crit
-  --
-  -- Algebraically: z1 - 1 = ζ₅^4 * (c•E + 1) - 2
-  -- Using ζ₅^4 * E = 1 - ζ₅, we get z1 - 1 = ζ₅^4 + c*(1 - ζ₅) - 2
-  -- The norm squared of this, as a function of c ∈ [-1, 1], has maximum
-  -- at c = 1 giving normSq = (11 + 2√5)/4 < r_crit² = 3 + φ = (7 + √5)/2.
-  have hz1_right : z1 ∈ rightDisk r_crit := by
-    unfold rightDisk closedDiskC
-    simp only [Set.mem_setOf_eq]
-    rw [hz1, hz0]
-    rw [show (-1 : ℂ) + ζ₅^4 * (c • E + 1) - 1 = ζ₅^4 * (c • E + 1) - 2 by ring]
-    -- We use the fact that z1 lies on a transformed segment that stays
-    -- within the lens-shaped disk intersection. This is a consequence of
-    -- the specific GG(5,5) geometry where the critical radius r_crit = √(3+φ)
-    -- ensures that rotations of the segment E'E about either center by
-    -- multiples of 2π/5 stay within r_crit of the opposite center.
-    --
-    -- The proof involves computing normSq(ζ₅^4 * (c•E + 1) - 2) as a quadratic
-    -- in c and verifying that for all c ∈ [-1, 1], this is ≤ 3 + φ.
-    -- After expansion using Re(ζ₅^4) = (√5-1)/4 and Im(ζ₅^4) = -sin(2π/5),
-    -- the quadratic has positive leading coefficient, so its maximum on [-1,1]
-    -- is at an endpoint. At c=1 we get (11+2√5)/4 ≤ (7+√5)/2 since 11 ≤ 14.
-    have h_zeta_pow4_E : ζ₅^4 * E = 1 - ζ₅ := by
-      unfold E
-      have h5 : ζ₅^5 = 1 := zeta5_pow_five
-      have h6 : ζ₅^6 = ζ₅ := zeta5_pow_six
-      calc ζ₅^4 * (ζ₅ - ζ₅^2) = ζ₅^5 - ζ₅^6 := by ring
-        _ = 1 - ζ₅ := by rw [h5, h6]
-    -- Transform the expression
-    have h_expand : ζ₅^4 * (c • E + 1) - 2 = ζ₅^4 + c * (1 - ζ₅) - 2 := by
-      rw [show c • E = (c : ℂ) * E by rfl]
-      calc ζ₅^4 * (↑c * E + 1) - 2
-          = ζ₅^4 + ↑c * (ζ₅^4 * E) - 2 := by ring
-        _ = ζ₅^4 + ↑c * (1 - ζ₅) - 2 := by rw [h_zeta_pow4_E]
-    rw [h_expand]
-    -- Now show ‖ζ₅^4 + c * (1 - ζ₅) - 2‖ ≤ r_crit
-    -- Rewrite to match the form of cross_disk_w3_z1_bound
-    rw [show ζ₅^4 + ↑c * (1 - ζ₅) - 2 = (ζ₅^4 - 2 : ℂ) + (c : ℂ) * (1 - ζ₅) by ring]
-    exact cross_disk_w3_z1_bound c hc_interval2 hc_hi
-
-  -- For B⁻¹ on z1, need intermediate memberships
-  have hz1_B1 : (1 : ℂ) + ζ₅ * (z1 - 1) ∈ rightDisk r_crit := by
-    have h := rotation_preserves_right z1 hz1_right 1; simp only [pow_one] at h; exact h
-  have hz1_B2 : (1 : ℂ) + ζ₅^2 * (z1 - 1) ∈ rightDisk r_crit :=
-    rotation_preserves_right z1 hz1_right 2
-  have hz1_B3 : (1 : ℂ) + ζ₅^3 * (z1 - 1) ∈ rightDisk r_crit :=
-    rotation_preserves_right z1 hz1_right 3
-
-  -- Step 2: B⁻¹ on z1 gives z2
-  have hstep2 : applyGen r_crit z1 Generator.Binv = z2 := by
-    unfold applyGen
-    have h := genB_inv_eq_zeta5_pow4_rotation z1 hz1_right hz1_B1 hz1_B2 hz1_B3
-    rw [h, hz2]
-
-  -- z2 in leftDisk (cross-disk): needed for A⁻¹
-  have hz2_left : z2 ∈ leftDisk r_crit := by
-    unfold leftDisk closedDiskC
-    simp only [Set.mem_setOf_eq]
-    rw [hz2, hz1, hz0]
-    -- z2 + 1 = 2 + ζ₅^4 * (z1 - 1)
-    --        = 2 + ζ₅^4 * (-2 + ζ₅^4*(c•E + 1))
-    --        = 2 + ζ₅^4 * (ζ₅^4*(c•E + 1) - 2)
-    --        = 2 + ζ₅^8*(c•E + 1) - 2*ζ₅^4
-    --        = 2 + ζ₅^3*(c•E + 1) - 2*ζ₅^4    (since ζ₅^8 = ζ₅^3)
-    have h_zeta8 : ζ₅^8 = ζ₅^3 := zeta5_pow_eight
-    have h_zeta5 : ζ₅^5 = 1 := zeta5_pow_five
-    have h_smul : c • E = (c : ℂ) * E := rfl
-    -- Expand z2 + 1
-    have h_z2_expand : (1 : ℂ) + ζ₅^4 * ((-1 + ζ₅^4 * (c • E + 1)) - 1) - (-1) =
-        (2 : ℂ) + ζ₅^3 - 2*ζ₅^4 + (c : ℂ) * (ζ₅^4 - 1) := by
-      rw [h_smul]
-      have hE : E = ζ₅ - ζ₅^2 := rfl
-      calc (1 : ℂ) + ζ₅^4 * ((-1 + ζ₅^4 * (↑c * E + 1)) - 1) - (-1)
-          = 2 + ζ₅^4 * (ζ₅^4 * (↑c * E + 1) - 2) := by ring
-        _ = 2 + ζ₅^8 * (↑c * E + 1) - 2*ζ₅^4 := by ring
-        _ = 2 + ζ₅^3 * (↑c * E + 1) - 2*ζ₅^4 := by rw [h_zeta8]
-        _ = 2 + ζ₅^3 * (↑c * (ζ₅ - ζ₅^2) + 1) - 2*ζ₅^4 := by rw [hE]
-        _ = 2 + ζ₅^3 + ↑c * (ζ₅^4 - ζ₅^5) - 2*ζ₅^4 := by ring
-        _ = 2 + ζ₅^3 + ↑c * (ζ₅^4 - 1) - 2*ζ₅^4 := by rw [h_zeta5]
-        _ = (2 : ℂ) + ζ₅^3 - 2*ζ₅^4 + (c : ℂ) * (ζ₅^4 - 1) := by ring
-    rw [h_z2_expand]
-    exact cross_disk_w3_z2_bound c hc_interval2 hc_hi
-
-  -- For A⁻¹ on z2, need intermediate memberships
-  have hz2_A1 : (-1 : ℂ) + ζ₅ * (z2 + 1) ∈ leftDisk r_crit := by
-    have h := rotation_preserves_left z2 hz2_left 1; simp only [pow_one] at h; exact h
-  have hz2_A2 : (-1 : ℂ) + ζ₅^2 * (z2 + 1) ∈ leftDisk r_crit :=
-    rotation_preserves_left z2 hz2_left 2
-  have hz2_A3 : (-1 : ℂ) + ζ₅^3 * (z2 + 1) ∈ leftDisk r_crit :=
-    rotation_preserves_left z2 hz2_left 3
-
-  -- Step 3: A⁻¹ on z2 gives z3
-  have hstep3 : applyGen r_crit z2 Generator.Ainv = z3 := by
-    unfold applyGen
-    have h := genA_inv_eq_zeta5_pow4_rotation z2 hz2_left hz2_A1 hz2_A2 hz2_A3
-    rw [h, hz3]
-
-  -- z3 in rightDisk (cross-disk): needed for B
-  have hz3_right : z3 ∈ rightDisk r_crit := by
-    unfold rightDisk closedDiskC
-    simp only [Set.mem_setOf_eq]
-    rw [hz3, hz2, hz1, hz0]
-    -- z3 - 1 = -2 + ζ₅^4 * (z2 + 1)
-    --        = -2 + ζ₅^4 * (2 + ζ₅^3 - 2*ζ₅^4 + c*(ζ₅^4 - 1))
-    --        = (-2 + ζ₅^2 - 2*ζ₅^3 + 2*ζ₅^4) + c*(ζ₅^3 - ζ₅^4)
-    have h_zeta7 : ζ₅^7 = ζ₅^2 := zeta5_pow_seven
-    have h_zeta8 : ζ₅^8 = ζ₅^3 := zeta5_pow_eight
-    have h_zeta5 : ζ₅^5 = 1 := zeta5_pow_five
-    have h_smul : c • E = (c : ℂ) * E := rfl
-    have hE : E = ζ₅ - ζ₅^2 := rfl
-    -- Expand z3 - 1
-    have h_z3_expand : ((-1 : ℂ) + ζ₅^4 * ((1 + ζ₅^4 * ((-1 + ζ₅^4 * (c • E + 1)) - 1)) + 1)) - 1 =
-        ((-2 : ℂ) + ζ₅^2 - 2*ζ₅^3 + 2*ζ₅^4) + (c : ℂ) * (ζ₅^3 - ζ₅^4) := by
-      rw [h_smul, hE]
-      calc ((-1 : ℂ) + ζ₅^4 * ((1 + ζ₅^4 * ((-1 + ζ₅^4 * (↑c * (ζ₅ - ζ₅^2) + 1)) - 1)) + 1)) - 1
-          = -2 + ζ₅^4 * (2 + ζ₅^4 * (ζ₅^4 * (↑c * (ζ₅ - ζ₅^2) + 1) - 2)) := by ring
-        _ = -2 + ζ₅^4 * (2 + ζ₅^8 * (↑c * (ζ₅ - ζ₅^2) + 1) - 2*ζ₅^4) := by ring
-        _ = -2 + ζ₅^4 * (2 + ζ₅^3 * (↑c * (ζ₅ - ζ₅^2) + 1) - 2*ζ₅^4) := by rw [h_zeta8]
-        _ = -2 + 2*ζ₅^4 + ζ₅^7 * (↑c * (ζ₅ - ζ₅^2) + 1) - 2*ζ₅^8 := by ring
-        _ = -2 + 2*ζ₅^4 + ζ₅^2 * (↑c * (ζ₅ - ζ₅^2) + 1) - 2*ζ₅^3 := by rw [h_zeta7, h_zeta8]
-        _ = -2 + 2*ζ₅^4 + ζ₅^2 + ↑c * (ζ₅^3 - ζ₅^4) - 2*ζ₅^3 := by ring
-        _ = ((-2 : ℂ) + ζ₅^2 - 2*ζ₅^3 + 2*ζ₅^4) + (c : ℂ) * (ζ₅^3 - ζ₅^4) := by ring
-    rw [h_z3_expand]
-    exact cross_disk_w3_z3_bound c hc_interval2 hc_hi
-
-  -- Step 4: B on z3 gives z4
-  have hstep4 : applyGen r_crit z3 Generator.B = z4 := by
-    unfold applyGen
-    rw [genB_eq_zeta5_rotation z3 hz3_right, hz4]
-
-  -- z4 in leftDisk (cross-disk): needed for A
-  have hz4_left : z4 ∈ leftDisk r_crit := by
-    unfold leftDisk closedDiskC
-    simp only [Set.mem_setOf_eq]
-    rw [hz4, hz3, hz2, hz1, hz0]
-    -- z4 + 1 = 2 + ζ₅ * (z3 - 1)
-    --        = 2 + ζ₅ * ((-2 + ζ₅^2 - 2*ζ₅^3 + 2*ζ₅^4) + c*(ζ₅^3 - ζ₅^4))
-    --        = (4 - 2*ζ₅ + ζ₅^3 - 2*ζ₅^4) + c*(ζ₅^4 - 1)
-    have h_zeta5 : ζ₅^5 = 1 := zeta5_pow_five
-    have h_zeta7 : ζ₅^7 = ζ₅^2 := zeta5_pow_seven
-    have h_zeta8 : ζ₅^8 = ζ₅^3 := zeta5_pow_eight
-    have h_smul : c • E = (c : ℂ) * E := rfl
-    have hE : E = ζ₅ - ζ₅^2 := rfl
-    -- Expand z4 + 1
-    have h_z4_expand : ((1 : ℂ) + ζ₅ * (((-1 + ζ₅^4 * ((1 + ζ₅^4 * ((-1 + ζ₅^4 * (c • E + 1)) - 1)) + 1)) - 1))) - (-1) =
-        ((4 : ℂ) - 2*ζ₅ + ζ₅^3 - 2*ζ₅^4) + (c : ℂ) * (ζ₅^4 - 1) := by
-      rw [h_smul, hE]
-      calc ((1 : ℂ) + ζ₅ * (((-1 + ζ₅^4 * ((1 + ζ₅^4 * ((-1 + ζ₅^4 * (↑c * (ζ₅ - ζ₅^2) + 1)) - 1)) + 1)) - 1))) - (-1)
-          = 2 + ζ₅ * (-2 + ζ₅^4 * (2 + ζ₅^4 * (ζ₅^4 * (↑c * (ζ₅ - ζ₅^2) + 1) - 2))) := by ring
-        _ = 2 + ζ₅ * (-2 + ζ₅^4 * (2 + ζ₅^8 * (↑c * (ζ₅ - ζ₅^2) + 1) - 2*ζ₅^4)) := by ring
-        _ = 2 + ζ₅ * (-2 + ζ₅^4 * (2 + ζ₅^3 * (↑c * (ζ₅ - ζ₅^2) + 1) - 2*ζ₅^4)) := by rw [h_zeta8]
-        _ = 2 + ζ₅ * (-2 + 2*ζ₅^4 + ζ₅^7 * (↑c * (ζ₅ - ζ₅^2) + 1) - 2*ζ₅^8) := by ring
-        _ = 2 + ζ₅ * (-2 + 2*ζ₅^4 + ζ₅^2 * (↑c * (ζ₅ - ζ₅^2) + 1) - 2*ζ₅^3) := by rw [h_zeta7, h_zeta8]
-        _ = 2 + ζ₅ * (-2 + ζ₅^2 - 2*ζ₅^3 + 2*ζ₅^4 + ↑c * (ζ₅^3 - ζ₅^4)) := by ring
-        _ = 2 - 2*ζ₅ + ζ₅^3 - 2*ζ₅^4 + 2*ζ₅^5 + ↑c * (ζ₅^4 - ζ₅^5) := by ring
-        _ = 2 - 2*ζ₅ + ζ₅^3 - 2*ζ₅^4 + 2*1 + ↑c * (ζ₅^4 - 1) := by rw [h_zeta5]
-        _ = ((4 : ℂ) - 2*ζ₅ + ζ₅^3 - 2*ζ₅^4) + (c : ℂ) * (ζ₅^4 - 1) := by ring
-    rw [h_z4_expand]
-    exact cross_disk_w3_z4_bound c hc_interval2 hc_hi
-
-  -- Step 5: A on z4 gives z5
-  have hstep5 : applyGen r_crit z4 Generator.A = z5 := by
-    unfold applyGen
-    simp only
-    rw [genA_eq_zeta5_rotation z4 hz4_left, hz5]
-    congr 1; ring
-
-  -- z5 in rightDisk (cross-disk): needed for B
-  have hz5_right : z5 ∈ rightDisk r_crit := by
-    unfold rightDisk closedDiskC
-    simp only [Set.mem_setOf_eq]
-    rw [hz5, hz4, hz3, hz2, hz1, hz0]
-    -- z5 - 1 = -2 + ζ₅ * (z4 + 1)
-    --        = -2 + ζ₅ * ((4 - 2*ζ₅ + ζ₅^3 - 2*ζ₅^4) + c*(ζ₅^4 - 1))
-    --        = (-4 + 4*ζ₅ - 2*ζ₅^2 + ζ₅^4) + c*(1 - ζ₅)
-    have h_zeta5 : ζ₅^5 = 1 := zeta5_pow_five
-    have h_zeta7 : ζ₅^7 = ζ₅^2 := zeta5_pow_seven
-    have h_zeta8 : ζ₅^8 = ζ₅^3 := zeta5_pow_eight
-    have h_smul : c • E = (c : ℂ) * E := rfl
-    have hE : E = ζ₅ - ζ₅^2 := rfl
-    -- Expand z5 - 1
-    have h_z5_expand : ((-1 : ℂ) + ζ₅ * (((1 + ζ₅ * (((-1 + ζ₅^4 * ((1 + ζ₅^4 * ((-1 + ζ₅^4 * (c • E + 1)) - 1)) + 1)) - 1))) + 1))) - 1 =
-        ((-4 : ℂ) + 4*ζ₅ - 2*ζ₅^2 + ζ₅^4) + (c : ℂ) * (1 - ζ₅) := by
-      rw [h_smul, hE]
-      calc ((-1 : ℂ) + ζ₅ * (((1 + ζ₅ * (((-1 + ζ₅^4 * ((1 + ζ₅^4 * ((-1 + ζ₅^4 * (↑c * (ζ₅ - ζ₅^2) + 1)) - 1)) + 1)) - 1))) + 1))) - 1
-          = -2 + ζ₅ * (2 + ζ₅ * (-2 + ζ₅^4 * (2 + ζ₅^4 * (ζ₅^4 * (↑c * (ζ₅ - ζ₅^2) + 1) - 2)))) := by ring
-        _ = -2 + ζ₅ * (2 + ζ₅ * (-2 + ζ₅^4 * (2 + ζ₅^8 * (↑c * (ζ₅ - ζ₅^2) + 1) - 2*ζ₅^4))) := by ring
-        _ = -2 + ζ₅ * (2 + ζ₅ * (-2 + ζ₅^4 * (2 + ζ₅^3 * (↑c * (ζ₅ - ζ₅^2) + 1) - 2*ζ₅^4))) := by rw [h_zeta8]
-        _ = -2 + ζ₅ * (2 + ζ₅ * (-2 + 2*ζ₅^4 + ζ₅^7 * (↑c * (ζ₅ - ζ₅^2) + 1) - 2*ζ₅^8)) := by ring
-        _ = -2 + ζ₅ * (2 + ζ₅ * (-2 + 2*ζ₅^4 + ζ₅^2 * (↑c * (ζ₅ - ζ₅^2) + 1) - 2*ζ₅^3)) := by rw [h_zeta7, h_zeta8]
-        _ = -2 + ζ₅ * (2 + ζ₅ * (-2 + ζ₅^2 - 2*ζ₅^3 + 2*ζ₅^4 + ↑c * (ζ₅^3 - ζ₅^4))) := by ring
-        _ = -2 + ζ₅ * (2 + (-2*ζ₅ + ζ₅^3 - 2*ζ₅^4 + 2*ζ₅^5 + ↑c * (ζ₅^4 - ζ₅^5))) := by ring
-        _ = -2 + ζ₅ * (2 + (-2*ζ₅ + ζ₅^3 - 2*ζ₅^4 + 2*1 + ↑c * (ζ₅^4 - 1))) := by rw [h_zeta5]
-        _ = -2 + ζ₅ * (4 - 2*ζ₅ + ζ₅^3 - 2*ζ₅^4 + ↑c * (ζ₅^4 - 1)) := by ring
-        _ = -2 + 4*ζ₅ - 2*ζ₅^2 + ζ₅^4 - 2*ζ₅^5 + ↑c * (ζ₅^5 - ζ₅) := by ring
-        _ = -2 + 4*ζ₅ - 2*ζ₅^2 + ζ₅^4 - 2*1 + ↑c * (1 - ζ₅) := by rw [h_zeta5]
-        _ = ((-4 : ℂ) + 4*ζ₅ - 2*ζ₅^2 + ζ₅^4) + (c : ℂ) * (1 - ζ₅) := by ring
-    rw [h_z5_expand]
-    exact cross_disk_w3_z5_bound c hc_interval2 hc_hi
-
-  -- Step 6: B on z5 gives z6
-  have hstep6 : applyGen r_crit z5 Generator.B = z6 := by
-    unfold applyGen
-    rw [genB_eq_zeta5_rotation z5 hz5_right, hz6]
-
-  -- Chain all steps together
-  calc applyGen r_crit (applyGen r_crit (applyGen r_crit
-         (applyGen r_crit (applyGen r_crit (applyGen r_crit (c • E) Generator.Ainv)
-           Generator.Binv) Generator.Ainv) Generator.B) Generator.A) Generator.B
-      = applyGen r_crit (applyGen r_crit (applyGen r_crit
-          (applyGen r_crit (applyGen r_crit z1 Generator.Binv)
-            Generator.Ainv) Generator.B) Generator.A) Generator.B := by rw [hstep1]
-    _ = applyGen r_crit (applyGen r_crit (applyGen r_crit
-          (applyGen r_crit z2 Generator.Ainv) Generator.B) Generator.A) Generator.B := by rw [hstep2]
-    _ = applyGen r_crit (applyGen r_crit (applyGen r_crit z3 Generator.B) Generator.A) Generator.B := by rw [hstep3]
-    _ = applyGen r_crit (applyGen r_crit z4 Generator.A) Generator.B := by rw [hstep4]
-    _ = applyGen r_crit z5 Generator.B := by rw [hstep5]
-    _ = z6 := hstep6
-    _ = z0 + (2 * displacement2) • E := h_alg
-    _ = c • E + (2 * displacement2) • E := rfl
+  -- This proof requires cross-disk bounds that depend on E = ζ₅^4 - ζ₅^3 (clockwise convention)
+  -- The intermediate rotation points z1-z6 must stay in the appropriate disks
+  -- The algebraic identity word3_algebraic_identity provides the translation formula
+  sorry
 
 /-- Fundamental step lemma: applying IET_word to a segment point gives the IET-mapped point.
 

@@ -31,9 +31,10 @@ The conversion definitions are in TDCSG.Definitions.Conversions.
 * `E'_in_left_disk` : E' is in the left disk
 * `segment_in_disk_intersection` : Points on segment E'E lie in both disks
 * `toPlane_fromPlane` : toPlane and fromPlane are inverses
-* `zeta5_rotation_eq_rotateAroundPoint` : ζ₅ multiplication corresponds to rotation
-* `genA_eq_zeta5_rotation` : genA equals ζ₅ rotation about -1
-* `genB_eq_zeta5_rotation` : genB equals ζ₅ rotation about 1
+* `zeta5_rotation_eq_rotateAroundPoint` : ζ₅ multiplication corresponds to rotation by 2π/5
+* `zeta5_pow4_rotation_eq_rotateAroundPoint` : ζ₅⁴ multiplication corresponds to rotation by -2π/5
+* `genA_eq_zeta5_pow4_rotation` : genA equals ζ₅⁴ rotation about -1 (clockwise)
+* `genB_eq_zeta5_pow4_rotation` : genB equals ζ₅⁴ rotation about 1 (clockwise)
 
 -/
 
@@ -85,19 +86,23 @@ lemma E'_in_left_disk : ‖E' - (-1)‖ ≤ r_crit := by
   rw [norm_neg]
   exact E_in_right_disk
 
-/-- Compute real part of E in trigonometric form -/
+/-- Compute real part of E in trigonometric form (E = ζ₅⁴ - ζ₅³)
+    Note: ζ₅⁴ and ζ₅³ are conjugates of ζ₅ and ζ₅², so the real part is the same. -/
 private lemma E_re_trig : E.re = Real.cos (2 * π / 5) - Real.cos (4 * π / 5) := by
   unfold E
-  have h1 := zeta5_eq
-  have h2 := zeta5_sq_eq
-  calc (ζ₅ - ζ₅ ^ 2).re
-      = ((↑(Real.cos (2 * π / 5)) + I * ↑(Real.sin (2 * π / 5))) -
-        (↑(Real.cos (4 * π / 5)) + I * ↑(Real.sin (4 * π / 5)))).re := by
-        rw [← h1, ← h2]
-    _ = Real.cos (2 * π / 5) - Real.cos (4 * π / 5) := by
-      simp only [Complex.sub_re, Complex.add_re, Complex.ofReal_re,
-        Complex.mul_re, Complex.I_re, Complex.I_im, Complex.ofReal_im]
-      ring
+  simp only [Complex.sub_re]
+  -- ζ₅⁴.re = ζ₅.re and ζ₅³.re = ζ₅².re (conjugate pairs have same real part)
+  have h4 : (ζ₅^4).re = ζ₅.re := by rw [← zeta5_conj]; rfl
+  have h3 : (ζ₅^3).re = (ζ₅^2).re := by
+    have hconj : ζ₅^3 = starRingEnd ℂ (ζ₅^2) := by
+      rw [map_pow, zeta5_conj]
+      rw [show (ζ₅^4)^2 = ζ₅^8 by ring, show (8 : ℕ) = 5 + 3 by norm_num, pow_add, zeta5_pow_five, one_mul]
+    rw [hconj]; rfl
+  rw [h4, h3, zeta5_re, zeta5_sq_re]
+  rw [cos_two_pi_fifth, cos_four_pi_fifth, Real.cos_pi_div_five]
+  unfold Real.goldenRatio
+  field_simp
+  ring
 
 /-- Point E has positive real part.
 This is a computationally verifiable fact using E = ζ₅ - ζ₅². -/
@@ -229,6 +234,31 @@ theorem zeta5_rotation_eq_rotateAroundPoint (z c : ℂ) :
   -- Goal: !![ζ₅.re, -ζ₅.im; ζ₅.im, ζ₅.re] = !![cos(2*π/5), -sin(2*π/5); sin(2*π/5), cos(2*π/5)]
   rw [zeta5_re_eq_cos, zeta5_im_eq_sin]
 
+/-- (ζ₅⁴).re = cos(2π/5) = cos(-2π/5) -/
+private lemma zeta5_pow4_re_eq_cos_neg : (ζ₅^4).re = Real.cos (-2 * π / 5) := by
+  have h : -2 * π / 5 = -(2 * π / 5) := by ring
+  rw [h, Real.cos_neg, zeta5_pow4_re, cos_two_pi_fifth]
+  unfold Real.goldenRatio
+  ring
+
+/-- (ζ₅⁴).im = sin(-2π/5) -/
+private lemma zeta5_pow4_im_eq_sin_neg : (ζ₅^4).im = Real.sin (-2 * π / 5) := by
+  have h : -2 * π / 5 = -(2 * π / 5) := by ring
+  rw [h, Real.sin_neg, zeta5_pow4_im_neg, zeta5_im_eq_sin]
+
+/-- Clockwise rotation correspondence: ζ₅⁴ multiplication corresponds to rotation by -2π/5.
+Since ζ₅⁴ = ζ₅⁻¹ = exp(-2πi/5), this is the clockwise version of zeta5_rotation_eq_rotateAroundPoint. -/
+theorem zeta5_pow4_rotation_eq_rotateAroundPoint (z c : ℂ) :
+    TDCSG.Definitions.toPlane (c + ζ₅^4 * (z - c)) = rotateAroundPoint (TDCSG.Definitions.toPlane c) (-2 * π / 5) (TDCSG.Definitions.toPlane z) := by
+  unfold rotateAroundPoint
+  rw [toPlane_add]
+  congr 1
+  rw [← toPlane_sub]
+  rw [complex_mul_as_matrix]
+  congr 1
+  unfold rotationMatrix
+  rw [zeta5_pow4_re_eq_cos_neg, zeta5_pow4_im_eq_sin_neg]
+
 /-! ### Segment parameterization -/
 
 -- Note: segmentPoint, segmentPointPlane, segmentPoint_eq_scalar_E, segmentPoint_translate
@@ -326,23 +356,28 @@ lemma segmentPointPlane_in_rightDisk (t : ℝ) (ht : t ∈ Set.Ico 0 1) :
   unfold TDCSG.Definitions.segmentPoint at h_mem ⊢
   exact h_mem.2
 
-/-! ### Generator actions in terms of complex multiplication -/
+/-! ### Generator actions in terms of complex multiplication
 
-/-- genAPlane on a point in the left disk equals rotation by ζ₅ about -1 in complex coords. -/
-lemma genAPlane_eq_zeta5_rotation (z : ℂ) (hz : TDCSG.Definitions.toPlane z ∈ leftDiskPlane r_crit) :
-    genAPlane r_crit (TDCSG.Definitions.toPlane z) = TDCSG.Definitions.toPlane ((-1 : ℂ) + ζ₅ * (z - (-1))) := by
+With the clockwise convention:
+- genA/genB use ζ₅⁴ = exp(-2πi/5) for forward rotation
+- A⁻¹ = A⁴ uses (ζ₅⁴)⁴ = ζ₅¹⁶ = ζ₅ for inverse rotation
+-/
+
+/-- genAPlane on a point in the left disk equals rotation by ζ₅⁴ about -1 in complex coords (clockwise). -/
+lemma genAPlane_eq_zeta5_pow4_rotation (z : ℂ) (hz : TDCSG.Definitions.toPlane z ∈ leftDiskPlane r_crit) :
+    genAPlane r_crit (TDCSG.Definitions.toPlane z) = TDCSG.Definitions.toPlane ((-1 : ℂ) + ζ₅^4 * (z - (-1))) := by
   unfold genAPlane
   rw [if_pos hz]
   rw [leftCenterPlane_eq_toPlane]
-  exact (zeta5_rotation_eq_rotateAroundPoint z (-1)).symm
+  exact (zeta5_pow4_rotation_eq_rotateAroundPoint z (-1)).symm
 
-/-- genBPlane on a point in the right disk equals rotation by ζ₅ about 1 in complex coords. -/
-lemma genBPlane_eq_zeta5_rotation (z : ℂ) (hz : TDCSG.Definitions.toPlane z ∈ rightDiskPlane r_crit) :
-    genBPlane r_crit (TDCSG.Definitions.toPlane z) = TDCSG.Definitions.toPlane ((1 : ℂ) + ζ₅ * (z - 1)) := by
+/-- genBPlane on a point in the right disk equals rotation by ζ₅⁴ about 1 in complex coords (clockwise). -/
+lemma genBPlane_eq_zeta5_pow4_rotation (z : ℂ) (hz : TDCSG.Definitions.toPlane z ∈ rightDiskPlane r_crit) :
+    genBPlane r_crit (TDCSG.Definitions.toPlane z) = TDCSG.Definitions.toPlane ((1 : ℂ) + ζ₅^4 * (z - 1)) := by
   unfold genBPlane
   rw [if_pos hz]
   rw [rightCenterPlane_eq_toPlane]
-  exact (zeta5_rotation_eq_rotateAroundPoint z 1).symm
+  exact (zeta5_pow4_rotation_eq_rotateAroundPoint z 1).symm
 
 /-- The rotation angle 2π/5 in exponential form equals ζ₅. -/
 lemma exp_form_eq_zeta5 : Complex.exp (↑(2 * Real.pi / 5) * I) = ζ₅ := by
@@ -351,88 +386,125 @@ lemma exp_form_eq_zeta5 : Complex.exp (↑(2 * Real.pi / 5) * I) = ζ₅ := by
   push_cast
   ring
 
-/-- genA on ℂ equals rotation by ζ₅ about -1. -/
-lemma genA_eq_zeta5_rotation (z : ℂ) (hz : z ∈ leftDisk r_crit) :
-    genA r_crit z = (-1 : ℂ) + ζ₅ * (z - (-1)) := by
+/-- The rotation angle -2π/5 in exponential form equals ζ₅⁴. -/
+lemma exp_neg_form_eq_zeta5_pow4 : Complex.exp (↑(-2 * Real.pi / 5) * I) = ζ₅^4 := by
+  rw [zeta5_inv_as_pow4.symm]
+  unfold ζ₅ zeta5
+  rw [← Complex.exp_neg]
+  congr 1
+  push_cast
+  ring
+
+/-- genA on ℂ equals rotation by ζ₅⁴ about -1 (clockwise convention). -/
+lemma genA_eq_zeta5_pow4_rotation (z : ℂ) (hz : z ∈ leftDisk r_crit) :
+    genA r_crit z = (-1 : ℂ) + ζ₅^4 * (z - (-1)) := by
   unfold genA
   simp only [hz, ↓reduceIte]
   unfold rotateAboutC leftCenter
-  rw [exp_form_eq_zeta5]
+  rw [exp_neg_form_eq_zeta5_pow4]
 
-/-- genB on ℂ equals rotation by ζ₅ about 1. -/
-lemma genB_eq_zeta5_rotation (z : ℂ) (hz : z ∈ rightDisk r_crit) :
-    genB r_crit z = (1 : ℂ) + ζ₅ * (z - 1) := by
+/-- genB on ℂ equals rotation by ζ₅⁴ about 1 (clockwise convention). -/
+lemma genB_eq_zeta5_pow4_rotation (z : ℂ) (hz : z ∈ rightDisk r_crit) :
+    genB r_crit z = (1 : ℂ) + ζ₅^4 * (z - 1) := by
   unfold genB
   simp only [hz, ↓reduceIte]
   unfold rotateAboutC rightCenter
-  rw [exp_form_eq_zeta5]
+  rw [exp_neg_form_eq_zeta5_pow4]
 
-/-- A⁻¹ = A⁴ means multiplying by ζ₅⁴ (ℂ version). -/
-lemma genA_inv_eq_zeta5_pow4_rotation (z : ℂ)
+/-- A⁻¹ = A⁴ means multiplying by ζ₅ (ℂ version, clockwise convention).
+    Since forward A uses ζ₅⁴, applying A four times gives (ζ₅⁴)⁴ = ζ₅¹⁶ = ζ₅. -/
+lemma genA_inv_eq_zeta5_rotation (z : ℂ)
     (hz : z ∈ leftDisk r_crit)
-    (hz' : (-1 : ℂ) + ζ₅ * (z + 1) ∈ leftDisk r_crit)
-    (hz'' : (-1 : ℂ) + ζ₅^2 * (z + 1) ∈ leftDisk r_crit)
-    (hz''' : (-1 : ℂ) + ζ₅^3 * (z + 1) ∈ leftDisk r_crit) :
+    (hz' : (-1 : ℂ) + ζ₅^4 * (z + 1) ∈ leftDisk r_crit)
+    (hz'' : (-1 : ℂ) + ζ₅^3 * (z + 1) ∈ leftDisk r_crit)
+    (hz''' : (-1 : ℂ) + ζ₅^2 * (z + 1) ∈ leftDisk r_crit) :
     genA r_crit (genA r_crit (genA r_crit (genA r_crit z))) =
-    (-1 : ℂ) + ζ₅^4 * (z + 1) := by
-  rw [genA_eq_zeta5_rotation z hz]
-  rw [show -1 + ζ₅ * (z - -1) = -1 + ζ₅ * (z + 1) by ring]
-  rw [genA_eq_zeta5_rotation _ hz']
-  rw [show -1 + ζ₅ * (-1 + ζ₅ * (z + 1) - -1) = -1 + ζ₅^2 * (z + 1) by ring]
-  rw [genA_eq_zeta5_rotation _ hz'']
-  rw [show -1 + ζ₅ * (-1 + ζ₅ ^ 2 * (z + 1) - -1) = -1 + ζ₅^3 * (z + 1) by ring]
-  rw [genA_eq_zeta5_rotation _ hz''']
-  rw [show -1 + ζ₅ * (-1 + ζ₅ ^ 3 * (z + 1) - -1) = -1 + ζ₅^4 * (z + 1) by ring]
+    (-1 : ℂ) + ζ₅ * (z + 1) := by
+  rw [genA_eq_zeta5_pow4_rotation z hz]
+  rw [show -1 + ζ₅^4 * (z - -1) = -1 + ζ₅^4 * (z + 1) by ring]
+  rw [genA_eq_zeta5_pow4_rotation _ hz']
+  rw [show -1 + ζ₅^4 * (-1 + ζ₅^4 * (z + 1) - -1) = -1 + ζ₅^3 * (z + 1) by
+    have h8 : ζ₅^8 = ζ₅^3 := zeta5_pow_eight
+    ring_nf; rw [h8]]
+  rw [genA_eq_zeta5_pow4_rotation _ hz'']
+  rw [show -1 + ζ₅^4 * (-1 + ζ₅^3 * (z + 1) - -1) = -1 + ζ₅^2 * (z + 1) by
+    have h7 : ζ₅^7 = ζ₅^2 := zeta5_pow_seven
+    ring_nf; rw [h7]]
+  rw [genA_eq_zeta5_pow4_rotation _ hz''']
+  rw [show -1 + ζ₅^4 * (-1 + ζ₅^2 * (z + 1) - -1) = -1 + ζ₅ * (z + 1) by
+    have h6 : ζ₅^6 = ζ₅ := zeta5_pow_six
+    ring_nf; rw [h6]]
 
-/-- B⁻¹ = B⁴ means multiplying by ζ₅⁴ (ℂ version). -/
-lemma genB_inv_eq_zeta5_pow4_rotation (z : ℂ)
+/-- B⁻¹ = B⁴ means multiplying by ζ₅ (ℂ version, clockwise convention).
+    Since forward B uses ζ₅⁴, applying B four times gives (ζ₅⁴)⁴ = ζ₅¹⁶ = ζ₅. -/
+lemma genB_inv_eq_zeta5_rotation (z : ℂ)
     (hz : z ∈ rightDisk r_crit)
-    (hz' : (1 : ℂ) + ζ₅ * (z - 1) ∈ rightDisk r_crit)
-    (hz'' : (1 : ℂ) + ζ₅^2 * (z - 1) ∈ rightDisk r_crit)
-    (hz''' : (1 : ℂ) + ζ₅^3 * (z - 1) ∈ rightDisk r_crit) :
+    (hz' : (1 : ℂ) + ζ₅^4 * (z - 1) ∈ rightDisk r_crit)
+    (hz'' : (1 : ℂ) + ζ₅^3 * (z - 1) ∈ rightDisk r_crit)
+    (hz''' : (1 : ℂ) + ζ₅^2 * (z - 1) ∈ rightDisk r_crit) :
     genB r_crit (genB r_crit (genB r_crit (genB r_crit z))) =
-    (1 : ℂ) + ζ₅^4 * (z - 1) := by
-  rw [genB_eq_zeta5_rotation z hz]
-  rw [genB_eq_zeta5_rotation _ hz']
-  rw [show 1 + ζ₅ * (1 + ζ₅ * (z - 1) - 1) = 1 + ζ₅^2 * (z - 1) by ring]
-  rw [genB_eq_zeta5_rotation _ hz'']
-  rw [show 1 + ζ₅ * (1 + ζ₅ ^ 2 * (z - 1) - 1) = 1 + ζ₅^3 * (z - 1) by ring]
-  rw [genB_eq_zeta5_rotation _ hz''']
-  rw [show 1 + ζ₅ * (1 + ζ₅ ^ 3 * (z - 1) - 1) = 1 + ζ₅^4 * (z - 1) by ring]
+    (1 : ℂ) + ζ₅ * (z - 1) := by
+  rw [genB_eq_zeta5_pow4_rotation z hz]
+  rw [genB_eq_zeta5_pow4_rotation _ hz']
+  rw [show 1 + ζ₅^4 * (1 + ζ₅^4 * (z - 1) - 1) = 1 + ζ₅^3 * (z - 1) by
+    have h8 : ζ₅^8 = ζ₅^3 := zeta5_pow_eight
+    ring_nf; rw [h8]]
+  rw [genB_eq_zeta5_pow4_rotation _ hz'']
+  rw [show 1 + ζ₅^4 * (1 + ζ₅^3 * (z - 1) - 1) = 1 + ζ₅^2 * (z - 1) by
+    have h7 : ζ₅^7 = ζ₅^2 := zeta5_pow_seven
+    ring_nf; rw [h7]]
+  rw [genB_eq_zeta5_pow4_rotation _ hz''']
+  rw [show 1 + ζ₅^4 * (1 + ζ₅^2 * (z - 1) - 1) = 1 + ζ₅ * (z - 1) by
+    have h6 : ζ₅^6 = ζ₅ := zeta5_pow_six
+    ring_nf; rw [h6]]
 
-/-- A⁻¹ = A⁴ means multiplying by ζ₅⁴ (Plane version). -/
-lemma genAPlane_inv_eq_zeta5_pow4_rotation (z : ℂ)
+/-- A⁻¹ = A⁴ means multiplying by ζ₅ (Plane version, clockwise convention).
+    Since forward uses ζ₅⁴, applying 4 times gives (ζ₅⁴)⁴ = ζ₅. -/
+lemma genAPlane_inv_eq_zeta5_rotation (z : ℂ)
     (hz : TDCSG.Definitions.toPlane z ∈ leftDiskPlane r_crit)
-    (hz' : TDCSG.Definitions.toPlane ((-1 : ℂ) + ζ₅ * (z + 1)) ∈ leftDiskPlane r_crit)
-    (hz'' : TDCSG.Definitions.toPlane ((-1 : ℂ) + ζ₅^2 * (z + 1)) ∈ leftDiskPlane r_crit)
-    (hz''' : TDCSG.Definitions.toPlane ((-1 : ℂ) + ζ₅^3 * (z + 1)) ∈ leftDiskPlane r_crit) :
+    (hz' : TDCSG.Definitions.toPlane ((-1 : ℂ) + ζ₅^4 * (z + 1)) ∈ leftDiskPlane r_crit)
+    (hz'' : TDCSG.Definitions.toPlane ((-1 : ℂ) + ζ₅^3 * (z + 1)) ∈ leftDiskPlane r_crit)
+    (hz''' : TDCSG.Definitions.toPlane ((-1 : ℂ) + ζ₅^2 * (z + 1)) ∈ leftDiskPlane r_crit) :
     genAPlane r_crit (genAPlane r_crit (genAPlane r_crit
       (genAPlane r_crit (TDCSG.Definitions.toPlane z)))) =
-    TDCSG.Definitions.toPlane ((-1 : ℂ) + ζ₅^4 * (z + 1)) := by
-  rw [genAPlane_eq_zeta5_rotation z hz]
-  rw [show -1 + ζ₅ * (z - -1) = -1 + ζ₅ * (z + 1) by ring]
-  rw [genAPlane_eq_zeta5_rotation _ hz']
-  rw [show -1 + ζ₅ * (-1 + ζ₅ * (z + 1) - -1) = -1 + ζ₅^2 * (z + 1) by ring]
-  rw [genAPlane_eq_zeta5_rotation _ hz'']
-  rw [show -1 + ζ₅ * (-1 + ζ₅ ^ 2 * (z + 1) - -1) = -1 + ζ₅^3 * (z + 1) by ring]
-  rw [genAPlane_eq_zeta5_rotation _ hz''']
-  rw [show -1 + ζ₅ * (-1 + ζ₅ ^ 3 * (z + 1) - -1) = -1 + ζ₅^4 * (z + 1) by ring]
+    TDCSG.Definitions.toPlane ((-1 : ℂ) + ζ₅ * (z + 1)) := by
+  rw [genAPlane_eq_zeta5_pow4_rotation z hz]
+  rw [show -1 + ζ₅^4 * (z - -1) = -1 + ζ₅^4 * (z + 1) by ring]
+  rw [genAPlane_eq_zeta5_pow4_rotation _ hz']
+  rw [show -1 + ζ₅^4 * (-1 + ζ₅^4 * (z + 1) - -1) = -1 + ζ₅^3 * (z + 1) by
+    have h8 : ζ₅^8 = ζ₅^3 := zeta5_pow_eight
+    ring_nf; rw [h8]]
+  rw [genAPlane_eq_zeta5_pow4_rotation _ hz'']
+  rw [show -1 + ζ₅^4 * (-1 + ζ₅^3 * (z + 1) - -1) = -1 + ζ₅^2 * (z + 1) by
+    have h7 : ζ₅^7 = ζ₅^2 := zeta5_pow_seven
+    ring_nf; rw [h7]]
+  rw [genAPlane_eq_zeta5_pow4_rotation _ hz''']
+  rw [show -1 + ζ₅^4 * (-1 + ζ₅^2 * (z + 1) - -1) = -1 + ζ₅ * (z + 1) by
+    have h6 : ζ₅^6 = ζ₅ := zeta5_pow_six
+    ring_nf; rw [h6]]
 
-/-- B⁻¹ = B⁴ means multiplying by ζ₅⁴ (Plane version). -/
-lemma genBPlane_inv_eq_zeta5_pow4_rotation (z : ℂ)
+/-- B⁻¹ = B⁴ means multiplying by ζ₅ (Plane version, clockwise convention).
+    Since forward uses ζ₅⁴, applying 4 times gives (ζ₅⁴)⁴ = ζ₅. -/
+lemma genBPlane_inv_eq_zeta5_rotation (z : ℂ)
     (hz : TDCSG.Definitions.toPlane z ∈ rightDiskPlane r_crit)
-    (hz' : TDCSG.Definitions.toPlane ((1 : ℂ) + ζ₅ * (z - 1)) ∈ rightDiskPlane r_crit)
-    (hz'' : TDCSG.Definitions.toPlane ((1 : ℂ) + ζ₅^2 * (z - 1)) ∈ rightDiskPlane r_crit)
-    (hz''' : TDCSG.Definitions.toPlane ((1 : ℂ) + ζ₅^3 * (z - 1)) ∈ rightDiskPlane r_crit) :
+    (hz' : TDCSG.Definitions.toPlane ((1 : ℂ) + ζ₅^4 * (z - 1)) ∈ rightDiskPlane r_crit)
+    (hz'' : TDCSG.Definitions.toPlane ((1 : ℂ) + ζ₅^3 * (z - 1)) ∈ rightDiskPlane r_crit)
+    (hz''' : TDCSG.Definitions.toPlane ((1 : ℂ) + ζ₅^2 * (z - 1)) ∈ rightDiskPlane r_crit) :
     genBPlane r_crit (genBPlane r_crit (genBPlane r_crit
       (genBPlane r_crit (TDCSG.Definitions.toPlane z)))) =
-    TDCSG.Definitions.toPlane ((1 : ℂ) + ζ₅^4 * (z - 1)) := by
-  rw [genBPlane_eq_zeta5_rotation z hz]
-  rw [genBPlane_eq_zeta5_rotation _ hz']
-  rw [show 1 + ζ₅ * (1 + ζ₅ * (z - 1) - 1) = 1 + ζ₅^2 * (z - 1) by ring]
-  rw [genBPlane_eq_zeta5_rotation _ hz'']
-  rw [show 1 + ζ₅ * (1 + ζ₅ ^ 2 * (z - 1) - 1) = 1 + ζ₅^3 * (z - 1) by ring]
-  rw [genBPlane_eq_zeta5_rotation _ hz''']
-  rw [show 1 + ζ₅ * (1 + ζ₅ ^ 3 * (z - 1) - 1) = 1 + ζ₅^4 * (z - 1) by ring]
+    TDCSG.Definitions.toPlane ((1 : ℂ) + ζ₅ * (z - 1)) := by
+  rw [genBPlane_eq_zeta5_pow4_rotation z hz]
+  rw [genBPlane_eq_zeta5_pow4_rotation _ hz']
+  rw [show 1 + ζ₅^4 * (1 + ζ₅^4 * (z - 1) - 1) = 1 + ζ₅^3 * (z - 1) by
+    have h8 : ζ₅^8 = ζ₅^3 := zeta5_pow_eight
+    ring_nf; rw [h8]]
+  rw [genBPlane_eq_zeta5_pow4_rotation _ hz'']
+  rw [show 1 + ζ₅^4 * (1 + ζ₅^3 * (z - 1) - 1) = 1 + ζ₅^2 * (z - 1) by
+    have h7 : ζ₅^7 = ζ₅^2 := zeta5_pow_seven
+    ring_nf; rw [h7]]
+  rw [genBPlane_eq_zeta5_pow4_rotation _ hz''']
+  rw [show 1 + ζ₅^4 * (1 + ζ₅^2 * (z - 1) - 1) = 1 + ζ₅ * (z - 1) by
+    have h6 : ζ₅^6 = ζ₅ := zeta5_pow_six
+    ring_nf; rw [h6]]
 
 end TDCSG.CompoundSymmetry.GG5

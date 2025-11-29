@@ -25,51 +25,104 @@ open Complex Real TDCSG.Definitions
 
 /-! ### E Real and Imaginary Parts -/
 
-/-- E.re = √5/2 -/
+/-- E.re = √5/2 (Note: E = ζ₅⁴ - ζ₅³ has the same real part as ζ₅ - ζ₅² since they are conjugates) -/
 lemma E_re : E.re = Real.sqrt 5 / 2 := by
   unfold E
   simp only [Complex.sub_re]
-  rw [zeta5_re, zeta5_sq_re]
-  ring
+  -- ζ₅⁴.re = ζ₅.re (conjugates), ζ₅³.re = ζ₅².re (conjugates)
+  have h4 : (ζ₅^4).re = ζ₅.re := by
+    have hconj : ζ₅^4 = starRingEnd ℂ ζ₅ := zeta5_conj.symm
+    rw [hconj]
+    rfl
+  have h3 : (ζ₅^3).re = (ζ₅^2).re := by
+    have hconj : ζ₅^3 = starRingEnd ℂ (ζ₅^2) := by
+      rw [map_pow, zeta5_conj]
+      rw [show (ζ₅^4)^2 = ζ₅^8 by ring, show (8 : ℕ) = 5 + 3 by norm_num, pow_add, zeta5_pow_five, one_mul]
+    rw [hconj]
+    rfl
+  -- Goal: (ζ₅^4).re - (ζ₅^3).re = √5/2
+  -- After substituting: ζ₅.re - (ζ₅^2).re = √5/2
+  calc (ζ₅^4).re - (ζ₅^3).re
+      = ζ₅.re - (ζ₅^2).re := by rw [h4, h3]
+    _ = Real.sqrt 5 / 2 := by rw [zeta5_re, zeta5_sq_re]; ring
 
-/-- E.im = sin(2π/5) - sin(4π/5) -/
-lemma E_im : E.im = Real.sin (2 * π / 5) - Real.sin (4 * π / 5) := by
+/-- E.im = -(sin(2π/5) - sin(4π/5)) = sin(4π/5) - sin(2π/5)
+    Note: E = ζ₅⁴ - ζ₅³ has the opposite imaginary part from ζ₅ - ζ₅² since they are conjugates -/
+lemma E_im : E.im = Real.sin (4 * π / 5) - Real.sin (2 * π / 5) := by
   unfold E
   simp only [Complex.sub_im]
-  rw [zeta5_im_eq_sin]
-  have h2 := zeta5_sq_eq
-  rw [h2]
-  simp only [Complex.add_im, Complex.mul_im, Complex.I_re, Complex.I_im, Complex.ofReal_re, Complex.ofReal_im]
-  ring
+  -- ζ₅⁴.im = -ζ₅.im (conjugates), ζ₅³.im = -ζ₅².im (conjugates)
+  have h4 : (ζ₅^4).im = -ζ₅.im := by
+    have hconj : ζ₅^4 = starRingEnd ℂ ζ₅ := zeta5_conj.symm
+    rw [hconj]
+    exact Complex.conj_im ζ₅
+  have h3 : (ζ₅^3).im = -(ζ₅^2).im := by
+    have hconj : ζ₅^3 = starRingEnd ℂ (ζ₅^2) := by
+      rw [map_pow, zeta5_conj]
+      rw [show (ζ₅^4)^2 = ζ₅^8 by ring, show (8 : ℕ) = 5 + 3 by norm_num, pow_add, zeta5_pow_five, one_mul]
+    rw [hconj]
+    exact Complex.conj_im (ζ₅^2)
+  have h2_im : (ζ₅^2).im = Real.sin (4 * π / 5) := by
+    have h2 := zeta5_sq_eq
+    rw [h2]
+    simp only [Complex.add_im, Complex.mul_im, Complex.I_re, Complex.I_im, Complex.ofReal_re, Complex.ofReal_im]
+    ring
+  -- Goal: (ζ₅^4).im - (ζ₅^3).im = sin(4π/5) - sin(2π/5)
+  calc (ζ₅^4).im - (ζ₅^3).im
+      = -ζ₅.im - -(ζ₅^2).im := by rw [h4, h3]
+    _ = (ζ₅^2).im - ζ₅.im := by ring
+    _ = Real.sin (4 * π / 5) - Real.sin (2 * π / 5) := by rw [h2_im, zeta5_im_eq_sin]
 
 /-! ### Point Properties -/
 
-/-- Compute real part of E + 1 -/
+/-- Compute real part of E + 1 (E = ζ₅⁴ - ζ₅³) -/
 private lemma E_plus_one_re : (E + 1).re = 1 + Real.cos (2 * π / 5) - Real.cos (4 * π / 5) := by
   unfold E
-  have h1 := zeta5_eq
-  have h2 := zeta5_sq_eq
-  calc (ζ₅ - ζ₅ ^ 2 + 1).re
-      = (1 + ζ₅ - ζ₅^2).re := by ring_nf
-    _ = (1 + (↑(Real.cos (2 * π / 5)) + I * ↑(Real.sin (2 * π / 5))) -
-        (↑(Real.cos (4 * π / 5)) + I * ↑(Real.sin (4 * π / 5)))).re := by rw [← h1, ← h2]
+  simp only [Complex.add_re, Complex.sub_re, Complex.one_re]
+  -- ζ₅⁴.re = ζ₅.re and ζ₅³.re = ζ₅².re (conjugate pairs have same real part)
+  have h4 : (ζ₅^4).re = ζ₅.re := by
+    have hconj : ζ₅^4 = starRingEnd ℂ ζ₅ := zeta5_conj.symm
+    rw [hconj]; rfl
+  have h3 : (ζ₅^3).re = (ζ₅^2).re := by
+    have hconj : ζ₅^3 = starRingEnd ℂ (ζ₅^2) := by
+      rw [map_pow, zeta5_conj]
+      rw [show (ζ₅^4)^2 = ζ₅^8 by ring, show (8 : ℕ) = 5 + 3 by norm_num, pow_add, zeta5_pow_five, one_mul]
+    rw [hconj]; rfl
+  -- Goal: (ζ₅^4).re - (ζ₅^3).re + 1 = 1 + cos(2π/5) - cos(4π/5)
+  calc (ζ₅^4).re - (ζ₅^3).re + 1
+      = ζ₅.re - (ζ₅^2).re + 1 := by rw [h4, h3]
     _ = 1 + Real.cos (2 * π / 5) - Real.cos (4 * π / 5) := by
-      simp only [Complex.add_re, Complex.sub_re, Complex.one_re, Complex.ofReal_re,
-                 Complex.ofReal_im, Complex.mul_re, Complex.I_re, Complex.I_im, zero_mul, mul_zero]
-      ring
+        rw [zeta5_re, zeta5_sq_re, cos_two_pi_fifth, cos_four_pi_fifth, Real.cos_pi_div_five]
+        unfold Real.goldenRatio
+        field_simp
+        ring
 
-/-- Compute imaginary part of E + 1 -/
-private lemma E_plus_one_im : (E + 1).im = Real.sin (2 * π / 5) - Real.sin (4 * π / 5) := by
+/-- Compute imaginary part of E + 1 (E = ζ₅⁴ - ζ₅³)
+    Note: For E = ζ₅⁴ - ζ₅³, the imaginary part has opposite sign compared to old E = ζ₅ - ζ₅² -/
+private lemma E_plus_one_im : (E + 1).im = Real.sin (4 * π / 5) - Real.sin (2 * π / 5) := by
   unfold E
-  have h1 := zeta5_eq
-  have h2 := zeta5_sq_eq
-  calc (ζ₅ - ζ₅ ^ 2 + 1).im
-      = (1 + ζ₅ - ζ₅^2).im := by ring_nf
-    _ = (1 + (↑(Real.cos (2 * π / 5)) + I * ↑(Real.sin (2 * π / 5))) -
-        (↑(Real.cos (4 * π / 5)) + I * ↑(Real.sin (4 * π / 5)))).im := by rw [← h1, ← h2]
-    _ = Real.sin (2 * π / 5) - Real.sin (4 * π / 5) := by
-      simp only [Complex.add_im, Complex.sub_im, Complex.one_im, Complex.ofReal_im,
-                 Complex.ofReal_re, Complex.mul_im, Complex.I_re, Complex.I_im, one_mul, zero_add, mul_zero]
+  simp only [Complex.add_im, Complex.sub_im, Complex.one_im]
+  -- ζ₅⁴.im = -ζ₅.im and ζ₅³.im = -ζ₅².im (conjugate pairs have opposite imaginary parts)
+  have h4 : (ζ₅^4).im = -ζ₅.im := by
+    have hconj : ζ₅^4 = starRingEnd ℂ ζ₅ := zeta5_conj.symm
+    rw [hconj]
+    exact Complex.conj_im ζ₅
+  have h3 : (ζ₅^3).im = -(ζ₅^2).im := by
+    have hconj : ζ₅^3 = starRingEnd ℂ (ζ₅^2) := by
+      rw [map_pow, zeta5_conj]
+      rw [show (ζ₅^4)^2 = ζ₅^8 by ring, show (8 : ℕ) = 5 + 3 by norm_num, pow_add, zeta5_pow_five, one_mul]
+    rw [hconj]
+    exact Complex.conj_im (ζ₅^2)
+  have h2_im : (ζ₅^2).im = Real.sin (4 * π / 5) := by
+    have h2 := zeta5_sq_eq
+    rw [h2]
+    simp only [Complex.add_im, Complex.mul_im, Complex.I_re, Complex.I_im, Complex.ofReal_re, Complex.ofReal_im]
+    ring
+  -- Goal: (ζ₅^4).im - (ζ₅^3).im + 0 = sin(4π/5) - sin(2π/5)
+  calc (ζ₅^4).im - (ζ₅^3).im + 0
+      = -ζ₅.im - -(ζ₅^2).im := by rw [h4, h3]; ring
+    _ = (ζ₅^2).im - ζ₅.im := by ring
+    _ = Real.sin (4 * π / 5) - Real.sin (2 * π / 5) := by rw [h2_im, zeta5_im_eq_sin]
 
 /-- Trigonometric identity: sin(4*pi/5) = sin(pi/5) -/
 private lemma sin_four_pi_fifth : Real.sin (4 * π / 5) = Real.sin (π / 5) := by
@@ -84,8 +137,11 @@ private lemma sin_two_pi_fifth : Real.sin (2 * π / 5) = 2 * Real.sin (π / 5) *
 lemma E_on_left_disk_boundary : ‖E + 1‖ = r_crit := by
   have h_sq : ‖E + 1‖ ^ 2 = 3 + Real.goldenRatio := by
     unfold E
-    rw [Complex.sq_norm, Complex.normSq_apply, show (ζ₅ - ζ₅ ^ 2 + 1 : ℂ) = E + 1 by unfold E; ring]
-    rw [E_plus_one_re, E_plus_one_im, cos_four_pi_fifth, sin_four_pi_fifth]
+    rw [Complex.sq_norm, Complex.normSq_apply, show (ζ₅^4 - ζ₅^3 + 1 : ℂ) = E + 1 by unfold E; ring]
+    rw [E_plus_one_re, E_plus_one_im]
+    -- Now we have: (1 + cos(2π/5) - cos(4π/5))^2 + (sin(4π/5) - sin(2π/5))^2
+    -- The sign of imaginary part flipped but squared gives same result
+    rw [cos_four_pi_fifth, sin_four_pi_fifth]
     rw [cos_two_pi_fifth, Real.cos_pi_div_five, sin_two_pi_fifth]
     unfold Real.goldenRatio
     have h_re : (1 + ((1 + Real.sqrt 5) / 2 - 1) / 2 - -((1 + Real.sqrt 5) / 4)) =
@@ -93,12 +149,18 @@ lemma E_on_left_disk_boundary : ‖E + 1‖ = r_crit := by
     rw [h_re]
     have h_im_factor : (2 * Real.cos (π / 5) - 1) = (Real.sqrt 5 - 1) / 2 := by
       rw [Real.cos_pi_div_five]; field_simp; ring
-    have h_im : (2 * Real.sin (π / 5) * Real.cos (π / 5) - Real.sin (π / 5)) =
-                Real.sin (π / 5) * (Real.sqrt 5 - 1) / 2 := by
-      rw [show 2 * Real.sin (π / 5) * Real.cos (π / 5) - Real.sin (π / 5) =
-              Real.sin (π / 5) * (2 * Real.cos (π / 5) - 1) by ring, h_im_factor]
-      ring
+    -- New E gives (sin(π/5) - 2*sin(π/5)*cos(π/5))^2 = (-(2*sin*cos - sin))^2 = (2*sin*cos - sin)^2
+    have h_im : (Real.sin (π / 5) - 2 * Real.sin (π / 5) * Real.cos (π / 5)) =
+                -(Real.sin (π / 5) * (Real.sqrt 5 - 1) / 2) := by
+      have h_orig : (2 * Real.sin (π / 5) * Real.cos (π / 5) - Real.sin (π / 5)) =
+                    Real.sin (π / 5) * (Real.sqrt 5 - 1) / 2 := by
+        rw [show 2 * Real.sin (π / 5) * Real.cos (π / 5) - Real.sin (π / 5) =
+                Real.sin (π / 5) * (2 * Real.cos (π / 5) - 1) by ring, h_im_factor]
+        ring
+      linarith
     rw [h_im]
+    -- Now: (...)^2 + (-(sin(π/5)*(√5-1)/2))^2 = (...)^2 + (sin(π/5)*(√5-1)/2)^2
+    rw [neg_mul_neg]
     have h_sin_sq : Real.sin (π / 5) ^ 2 = 1 - ((1 + Real.sqrt 5) / 4) ^ 2 := by
       have h := Real.sin_sq_add_cos_sq (π / 5)
       rw [Real.cos_pi_div_five] at h
@@ -126,56 +188,84 @@ lemma E_on_left_disk_boundary : ‖E + 1‖ = r_crit := by
   rw [← Real.sqrt_sq (norm_nonneg (E + 1)), h_sq]
   rfl
 
-/-- Compute real part of E - 1 -/
+/-- Compute real part of E - 1 (E = ζ₅⁴ - ζ₅³) -/
 private lemma E_minus_one_re : (E - 1).re = Real.cos (2 * π / 5) - Real.cos (4 * π / 5) - 1 := by
   unfold E
-  have h1 := zeta5_eq
-  have h2 := zeta5_sq_eq
-  calc (ζ₅ - ζ₅ ^ 2 - 1).re
-      = ((↑(Real.cos (2 * π / 5)) + I * ↑(Real.sin (2 * π / 5))) -
-        (↑(Real.cos (4 * π / 5)) + I * ↑(Real.sin (4 * π / 5))) - 1).re := by
-        rw [← h1, ← h2]
+  simp only [Complex.sub_re, Complex.one_re]
+  -- ζ₅⁴.re = ζ₅.re and ζ₅³.re = ζ₅².re (conjugate pairs have same real part)
+  have h4 : (ζ₅^4).re = ζ₅.re := by
+    have hconj : ζ₅^4 = starRingEnd ℂ ζ₅ := zeta5_conj.symm
+    rw [hconj]; rfl
+  have h3 : (ζ₅^3).re = (ζ₅^2).re := by
+    have hconj : ζ₅^3 = starRingEnd ℂ (ζ₅^2) := by
+      rw [map_pow, zeta5_conj]
+      rw [show (ζ₅^4)^2 = ζ₅^8 by ring, show (8 : ℕ) = 5 + 3 by norm_num, pow_add, zeta5_pow_five, one_mul]
+    rw [hconj]; rfl
+  -- Goal: (ζ₅^4).re - (ζ₅^3).re - 1 = cos(2π/5) - cos(4π/5) - 1
+  calc (ζ₅^4).re - (ζ₅^3).re - 1
+      = ζ₅.re - (ζ₅^2).re - 1 := by rw [h4, h3]
     _ = Real.cos (2 * π / 5) - Real.cos (4 * π / 5) - 1 := by
-      simp only [Complex.sub_re, Complex.one_re, Complex.add_re, Complex.ofReal_re,
-        Complex.mul_re, Complex.I_re, Complex.I_im, Complex.ofReal_im]
-      ring
+        rw [zeta5_re, zeta5_sq_re, cos_two_pi_fifth, cos_four_pi_fifth, Real.cos_pi_div_five]
+        unfold Real.goldenRatio
+        field_simp
+        ring
 
-/-- Compute imaginary part of E - 1 -/
-private lemma E_minus_one_im : (E - 1).im = Real.sin (2 * π / 5) - Real.sin (4 * π / 5) := by
+/-- Compute imaginary part of E - 1 (E = ζ₅⁴ - ζ₅³)
+    Note: For E = ζ₅⁴ - ζ₅³, the imaginary part has opposite sign compared to old E = ζ₅ - ζ₅² -/
+private lemma E_minus_one_im : (E - 1).im = Real.sin (4 * π / 5) - Real.sin (2 * π / 5) := by
   unfold E
-  have h1 := zeta5_eq
-  have h2 := zeta5_sq_eq
-  calc (ζ₅ - ζ₅ ^ 2 - 1).im
-      = ((↑(Real.cos (2 * π / 5)) + I * ↑(Real.sin (2 * π / 5))) -
-        (↑(Real.cos (4 * π / 5)) + I * ↑(Real.sin (4 * π / 5))) - 1).im := by
-        rw [← h1, ← h2]
-    _ = Real.sin (2 * π / 5) - Real.sin (4 * π / 5) := by
-      simp only [Complex.sub_im, Complex.one_im, Complex.add_im, Complex.ofReal_re,
-        Complex.mul_im, Complex.I_re, Complex.I_im, Complex.ofReal_im]
-      ring
+  simp only [Complex.sub_im, Complex.one_im]
+  -- ζ₅⁴.im = -ζ₅.im and ζ₅³.im = -ζ₅².im (conjugate pairs have opposite imaginary parts)
+  have h4 : (ζ₅^4).im = -ζ₅.im := by
+    have hconj : ζ₅^4 = starRingEnd ℂ ζ₅ := zeta5_conj.symm
+    rw [hconj]
+    exact Complex.conj_im ζ₅
+  have h3 : (ζ₅^3).im = -(ζ₅^2).im := by
+    have hconj : ζ₅^3 = starRingEnd ℂ (ζ₅^2) := by
+      rw [map_pow, zeta5_conj]
+      rw [show (ζ₅^4)^2 = ζ₅^8 by ring, show (8 : ℕ) = 5 + 3 by norm_num, pow_add, zeta5_pow_five, one_mul]
+    rw [hconj]
+    exact Complex.conj_im (ζ₅^2)
+  have h2_im : (ζ₅^2).im = Real.sin (4 * π / 5) := by
+    have h2 := zeta5_sq_eq
+    rw [h2]
+    simp only [Complex.add_im, Complex.mul_im, Complex.I_re, Complex.I_im, Complex.ofReal_re, Complex.ofReal_im]
+    ring
+  -- Goal: (ζ₅^4).im - (ζ₅^3).im - 0 = sin(4π/5) - sin(2π/5)
+  calc (ζ₅^4).im - (ζ₅^3).im - 0
+      = -ζ₅.im - -(ζ₅^2).im := by rw [h4, h3]; ring
+    _ = (ζ₅^2).im - ζ₅.im := by ring
+    _ = Real.sin (4 * π / 5) - Real.sin (2 * π / 5) := by rw [h2_im, zeta5_im_eq_sin]
 
 /-- E also lies in the right disk. -/
 lemma E_in_right_disk : ‖E - 1‖ ≤ r_crit := by
   -- We compute |E - 1|^2 explicitly and show it's less than r_crit^2
   have h_sq : ‖E - 1‖ ^ 2 < 3 + Real.goldenRatio := by
     unfold E
-    rw [Complex.sq_norm, Complex.normSq_apply, show (ζ₅ - ζ₅ ^ 2 - 1 : ℂ) = E - 1 by unfold E; ring]
-    rw [E_minus_one_re, E_minus_one_im, cos_four_pi_fifth, sin_four_pi_fifth]
+    rw [Complex.sq_norm, Complex.normSq_apply, show (ζ₅^4 - ζ₅^3 - 1 : ℂ) = E - 1 by unfold E; ring]
+    rw [E_minus_one_re, E_minus_one_im]
+    -- Now we have: (cos(2π/5) - cos(4π/5) - 1)^2 + (sin(4π/5) - sin(2π/5))^2
+    rw [cos_four_pi_fifth, sin_four_pi_fifth]
     rw [cos_two_pi_fifth, Real.cos_pi_div_five, sin_two_pi_fifth]
     unfold Real.goldenRatio
     -- Real part: cos(2*pi/5) - (-cos(pi/5)) - 1 = (phi-1)/2 + (1+sqrt5)/4 - 1
     have h_re : (((1 + Real.sqrt 5) / 2 - 1) / 2 - -((1 + Real.sqrt 5) / 4) - 1) =
                 (Real.sqrt 5 - 2) / 2 := by field_simp; ring
     rw [h_re]
-    -- Imaginary part: sin(2*pi/5) - sin(pi/5) = 2*sin(pi/5)*cos(pi/5) - sin(pi/5)
+    -- Imaginary part: sin(pi/5) - 2*sin(pi/5)*cos(pi/5) = -(2*sin*cos - sin)
     have h_im_factor : (2 * Real.cos (π / 5) - 1) = (Real.sqrt 5 - 1) / 2 := by
       rw [Real.cos_pi_div_five]; field_simp; ring
-    have h_im : (2 * Real.sin (π / 5) * Real.cos (π / 5) - Real.sin (π / 5)) =
-                Real.sin (π / 5) * (Real.sqrt 5 - 1) / 2 := by
-      rw [show 2 * Real.sin (π / 5) * Real.cos (π / 5) - Real.sin (π / 5) =
-              Real.sin (π / 5) * (2 * Real.cos (π / 5) - 1) by ring, h_im_factor]
-      ring
+    have h_im : (Real.sin (π / 5) - 2 * Real.sin (π / 5) * Real.cos (π / 5)) =
+                -(Real.sin (π / 5) * (Real.sqrt 5 - 1) / 2) := by
+      have h_orig : (2 * Real.sin (π / 5) * Real.cos (π / 5) - Real.sin (π / 5)) =
+                    Real.sin (π / 5) * (Real.sqrt 5 - 1) / 2 := by
+        rw [show 2 * Real.sin (π / 5) * Real.cos (π / 5) - Real.sin (π / 5) =
+                Real.sin (π / 5) * (2 * Real.cos (π / 5) - 1) by ring, h_im_factor]
+        ring
+      linarith
     rw [h_im]
+    -- (-x)^2 = x^2
+    rw [neg_mul_neg]
     have h_sin_sq : Real.sin (π / 5) ^ 2 = 1 - ((1 + Real.sqrt 5) / 4) ^ 2 := by
       have h := Real.sin_sq_add_cos_sq (π / 5)
       rw [Real.cos_pi_div_five] at h
@@ -330,63 +420,73 @@ private lemma goldenRatio_eq_one_add_psi : Real.goldenRatio = 1 + psi := by
   field_simp
   ring
 
-/-- Key algebraic identity: 1 = phi*(zeta5 - zeta5^2) + zeta5^3 where phi = goldenRatio. -/
-private lemma one_eq_phi_times_E_plus_zeta5_cube :
-    (1 : ℂ) = Real.goldenRatio • E + ζ₅^3 := by
+/-- Key algebraic identity: 1 = phi*(ζ₅⁴ - ζ₅³) + ζ₅² where phi = goldenRatio.
+    Updated for E = ζ₅⁴ - ζ₅³ (clockwise convention). -/
+private lemma one_eq_phi_times_E_plus_zeta5_sq :
+    (1 : ℂ) = Real.goldenRatio • E + ζ₅^2 := by
   unfold E
-  -- Strategy: Use phi = 1 + psi and the factorization psi * (zeta5 - zeta5^2) = 1 - zeta5 + zeta5^2 - zeta5^3
-  -- Then phi * (zeta5 - zeta5^2) = (1 + psi) * (zeta5 - zeta5^2) = (zeta5 - zeta5^2) + psi * (zeta5 - zeta5^2)
-  --                      = (zeta5 - zeta5^2) + (1 - zeta5 + zeta5^2 - zeta5^3) = 1 - zeta5^3
-  -- So: 1 = phi * (zeta5 - zeta5^2) + zeta5^3
+  -- Strategy: Use phi = 1 + psi and the factorization psi * (ζ₅⁴ - ζ₅³) = 1 - ζ₅⁴ + ζ₅³ - ζ₅²
+  -- Then phi * (ζ₅⁴ - ζ₅³) = (1 + psi) * (ζ₅⁴ - ζ₅³) = (ζ₅⁴ - ζ₅³) + psi * (ζ₅⁴ - ζ₅³)
+  --                      = (ζ₅⁴ - ζ₅³) + (1 - ζ₅⁴ + ζ₅³ - ζ₅²) = 1 - ζ₅²
+  -- So: 1 = phi * (ζ₅⁴ - ζ₅³) + ζ₅²
 
-  -- From the factorization (zeta5 + zeta5^4)(zeta5 - zeta5^2) = 1 - zeta5 + zeta5^2 - zeta5^3
-  -- and zeta5 + zeta5^4 = psi, we have: psi * (zeta5 - zeta5^2) = 1 - zeta5 + zeta5^2 - zeta5^3
-  have factorization : (psi : ℂ) • (ζ₅ - ζ₅^2) = 1 - ζ₅ + ζ₅^2 - ζ₅^3 := by
+  -- From the factorization (ζ₅ + ζ₅⁴)(ζ₅⁴ - ζ₅³) = 1 - ζ₅⁴ + ζ₅³ - ζ₅²
+  -- and ζ₅ + ζ₅⁴ = psi, we have: psi * (ζ₅⁴ - ζ₅³) = 1 - ζ₅⁴ + ζ₅³ - ζ₅²
+  have factorization : (psi : ℂ) • (ζ₅^4 - ζ₅^3) = 1 - ζ₅^4 + ζ₅^3 - ζ₅^2 := by
     have h1 := zeta5_plus_zeta5_fourth
-    -- Compute: (zeta5 + zeta5^4)(zeta5 - zeta5^2) = zeta5^2 - zeta5^3 + zeta5^5 - zeta5^6
-    have h_mult : (ζ₅ + ζ₅^4) * (ζ₅ - ζ₅^2) = ζ₅^2 - ζ₅^3 + ζ₅^5 - ζ₅^6 := by ring
+    -- Compute: (ζ₅ + ζ₅⁴)(ζ₅⁴ - ζ₅³) = ζ₅⁵ - ζ₅⁴ + ζ₅⁸ - ζ₅⁷
+    have h_mult : (ζ₅ + ζ₅^4) * (ζ₅^4 - ζ₅^3) = ζ₅^5 - ζ₅^4 + ζ₅^8 - ζ₅^7 := by ring
     rw [zeta5_pow_five] at h_mult
-    have h6 : ζ₅^6 = ζ₅ := by
-      calc ζ₅^6 = ζ₅^5 * ζ₅ := by ring
-        _ = 1 * ζ₅ := by rw [zeta5_pow_five]
-        _ = ζ₅ := by ring
-    rw [h6] at h_mult
+    have h7 : ζ₅^7 = ζ₅^2 := by
+      calc ζ₅^7 = ζ₅^5 * ζ₅^2 := by ring
+        _ = 1 * ζ₅^2 := by rw [zeta5_pow_five]
+        _ = ζ₅^2 := by ring
+    have h8 : ζ₅^8 = ζ₅^3 := by
+      calc ζ₅^8 = ζ₅^5 * ζ₅^3 := by ring
+        _ = 1 * ζ₅^3 := by rw [zeta5_pow_five]
+        _ = ζ₅^3 := by ring
+    rw [h7, h8] at h_mult
     rw [h1] at h_mult
-    rw [show ζ₅^2 - ζ₅^3 + (1 : ℂ) - ζ₅ = 1 - ζ₅ + ζ₅^2 - ζ₅^3 by ring] at h_mult
+    rw [show (1 : ℂ) - ζ₅^4 + ζ₅^3 - ζ₅^2 = 1 - ζ₅^4 + ζ₅^3 - ζ₅^2 by ring] at h_mult
     -- Now convert from multiplication to scalar multiplication
     rw [← smul_eq_mul] at h_mult
     exact h_mult
 
   -- Now use phi = 1 + psi
   calc (1 : ℂ)
-      = (ζ₅ - ζ₅^2) + (1 - ζ₅ + ζ₅^2 - ζ₅^3) + ζ₅^3 := by ring
-    _ = (ζ₅ - ζ₅^2) + (psi : ℂ) • (ζ₅ - ζ₅^2) + ζ₅^3 := by
+      = (ζ₅^4 - ζ₅^3) + (1 - ζ₅^4 + ζ₅^3 - ζ₅^2) + ζ₅^2 := by ring
+    _ = (ζ₅^4 - ζ₅^3) + (psi : ℂ) • (ζ₅^4 - ζ₅^3) + ζ₅^2 := by
         rw [← factorization]
-    _ = (1 : ℂ) • (ζ₅ - ζ₅^2) + (psi : ℂ) • (ζ₅ - ζ₅^2) + ζ₅^3 := by
+    _ = (1 : ℂ) • (ζ₅^4 - ζ₅^3) + (psi : ℂ) • (ζ₅^4 - ζ₅^3) + ζ₅^2 := by
         simp only [one_smul]
-    _ = ((1 : ℂ) + (psi : ℂ)) • (ζ₅ - ζ₅^2) + ζ₅^3 := by
+    _ = ((1 : ℂ) + (psi : ℂ)) • (ζ₅^4 - ζ₅^3) + ζ₅^2 := by
         rw [← add_smul]
-    _ = (((1 : ℝ) + psi) : ℂ) • (ζ₅ - ζ₅^2) + ζ₅^3 := by
+    _ = (((1 : ℝ) + psi) : ℂ) • (ζ₅^4 - ζ₅^3) + ζ₅^2 := by
         congr 1
-    _ = (Real.goldenRatio : ℂ) • (ζ₅ - ζ₅^2) + ζ₅^3 := by
+    _ = (Real.goldenRatio : ℂ) • (ζ₅^4 - ζ₅^3) + ζ₅^2 := by
         simp only [goldenRatio_eq_one_add_psi]
         norm_cast
 
-/-- F = ψ • E where ψ = (√5-1)/2 (scalar relationship between F and E). -/
+/-- F = ψ • E where ψ = (√5-1)/2 (scalar relationship between F and E).
+    For E = ζ₅⁴ - ζ₅³ and F = 1 - ζ₅⁴ + ζ₅³ - ζ₅² (clockwise convention). -/
 lemma F_eq_psi_times_E : F = psi • E := by
   unfold F E
-  -- Strategy: Use the factorization (zeta5 + zeta5^4)(zeta5 - zeta5^2) = 1 - zeta5 + zeta5^2 - zeta5^3
+  -- Strategy: Use the factorization (ζ₅ + ζ₅⁴)(ζ₅⁴ - ζ₅³) = 1 - ζ₅⁴ + ζ₅³ - ζ₅²
   have h1 := zeta5_plus_zeta5_fourth
-  -- Compute: (zeta5 + zeta5^4)(zeta5 - zeta5^2) = zeta5^2 - zeta5^3 + zeta5^5 - zeta5^6
-  have h_mult : (ζ₅ + ζ₅^4) * (ζ₅ - ζ₅^2) = ζ₅^2 - ζ₅^3 + ζ₅^5 - ζ₅^6 := by ring
+  -- Compute: (ζ₅ + ζ₅⁴)(ζ₅⁴ - ζ₅³) = ζ₅⁵ - ζ₅⁴ + ζ₅⁸ - ζ₅⁷
+  have h_mult : (ζ₅ + ζ₅^4) * (ζ₅^4 - ζ₅^3) = ζ₅^5 - ζ₅^4 + ζ₅^8 - ζ₅^7 := by ring
   rw [zeta5_pow_five] at h_mult
-  have h6 : ζ₅^6 = ζ₅ := by
-    calc ζ₅^6 = ζ₅^5 * ζ₅ := by ring
-      _ = 1 * ζ₅ := by rw [zeta5_pow_five]
-      _ = ζ₅ := by ring
-  rw [h6] at h_mult
+  have h7 : ζ₅^7 = ζ₅^2 := by
+    calc ζ₅^7 = ζ₅^5 * ζ₅^2 := by ring
+      _ = 1 * ζ₅^2 := by rw [zeta5_pow_five]
+      _ = ζ₅^2 := by ring
+  have h8 : ζ₅^8 = ζ₅^3 := by
+    calc ζ₅^8 = ζ₅^5 * ζ₅^3 := by ring
+      _ = 1 * ζ₅^3 := by rw [zeta5_pow_five]
+      _ = ζ₅^3 := by ring
+  rw [h7, h8] at h_mult
   rw [h1] at h_mult
-  rw [show ζ₅^2 - ζ₅^3 + (1 : ℂ) - ζ₅ = 1 - ζ₅ + ζ₅^2 - ζ₅^3 by ring] at h_mult
+  rw [show (1 : ℂ) - ζ₅^4 + ζ₅^3 - ζ₅^2 = 1 - ζ₅^4 + ζ₅^3 - ζ₅^2 by ring] at h_mult
   -- Convert from multiplication to scalar multiplication
   rw [← smul_eq_mul] at h_mult
   exact h_mult.symm
