@@ -4,7 +4,6 @@ import TDCSG.Definitions.Cyclotomic
 import TDCSG.Definitions.Points
 import TDCSG.Definitions.Geometry
 import TDCSG.Definitions.IET
-import TDCSG.Definitions.Rotations
 import TDCSG.Definitions.TwoDisk
 import TDCSG.Definitions.Orbit
 import TDCSG.Definitions.WordCorrespondence
@@ -34,13 +33,12 @@ is the golden ratio.
 
 ## Module Organization
 
-### Definitions (10 files)
+### Definitions (9 files)
 - `Core`: Fundamental constants (r_c, generators, angles)
 - `Cyclotomic`: ζ₅ algebra, critical radius calculations
 - `Points`: E, E', F, G point definitions, segment parameterization
-- `Geometry`: Geometric primitives (disks, rotations, toPlane conversion)
+- `Geometry`: Geometric primitives (disks, rotations)
 - `IET`: Interval exchange transformation structure
-- `Rotations`: Rotation definitions
 - `TwoDisk`: Two-disk system structure
 - `Orbit`: Orbit set definitions
 - `WordCorrespondence`: Group word definitions

@@ -76,14 +76,4 @@ noncomputable def applyWord (r : ℝ) (w : Word) (z : ℂ) : ℂ :=
 noncomputable def orbit (r : ℝ) (z : ℂ) : Set ℂ :=
   { w | ∃ word : Word, applyWord r word z = w }
 
-/-- DEPRECATED: Generator A on Plane. Use genA : ℂ → ℂ instead. -/
-noncomputable def genAPlane (r : ℝ) (p : Plane) : Plane := by
-  classical
-  exact if p ∈ leftDiskPlane r then rotateAroundPoint leftCenterPlane (-2 * π / 5) p else p
-
-/-- DEPRECATED: Generator B on Plane. Use genB : ℂ → ℂ instead. -/
-noncomputable def genBPlane (r : ℝ) (p : Plane) : Plane := by
-  classical
-  exact if p ∈ rightDiskPlane r then rotateAroundPoint rightCenterPlane (-2 * π / 5) p else p
-
 end TDCSG.Definitions

@@ -288,22 +288,6 @@ theorem segmentPoint_injective : Function.Injective segmentPoint := by
     exact smul_eq_zero.mp h_smul |>.resolve_left hsub_ne
   exact hne this
 
-/-- The Plane parameterization is also injective. -/
-theorem segmentPointPlane_injective : Function.Injective segmentPointPlane := by
-  intro t₁ t₂ h
-  apply segmentPoint_injective
-  unfold segmentPointPlane toPlane at h
-  -- If ![z₁.re, z₁.im] = ![z₂.re, z₂.im], then z₁ = z₂
-  have hre : (segmentPoint t₁).re = (segmentPoint t₂).re := by
-    have := congrFun h 0
-    simp only [Matrix.cons_val_zero] at this
-    exact this
-  have him : (segmentPoint t₁).im = (segmentPoint t₂).im := by
-    have := congrFun h 1
-    simp only [Matrix.cons_val_one] at this
-    exact this
-  exact Complex.ext hre him
-
 /-! ### Disk Intersection Lemmas -/
 
 /-- E' is on the RIGHT disk boundary (since E is on left disk boundary). -/

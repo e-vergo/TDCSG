@@ -37,14 +37,6 @@ def leftCenter : ℂ := -1
 /-- Center of the right disk in complex plane: 1. -/
 def rightCenter : ℂ := 1
 
-/-- DEPRECATED: Left center in Plane coordinates. Use leftCenter : ℂ instead. -/
-def leftCenterPlane : Plane :=
-  fun i => if i = 0 then -1 else 0
-
-/-- DEPRECATED: Right center in Plane coordinates. Use rightCenter : ℂ instead. -/
-def rightCenterPlane : Plane :=
-  fun i => if i = 0 then 1 else 0
-
 /-! ### Disk Definitions -/
 
 /-- A closed disk in complex plane with given center and radius. -/
@@ -55,16 +47,6 @@ def leftDisk (r : ℝ) : Set ℂ := closedDiskC (-1) r
 
 /-- The right disk in ℂ with radius r centered at 1. -/
 def rightDisk (r : ℝ) : Set ℂ := closedDiskC 1 r
-
-/-- DEPRECATED: A closed disk in Plane. Use closedDiskC instead. -/
-def closedDisk (center : Plane) (radius : ℝ) : Set Plane :=
-  Metric.closedBall center radius
-
-/-- DEPRECATED: Left disk in Plane. Use leftDisk : Set ℂ instead. -/
-noncomputable def leftDiskPlane (r : ℝ) : Set Plane := closedDisk leftCenterPlane r
-
-/-- DEPRECATED: Right disk in Plane. Use rightDisk : Set ℂ instead. -/
-noncomputable def rightDiskPlane (r : ℝ) : Set Plane := closedDisk rightCenterPlane r
 
 /-! ### Rotation Operations -/
 
@@ -109,19 +91,6 @@ lemma rotateAboutCircle_pow (c : ℂ) (a : Circle) (n : ℕ) (z : ℂ) :
     rw [Function.iterate_succ_apply', ih, pow_succ, mul_comm]
     exact (rotateAboutCircle_mul c a (a ^ n) z).symm
 
-/-- DEPRECATED: Rotation matrix in R^2 by angle theta. -/
-noncomputable def rotationMatrix (θ : ℝ) : Matrix (Fin 2) (Fin 2) ℝ :=
-  !![cos θ, -sin θ; sin θ, cos θ]
-
-/-- DEPRECATED: Apply a 2x2 matrix to a point in R^2. -/
-noncomputable def applyMatrix (M : Matrix (Fin 2) (Fin 2) ℝ) (p : Plane) : Plane :=
-  fun i => ∑ j, M i j * p j
-
-/-- DEPRECATED: Rotation about a given center point by angle theta.
-    Use rotateAboutC for complex plane rotations. -/
-noncomputable def rotateAroundPoint (center : Plane) (θ : ℝ) (p : Plane) : Plane :=
-  center + applyMatrix (rotationMatrix θ) (p - center)
-
 /-! ### Complex to Plane Conversion -/
 
 /-- Convert a complex number to a Plane point (EuclideanSpace form). -/
@@ -151,17 +120,5 @@ lemma toPlane_dist_eq_complex_norm (z w : ℂ) : dist (toPlane z) (toPlane w) = 
   simp only [Complex.sub_re, Complex.sub_im]
   congr 1
   simp only [sq_abs]
-
-/-- leftCenterPlane equals toPlane of leftCenter. -/
-lemma leftCenterPlane_eq_toPlane : leftCenterPlane = toPlane leftCenter := by
-  unfold leftCenterPlane leftCenter toPlane
-  ext i
-  fin_cases i <;> simp [Complex.neg_re, Complex.neg_im]
-
-/-- rightCenterPlane equals toPlane of rightCenter. -/
-lemma rightCenterPlane_eq_toPlane : rightCenterPlane = toPlane rightCenter := by
-  unfold rightCenterPlane rightCenter toPlane
-  ext i
-  fin_cases i <;> simp [Complex.one_re, Complex.one_im]
 
 end TDCSG.Definitions
