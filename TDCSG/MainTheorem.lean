@@ -21,17 +21,6 @@ noncomputable def GG5_critical :
   r2 := r_crit
   n1 := 5
   n2 := 5
-  r1_pos := by
-    unfold r_crit φ
-    apply Real.sqrt_pos_of_pos
-    linarith [Real.goldenRatio_pos]
-  r2_pos := by
-    unfold r_crit φ
-    apply Real.sqrt_pos_of_pos
-    linarith [Real.goldenRatio_pos]
-  n1_ge := by norm_num
-  n2_ge := by norm_num
-
 
 /-- **Theorem 2**: The compound symmetry group GG₅ at the critical radius is infinite. -/
 def StatementOfTheorem : Prop :=

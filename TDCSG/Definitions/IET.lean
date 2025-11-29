@@ -95,26 +95,6 @@ noncomputable def toFun : ℝ → ℝ := fun x =>
 
 end IntervalExchangeTransformation
 
-section TwoIntervals
-
-/-- A 2-interval exchange is determined by a single parameter alpha in (0,1). -/
-def IET_two_intervals (α : ℝ) (hα : α ∈ Ioo (0 : ℝ) 1) :
-    IntervalExchangeTransformation 2 where
-  n_pos := by norm_num
-  lengths := fun i => if i = 0 then α else 1 - α
-  lengths_pos := by
-    intro i
-    simp only [mem_Ioo] at hα
-    by_cases h : i = 0
-    · simp [h]; exact hα.1
-    · simp [h]; linarith
-  lengths_sum := by
-    have : (Finset.univ : Finset (Fin 2)) = {0, 1} := by decide
-    rw [this, Finset.sum_pair (by decide : (0 : Fin 2) ≠ 1)]
-    norm_num [if_pos, if_neg]
-  permutation := Equiv.swap 0 1
-
-end TwoIntervals
 
 section GeneralProperties
 

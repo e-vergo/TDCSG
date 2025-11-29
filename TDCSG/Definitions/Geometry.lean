@@ -31,11 +31,11 @@ open Real
 
 /-! ### Disk Centers (FIXED positions) -/
 
-/-- Center of the left disk in complex plane: -1. -/
-def leftCenter : ℂ := -1
+/-- Center of the left disk in complex plane: (-1, 0). -/
+def leftCenter : ℂ := -1 + 0 * Complex.I
 
-/-- Center of the right disk in complex plane: 1. -/
-def rightCenter : ℂ := 1
+/-- Center of the right disk in complex plane: (1, 0). -/
+def rightCenter : ℂ := 1 + 0 * Complex.I
 
 /-! ### Disk Definitions -/
 
@@ -96,29 +96,6 @@ lemma rotateAboutCircle_pow (c : ℂ) (a : Circle) (n : ℕ) (z : ℂ) :
 /-- Convert a complex number to a Plane point (EuclideanSpace form). -/
 noncomputable def toPlane (z : ℂ) : Plane := ![z.re, z.im]
 
-/-- Addition in complex numbers corresponds to addition in Plane. -/
-lemma toPlane_add (z w : ℂ) : toPlane (z + w) = toPlane z + toPlane w := by
-  unfold toPlane
-  ext i
-  fin_cases i <;> simp [Complex.add_re, Complex.add_im]
 
-/-- Subtraction in complex numbers corresponds to subtraction in Plane. -/
-lemma toPlane_sub (z w : ℂ) : toPlane (z - w) = toPlane z - toPlane w := by
-  unfold toPlane
-  ext i
-  fin_cases i <;> simp [Complex.sub_re, Complex.sub_im]
-
-/-- Distance in Plane equals complex norm. -/
-lemma toPlane_dist_eq_complex_norm (z w : ℂ) : dist (toPlane z) (toPlane w) = ‖z - w‖ := by
-  unfold toPlane
-  rw [dist_comm, EuclideanSpace.dist_eq]
-  simp only [Fin.sum_univ_two]
-  simp only [Matrix.cons_val_zero, Matrix.cons_val_one]
-  rw [dist_comm (w.re), dist_comm (w.im)]
-  simp only [Real.dist_eq]
-  rw [Complex.norm_eq_sqrt_sq_add_sq]
-  simp only [Complex.sub_re, Complex.sub_im]
-  congr 1
-  simp only [sq_abs]
 
 end TDCSG.Definitions
