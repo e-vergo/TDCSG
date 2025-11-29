@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Moffat
 -/
 import TDCSG.Definitions.IET
-import TDCSG.IntervalExchange
+import TDCSG.Proofs.IntervalExchange
 import Mathlib.NumberTheory.Real.GoldenRatio
 import Mathlib.Data.Real.Basic
 import Mathlib.Analysis.SpecialFunctions.Pow.Real

@@ -3,9 +3,9 @@ Copyright (c) 2024 Eric Moffat. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Moffat, Eric Hearn
 -/
-import TDCSG.Basic
-import TDCSG.Finite
-import TDCSG.MeasurePreserving
+import TDCSG.Proofs.Basic
+import TDCSG.Proofs.Finite
+import TDCSG.Proofs.MeasurePreserving
 import Mathlib.Data.Real.Basic
 import Mathlib.Algebra.BigOperators.Fin
 import Mathlib.NumberTheory.Real.GoldenRatio

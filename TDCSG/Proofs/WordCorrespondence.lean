@@ -3,11 +3,11 @@ Copyright (c) 2025 Eric Hearn. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Hearn
 -/
-import TDCSG.PlaneConversion
-import TDCSG.Orbit
-import TDCSG.OrbitInfinite
+import TDCSG.Proofs.PlaneConversion
+import TDCSG.Proofs.Orbit
+import TDCSG.Proofs.OrbitInfinite
 import TDCSG.MainTheorem
-import TDCSG.IET
+import TDCSG.Proofs.IET
 import TDCSG.Definitions.Core
 import TDCSG.Definitions.IET
 import TDCSG.Definitions.Conversions

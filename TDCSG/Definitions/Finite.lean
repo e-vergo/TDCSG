@@ -4,10 +4,10 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Moffat
 -/
 import TDCSG.Definitions.PiecewiseIsometry
-import TDCSG.Basic
-import TDCSG.Properties
-import TDCSG.MeasurePreserving
-import TDCSG.Composition
+import TDCSG.Proofs.Basic
+import TDCSG.Proofs.Properties
+import TDCSG.Proofs.MeasurePreserving
+import TDCSG.Proofs.Composition
 import Mathlib.Data.Set.Finite.Basic
 
 /-!

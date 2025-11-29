@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Hearn
 -/
 import TDCSG.Definitions.Conversions
-import TDCSG.Points
+import TDCSG.Proofs.Points
 
 /-!
 # Segment Geometry for GG(5,5)

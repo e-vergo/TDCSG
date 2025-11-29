@@ -2,70 +2,86 @@
 
 Formal verification in Lean 4 of the critical radius theorem for two-disk compound symmetry groups from [arXiv:2302.12950v1](https://arxiv.org/abs/2302.12950).
 
-**Main Theorem (Theorem 2):** GG5 is infinite at the critical radius r_c = sqrt(3 + phi), where phi = (1 + sqrt5)/2 is the golden ratio.
+**Main Theorem (Theorem 2):** The compound symmetry group GG₅ at the critical radius is infinite.
 
 ## Project Status
 
 | Metric | Value |
 |--------|-------|
 | Build | Compiles |
-| Sorries | 2 (geometric correspondence lemmas) |
+| Sorries | Multiple (see below) |
 | Axioms | Standard only (propext, Quot.sound, Classical.choice) |
-| Kim Morrison Standard | Structure verified, pending 2 geometric lemmas |
+| Kim Morrison Standard | Structure passes, axiom soundness pending |
 
-**Near Complete.** The proof structure is complete. Two geometric lemmas remain:
-1. `zeta5_rotation_eq_rotateAround`: Complex ζ₅ multiplication ↔ Plane rotation
-2. `IET_step_word_correspondence`: Group words correctly implement IET steps
+**In Progress.** The proof structure is complete but several lemmas remain:
+
+| File | Sorries | Description |
+|------|---------|-------------|
+| Definitions/TwoDisk.lean | 12 | PiecewiseIsometry conversions |
+| Definitions/Composition.lean | 5 | Partition refinement |
+| Definitions/IET.lean | 10 | IET structure proofs |
+| Proofs/WordCorrespondence.lean | 4 | Group word correspondence |
+
+## Main Theorem Statement
+
+```lean
+/-- Theorem 2: The compound symmetry group GG₅ at the critical radius is infinite. -/
+def StatementOfTheorem : Prop :=
+  ∃ p, (orbit GG5_critical.r1 p).Infinite
+```
+
+Where:
+
+- `GG5_critical` is the GG(5,5) two-disk system at r_crit = √(3 + φ)
+- `orbit r p` is the set of points reachable from p under the group action
+- φ = (1 + √5)/2 is the golden ratio
 
 ## Kim Morrison Standard Compliance
 
 This project follows the [Kim Morrison standard](https://leanprover.zulipchat.com/#narrow/channel/219941-Machine-Learning-for-Theorem-Proving/topic/Discussion.3A.20AI-written.20mathematical.proofs/with/558843568) for AI-assisted formal mathematics:
 
-- `MainTheorem.lean` contains only the statement, importing only from Mathlib
+- `MainTheorem.lean` contains the statement, importing from Definitions
 - `ProofOfMainTheorem.lean` provides the proof
 - Uses only standard axioms
-- Pending: 2 geometric lemmas need completion (see Project Status)
+- Review burden: 81 lines (MainTheorem + ProofOfMainTheorem)
 
 Run verification:
+
 ```bash
-lake env lean --run KMVerify.lean
+lake build TDCSG.ProofOfMainTheorem && lake env lean --run KMVerify.lean
 ```
 
 ## Project Structure
 
-```
+```text
 TDCSG/
-  MainTheorem.lean        # Statement only (imports only Mathlib)
-  ProofOfMainTheorem.lean # Proof of main theorem
-  Basic.lean              # PiecewiseIsometry definition
-  Properties.lean         # Partition properties, continuity
-  Composition.lean        # Composition and iteration
-  MeasurePreserving.lean  # Measure-preserving transformations
-  Finite.lean             # Finite partition specializations
-  IntervalExchange.lean   # IET infrastructure
-  Rotations.lean          # Rotations about arbitrary points
-  Disks.lean              # Disk geometry
-  TwoDisk.lean            # TwoDiskSystem structure
-  IET.lean                # GG5_induced_IET definition
-  Orbit.lean              # Orbit definitions
-  OrbitInfinite.lean      # GG5_IET_has_infinite_orbit
-  Geometry.lean           # GG5_infinite_at_critical_radius
-KMVerify.lean             # Kim Morrison standard verification tool
+  MainTheorem.lean          # Statement + GG5_critical definition
+  ProofOfMainTheorem.lean   # Proof of main theorem
+  Definitions/              # All definitions (no proofs)
+    Core.lean               # φ, r_crit, Plane, Word
+    Geometry.lean           # Disk geometry, rotations
+    GroupAction.lean        # genA, genB, orbit
+    TwoDisk.lean            # TwoDiskSystem structure
+    IET.lean                # Interval exchange transformations
+    ...
+  Proofs/                   # All supporting lemmas and proofs
+    OrbitInfinite.lean      # GG5_IET_has_infinite_orbit
+    WordCorrespondence.lean # IET ↔ group word correspondence
+    Geometry.lean           # Geometric analysis
+    IntervalExchange.lean   # IET lemmas
+    ...
+KMVerify.lean               # Kim Morrison standard verification
 ```
 
-## Main Theorems
+## Proof Architecture
 
-1. **`mainTheorem`** (ProofOfMainTheorem.lean)
-   - GG5 is infinite at r_crit = sqrt(3 + phi)
+The proof proceeds through:
 
-2. **`GG5_IET_has_infinite_orbit`** (OrbitInfinite.lean)
-   - The induced IET has infinite orbits
-
-3. **`GG5_IET_rotation_irrational`** (OrbitInfinite.lean)
-   - Interval lengths are irrationally related (golden ratio)
-
-4. **`int_add_int_mul_phi_eq_zero`** (OrbitInfinite.lean)
-   - Linear independence: a + b*phi = 0 implies a = b = 0
+1. **GG5 Definition**: Two-disk system with 5-fold rotations at critical radius
+2. **IET Embedding**: Group action induces interval exchange on segment E'E
+3. **Golden Ratio Structure**: Interval lengths are in ratio 1 : φ : φ²
+4. **Linear Independence**: {1, φ} linearly independent over ℤ
+5. **Infinite Orbits**: No periodic orbits possible → orbits are infinite
 
 ## Build Commands
 
@@ -73,16 +89,12 @@ KMVerify.lean             # Kim Morrison standard verification tool
 # Build entire project
 lake build
 
-# Run Kim Morrison verification
-lake env lean --run KMVerify.lean
-
 # Build main theorem only
 lake build TDCSG.ProofOfMainTheorem
+
+# Run Kim Morrison verification
+lake env lean --run KMVerify.lean
 ```
-
-## Mathematical Significance
-
-The formalization proves that r_crit = sqrt(3 + phi) is the exact transition point where GG5 changes from finite to infinite. The proof establishes that the group generators induce an interval exchange transformation with translation lengths in golden ratio. The irrationality of phi, combined with linear independence of {1, phi} over Z, prevents periodic orbits.
 
 ## References
 

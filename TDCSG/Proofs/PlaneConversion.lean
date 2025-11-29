@@ -6,9 +6,9 @@ Authors: Eric Hearn
 import TDCSG.Definitions.Conversions
 import TDCSG.Definitions.Geometry
 import TDCSG.Definitions.Core
-import TDCSG.Points
+import TDCSG.Proofs.Points
 import TDCSG.MainTheorem
-import TDCSG.SegmentGeometry
+import TDCSG.Proofs.SegmentGeometry
 
 /-!
 # Complex to Plane Conversion for GG(5,5) - Proofs

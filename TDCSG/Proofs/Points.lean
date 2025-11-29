@@ -5,7 +5,7 @@ Authors: Eric Hearn
 -/
 import TDCSG.Definitions.Cyclotomic
 import TDCSG.Definitions.Points
-import TDCSG.Zeta5
+import TDCSG.Proofs.Zeta5
 
 /-!
 # Fundamental Points for GG(5,5) - Proofs

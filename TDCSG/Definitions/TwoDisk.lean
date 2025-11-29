@@ -3,9 +3,9 @@ Copyright (c) 2025 Eric Moffat. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Moffat
 -/
-import TDCSG.Basic
-import TDCSG.Rotations
-import TDCSG.Disks
+import TDCSG.Proofs.Basic
+import TDCSG.Proofs.Rotations
+import TDCSG.Proofs.Disks
 import TDCSG.Definitions.Geometry
 import TDCSG.Definitions.PiecewiseIsometry
 

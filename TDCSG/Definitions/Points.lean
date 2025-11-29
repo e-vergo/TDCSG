@@ -3,7 +3,7 @@ Copyright (c) 2025 Eric Hearn. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Hearn
 -/
-import TDCSG.Zeta5
+import TDCSG.Proofs.Zeta5
 
 /-!
 # Geometric Points for GG5

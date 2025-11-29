@@ -8,7 +8,7 @@ import Mathlib.Topology.MetricSpace.Pseudo.Defs
 import Mathlib.Topology.MetricSpace.Basic
 import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
 import Mathlib.MeasureTheory.Measure.Haar.OfBasis
-import TDCSG.Rotations
+import TDCSG.Proofs.Rotations
 import TDCSG.Definitions.Geometry
 
 /-!

@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Hearn
 -/
 import TDCSG.MainTheorem
-import TDCSG.Geometry
+import TDCSG.Proofs.Geometry
 
 /-!
 # Proof of Main Theorem

@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Moffat
 -/
 import TDCSG.Definitions.Orbit
-import TDCSG.Orbit
+import TDCSG.Proofs.Orbit
 import Mathlib.NumberTheory.Real.GoldenRatio
 import Mathlib.NumberTheory.Real.Irrational
 import Mathlib.Data.Set.Function

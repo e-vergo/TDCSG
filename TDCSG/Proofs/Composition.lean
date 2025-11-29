@@ -3,8 +3,8 @@ Copyright (c) 2024 Eric Moffat. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Moffat
 -/
-import TDCSG.Basic
-import TDCSG.Properties
+import TDCSG.Proofs.Basic
+import TDCSG.Proofs.Properties
 import TDCSG.Definitions.Composition
 import Mathlib.Topology.MetricSpace.Isometry
 
