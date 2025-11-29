@@ -36,6 +36,23 @@ noncomputable def genB (r : ℝ) (z : ℂ) : ℂ := by
   classical
   exact if z ∈ rightDisk r then rotateAboutC rightCenter (2 * π / 5) z else z
 
+/-! ### Circle-based generator expressions
+
+These lemmas show that genA/genB can be expressed using `rotateAboutCircle` with
+`Circle.exp (2 * π / 5)`. This provides a bridge to the Circle-based rotation
+infrastructure and enables use of Circle's group properties.
+-/
+
+/-- genA expressed using Circle-based rotation (inside left disk). -/
+lemma genA_in_disk_eq_rotateAboutCircle (r : ℝ) (z : ℂ) (hz : z ∈ leftDisk r) :
+    genA r z = rotateAboutCircle leftCenter (Circle.exp (2 * π / 5)) z := by
+  simp only [genA, hz, ↓reduceIte, rotateAboutCircle_eq_rotateAboutC]
+
+/-- genB expressed using Circle-based rotation (inside right disk). -/
+lemma genB_in_disk_eq_rotateAboutCircle (r : ℝ) (z : ℂ) (hz : z ∈ rightDisk r) :
+    genB r z = rotateAboutCircle rightCenter (Circle.exp (2 * π / 5)) z := by
+  simp only [genB, hz, ↓reduceIte, rotateAboutCircle_eq_rotateAboutC]
+
 /-- Apply a generator or its inverse to a point in ℂ. -/
 noncomputable def applyGen (r : ℝ) (z : ℂ) : Generator → ℂ
   | .A    => genA r z                            -- A
