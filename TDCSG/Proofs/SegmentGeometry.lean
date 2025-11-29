@@ -115,11 +115,7 @@ lemma F_ne_zero : F ≠ 0 := by
   have h_psi := F_eq_psi_times_E
   rw [h] at h_psi
   -- Need to show psi ≠ 0 to get E = 0
-  have psi_ne_zero : psi ≠ 0 := by
-    unfold psi
-    apply div_ne_zero
-    · linarith [sqrt5_gt_one]
-    · norm_num
+  have psi_ne_zero' : psi ≠ 0 := psi_ne_zero
   have : E = 0 := by
     rw [show (0 : ℂ) = psi • 0 by simp] at h_psi
     have eq : psi • (0 : ℂ) = psi • E := by rw [h_psi]
@@ -130,7 +126,7 @@ lemma F_ne_zero : F ≠ 0 := by
         _ = 0 := by ring
     rw [smul_eq_zero] at h_sub
     cases h_sub with
-    | inl h => exact absurd h psi_ne_zero
+    | inl h => exact absurd h psi_ne_zero'
     | inr h =>
       simp only [sub_eq_zero] at h
       exact h.symm
@@ -185,21 +181,16 @@ lemma segment_ratio_is_golden :
   rw [h_simplify]
 
   -- Since psi > 0, we have |psi| = psi
-  have psi_pos : 0 < psi := by
-    unfold psi
-    apply div_pos
-    · linarith [sqrt5_gt_one]
-    · norm_num
+  have psi_pos' : 0 < psi := psi_pos
 
   have abs_psi : |psi| = psi := by
-    exact abs_of_pos psi_pos
+    exact abs_of_pos psi_pos'
 
   rw [abs_psi]
 
   -- Now: 1 / psi = 1 / ((√5-1)/2) = 2/(√5-1)
   -- Rationalize: 2/(√5-1) = 2(√5+1)/((√5-1)(√5+1)) = 2(√5+1)/4 = (√5+1)/2 = φ
-  unfold psi
-  rw [one_div, inv_div]
+  rw [psi_eq, one_div, inv_div]
   rw [show (2 : ℝ) / (Real.sqrt 5 - 1) = Real.goldenRatio by
     unfold Real.goldenRatio
     have h_sqrt5_sq : Real.sqrt 5 ^ 2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
@@ -229,13 +220,12 @@ lemma translations_irrational : ∀ (q r : ℤ),
     rw [show F - (-F) = (2 : ℕ) • F by simp [two_smul]]
     rw [show (2 : ℕ) • F = (2 : ℝ) • F by norm_cast]
     rw [norm_smul, F_eq_psi_times_E, norm_smul]
-    unfold psi
+    rw [psi_eq]
     have sqrt5_gt_1 : 1 < Real.sqrt 5 := by
       calc (1 : ℝ) = Real.sqrt 1 := by norm_num
         _ < Real.sqrt 5 := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
     have h_psi_pos : 0 < (Real.sqrt 5 - 1) / 2 := by linarith
-    have sqrt5_nonneg : 0 ≤ Real.sqrt 5 - 1 := by linarith
-    simp [abs_of_nonneg sqrt5_nonneg]
+    simp only [Real.norm_of_nonneg (le_of_lt h_psi_pos), Real.norm_two]
     ring
 
   -- Step 2: Express translation_length_2 in terms of ‖E‖

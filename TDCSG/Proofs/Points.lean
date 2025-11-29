@@ -243,22 +243,43 @@ lemma sqrt5_lt_three : Real.sqrt 5 < 3 := by
            · exact this
        _ = 3 := by simp
 
-/-- t_G is positive. -/
-lemma t_G_pos : 0 < t_G := by
-  unfold t_G
-  apply div_pos
-  · linarith [sqrt5_gt_one]
-  · norm_num
+/-- psi equals the explicit form (√5 - 1) / 2.
+    This follows from psi = -goldenConj and goldenConj = (1 - √5) / 2. -/
+lemma psi_eq : psi = (Real.sqrt 5 - 1) / 2 := by
+  unfold psi Real.goldenConj
+  ring
 
-/-- t_G < t_F (since (sqrt5-1)/2 approx 0.618 < 0.809 approx (1+sqrt5)/4) -/
-lemma t_G_lt_t_F : t_G < t_F := by
-  unfold t_G t_F
+/-- psi is positive. -/
+lemma psi_pos : 0 < psi := neg_pos.mpr Real.goldenConj_neg
+
+/-- psi is nonzero. -/
+lemma psi_ne_zero : psi ≠ 0 := ne_of_gt psi_pos
+
+/-- psi < 1. -/
+lemma psi_lt_one : psi < 1 := by
+  rw [psi_eq]
+  have h : Real.sqrt 5 < 3 := sqrt5_lt_three
+  linarith
+
+/-- psi ≤ 1. -/
+lemma psi_le_one : psi ≤ 1 := le_of_lt psi_lt_one
+
+/-- psi is positive (renamed for backward compatibility). -/
+lemma t_G_pos : 0 < psi := psi_pos
+
+/-- psi < t_F (since (√5-1)/2 ≈ 0.618 < 0.809 ≈ (1+√5)/4) -/
+lemma psi_lt_t_F : psi < t_F := by
+  rw [psi_eq]
+  unfold t_F
   have sqrt5_bound : Real.sqrt 5 < 3 := sqrt5_lt_three
   rw [show (Real.sqrt 5 - 1) / 2 < (1 + Real.sqrt 5) / 4 ↔
            4 * ((Real.sqrt 5 - 1) / 2) < 4 * ((1 + Real.sqrt 5) / 4) by
       constructor <;> intro h <;> nlinarith [h]]
   field_simp
   linarith
+
+/-- Backward compatibility alias. -/
+lemma t_G_lt_t_F : psi < t_F := psi_lt_t_F
 
 /-- t_F < 1 -/
 lemma t_F_lt_one : t_F < 1 := by
@@ -280,7 +301,8 @@ private lemma zeta5_plus_zeta5_fourth : ζ₅ + ζ₅^4 = psi := by
     simp only [Complex.add_re, Complex.mul_re, Complex.I_re, Complex.I_im, Complex.ofReal_re, Complex.ofReal_im]
     ring
   rw [h2, cos_two_pi_fifth]
-  unfold psi Real.goldenRatio
+  rw [psi_eq]
+  unfold Real.goldenRatio
   push_cast
   ring
 
@@ -413,7 +435,7 @@ private lemma G_eq_coeff_times_E : G = ((Real.sqrt 5 - 2) : ℝ) • E := by
   -- Goal: 2 * psi * E - E = (sqrt5 - 2) * E
   -- First prove the key coefficient identity
   have h_coeff : 2 * psi - 1 = Real.sqrt 5 - 2 := by
-    unfold psi
+    rw [psi_eq]
     field_simp
     ring
   -- Now prove the main goal
@@ -431,54 +453,41 @@ private lemma G_eq_coeff_times_E : G = ((Real.sqrt 5 - 2) : ℝ) • E := by
 /-- G lies on the segment E'E. -/
 lemma G_on_segment_E'E :
     ∃ t : ℝ, 0 ≤ t ∧ t ≤ 1 ∧ G = E' + t • (E - E') := by
-  use t_G
+  use psi
   constructor
-  · -- Show 0 <= t_G (already proven as t_G_pos)
-    exact t_G_pos.le
+  · exact psi_pos.le
   constructor
-  · -- Show t_G <= 1
-    -- Since t_G = (sqrt5 - 1)/2 and sqrt5 < 3, we have t_G < 1
-    unfold t_G
-    rw [div_le_one (by norm_num : (0 : ℝ) < 2)]
-    have : Real.sqrt 5 - 1 < 2 := by
-      calc Real.sqrt 5 - 1
-          < 3 - 1 := by linarith [sqrt5_lt_three]
-        _ = 2 := by norm_num
-    linarith [this]
-  · -- Show G = E' + t_G * (E - E')
+  · exact psi_le_one
+  · -- Show G = E' + psi * (E - E')
     unfold E'
     rw [show E - (-E) = 2 • E by simp [two_smul]]
-    -- Goal: G = -E + t_G * (2 * E)
-    have step1 : t_G • ((2 : ℕ) • E) = (t_G * (2 : ℝ)) • E := by
+    have step1 : psi • ((2 : ℕ) • E) = (psi * (2 : ℝ)) • E := by
       rw [show (2 : ℕ) • E = ((2 : ℝ) • E) by norm_cast]
       rw [mul_smul]
     rw [step1]
-    -- Goal: G = -E + (t_G * 2) * E = (-1 + 2*t_G) * E
-    rw [show -E + (t_G * (2 : ℝ)) • E = (((-1 : ℝ) + 2 * t_G) • E) by
-      rw [← neg_one_smul ℝ E, ← add_smul, mul_comm t_G 2]]
-    -- Compute -1 + 2*t_G = sqrt5 - 2
-    have h1 : ((-1 : ℝ) + 2 * t_G) = Real.sqrt 5 - 2 := by
-      unfold t_G; field_simp; ring
+    rw [show -E + (psi * (2 : ℝ)) • E = (((-1 : ℝ) + 2 * psi) • E) by
+      rw [← neg_one_smul ℝ E, ← add_smul, mul_comm psi 2]]
+    have h1 : ((-1 : ℝ) + 2 * psi) = Real.sqrt 5 - 2 := by
+      rw [psi_eq]; field_simp; ring
     rw [h1]
     exact G_eq_coeff_times_E
 
 /-- The ordering along the segment: E' < G < F < E.
-    Note: G is closer to E' with parameter t_G approx 0.618,
-    while F is closer to E with parameter t_F approx 0.809. -/
+    Note: G is closer to E' with parameter psi ≈ 0.618,
+    while F is closer to E with parameter t_F ≈ 0.809. -/
 lemma segment_ordering :
-    ∃ (t_F t_G : ℝ), 0 < t_G ∧ t_G < t_F ∧ t_F < 1 ∧
-      F = E' + t_F • (E - E') ∧
-      G = E' + t_G • (E - E') := by
-  use t_F, t_G
+    ∃ (t_F' t_G' : ℝ), 0 < t_G' ∧ t_G' < t_F' ∧ t_F' < 1 ∧
+      F = E' + t_F' • (E - E') ∧
+      G = E' + t_G' • (E - E') := by
+  use t_F, psi
   constructor
-  · exact t_G_pos
+  · exact psi_pos
   constructor
-  · exact t_G_lt_t_F
+  · exact psi_lt_t_F
   constructor
   · exact t_F_lt_one
   constructor
   · -- F = E' + t_F * (E - E')
-    -- Extract from F_on_segment_E'E directly
     unfold E'
     rw [show E - (-E) = 2 • E by simp [two_smul]]
     have step1 : t_F • ((2 : ℕ) • E) = (t_F * (2 : ℝ)) • E := by
@@ -488,20 +497,20 @@ lemma segment_ordering :
     rw [show -E + (t_F * (2 : ℝ)) • E = ((2 * t_F - 1) • E) by
       rw [← neg_one_smul ℝ E, ← add_smul, mul_comm t_F 2, show (-1 : ℝ) + 2 * t_F = 2 * t_F - 1 by ring]]
     have h_param : 2 * t_F - 1 = psi := by
-      unfold t_F psi; field_simp; ring
+      unfold t_F; rw [psi_eq]; field_simp; ring
     rw [h_param]
     exact F_eq_psi_times_E
-  · -- G = E' + t_G * (E - E')
+  · -- G = E' + psi * (E - E')
     unfold E'
     rw [show E - (-E) = 2 • E by simp [two_smul]]
-    have step1 : t_G • ((2 : ℕ) • E) = (t_G * (2 : ℝ)) • E := by
+    have step1 : psi • ((2 : ℕ) • E) = (psi * (2 : ℝ)) • E := by
       rw [show (2 : ℕ) • E = ((2 : ℝ) • E) by norm_cast]
       rw [mul_smul]
     rw [step1]
-    rw [show -E + (t_G * (2 : ℝ)) • E = (((-1 : ℝ) + 2 * t_G) • E) by
-      rw [← neg_one_smul ℝ E, ← add_smul, mul_comm t_G 2]]
-    have h1 : ((-1 : ℝ) + 2 * t_G) = Real.sqrt 5 - 2 := by
-      unfold t_G; field_simp; ring
+    rw [show -E + (psi * (2 : ℝ)) • E = (((-1 : ℝ) + 2 * psi) • E) by
+      rw [← neg_one_smul ℝ E, ← add_smul, mul_comm psi 2]]
+    have h1 : ((-1 : ℝ) + 2 * psi) = Real.sqrt 5 - 2 := by
+      rw [psi_eq]; field_simp; ring
     rw [h1]
     exact G_eq_coeff_times_E
 

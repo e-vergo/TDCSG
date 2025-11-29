@@ -15,7 +15,8 @@ that are critical for the interval exchange transformation analysis.
 - `E` : ζ₅ - ζ₅² - key point in complex plane
 - `E'` : -E - reflection of E
 - `F`, `G` : Points on segment E'E
-- `psi`, `t_F`, `t_G` : Parametric coordinates
+- `psi` : Positive golden conjugate = -Real.goldenConj
+- `t_F`, `t_G` : Parametric coordinates (t_G = psi)
 
 ## References
 - Two-Disk Compound Symmetry Groups, arXiv:2302.12950v1
@@ -44,15 +45,15 @@ noncomputable def G : ℂ := 2 * F - E
 
 /-! ### Parametric Coordinates -/
 
-/-- The positive golden conjugate: psi = (sqrt5-1)/2 approx 0.618.
-    Note: This is DIFFERENT from Real.goldenConj = (1-sqrt5)/2 which is negative!
-    In fact, psi = -Real.goldenConj. -/
-noncomputable def psi : ℝ := (Real.sqrt 5 - 1) / 2
+/-- The positive golden conjugate: ψ = (√5-1)/2 ≈ 0.618.
+    This equals -Real.goldenConj since goldenConj = (1-√5)/2. -/
+noncomputable abbrev psi : ℝ := -Real.goldenConj
 
-/-- The parameter value for F on segment E'E: t_F = (1 + sqrt5)/4 approx 0.809 -/
+/-- The parameter value for F on segment E'E: t_F = (1 + √5)/4 ≈ 0.809 -/
 noncomputable def t_F : ℝ := (1 + Real.sqrt 5) / 4
 
-/-- The parameter value for G on segment E'E: t_G = (sqrt5 - 1)/2 approx 0.618 -/
-noncomputable def t_G : ℝ := (Real.sqrt 5 - 1) / 2
+/-- The parameter value for G on segment E'E: t_G = ψ = (√5-1)/2 ≈ 0.618.
+    This equals psi, the positive golden conjugate. -/
+noncomputable abbrev t_G : ℝ := psi
 
 end TDCSG.Definitions

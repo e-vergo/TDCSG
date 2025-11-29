@@ -60,11 +60,11 @@ variable (sys : TwoDiskSystem)
 
 /-- The left disk (method on TwoDiskSystem) -/
 noncomputable def diskL : Set ℝ² :=
-  Disk leftCenter sys.r1
+  closedDisk leftCenter sys.r1
 
 /-- The right disk (method on TwoDiskSystem) -/
 noncomputable def diskR : Set ℝ² :=
-  Disk rightCenter sys.r2
+  closedDisk rightCenter sys.r2
 
 /-- The exterior region (outside both disks) -/
 noncomputable def exterior : Set ℝ² :=

@@ -13,7 +13,6 @@ This file provides utilities for converting between complex plane coordinates
 and the Euclidean plane representation, plus segment parameterization.
 
 ## Main definitions
-- `toR2` : Convert complex number to R^2 coordinates
 - `toPlane`, `fromPlane` : Convert between complex and Plane (EuclideanSpace)
 - `segmentPoint` : Parametric representation of segment E'E in complex plane
 - `segmentPointPlane` : Parametric representation of segment E'E in Plane
@@ -22,10 +21,9 @@ and the Euclidean plane representation, plus segment parameterization.
 
 ## Coordinate systems
 
-We work with three coordinate representations:
+We work with two coordinate representations:
 1. Complex plane C - used for algebraic calculations with zeta5
-2. R^2 (as R x R) - simple tuple representation
-3. Plane (EuclideanSpace R (Fin 2)) - used for disk geometry
+2. Plane (EuclideanSpace R (Fin 2)) - used for disk geometry
 
 The conversions preserve distances and geometric relationships.
 -/
@@ -37,28 +35,11 @@ open TDCSG.CompoundSymmetry.GG5
 
 /-! ### Basic coordinate conversions -/
 
-/-- Convert a complex number to R^2 coordinates (tuple form). -/
-noncomputable def toR2 (z : ℂ) : ℝ × ℝ := (z.re, z.im)
-
 /-- Convert a complex number to a Plane point (EuclideanSpace form). -/
 noncomputable def toPlane (z : ℂ) : Plane := ![z.re, z.im]
 
 /-- Convert a Plane point to a complex number. -/
 noncomputable def fromPlane (p : Plane) : ℂ := ⟨p 0, p 1⟩
-
-/-! ### Key points in R^2 coordinates -/
-
-/-- E in R^2 coordinates. -/
-noncomputable def E_R2 : ℝ × ℝ := toR2 E
-
-/-- E' in R^2 coordinates. -/
-noncomputable def E'_R2 : ℝ × ℝ := toR2 E'
-
-/-- F in R^2 coordinates. -/
-noncomputable def F_R2 : ℝ × ℝ := toR2 F
-
-/-- G in R^2 coordinates. -/
-noncomputable def G_R2 : ℝ × ℝ := toR2 G
 
 /-! ### Segment parameterization -/
 
