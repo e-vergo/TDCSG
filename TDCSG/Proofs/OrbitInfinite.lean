@@ -4,7 +4,9 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Moffat
 -/
 import TDCSG.Definitions.Orbit
+import TDCSG.Definitions.IET
 import TDCSG.Proofs.Orbit
+import TDCSG.Proofs.IET
 import Mathlib.NumberTheory.Real.GoldenRatio
 import Mathlib.NumberTheory.Real.Irrational
 import Mathlib.Data.Set.Function
@@ -54,9 +56,9 @@ measure-theoretic arguments beyond current Mathlib ergodic theory coverage.
 
 -/
 
-namespace CompoundSymmetry.GG5
+namespace TDCSG.CompoundSymmetry.GG5
 
-open PiecewiseIsometry Real Function Set Orbit TDCSG.Definitions
+open Real Function Set Orbit TDCSG.Definitions
 
 /-! ### Irrationality results -/
 
@@ -905,4 +907,4 @@ theorem GG5_IET_has_infinite_orbit :
     intro n
     exact Orbit.orbitSet_iterate _ _ n
 
-end CompoundSymmetry.GG5
+end TDCSG.CompoundSymmetry.GG5

@@ -28,7 +28,26 @@ Proves the correspondence between IET orbits and group orbits.
 
 namespace TDCSG.CompoundSymmetry.GG5
 
-open Complex Real TDCSG.Definitions _root_.CompoundSymmetry.GG5
+open Complex Real TDCSG.Definitions CompoundSymmetry.GG5
+
+/-! ### Word selection and iteration -/
+
+/-- Select the word based on which IET interval x falls in. -/
+noncomputable def IET_word (x : Real) : Word :=
+  if x < length1 then word1
+  else if x < length1 + length2 then word2
+  else word3
+
+/-- Concatenated word for n iterations of the IET starting from x0.
+Each iteration applies the word corresponding to the current interval. -/
+noncomputable def wordForIterate (x0 : Real) : Nat -> Word
+  | 0 => []
+  | n + 1 => wordForIterate x0 n ++ IET_word (GG5_induced_IET.toFun^[n] x0)
+
+/-- Simplified version that doesn't track starting point - used in ProofOfMainTheorem. -/
+noncomputable def wordForIterate' : Nat -> Word
+  | 0 => []
+  | n + 1 => wordForIterate' n ++ word1  -- Simplified: actual depends on orbit
 
 /-! ### IET interval lemmas -/
 

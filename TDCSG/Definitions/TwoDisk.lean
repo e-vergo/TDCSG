@@ -3,11 +3,8 @@ Copyright (c) 2025 Eric Moffat. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Moffat
 -/
-import TDCSG.Proofs.Basic
-import TDCSG.Proofs.Rotations
-import TDCSG.Proofs.Disks
+import TDCSG.Definitions.Rotations
 import TDCSG.Definitions.Geometry
-import TDCSG.Definitions.PiecewiseIsometry
 
 /-!
 # Two-Disk System Definitions
@@ -24,9 +21,6 @@ This file contains the core definitions for the two-disk compound symmetry group
 - `TwoDiskSystem.angleB`: The rotation angle for the right disk
 - `TwoDiskSystem.rotationA`: Rotation A (on left disk)
 - `TwoDiskSystem.rotationB`: Rotation B (on right disk)
-- `TwoDiskSystem.partitionA`: The partition for generator A
-- `TwoDiskSystem.partitionB`: The partition for generator B
-- `TwoDiskSystem.basicPartition`: The initial partition
 
 ## References
 
@@ -99,42 +93,6 @@ noncomputable def rotationB : ℝ² → ℝ² :=
     rotateAround rightCenter (angleB sys) x
   else
     x
-
-/-- The partition for generator A. -/
-noncomputable def partitionA : Set (Set ℝ²) :=
-  {diskL sys, (diskL sys)ᶜ}
-
-/-- The partition for generator B. -/
-noncomputable def partitionB : Set (Set ℝ²) :=
-  {diskR sys, (diskR sys)ᶜ}
-
-/-- The basic partition for the two-disk system. -/
-noncomputable def basicPartition : Set (Set ℝ²) :=
-  {diskL sys, diskR sys, exterior sys}
-
-/-- Convert generator A to a piecewise isometry.
-    The isometry_on_pieces proof is provided in TDCSG.TwoDisk. -/
-noncomputable def toPiecewiseIsometry_a : PiecewiseIsometry ℝ² where
-  partition := partitionA sys
-  partition_measurable := sorry
-  partition_countable := sorry
-  partition_cover := sorry
-  partition_disjoint := sorry
-  partition_nonempty := sorry
-  toFun := rotationA sys
-  isometry_on_pieces := sorry
-
-/-- Convert generator B to a piecewise isometry.
-    The isometry_on_pieces proof is provided in TDCSG.TwoDisk. -/
-noncomputable def toPiecewiseIsometry_b : PiecewiseIsometry ℝ² where
-  partition := partitionB sys
-  partition_measurable := sorry
-  partition_countable := sorry
-  partition_cover := sorry
-  partition_disjoint := sorry
-  partition_nonempty := sorry
-  toFun := rotationB sys
-  isometry_on_pieces := sorry
 
 end TwoDiskSystem
 
