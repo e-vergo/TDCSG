@@ -321,8 +321,33 @@ lemma zeta5_pow_seven : ζ₅^7 = ζ₅^2 := by
   norm_num at this
   exact this
 
+lemma zeta5_pow_eight : ζ₅^8 = ζ₅^3 := by
+  have : ζ₅^8 = ζ₅^(8 % 5) := zeta5_pow_reduce 8
+  norm_num at this
+  exact this
+
+lemma zeta5_pow_nine : ζ₅^9 = ζ₅^4 := by
+  have : ζ₅^9 = ζ₅^(9 % 5) := zeta5_pow_reduce 9
+  norm_num at this
+  exact this
+
+lemma zeta5_pow_ten : ζ₅^10 = 1 := by
+  have : ζ₅^10 = ζ₅^(10 % 5) := zeta5_pow_reduce 10
+  norm_num at this
+  exact this
+
 lemma zeta5_pow_eleven : ζ₅^11 = ζ₅ := by
   have : ζ₅^11 = ζ₅^(11 % 5) := zeta5_pow_reduce 11
+  norm_num at this
+  exact this
+
+lemma zeta5_pow_twelve : ζ₅^12 = ζ₅^2 := by
+  have : ζ₅^12 = ζ₅^(12 % 5) := zeta5_pow_reduce 12
+  norm_num at this
+  exact this
+
+lemma zeta5_pow_thirteen : ζ₅^13 = ζ₅^3 := by
+  have : ζ₅^13 = ζ₅^(13 % 5) := zeta5_pow_reduce 13
   norm_num at this
   exact this
 
