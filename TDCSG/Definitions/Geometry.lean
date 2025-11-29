@@ -28,40 +28,57 @@ open Real
 
 /-! ### Disk Centers (FIXED positions) -/
 
-/-- Center of the left disk, positioned at (-1, 0).
-    This is a FIXED position, independent of radius. -/
-def leftCenter : Plane :=
+/-- Center of the left disk in complex plane: -1. -/
+def leftCenter : ℂ := -1
+
+/-- Center of the right disk in complex plane: 1. -/
+def rightCenter : ℂ := 1
+
+/-- DEPRECATED: Left center in Plane coordinates. Use leftCenter : ℂ instead. -/
+def leftCenterPlane : Plane :=
   fun i => if i = 0 then -1 else 0
 
-/-- Center of the right disk, positioned at (1, 0).
-    This is a FIXED position, independent of radius. -/
-def rightCenter : Plane :=
+/-- DEPRECATED: Right center in Plane coordinates. Use rightCenter : ℂ instead. -/
+def rightCenterPlane : Plane :=
   fun i => if i = 0 then 1 else 0
 
 /-! ### Disk Definitions -/
 
-/-- A closed disk in the plane with given center and radius. -/
+/-- A closed disk in complex plane with given center and radius. -/
+def closedDiskC (c : ℂ) (r : ℝ) : Set ℂ := {z | ‖z - c‖ ≤ r}
+
+/-- The left disk in ℂ with radius r centered at -1. -/
+def leftDisk (r : ℝ) : Set ℂ := closedDiskC (-1) r
+
+/-- The right disk in ℂ with radius r centered at 1. -/
+def rightDisk (r : ℝ) : Set ℂ := closedDiskC 1 r
+
+/-- DEPRECATED: A closed disk in Plane. Use closedDiskC instead. -/
 def closedDisk (center : Plane) (radius : ℝ) : Set Plane :=
   Metric.closedBall center radius
 
-/-- The left disk with radius r centered at (-1, 0). -/
-noncomputable def leftDisk (r : ℝ) : Set Plane := closedDisk leftCenter r
+/-- DEPRECATED: Left disk in Plane. Use leftDisk : Set ℂ instead. -/
+noncomputable def leftDiskPlane (r : ℝ) : Set Plane := closedDisk leftCenterPlane r
 
-/-- The right disk with radius r centered at (1, 0). -/
-noncomputable def rightDisk (r : ℝ) : Set Plane := closedDisk rightCenter r
+/-- DEPRECATED: Right disk in Plane. Use rightDisk : Set ℂ instead. -/
+noncomputable def rightDiskPlane (r : ℝ) : Set Plane := closedDisk rightCenterPlane r
 
 /-! ### Rotation Operations -/
 
-/-- Rotation matrix in R^2 by angle theta. -/
+/-- Rotation in the complex plane about a center by angle θ. -/
+noncomputable def rotateAboutC (c : ℂ) (θ : ℝ) (z : ℂ) : ℂ :=
+  c + Complex.exp (θ * Complex.I) * (z - c)
+
+/-- DEPRECATED: Rotation matrix in R^2 by angle theta. -/
 noncomputable def rotationMatrix (θ : ℝ) : Matrix (Fin 2) (Fin 2) ℝ :=
   !![cos θ, -sin θ; sin θ, cos θ]
 
-/-- Apply a 2x2 matrix to a point in R^2. -/
+/-- DEPRECATED: Apply a 2x2 matrix to a point in R^2. -/
 noncomputable def applyMatrix (M : Matrix (Fin 2) (Fin 2) ℝ) (p : Plane) : Plane :=
   fun i => ∑ j, M i j * p j
 
-/-- Rotation about a given center point by angle theta.
-    Returns the rotated point (simple version, not an isometry equivalence). -/
+/-- DEPRECATED: Rotation about a given center point by angle theta.
+    Use rotateAboutC for complex plane rotations. -/
 noncomputable def rotateAroundPoint (center : Plane) (θ : ℝ) (p : Plane) : Plane :=
   center + applyMatrix (rotationMatrix θ) (p - center)
 

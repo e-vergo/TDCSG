@@ -54,6 +54,6 @@ theorem GG5_infinite_at_critical_radius : StatementOfTheorem := by
   -- Get x₀ ∈ [0,1) with infinite IET orbit
   obtain ⟨x₀, hx₀_mem, hx₀_inf⟩ := GG5_IET_has_infinite_orbit
   -- The point on segment E'E corresponding to x₀
-  use segmentPointPlane x₀
+  use segmentPoint x₀
   -- The IET orbit being infinite implies the group orbit is infinite
   exact IET_orbit_infinite_implies_group_orbit_infinite x₀ hx₀_mem hx₀_inf

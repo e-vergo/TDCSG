@@ -60,11 +60,11 @@ variable (sys : TwoDiskSystem)
 
 /-- The left disk (method on TwoDiskSystem) -/
 noncomputable def diskL : Set ℝ² :=
-  closedDisk leftCenter sys.r1
+  closedDisk leftCenterPlane sys.r1
 
 /-- The right disk (method on TwoDiskSystem) -/
 noncomputable def diskR : Set ℝ² :=
-  closedDisk rightCenter sys.r2
+  closedDisk rightCenterPlane sys.r2
 
 /-- The exterior region (outside both disks) -/
 noncomputable def exterior : Set ℝ² :=
@@ -82,7 +82,7 @@ noncomputable def angleB : Real.Angle :=
     This is the TwoDiskSystem version; see MainTheorem.genA for the simplified theorem API. -/
 noncomputable def rotationA : ℝ² → ℝ² :=
   fun x => if x ∈ diskL sys then
-    rotateAround leftCenter (angleA sys) x
+    rotateAround leftCenterPlane (angleA sys) x
   else
     x
 
@@ -90,7 +90,7 @@ noncomputable def rotationA : ℝ² → ℝ² :=
     This is the TwoDiskSystem version; see MainTheorem.genB for the simplified theorem API. -/
 noncomputable def rotationB : ℝ² → ℝ² :=
   fun x => if x ∈ diskR sys then
-    rotateAround rightCenter (angleB sys) x
+    rotateAround rightCenterPlane (angleB sys) x
   else
     x
 

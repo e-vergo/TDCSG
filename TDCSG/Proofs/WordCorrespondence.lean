@@ -447,8 +447,8 @@ Note: This lemma requires x to be in interval 0 [0, length1) for the cross-disk 
 proofs to hold. The intermediate rotation points stay in the disk intersection only for
 this interval range. -/
 lemma word1_produces_displacement0 (x : ℝ) (hx : x ∈ Set.Ico 0 1) (hx_int : x < length1) :
-    applyWord r_crit word1 (segmentPointPlane x) =
-    segmentPointPlane (x + displacement0) := by
+    applyWord r_crit word1 (segmentPoint x) =
+    segmentPoint (x + displacement0) := by
   -- The parameter c = 2x - 1 gives the scalar coefficient: segmentPoint x = c • E
   let c := 2 * x - 1
   have hc_lo : -1 ≤ c := by have h := hx.1; linarith
@@ -470,10 +470,9 @@ lemma word1_produces_displacement0 (x : ℝ) (hx : x ∈ Set.Ico 0 1) (hx_int : 
     rw [smul_smul, ← neg_one_smul ℝ E, ← add_smul, ← add_smul]
     congr 1
     ring
-  -- Unfold to work with toPlane
-  unfold segmentPointPlane
+  -- Rewrite using the scalar form c • E
   rw [h_seg, h_translate]
-  -- Goal: applyWord r_crit word1 (toPlane (c • E)) = toPlane (c • E + (2 * displacement0) • E)
+  -- Goal: applyWord r_crit word1 (c • E) = c • E + (2 * displacement0) • E
   --
   -- First, establish that c • E is in both disks
   have h_in_disks : ‖c • E + 1‖ ≤ r_crit ∧ ‖c • E - 1‖ ≤ r_crit := by
@@ -490,15 +489,15 @@ lemma word1_produces_displacement0 (x : ℝ) (hx : x ∈ Set.Ico 0 1) (hx_int : 
     have h_disk := segment_in_disk_intersection ((c + 1) / 2) h_param
     rw [← h_eq] at h_disk
     exact h_disk
-  -- Convert disk membership to Plane form
-  have h_in_left : toPlane (c • E) ∈ leftDisk r_crit := by
-    unfold leftDisk closedDisk
-    rw [Metric.mem_closedBall, leftCenter_eq_toPlane, toPlane_dist_eq_complex_norm]
+  -- Disk membership in ℂ directly
+  have h_in_left : c • E ∈ leftDisk r_crit := by
+    unfold leftDisk closedDiskC
+    simp only [Set.mem_setOf_eq]
     rw [show c • E - (-1 : ℂ) = c • E + 1 by ring]
     exact h_in_disks.1
-  have h_in_right : toPlane (c • E) ∈ rightDisk r_crit := by
-    unfold rightDisk closedDisk
-    rw [Metric.mem_closedBall, rightCenter_eq_toPlane, toPlane_dist_eq_complex_norm]
+  have h_in_right : c • E ∈ rightDisk r_crit := by
+    unfold rightDisk closedDiskC
+    simp only [Set.mem_setOf_eq]
     exact h_in_disks.2
   -- Unfold applyWord and word1
   unfold applyWord word1
@@ -518,34 +517,30 @@ lemma word1_produces_displacement0 (x : ℝ) (hx : x ∈ Set.Ico 0 1) (hx_int : 
     simp only at h
     convert h using 1
 
-  -- Rotation preservation lemmas
-  have rotation_preserves_left (w : ℂ) (hw : toPlane w ∈ leftDisk r_crit) (k : ℕ) :
-      toPlane ((-1 : ℂ) + ζ₅^k * (w + 1)) ∈ leftDisk r_crit := by
-    unfold leftDisk closedDisk
-    rw [Metric.mem_closedBall, leftCenter_eq_toPlane, toPlane_dist_eq_complex_norm]
+  -- Rotation preservation lemmas (ℂ-native: leftDisk/rightDisk are now Set ℂ)
+  have rotation_preserves_left (w : ℂ) (hw : w ∈ leftDisk r_crit) (k : ℕ) :
+      (-1 : ℂ) + ζ₅^k * (w + 1) ∈ leftDisk r_crit := by
+    unfold leftDisk closedDiskC at hw ⊢
+    simp only [Set.mem_setOf_eq] at hw ⊢
     rw [show (-1 : ℂ) + ζ₅^k * (w + 1) - (-1) = ζ₅^k * (w + 1) by ring]
     rw [Complex.norm_mul]
     have hk_norm : ‖ζ₅^k‖ = 1 := by rw [norm_pow, zeta5_abs, one_pow]
     rw [hk_norm, one_mul]
-    unfold leftDisk closedDisk at hw
-    rw [Metric.mem_closedBall, leftCenter_eq_toPlane, toPlane_dist_eq_complex_norm] at hw
     rw [show w - (-1 : ℂ) = w + 1 by ring] at hw
     exact hw
 
-  have rotation_preserves_right (w : ℂ) (hw : toPlane w ∈ rightDisk r_crit) (k : ℕ) :
-      toPlane ((1 : ℂ) + ζ₅^k * (w - 1)) ∈ rightDisk r_crit := by
-    unfold rightDisk closedDisk
-    rw [Metric.mem_closedBall, rightCenter_eq_toPlane, toPlane_dist_eq_complex_norm]
+  have rotation_preserves_right (w : ℂ) (hw : w ∈ rightDisk r_crit) (k : ℕ) :
+      (1 : ℂ) + ζ₅^k * (w - 1) ∈ rightDisk r_crit := by
+    unfold rightDisk closedDiskC at hw ⊢
+    simp only [Set.mem_setOf_eq] at hw ⊢
     rw [show (1 : ℂ) + ζ₅^k * (w - 1) - 1 = ζ₅^k * (w - 1) by ring]
     rw [Complex.norm_mul]
     have hk_norm : ‖ζ₅^k‖ = 1 := by rw [norm_pow, zeta5_abs, one_pow]
     rw [hk_norm, one_mul]
-    unfold rightDisk closedDisk at hw
-    rw [Metric.mem_closedBall, rightCenter_eq_toPlane, toPlane_dist_eq_complex_norm] at hw
     exact hw
 
   -- Step 1: First A application
-  have step1 : applyGen r_crit (toPlane z0) Generator.A = toPlane z1 := by
+  have step1 : applyGen r_crit z0 Generator.A = z1 := by
     unfold applyGen
     simp only
     rw [genA_eq_zeta5_rotation z0 h_in_left]
@@ -554,14 +549,14 @@ lemma word1_produces_displacement0 (x : ℝ) (hx : x ∈ Set.Ico 0 1) (hx_int : 
     ring
 
   -- z1 is in the left disk (rotation about -1 preserves distance to -1)
-  have h_z1_in_left : toPlane z1 ∈ leftDisk r_crit := by
+  have h_z1_in_left : z1 ∈ leftDisk r_crit := by
     rw [hz1]
     have h := rotation_preserves_left z0 h_in_left 1
     simp only [pow_one] at h ⊢
     exact h
 
   -- Step 2: Second A application
-  have step2 : applyGen r_crit (toPlane z1) Generator.A = toPlane z2 := by
+  have step2 : applyGen r_crit z1 Generator.A = z2 := by
     unfold applyGen
     simp only
     rw [genA_eq_zeta5_rotation z1 h_z1_in_left]
@@ -570,7 +565,7 @@ lemma word1_produces_displacement0 (x : ℝ) (hx : x ∈ Set.Ico 0 1) (hx_int : 
     ring
 
   -- z2 is in the left disk
-  have h_z2_in_left : toPlane z2 ∈ leftDisk r_crit := by
+  have h_z2_in_left : z2 ∈ leftDisk r_crit := by
     rw [hz2]
     have h := rotation_preserves_left z1 h_z1_in_left 1
     simp only [pow_one] at h ⊢
@@ -578,11 +573,11 @@ lemma word1_produces_displacement0 (x : ℝ) (hx : x ∈ Set.Ico 0 1) (hx_int : 
 
   -- z2 in rightDisk (cross-disk): needed for B application
   -- For interval 0 (x < length1), c = 2x-1 ∈ [-1, (1-√5)/2)
-  have h_z2_in_right : toPlane z2 ∈ rightDisk r_crit := by
+  have h_z2_in_right : z2 ∈ rightDisk r_crit := by
     have hz2_expand : z2 = -1 + ζ₅^2 * (z0 + 1) := by
       rw [hz2, hz1]; ring
-    unfold rightDisk closedDisk
-    rw [Metric.mem_closedBall, rightCenter_eq_toPlane, toPlane_dist_eq_complex_norm]
+    unfold rightDisk closedDiskC
+    simp only [Set.mem_setOf_eq]
     rw [hz2_expand, hz0]
     -- Transform to match cross_disk_z2_bound_restricted
     have h_expand : (-1 : ℂ) + ζ₅^2 * (c • E + 1) - 1 = -2 + ζ₅^2 + (c : ℂ) * (ζ₅^3 - ζ₅^4) := by
@@ -609,20 +604,20 @@ lemma word1_produces_displacement0 (x : ℝ) (hx : x ∈ Set.Ico 0 1) (hx_int : 
     exact cross_disk_z2_bound_restricted c hc_lo hc_upper
 
   -- Step 3: B application
-  have step3 : applyGen r_crit (toPlane z2) Generator.B = toPlane z3 := by
+  have step3 : applyGen r_crit z2 Generator.B = z3 := by
     unfold applyGen
     simp only
     rw [genB_eq_zeta5_rotation z2 h_z2_in_right]
 
   -- z3 is in rightDisk (same center)
-  have h_z3_in_right : toPlane z3 ∈ rightDisk r_crit := by
+  have h_z3_in_right : z3 ∈ rightDisk r_crit := by
     rw [hz3]
     have h := rotation_preserves_right z2 h_z2_in_right 1
     simp only [pow_one] at h ⊢
     exact h
 
   -- z3 in leftDisk (cross-disk): needed for A application
-  have h_z3_in_left : toPlane z3 ∈ leftDisk r_crit := by
+  have h_z3_in_left : z3 ∈ leftDisk r_crit := by
     -- z3 + 1 = 2 - 2*zeta5 + zeta5^3 + c*(zeta5^4 - 1)
     have hz3_expand : z3 + 1 = 2 - 2*ζ₅ + ζ₅^3 + (c : ℂ) * (ζ₅^4 - 1) := by
       rw [hz3, hz2, hz1, hz0]
@@ -632,8 +627,8 @@ lemma word1_produces_displacement0 (x : ℝ) (hx : x ∈ Set.Ico 0 1) (hx_int : 
       rw [h_smul, hE]
       ring_nf
       simp only [h5, one_mul]
-    unfold leftDisk closedDisk
-    rw [Metric.mem_closedBall, leftCenter_eq_toPlane, toPlane_dist_eq_complex_norm]
+    unfold leftDisk closedDiskC
+    simp only [Set.mem_setOf_eq]
     rw [show z3 - (-1 : ℂ) = z3 + 1 by ring, hz3_expand]
     -- Apply cross-disk bound with c ∈ [-1, (1-√5)/2]
     have hc_upper : c ≤ (1 - √5) / 2 := by
@@ -653,7 +648,7 @@ lemma word1_produces_displacement0 (x : ℝ) (hx : x ∈ Set.Ico 0 1) (hx_int : 
     exact cross_disk_z3_bound_restricted c hc_lo hc_upper
 
   -- Step 4: A application
-  have step4 : applyGen r_crit (toPlane z3) Generator.A = toPlane z4 := by
+  have step4 : applyGen r_crit z3 Generator.A = z4 := by
     unfold applyGen
     simp only
     rw [genA_eq_zeta5_rotation z3 h_z3_in_left]
@@ -662,14 +657,14 @@ lemma word1_produces_displacement0 (x : ℝ) (hx : x ∈ Set.Ico 0 1) (hx_int : 
     ring
 
   -- z4 is in leftDisk (same center)
-  have h_z4_in_left : toPlane z4 ∈ leftDisk r_crit := by
+  have h_z4_in_left : z4 ∈ leftDisk r_crit := by
     rw [hz4]
     have h := rotation_preserves_left z3 h_z3_in_left 1
     simp only [pow_one] at h ⊢
     exact h
 
   -- z4 in rightDisk (cross-disk): needed for B application
-  have h_z4_in_right : toPlane z4 ∈ rightDisk r_crit := by
+  have h_z4_in_right : z4 ∈ rightDisk r_crit := by
     -- z4 - 1 = -2 + 2*zeta5 - 2*zeta5^2 + zeta5^4 + c*(1 - zeta5)
     have hz4_expand : z4 - 1 = -2 + 2*ζ₅ - 2*ζ₅^2 + ζ₅^4 + (c : ℂ) * (1 - ζ₅) := by
       rw [hz4, hz3, hz2, hz1, hz0]
@@ -681,8 +676,8 @@ lemma word1_produces_displacement0 (x : ℝ) (hx : x ∈ Set.Ico 0 1) (hx_int : 
       ring_nf
       simp only [h5, h6, one_mul]
       ring
-    unfold rightDisk closedDisk
-    rw [Metric.mem_closedBall, rightCenter_eq_toPlane, toPlane_dist_eq_complex_norm]
+    unfold rightDisk closedDiskC
+    simp only [Set.mem_setOf_eq]
     rw [hz4_expand]
     -- Apply cross-disk bound with c ∈ [-1, (1-√5)/2]
     have hc_upper : c ≤ (1 - √5) / 2 := by
@@ -702,20 +697,20 @@ lemma word1_produces_displacement0 (x : ℝ) (hx : x ∈ Set.Ico 0 1) (hx_int : 
     exact cross_disk_z4_bound_restricted c hc_lo hc_upper
 
   -- Step 5: B application
-  have step5 : applyGen r_crit (toPlane z4) Generator.B = toPlane z5 := by
+  have step5 : applyGen r_crit z4 Generator.B = z5 := by
     unfold applyGen
     simp only
     rw [genB_eq_zeta5_rotation z4 h_z4_in_right]
 
   -- Chain all steps together
-  calc applyGen r_crit (applyGen r_crit (applyGen r_crit (applyGen r_crit (applyGen r_crit (toPlane z0) Generator.A) Generator.A) Generator.B) Generator.A) Generator.B
-      = applyGen r_crit (applyGen r_crit (applyGen r_crit (applyGen r_crit (toPlane z1) Generator.A) Generator.B) Generator.A) Generator.B := by rw [step1]
-    _ = applyGen r_crit (applyGen r_crit (applyGen r_crit (toPlane z2) Generator.B) Generator.A) Generator.B := by rw [step2]
-    _ = applyGen r_crit (applyGen r_crit (toPlane z3) Generator.A) Generator.B := by rw [step3]
-    _ = applyGen r_crit (toPlane z4) Generator.B := by rw [step4]
-    _ = toPlane z5 := by rw [step5]
-    _ = toPlane (z0 + (2 * displacement0) • E) := by rw [h_alg]
-    _ = toPlane (c • E + (2 * displacement0) • E) := by rw [hz0]
+  calc applyGen r_crit (applyGen r_crit (applyGen r_crit (applyGen r_crit (applyGen r_crit z0 Generator.A) Generator.A) Generator.B) Generator.A) Generator.B
+      = applyGen r_crit (applyGen r_crit (applyGen r_crit (applyGen r_crit z1 Generator.A) Generator.B) Generator.A) Generator.B := by rw [step1]
+    _ = applyGen r_crit (applyGen r_crit (applyGen r_crit z2 Generator.B) Generator.A) Generator.B := by rw [step2]
+    _ = applyGen r_crit (applyGen r_crit z3 Generator.A) Generator.B := by rw [step3]
+    _ = applyGen r_crit z4 Generator.B := by rw [step4]
+    _ = z5 := by rw [step5]
+    _ = z0 + (2 * displacement0) • E := by rw [h_alg]
+    _ = c • E + (2 * displacement0) • E := by rw [hz0]
 
 /-- Word 2 action on segment points: translates by displacement1.
 
@@ -730,8 +725,8 @@ word2 = [Generator.Ainv, Generator.B, Generator.Ainv, Generator.B, Generator.B]
      = [A⁻¹, B, A⁻¹, B, B] applied left-to-right -/
 lemma word2_produces_displacement1 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     (hx_lo : length1 ≤ x) (hx_hi : x < length1 + length2) :
-    applyWord r_crit word2 (segmentPointPlane x) =
-    segmentPointPlane (x + displacement1) := by
+    applyWord r_crit word2 (segmentPoint x) =
+    segmentPoint (x + displacement1) := by
   -- The parameter c = 2x - 1 gives the scalar coefficient: segmentPoint x = c • E
   let c := 2 * x - 1
   have hc_lo : -1 ≤ c := by have h := hx.1; linarith
@@ -753,8 +748,7 @@ lemma word2_produces_displacement1 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     rw [smul_smul, ← neg_one_smul ℝ E, ← add_smul, ← add_smul]
     congr 1
     ring
-  -- Unfold to work with toPlane
-  unfold segmentPointPlane
+  -- Rewrite using the scalar form c • E
   rw [h_seg, h_translate]
   -- Establish that c • E is in both disks
   have h_in_disks : ‖c • E + 1‖ ≤ r_crit ∧ ‖c • E - 1‖ ≤ r_crit := by
@@ -771,15 +765,15 @@ lemma word2_produces_displacement1 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     have h_disk := segment_in_disk_intersection ((c + 1) / 2) h_param
     rw [← h_eq] at h_disk
     exact h_disk
-  -- Convert disk membership to Plane form
-  have h_in_left : toPlane (c • E) ∈ leftDisk r_crit := by
-    unfold leftDisk closedDisk
-    rw [Metric.mem_closedBall, leftCenter_eq_toPlane, toPlane_dist_eq_complex_norm]
+  -- Disk membership in ℂ directly
+  have h_in_left : c • E ∈ leftDisk r_crit := by
+    unfold leftDisk closedDiskC
+    simp only [Set.mem_setOf_eq]
     rw [show c • E - (-1 : ℂ) = c • E + 1 by ring]
     exact h_in_disks.1
-  have h_in_right : toPlane (c • E) ∈ rightDisk r_crit := by
-    unfold rightDisk closedDisk
-    rw [Metric.mem_closedBall, rightCenter_eq_toPlane, toPlane_dist_eq_complex_norm]
+  have h_in_right : c • E ∈ rightDisk r_crit := by
+    unfold rightDisk closedDiskC
+    simp only [Set.mem_setOf_eq]
     exact h_in_disks.2
   -- Unfold applyWord and word2
   unfold applyWord word2
@@ -801,41 +795,37 @@ lemma word2_produces_displacement1 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     convert h using 1
 
   -- Rotation preservation lemmas
-  have rotation_preserves_left (w : ℂ) (hw : toPlane w ∈ leftDisk r_crit) (k : ℕ) :
-      toPlane ((-1 : ℂ) + ζ₅^k * (w + 1)) ∈ leftDisk r_crit := by
-    unfold leftDisk closedDisk
-    rw [Metric.mem_closedBall, leftCenter_eq_toPlane, toPlane_dist_eq_complex_norm]
+  have rotation_preserves_left (w : ℂ) (hw : w ∈ leftDisk r_crit) (k : ℕ) :
+      (-1 : ℂ) + ζ₅^k * (w + 1) ∈ leftDisk r_crit := by
+    unfold leftDisk closedDiskC at hw ⊢
+    simp only [Set.mem_setOf_eq] at hw ⊢
     rw [show (-1 : ℂ) + ζ₅^k * (w + 1) - (-1) = ζ₅^k * (w + 1) by ring]
     rw [Complex.norm_mul]
     have hk_norm : ‖ζ₅^k‖ = 1 := by rw [norm_pow, zeta5_abs, one_pow]
     rw [hk_norm, one_mul]
-    unfold leftDisk closedDisk at hw
-    rw [Metric.mem_closedBall, leftCenter_eq_toPlane, toPlane_dist_eq_complex_norm] at hw
     rw [show w - (-1 : ℂ) = w + 1 by ring] at hw
     exact hw
 
-  have rotation_preserves_right (w : ℂ) (hw : toPlane w ∈ rightDisk r_crit) (k : ℕ) :
-      toPlane ((1 : ℂ) + ζ₅^k * (w - 1)) ∈ rightDisk r_crit := by
-    unfold rightDisk closedDisk
-    rw [Metric.mem_closedBall, rightCenter_eq_toPlane, toPlane_dist_eq_complex_norm]
+  have rotation_preserves_right (w : ℂ) (hw : w ∈ rightDisk r_crit) (k : ℕ) :
+      (1 : ℂ) + ζ₅^k * (w - 1) ∈ rightDisk r_crit := by
+    unfold rightDisk closedDiskC at hw ⊢
+    simp only [Set.mem_setOf_eq] at hw ⊢
     rw [show (1 : ℂ) + ζ₅^k * (w - 1) - 1 = ζ₅^k * (w - 1) by ring]
     rw [Complex.norm_mul]
     have hk_norm : ‖ζ₅^k‖ = 1 := by rw [norm_pow, zeta5_abs, one_pow]
     rw [hk_norm, one_mul]
-    unfold rightDisk closedDisk at hw
-    rw [Metric.mem_closedBall, rightCenter_eq_toPlane, toPlane_dist_eq_complex_norm] at hw
     exact hw
 
   -- For A⁻¹ = A⁴, we need intermediate disk memberships
-  have hz0_A1 : toPlane ((-1 : ℂ) + ζ₅ * (z0 + 1)) ∈ leftDisk r_crit := by
+  have hz0_A1 : (-1 : ℂ) + ζ₅ * (z0 + 1) ∈ leftDisk r_crit := by
     have h := rotation_preserves_left z0 h_in_left 1; simp only [pow_one] at h; exact h
-  have hz0_A2 : toPlane ((-1 : ℂ) + ζ₅^2 * (z0 + 1)) ∈ leftDisk r_crit :=
+  have hz0_A2 : (-1 : ℂ) + ζ₅^2 * (z0 + 1) ∈ leftDisk r_crit :=
     rotation_preserves_left z0 h_in_left 2
-  have hz0_A3 : toPlane ((-1 : ℂ) + ζ₅^3 * (z0 + 1)) ∈ leftDisk r_crit :=
+  have hz0_A3 : (-1 : ℂ) + ζ₅^3 * (z0 + 1) ∈ leftDisk r_crit :=
     rotation_preserves_left z0 h_in_left 3
 
   -- Step 1: A⁻¹ on z0 gives z1
-  have hstep1 : applyGen r_crit (toPlane z0) Generator.Ainv = toPlane z1 := by
+  have hstep1 : applyGen r_crit z0 Generator.Ainv = z1 := by
     unfold applyGen
     have h := genA_inv_eq_zeta5_pow4_rotation z0 h_in_left hz0_A1 hz0_A2 hz0_A3
     rw [h, hz1]
@@ -844,9 +834,9 @@ lemma word2_produces_displacement1 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
   -- z1 = -1 + ζ₅^4 * (z0 + 1) = -1 + ζ₅^4 * (c•E + 1)
   -- z1 - 1 = ζ₅^4 * (c•E + 1) - 2 = (ζ₅^4 - 2) + c*(1 - ζ₅)
   -- This uses ζ₅^4 * E = 1 - ζ₅
-  have hz1_right : toPlane z1 ∈ rightDisk r_crit := by
-    unfold rightDisk closedDisk
-    rw [Metric.mem_closedBall, rightCenter_eq_toPlane, toPlane_dist_eq_complex_norm]
+  have hz1_right : z1 ∈ rightDisk r_crit := by
+    unfold rightDisk closedDiskC
+    simp only [Set.mem_setOf_eq]
     rw [hz1, hz0]
     rw [show (-1 : ℂ) + ζ₅^4 * (c • E + 1) - 1 = ζ₅^4 * (c • E + 1) - 2 by ring]
     have h_zeta_pow4_E : ζ₅^4 * E = 1 - ζ₅ := by
@@ -869,28 +859,28 @@ lemma word2_produces_displacement1 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
 
   -- For B⁻¹ on z1, need z1 in right disk (established above)
   -- Also need intermediate B-rotations for B⁻¹ = B^4
-  have hz1_B1 : toPlane ((1 : ℂ) + ζ₅ * (z1 - 1)) ∈ rightDisk r_crit := by
+  have hz1_B1 : (1 : ℂ) + ζ₅ * (z1 - 1) ∈ rightDisk r_crit := by
     have h := rotation_preserves_right z1 hz1_right 1; simp only [pow_one] at h; exact h
-  have hz1_B2 : toPlane ((1 : ℂ) + ζ₅^2 * (z1 - 1)) ∈ rightDisk r_crit :=
+  have hz1_B2 : (1 : ℂ) + ζ₅^2 * (z1 - 1) ∈ rightDisk r_crit :=
     rotation_preserves_right z1 hz1_right 2
-  have hz1_B3 : toPlane ((1 : ℂ) + ζ₅^3 * (z1 - 1)) ∈ rightDisk r_crit :=
+  have hz1_B3 : (1 : ℂ) + ζ₅^3 * (z1 - 1) ∈ rightDisk r_crit :=
     rotation_preserves_right z1 hz1_right 3
 
   -- Step 2: B⁻¹ on z1 gives z2
-  have hstep2 : applyGen r_crit (toPlane z1) Generator.Binv = toPlane z2 := by
+  have hstep2 : applyGen r_crit z1 Generator.Binv = z2 := by
     unfold applyGen
     have h := genB_inv_eq_zeta5_pow4_rotation z1 hz1_right hz1_B1 hz1_B2 hz1_B3
     rw [h, hz2]
 
   -- z2 is in rightDisk (same center, rotation preserves membership)
-  have hz2_right : toPlane z2 ∈ rightDisk r_crit := by
+  have hz2_right : z2 ∈ rightDisk r_crit := by
     rw [hz2]
     exact rotation_preserves_right z1 hz1_right 4
 
   -- z2 in leftDisk (cross-disk): needed for A⁻¹
-  have hz2_left : toPlane z2 ∈ leftDisk r_crit := by
-    unfold leftDisk closedDisk
-    rw [Metric.mem_closedBall, leftCenter_eq_toPlane, toPlane_dist_eq_complex_norm]
+  have hz2_left : z2 ∈ leftDisk r_crit := by
+    unfold leftDisk closedDiskC
+    simp only [Set.mem_setOf_eq]
     rw [hz2, hz1, hz0]
     -- z2 + 1 = 2 + ζ₅ * (z1 - 1)
     --        = 2 + ζ₅ * (ζ₅^4*(c•E + 1) - 2)
@@ -900,68 +890,68 @@ lemma word2_produces_displacement1 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     sorry
 
   -- For A⁻¹ on z2, need intermediate memberships
-  have hz2_A1 : toPlane ((-1 : ℂ) + ζ₅ * (z2 + 1)) ∈ leftDisk r_crit := by
+  have hz2_A1 : (-1 : ℂ) + ζ₅ * (z2 + 1) ∈ leftDisk r_crit := by
     have h := rotation_preserves_left z2 hz2_left 1; simp only [pow_one] at h; exact h
-  have hz2_A2 : toPlane ((-1 : ℂ) + ζ₅^2 * (z2 + 1)) ∈ leftDisk r_crit :=
+  have hz2_A2 : (-1 : ℂ) + ζ₅^2 * (z2 + 1) ∈ leftDisk r_crit :=
     rotation_preserves_left z2 hz2_left 2
-  have hz2_A3 : toPlane ((-1 : ℂ) + ζ₅^3 * (z2 + 1)) ∈ leftDisk r_crit :=
+  have hz2_A3 : (-1 : ℂ) + ζ₅^3 * (z2 + 1) ∈ leftDisk r_crit :=
     rotation_preserves_left z2 hz2_left 3
 
   -- Step 3: A⁻¹ on z2 gives z3
-  have hstep3 : applyGen r_crit (toPlane z2) Generator.Ainv = toPlane z3 := by
+  have hstep3 : applyGen r_crit z2 Generator.Ainv = z3 := by
     unfold applyGen
     have h := genA_inv_eq_zeta5_pow4_rotation z2 hz2_left hz2_A1 hz2_A2 hz2_A3
     rw [h, hz3]
 
   -- z3 in rightDisk (cross-disk): needed for B⁻¹
-  have hz3_right : toPlane z3 ∈ rightDisk r_crit := by
-    unfold rightDisk closedDisk
-    rw [Metric.mem_closedBall, rightCenter_eq_toPlane, toPlane_dist_eq_complex_norm]
+  have hz3_right : z3 ∈ rightDisk r_crit := by
+    unfold rightDisk closedDiskC
+    simp only [Set.mem_setOf_eq]
     rw [hz3, hz2, hz1, hz0]
     sorry
 
   -- For B⁻¹ on z3, need intermediate B-rotations
-  have hz3_B1 : toPlane ((1 : ℂ) + ζ₅ * (z3 - 1)) ∈ rightDisk r_crit := by
+  have hz3_B1 : (1 : ℂ) + ζ₅ * (z3 - 1) ∈ rightDisk r_crit := by
     have h := rotation_preserves_right z3 hz3_right 1; simp only [pow_one] at h; exact h
-  have hz3_B2 : toPlane ((1 : ℂ) + ζ₅^2 * (z3 - 1)) ∈ rightDisk r_crit :=
+  have hz3_B2 : (1 : ℂ) + ζ₅^2 * (z3 - 1) ∈ rightDisk r_crit :=
     rotation_preserves_right z3 hz3_right 2
-  have hz3_B3 : toPlane ((1 : ℂ) + ζ₅^3 * (z3 - 1)) ∈ rightDisk r_crit :=
+  have hz3_B3 : (1 : ℂ) + ζ₅^3 * (z3 - 1) ∈ rightDisk r_crit :=
     rotation_preserves_right z3 hz3_right 3
 
   -- Step 4: B⁻¹ on z3 gives z4
-  have hstep4 : applyGen r_crit (toPlane z3) Generator.Binv = toPlane z4 := by
+  have hstep4 : applyGen r_crit z3 Generator.Binv = z4 := by
     unfold applyGen
     have h := genB_inv_eq_zeta5_pow4_rotation z3 hz3_right hz3_B1 hz3_B2 hz3_B3
     rw [h, hz4]
 
   -- z4 is in rightDisk (same center)
-  have hz4_right : toPlane z4 ∈ rightDisk r_crit := by
+  have hz4_right : z4 ∈ rightDisk r_crit := by
     rw [hz4]
     exact rotation_preserves_right z3 hz3_right 4
 
   -- For B⁻¹ on z4, need intermediate B-rotations
-  have hz4_B1 : toPlane ((1 : ℂ) + ζ₅ * (z4 - 1)) ∈ rightDisk r_crit := by
+  have hz4_B1 : (1 : ℂ) + ζ₅ * (z4 - 1) ∈ rightDisk r_crit := by
     have h := rotation_preserves_right z4 hz4_right 1; simp only [pow_one] at h; exact h
-  have hz4_B2 : toPlane ((1 : ℂ) + ζ₅^2 * (z4 - 1)) ∈ rightDisk r_crit :=
+  have hz4_B2 : (1 : ℂ) + ζ₅^2 * (z4 - 1) ∈ rightDisk r_crit :=
     rotation_preserves_right z4 hz4_right 2
-  have hz4_B3 : toPlane ((1 : ℂ) + ζ₅^3 * (z4 - 1)) ∈ rightDisk r_crit :=
+  have hz4_B3 : (1 : ℂ) + ζ₅^3 * (z4 - 1) ∈ rightDisk r_crit :=
     rotation_preserves_right z4 hz4_right 3
 
   -- Step 5: B⁻¹ on z4 gives z5
-  have hstep5 : applyGen r_crit (toPlane z4) Generator.Binv = toPlane z5 := by
+  have hstep5 : applyGen r_crit z4 Generator.Binv = z5 := by
     unfold applyGen
     have h := genB_inv_eq_zeta5_pow4_rotation z4 hz4_right hz4_B1 hz4_B2 hz4_B3
     rw [h, hz5]
 
   -- Chain all steps together
-  calc applyGen r_crit (applyGen r_crit (applyGen r_crit (applyGen r_crit (applyGen r_crit (toPlane z0) Generator.Ainv) Generator.Binv) Generator.Ainv) Generator.Binv) Generator.Binv
-      = applyGen r_crit (applyGen r_crit (applyGen r_crit (applyGen r_crit (toPlane z1) Generator.Binv) Generator.Ainv) Generator.Binv) Generator.Binv := by rw [hstep1]
-    _ = applyGen r_crit (applyGen r_crit (applyGen r_crit (toPlane z2) Generator.Ainv) Generator.Binv) Generator.Binv := by rw [hstep2]
-    _ = applyGen r_crit (applyGen r_crit (toPlane z3) Generator.Binv) Generator.Binv := by rw [hstep3]
-    _ = applyGen r_crit (toPlane z4) Generator.Binv := by rw [hstep4]
-    _ = toPlane z5 := by rw [hstep5]
-    _ = toPlane (z0 + (2 * displacement1) • E) := by rw [h_alg]
-    _ = toPlane (c • E + (2 * displacement1) • E) := by rw [hz0]
+  calc applyGen r_crit (applyGen r_crit (applyGen r_crit (applyGen r_crit (applyGen r_crit z0 Generator.Ainv) Generator.Binv) Generator.Ainv) Generator.Binv) Generator.Binv
+      = applyGen r_crit (applyGen r_crit (applyGen r_crit (applyGen r_crit z1 Generator.Binv) Generator.Ainv) Generator.Binv) Generator.Binv := by rw [hstep1]
+    _ = applyGen r_crit (applyGen r_crit (applyGen r_crit z2 Generator.Ainv) Generator.Binv) Generator.Binv := by rw [hstep2]
+    _ = applyGen r_crit (applyGen r_crit z3 Generator.Binv) Generator.Binv := by rw [hstep3]
+    _ = applyGen r_crit z4 Generator.Binv := by rw [hstep4]
+    _ = z5 := by rw [hstep5]
+    _ = z0 + (2 * displacement1) • E := by rw [h_alg]
+    _ = c • E + (2 * displacement1) • E := by rw [hz0]
 
 /-- Word 3 action on segment points: translates by displacement2.
 
@@ -978,8 +968,8 @@ Note: word3 = [Generator.Ainv, Generator.Binv, Generator.Ainv, Generator.B, Gene
     = [A⁻¹, B⁻¹, A⁻¹, B, A, B] applied left-to-right -/
 lemma word3_produces_displacement2 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     (hx_interval2 : length1 + length2 ≤ x) :
-    applyWord r_crit word3 (segmentPointPlane x) =
-    segmentPointPlane (x + displacement2) := by
+    applyWord r_crit word3 (segmentPoint x) =
+    segmentPoint (x + displacement2) := by
   -- The parameter c = 2x - 1 gives the scalar coefficient: segmentPoint x = c • E
   let c := 2 * x - 1
   have hc_lo : -1 ≤ c := by have h := hx.1; linarith
@@ -1050,8 +1040,7 @@ lemma word3_produces_displacement2 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     rw [smul_smul, ← neg_one_smul ℝ E, ← add_smul, ← add_smul]
     congr 1
     ring
-  -- Unfold to work with toPlane
-  unfold segmentPointPlane
+  -- Rewrite using h_seg and h_translate
   rw [h_seg, h_translate]
 
   -- Establish that c • E is in both disks
@@ -1069,15 +1058,15 @@ lemma word3_produces_displacement2 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     have h_disk := segment_in_disk_intersection ((c + 1) / 2) h_param
     rw [← h_eq] at h_disk
     exact h_disk
-  -- Convert disk membership to Plane form
-  have h_in_left : toPlane (c • E) ∈ leftDisk r_crit := by
-    unfold leftDisk closedDisk
-    rw [Metric.mem_closedBall, leftCenter_eq_toPlane, toPlane_dist_eq_complex_norm]
+  -- Disk membership in ℂ
+  have h_in_left : c • E ∈ leftDisk r_crit := by
+    unfold leftDisk closedDiskC
+    simp only [Set.mem_setOf_eq]
     rw [show c • E - (-1 : ℂ) = c • E + 1 by ring]
     exact h_in_disks.1
-  have h_in_right : toPlane (c • E) ∈ rightDisk r_crit := by
-    unfold rightDisk closedDisk
-    rw [Metric.mem_closedBall, rightCenter_eq_toPlane, toPlane_dist_eq_complex_norm]
+  have h_in_right : c • E ∈ rightDisk r_crit := by
+    unfold rightDisk closedDiskC
+    simp only [Set.mem_setOf_eq]
     exact h_in_disks.2
 
   -- Unfold applyWord and word3
@@ -1100,42 +1089,42 @@ lemma word3_produces_displacement2 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     simp only at h
     convert h using 1
 
-  -- Rotation preservation lemmas
-  have rotation_preserves_left (w : ℂ) (hw : toPlane w ∈ leftDisk r_crit) (k : ℕ) :
-      toPlane ((-1 : ℂ) + ζ₅^k * (w + 1)) ∈ leftDisk r_crit := by
-    unfold leftDisk closedDisk
-    rw [Metric.mem_closedBall, leftCenter_eq_toPlane, toPlane_dist_eq_complex_norm]
+  -- Rotation preservation lemmas (ℂ version for word3)
+  have rotation_preserves_left (w : ℂ) (hw : w ∈ leftDisk r_crit) (k : ℕ) :
+      (-1 : ℂ) + ζ₅^k * (w + 1) ∈ leftDisk r_crit := by
+    unfold leftDisk closedDiskC
+    simp only [Set.mem_setOf_eq]
     rw [show (-1 : ℂ) + ζ₅^k * (w + 1) - (-1) = ζ₅^k * (w + 1) by ring]
     rw [Complex.norm_mul]
     have hk_norm : ‖ζ₅^k‖ = 1 := by rw [norm_pow, zeta5_abs, one_pow]
     rw [hk_norm, one_mul]
-    unfold leftDisk closedDisk at hw
-    rw [Metric.mem_closedBall, leftCenter_eq_toPlane, toPlane_dist_eq_complex_norm] at hw
+    unfold leftDisk closedDiskC at hw
+    simp only [Set.mem_setOf_eq] at hw
     rw [show w - (-1 : ℂ) = w + 1 by ring] at hw
     exact hw
 
-  have rotation_preserves_right (w : ℂ) (hw : toPlane w ∈ rightDisk r_crit) (k : ℕ) :
-      toPlane ((1 : ℂ) + ζ₅^k * (w - 1)) ∈ rightDisk r_crit := by
-    unfold rightDisk closedDisk
-    rw [Metric.mem_closedBall, rightCenter_eq_toPlane, toPlane_dist_eq_complex_norm]
+  have rotation_preserves_right (w : ℂ) (hw : w ∈ rightDisk r_crit) (k : ℕ) :
+      (1 : ℂ) + ζ₅^k * (w - 1) ∈ rightDisk r_crit := by
+    unfold rightDisk closedDiskC
+    simp only [Set.mem_setOf_eq]
     rw [show (1 : ℂ) + ζ₅^k * (w - 1) - 1 = ζ₅^k * (w - 1) by ring]
     rw [Complex.norm_mul]
     have hk_norm : ‖ζ₅^k‖ = 1 := by rw [norm_pow, zeta5_abs, one_pow]
     rw [hk_norm, one_mul]
-    unfold rightDisk closedDisk at hw
-    rw [Metric.mem_closedBall, rightCenter_eq_toPlane, toPlane_dist_eq_complex_norm] at hw
+    unfold rightDisk closedDiskC at hw
+    simp only [Set.mem_setOf_eq] at hw
     exact hw
 
   -- For A⁻¹ = A⁴, we need intermediate disk memberships
-  have hz0_A1 : toPlane ((-1 : ℂ) + ζ₅ * (z0 + 1)) ∈ leftDisk r_crit := by
+  have hz0_A1 : (-1 : ℂ) + ζ₅ * (z0 + 1) ∈ leftDisk r_crit := by
     have h := rotation_preserves_left z0 h_in_left 1; simp only [pow_one] at h; exact h
-  have hz0_A2 : toPlane ((-1 : ℂ) + ζ₅^2 * (z0 + 1)) ∈ leftDisk r_crit :=
+  have hz0_A2 : (-1 : ℂ) + ζ₅^2 * (z0 + 1) ∈ leftDisk r_crit :=
     rotation_preserves_left z0 h_in_left 2
-  have hz0_A3 : toPlane ((-1 : ℂ) + ζ₅^3 * (z0 + 1)) ∈ leftDisk r_crit :=
+  have hz0_A3 : (-1 : ℂ) + ζ₅^3 * (z0 + 1) ∈ leftDisk r_crit :=
     rotation_preserves_left z0 h_in_left 3
 
   -- Step 1: A⁻¹ on z0 gives z1
-  have hstep1 : applyGen r_crit (toPlane z0) Generator.Ainv = toPlane z1 := by
+  have hstep1 : applyGen r_crit z0 Generator.Ainv = z1 := by
     unfold applyGen
     have h := genA_inv_eq_zeta5_pow4_rotation z0 h_in_left hz0_A1 hz0_A2 hz0_A3
     rw [h, hz1]
@@ -1148,9 +1137,9 @@ lemma word3_produces_displacement2 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
   -- Using ζ₅^4 * E = 1 - ζ₅, we get z1 - 1 = ζ₅^4 + c*(1 - ζ₅) - 2
   -- The norm squared of this, as a function of c ∈ [-1, 1], has maximum
   -- at c = 1 giving normSq = (11 + 2√5)/4 < r_crit² = 3 + φ = (7 + √5)/2.
-  have hz1_right : toPlane z1 ∈ rightDisk r_crit := by
-    unfold rightDisk closedDisk
-    rw [Metric.mem_closedBall, rightCenter_eq_toPlane, toPlane_dist_eq_complex_norm]
+  have hz1_right : z1 ∈ rightDisk r_crit := by
+    unfold rightDisk closedDiskC
+    simp only [Set.mem_setOf_eq]
     rw [hz1, hz0]
     rw [show (-1 : ℂ) + ζ₅^4 * (c • E + 1) - 1 = ζ₅^4 * (c • E + 1) - 2 by ring]
     -- We use the fact that z1 lies on a transformed segment that stays
@@ -1183,23 +1172,23 @@ lemma word3_produces_displacement2 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     exact cross_disk_w3_z1_bound c hc_interval2 hc_hi
 
   -- For B⁻¹ on z1, need intermediate memberships
-  have hz1_B1 : toPlane ((1 : ℂ) + ζ₅ * (z1 - 1)) ∈ rightDisk r_crit := by
+  have hz1_B1 : (1 : ℂ) + ζ₅ * (z1 - 1) ∈ rightDisk r_crit := by
     have h := rotation_preserves_right z1 hz1_right 1; simp only [pow_one] at h; exact h
-  have hz1_B2 : toPlane ((1 : ℂ) + ζ₅^2 * (z1 - 1)) ∈ rightDisk r_crit :=
+  have hz1_B2 : (1 : ℂ) + ζ₅^2 * (z1 - 1) ∈ rightDisk r_crit :=
     rotation_preserves_right z1 hz1_right 2
-  have hz1_B3 : toPlane ((1 : ℂ) + ζ₅^3 * (z1 - 1)) ∈ rightDisk r_crit :=
+  have hz1_B3 : (1 : ℂ) + ζ₅^3 * (z1 - 1) ∈ rightDisk r_crit :=
     rotation_preserves_right z1 hz1_right 3
 
   -- Step 2: B⁻¹ on z1 gives z2
-  have hstep2 : applyGen r_crit (toPlane z1) Generator.Binv = toPlane z2 := by
+  have hstep2 : applyGen r_crit z1 Generator.Binv = z2 := by
     unfold applyGen
     have h := genB_inv_eq_zeta5_pow4_rotation z1 hz1_right hz1_B1 hz1_B2 hz1_B3
     rw [h, hz2]
 
   -- z2 in leftDisk (cross-disk): needed for A⁻¹
-  have hz2_left : toPlane z2 ∈ leftDisk r_crit := by
-    unfold leftDisk closedDisk
-    rw [Metric.mem_closedBall, leftCenter_eq_toPlane, toPlane_dist_eq_complex_norm]
+  have hz2_left : z2 ∈ leftDisk r_crit := by
+    unfold leftDisk closedDiskC
+    simp only [Set.mem_setOf_eq]
     rw [hz2, hz1, hz0]
     -- z2 + 1 = 2 + ζ₅^4 * (z1 - 1)
     --        = 2 + ζ₅^4 * (-2 + ζ₅^4*(c•E + 1))
@@ -1226,23 +1215,23 @@ lemma word3_produces_displacement2 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     exact cross_disk_w3_z2_bound c hc_interval2 hc_hi
 
   -- For A⁻¹ on z2, need intermediate memberships
-  have hz2_A1 : toPlane ((-1 : ℂ) + ζ₅ * (z2 + 1)) ∈ leftDisk r_crit := by
+  have hz2_A1 : (-1 : ℂ) + ζ₅ * (z2 + 1) ∈ leftDisk r_crit := by
     have h := rotation_preserves_left z2 hz2_left 1; simp only [pow_one] at h; exact h
-  have hz2_A2 : toPlane ((-1 : ℂ) + ζ₅^2 * (z2 + 1)) ∈ leftDisk r_crit :=
+  have hz2_A2 : (-1 : ℂ) + ζ₅^2 * (z2 + 1) ∈ leftDisk r_crit :=
     rotation_preserves_left z2 hz2_left 2
-  have hz2_A3 : toPlane ((-1 : ℂ) + ζ₅^3 * (z2 + 1)) ∈ leftDisk r_crit :=
+  have hz2_A3 : (-1 : ℂ) + ζ₅^3 * (z2 + 1) ∈ leftDisk r_crit :=
     rotation_preserves_left z2 hz2_left 3
 
   -- Step 3: A⁻¹ on z2 gives z3
-  have hstep3 : applyGen r_crit (toPlane z2) Generator.Ainv = toPlane z3 := by
+  have hstep3 : applyGen r_crit z2 Generator.Ainv = z3 := by
     unfold applyGen
     have h := genA_inv_eq_zeta5_pow4_rotation z2 hz2_left hz2_A1 hz2_A2 hz2_A3
     rw [h, hz3]
 
   -- z3 in rightDisk (cross-disk): needed for B
-  have hz3_right : toPlane z3 ∈ rightDisk r_crit := by
-    unfold rightDisk closedDisk
-    rw [Metric.mem_closedBall, rightCenter_eq_toPlane, toPlane_dist_eq_complex_norm]
+  have hz3_right : z3 ∈ rightDisk r_crit := by
+    unfold rightDisk closedDiskC
+    simp only [Set.mem_setOf_eq]
     rw [hz3, hz2, hz1, hz0]
     -- z3 - 1 = -2 + ζ₅^4 * (z2 + 1)
     --        = -2 + ζ₅^4 * (2 + ζ₅^3 - 2*ζ₅^4 + c*(ζ₅^4 - 1))
@@ -1268,14 +1257,14 @@ lemma word3_produces_displacement2 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     exact cross_disk_w3_z3_bound c hc_interval2 hc_hi
 
   -- Step 4: B on z3 gives z4
-  have hstep4 : applyGen r_crit (toPlane z3) Generator.B = toPlane z4 := by
+  have hstep4 : applyGen r_crit z3 Generator.B = z4 := by
     unfold applyGen
     rw [genB_eq_zeta5_rotation z3 hz3_right, hz4]
 
   -- z4 in leftDisk (cross-disk): needed for A
-  have hz4_left : toPlane z4 ∈ leftDisk r_crit := by
-    unfold leftDisk closedDisk
-    rw [Metric.mem_closedBall, leftCenter_eq_toPlane, toPlane_dist_eq_complex_norm]
+  have hz4_left : z4 ∈ leftDisk r_crit := by
+    unfold leftDisk closedDiskC
+    simp only [Set.mem_setOf_eq]
     rw [hz4, hz3, hz2, hz1, hz0]
     -- z4 + 1 = 2 + ζ₅ * (z3 - 1)
     --        = 2 + ζ₅ * ((-2 + ζ₅^2 - 2*ζ₅^3 + 2*ζ₅^4) + c*(ζ₅^3 - ζ₅^4))
@@ -1303,16 +1292,16 @@ lemma word3_produces_displacement2 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     exact cross_disk_w3_z4_bound c hc_interval2 hc_hi
 
   -- Step 5: A on z4 gives z5
-  have hstep5 : applyGen r_crit (toPlane z4) Generator.A = toPlane z5 := by
+  have hstep5 : applyGen r_crit z4 Generator.A = z5 := by
     unfold applyGen
     simp only
     rw [genA_eq_zeta5_rotation z4 hz4_left, hz5]
     congr 1; ring
 
   -- z5 in rightDisk (cross-disk): needed for B
-  have hz5_right : toPlane z5 ∈ rightDisk r_crit := by
-    unfold rightDisk closedDisk
-    rw [Metric.mem_closedBall, rightCenter_eq_toPlane, toPlane_dist_eq_complex_norm]
+  have hz5_right : z5 ∈ rightDisk r_crit := by
+    unfold rightDisk closedDiskC
+    simp only [Set.mem_setOf_eq]
     rw [hz5, hz4, hz3, hz2, hz1, hz0]
     -- z5 - 1 = -2 + ζ₅ * (z4 + 1)
     --        = -2 + ζ₅ * ((4 - 2*ζ₅ + ζ₅^3 - 2*ζ₅^4) + c*(ζ₅^4 - 1))
@@ -1343,25 +1332,25 @@ lemma word3_produces_displacement2 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     exact cross_disk_w3_z5_bound c hc_interval2 hc_hi
 
   -- Step 6: B on z5 gives z6
-  have hstep6 : applyGen r_crit (toPlane z5) Generator.B = toPlane z6 := by
+  have hstep6 : applyGen r_crit z5 Generator.B = z6 := by
     unfold applyGen
     rw [genB_eq_zeta5_rotation z5 hz5_right, hz6]
 
   -- Chain all steps together
   calc applyGen r_crit (applyGen r_crit (applyGen r_crit
-         (applyGen r_crit (applyGen r_crit (applyGen r_crit (toPlane (c • E)) Generator.Ainv)
+         (applyGen r_crit (applyGen r_crit (applyGen r_crit (c • E) Generator.Ainv)
            Generator.Binv) Generator.Ainv) Generator.B) Generator.A) Generator.B
       = applyGen r_crit (applyGen r_crit (applyGen r_crit
-          (applyGen r_crit (applyGen r_crit (toPlane z1) Generator.Binv)
+          (applyGen r_crit (applyGen r_crit z1 Generator.Binv)
             Generator.Ainv) Generator.B) Generator.A) Generator.B := by rw [hstep1]
     _ = applyGen r_crit (applyGen r_crit (applyGen r_crit
-          (applyGen r_crit (toPlane z2) Generator.Ainv) Generator.B) Generator.A) Generator.B := by rw [hstep2]
-    _ = applyGen r_crit (applyGen r_crit (applyGen r_crit (toPlane z3) Generator.B) Generator.A) Generator.B := by rw [hstep3]
-    _ = applyGen r_crit (applyGen r_crit (toPlane z4) Generator.A) Generator.B := by rw [hstep4]
-    _ = applyGen r_crit (toPlane z5) Generator.B := by rw [hstep5]
-    _ = toPlane z6 := hstep6
-    _ = toPlane (z0 + (2 * displacement2) • E) := by rw [h_alg]
-    _ = toPlane (c • E + (2 * displacement2) • E) := rfl
+          (applyGen r_crit z2 Generator.Ainv) Generator.B) Generator.A) Generator.B := by rw [hstep2]
+    _ = applyGen r_crit (applyGen r_crit (applyGen r_crit z3 Generator.B) Generator.A) Generator.B := by rw [hstep3]
+    _ = applyGen r_crit (applyGen r_crit z4 Generator.A) Generator.B := by rw [hstep4]
+    _ = applyGen r_crit z5 Generator.B := by rw [hstep5]
+    _ = z6 := hstep6
+    _ = z0 + (2 * displacement2) • E := h_alg
+    _ = c • E + (2 * displacement2) • E := rfl
 
 /-- Fundamental step lemma: applying IET_word to a segment point gives the IET-mapped point.
 
@@ -1373,8 +1362,8 @@ This is the key correspondence between the group action and the IET:
 The proof follows from the geometric construction in SegmentMaps.lean, which shows that
 each word was specifically designed to map its interval's segment subsegment. -/
 theorem IET_step_word_correspondence (x : ℝ) (hx : x ∈ Set.Ico 0 1) :
-    applyWord r_crit (IET_word x) (segmentPointPlane x) =
-    segmentPointPlane (CompoundSymmetry.GG5.GG5_induced_IET.toFun x) := by
+    applyWord r_crit (IET_word x) (segmentPoint x) =
+    segmentPoint (CompoundSymmetry.GG5.GG5_induced_IET.toFun x) := by
   -- The IET has three intervals with permutation (swap 0 2):
   -- - Interval 0 [0, length1) maps to interval 2's position
   -- - Interval 1 [length1, length1+length2) stays in place
@@ -1431,8 +1420,8 @@ theorem IET_iterate_mem_Ico (x₀ : ℝ) (hx₀ : x₀ ∈ Set.Ico 0 1) (n : ℕ
 
 /-- Core induction lemma: wordForIterate correctly computes the n-th iterate. -/
 theorem wordForIterate_correct (x₀ : ℝ) (hx₀ : x₀ ∈ Set.Ico 0 1) (n : ℕ) :
-    applyWord r_crit (wordForIterate x₀ n) (segmentPointPlane x₀) =
-    segmentPointPlane (CompoundSymmetry.GG5.GG5_induced_IET.toFun^[n] x₀) := by
+    applyWord r_crit (wordForIterate x₀ n) (segmentPoint x₀) =
+    segmentPoint (CompoundSymmetry.GG5.GG5_induced_IET.toFun^[n] x₀) := by
   induction n with
   | zero =>
     -- Base case: empty word, identity
@@ -1442,18 +1431,18 @@ theorem wordForIterate_correct (x₀ : ℝ) (hx₀ : x₀ ∈ Set.Ico 0 1) (n : 
     simp only [Function.iterate_succ', Function.comp_apply]
     rw [wordForIterate, applyWord, List.foldl_append]
     -- Goal: (IET_word ...).foldl (applyGen r) (foldl (applyGen r) p (wordForIterate n))
-    --     = segmentPointPlane (IET (IET^[n] x0))
-    -- The inner foldl equals applyWord ... (wordForIterate n) p, which by IH equals segmentPointPlane (IET^[n] x0)
-    have h_inner : List.foldl (applyGen r_crit) (segmentPointPlane x₀) (wordForIterate x₀ n) =
-        applyWord r_crit (wordForIterate x₀ n) (segmentPointPlane x₀) := rfl
+    --     = segmentPoint (IET (IET^[n] x0))
+    -- The inner foldl equals applyWord ... (wordForIterate n) p, which by IH equals segmentPoint (IET^[n] x0)
+    have h_inner : List.foldl (applyGen r_crit) (segmentPoint x₀) (wordForIterate x₀ n) =
+        applyWord r_crit (wordForIterate x₀ n) (segmentPoint x₀) := rfl
     rw [h_inner, ih]
-    -- Goal: (IET_word ...).foldl (applyGen r) (segmentPointPlane (IET^[n] x0)) = segmentPointPlane (IET ...)
+    -- Goal: (IET_word ...).foldl (applyGen r) (segmentPoint (IET^[n] x0)) = segmentPoint (IET ...)
     -- Convert back to applyWord form
     have h_outer : List.foldl (applyGen r_crit)
-        (segmentPointPlane (CompoundSymmetry.GG5.GG5_induced_IET.toFun^[n] x₀))
+        (segmentPoint (CompoundSymmetry.GG5.GG5_induced_IET.toFun^[n] x₀))
         (IET_word (CompoundSymmetry.GG5.GG5_induced_IET.toFun^[n] x₀)) =
         applyWord r_crit (IET_word (CompoundSymmetry.GG5.GG5_induced_IET.toFun^[n] x₀))
-        (segmentPointPlane (CompoundSymmetry.GG5.GG5_induced_IET.toFun^[n] x₀)) := rfl
+        (segmentPoint (CompoundSymmetry.GG5.GG5_induced_IET.toFun^[n] x₀)) := rfl
     rw [h_outer]
     exact IET_step_word_correspondence _ (IET_iterate_mem_Ico x₀ hx₀ n)
 
@@ -1464,7 +1453,7 @@ Every iterate of the IET corresponds to applying some sequence of group words
 to the initial point. Hence if the IET orbit is infinite, the group orbit is infinite. -/
 theorem IET_orbit_subset_group_orbit (x₀ : ℝ) (hx₀ : x₀ ∈ Set.Ico 0 1) :
     ∀ y ∈ Orbit.orbitSet CompoundSymmetry.GG5.GG5_induced_IET.toFun x₀,
-      ∃ w : Word, applyWord r_crit w (segmentPointPlane x₀) = segmentPointPlane y := by
+      ∃ w : Word, applyWord r_crit w (segmentPoint x₀) = segmentPoint y := by
   intro y hy
   rw [Orbit.orbitSet] at hy
   simp only [Set.mem_setOf_eq] at hy
@@ -1473,17 +1462,17 @@ theorem IET_orbit_subset_group_orbit (x₀ : ℝ) (hx₀ : x₀ ∈ Set.Ico 0 1)
   rw [← hn]
   exact wordForIterate_correct x₀ hx₀ n
 
-/-- If the IET orbit of x0 is infinite, the group orbit of the corresponding Plane point is infinite. -/
+/-- If the IET orbit of x0 is infinite, the group orbit of the corresponding point in ℂ is infinite. -/
 theorem IET_orbit_infinite_implies_group_orbit_infinite (x₀ : ℝ) (hx₀ : x₀ ∈ Set.Ico 0 1)
     (h_inf : (Orbit.orbitSet CompoundSymmetry.GG5.GG5_induced_IET.toFun x₀).Infinite) :
-    (orbit r_crit (segmentPointPlane x₀)).Infinite := by
+    (orbit r_crit (segmentPoint x₀)).Infinite := by
   -- The IET orbit is infinite means infinitely many distinct iterates
   -- Each iterate is in the group orbit (by IET_orbit_subset_group_orbit)
-  -- The map from IET orbit to group orbit is injective (segmentPointPlane_injective)
+  -- The map from IET orbit to group orbit is injective (segmentPoint_injective)
   -- Therefore the group orbit is infinite
   -- Map from IET orbit to group orbit
-  have h_subset : segmentPointPlane '' (Orbit.orbitSet CompoundSymmetry.GG5.GG5_induced_IET.toFun x₀) ⊆
-      orbit r_crit (segmentPointPlane x₀) := by
+  have h_subset : segmentPoint '' (Orbit.orbitSet CompoundSymmetry.GG5.GG5_induced_IET.toFun x₀) ⊆
+      orbit r_crit (segmentPoint x₀) := by
     intro p hp
     rw [Set.mem_image] at hp
     obtain ⟨y, hy_mem, hy_eq⟩ := hp
@@ -1493,10 +1482,10 @@ theorem IET_orbit_infinite_implies_group_orbit_infinite (x₀ : ℝ) (hx₀ : x�
     use w
     rw [← hy_eq, hw]
   -- The image of an infinite set under an injective function is infinite
-  have h_inj : Set.InjOn segmentPointPlane (Orbit.orbitSet CompoundSymmetry.GG5.GG5_induced_IET.toFun x₀) := by
+  have h_inj : Set.InjOn segmentPoint (Orbit.orbitSet CompoundSymmetry.GG5.GG5_induced_IET.toFun x₀) := by
     intro y₁ _ y₂ _ h
-    exact segmentPointPlane_injective h
-  have h_image_inf : (segmentPointPlane '' (Orbit.orbitSet CompoundSymmetry.GG5.GG5_induced_IET.toFun x₀)).Infinite :=
+    exact segmentPoint_injective h
+  have h_image_inf : (segmentPoint '' (Orbit.orbitSet CompoundSymmetry.GG5.GG5_induced_IET.toFun x₀)).Infinite :=
     Set.Infinite.image h_inj h_inf
   exact Set.Infinite.mono h_subset h_image_inf
 

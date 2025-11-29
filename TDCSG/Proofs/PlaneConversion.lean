@@ -282,24 +282,30 @@ theorem segmentPointPlane_injective : Function.Injective TDCSG.Definitions.segme
 
 -- Note: toPlane_dist_eq_complex_norm is defined in TDCSG.Definitions.Conversions
 
-/-- leftCenter equals toPlane (-1). -/
-lemma leftCenter_eq_toPlane : leftCenter = TDCSG.Definitions.toPlane (-1 : ℂ) := by
-  unfold leftCenter TDCSG.Definitions.toPlane
+/-- leftCenterPlane equals toPlane (-1). -/
+lemma leftCenterPlane_eq_toPlane : leftCenterPlane = TDCSG.Definitions.toPlane (-1 : ℂ) := by
+  unfold leftCenterPlane TDCSG.Definitions.toPlane
   ext i
   fin_cases i <;> simp [Complex.neg_re, Complex.neg_im]
 
-/-- rightCenter equals toPlane (1). -/
-lemma rightCenter_eq_toPlane : rightCenter = TDCSG.Definitions.toPlane (1 : ℂ) := by
-  unfold rightCenter TDCSG.Definitions.toPlane
+/-- rightCenterPlane equals toPlane (1). -/
+lemma rightCenterPlane_eq_toPlane : rightCenterPlane = TDCSG.Definitions.toPlane (1 : ℂ) := by
+  unfold rightCenterPlane TDCSG.Definitions.toPlane
   ext i
   fin_cases i <;> simp [Complex.one_re, Complex.one_im]
 
+/-- DEPRECATED: leftCenter is now ℂ, equal to -1. -/
+lemma leftCenter_eq_neg_one : leftCenter = (-1 : ℂ) := rfl
+
+/-- DEPRECATED: rightCenter is now ℂ, equal to 1. -/
+lemma rightCenter_eq_one : rightCenter = (1 : ℂ) := rfl
+
 /-- Segment points are in the left disk at r_crit. -/
 lemma segmentPointPlane_in_leftDisk (t : ℝ) (ht : t ∈ Set.Ico 0 1) :
-    TDCSG.Definitions.segmentPointPlane t ∈ leftDisk r_crit := by
-  unfold leftDisk closedDisk
+    TDCSG.Definitions.segmentPointPlane t ∈ leftDiskPlane r_crit := by
+  unfold leftDiskPlane closedDisk
   rw [Metric.mem_closedBall]
-  rw [leftCenter_eq_toPlane]
+  rw [leftCenterPlane_eq_toPlane]
   unfold TDCSG.Definitions.segmentPointPlane
   rw [toPlane_dist_eq_complex_norm]
   rw [show TDCSG.Definitions.segmentPoint t - (-1 : ℂ) = TDCSG.Definitions.segmentPoint t + 1 by ring]
@@ -309,10 +315,10 @@ lemma segmentPointPlane_in_leftDisk (t : ℝ) (ht : t ∈ Set.Ico 0 1) :
 
 /-- Segment points are in the right disk at r_crit. -/
 lemma segmentPointPlane_in_rightDisk (t : ℝ) (ht : t ∈ Set.Ico 0 1) :
-    TDCSG.Definitions.segmentPointPlane t ∈ rightDisk r_crit := by
-  unfold rightDisk closedDisk
+    TDCSG.Definitions.segmentPointPlane t ∈ rightDiskPlane r_crit := by
+  unfold rightDiskPlane closedDisk
   rw [Metric.mem_closedBall]
-  rw [rightCenter_eq_toPlane]
+  rw [rightCenterPlane_eq_toPlane]
   unfold TDCSG.Definitions.segmentPointPlane
   rw [toPlane_dist_eq_complex_norm]
   rw [show TDCSG.Definitions.segmentPoint t - (1 : ℂ) = TDCSG.Definitions.segmentPoint t - 1 by ring]
@@ -322,31 +328,53 @@ lemma segmentPointPlane_in_rightDisk (t : ℝ) (ht : t ∈ Set.Ico 0 1) :
 
 /-! ### Generator actions in terms of complex multiplication -/
 
-/-- genA on a point in the left disk equals rotation by ζ₅ about -1 in complex coords. -/
-lemma genA_eq_zeta5_rotation (z : ℂ) (hz : TDCSG.Definitions.toPlane z ∈ leftDisk r_crit) :
-    genA r_crit (TDCSG.Definitions.toPlane z) = TDCSG.Definitions.toPlane ((-1 : ℂ) + ζ₅ * (z - (-1))) := by
-  unfold genA
+/-- genAPlane on a point in the left disk equals rotation by ζ₅ about -1 in complex coords. -/
+lemma genAPlane_eq_zeta5_rotation (z : ℂ) (hz : TDCSG.Definitions.toPlane z ∈ leftDiskPlane r_crit) :
+    genAPlane r_crit (TDCSG.Definitions.toPlane z) = TDCSG.Definitions.toPlane ((-1 : ℂ) + ζ₅ * (z - (-1))) := by
+  unfold genAPlane
   rw [if_pos hz]
-  rw [leftCenter_eq_toPlane]
+  rw [leftCenterPlane_eq_toPlane]
   exact (zeta5_rotation_eq_rotateAroundPoint z (-1)).symm
 
-/-- genB on a point in the right disk equals rotation by ζ₅ about 1 in complex coords. -/
-lemma genB_eq_zeta5_rotation (z : ℂ) (hz : TDCSG.Definitions.toPlane z ∈ rightDisk r_crit) :
-    genB r_crit (TDCSG.Definitions.toPlane z) = TDCSG.Definitions.toPlane ((1 : ℂ) + ζ₅ * (z - 1)) := by
-  unfold genB
+/-- genBPlane on a point in the right disk equals rotation by ζ₅ about 1 in complex coords. -/
+lemma genBPlane_eq_zeta5_rotation (z : ℂ) (hz : TDCSG.Definitions.toPlane z ∈ rightDiskPlane r_crit) :
+    genBPlane r_crit (TDCSG.Definitions.toPlane z) = TDCSG.Definitions.toPlane ((1 : ℂ) + ζ₅ * (z - 1)) := by
+  unfold genBPlane
   rw [if_pos hz]
-  rw [rightCenter_eq_toPlane]
+  rw [rightCenterPlane_eq_toPlane]
   exact (zeta5_rotation_eq_rotateAroundPoint z 1).symm
 
-/-- A⁻¹ = A⁴ means multiplying by ζ₅⁴. -/
+/-- The rotation angle 2π/5 in exponential form equals ζ₅. -/
+lemma exp_form_eq_zeta5 : Complex.exp (↑(2 * Real.pi / 5) * I) = ζ₅ := by
+  unfold ζ₅ zeta5
+  congr 1
+  push_cast
+  ring
+
+/-- genA on ℂ equals rotation by ζ₅ about -1. -/
+lemma genA_eq_zeta5_rotation (z : ℂ) (hz : z ∈ leftDisk r_crit) :
+    genA r_crit z = (-1 : ℂ) + ζ₅ * (z - (-1)) := by
+  unfold genA
+  simp only [hz, ↓reduceIte]
+  unfold rotateAboutC leftCenter
+  rw [exp_form_eq_zeta5]
+
+/-- genB on ℂ equals rotation by ζ₅ about 1. -/
+lemma genB_eq_zeta5_rotation (z : ℂ) (hz : z ∈ rightDisk r_crit) :
+    genB r_crit z = (1 : ℂ) + ζ₅ * (z - 1) := by
+  unfold genB
+  simp only [hz, ↓reduceIte]
+  unfold rotateAboutC rightCenter
+  rw [exp_form_eq_zeta5]
+
+/-- A⁻¹ = A⁴ means multiplying by ζ₅⁴ (ℂ version). -/
 lemma genA_inv_eq_zeta5_pow4_rotation (z : ℂ)
-    (hz : TDCSG.Definitions.toPlane z ∈ leftDisk r_crit)
-    (hz' : TDCSG.Definitions.toPlane ((-1 : ℂ) + ζ₅ * (z + 1)) ∈ leftDisk r_crit)
-    (hz'' : TDCSG.Definitions.toPlane ((-1 : ℂ) + ζ₅^2 * (z + 1)) ∈ leftDisk r_crit)
-    (hz''' : TDCSG.Definitions.toPlane ((-1 : ℂ) + ζ₅^3 * (z + 1)) ∈ leftDisk r_crit) :
-    genA r_crit (genA r_crit (genA r_crit
-      (genA r_crit (TDCSG.Definitions.toPlane z)))) =
-    TDCSG.Definitions.toPlane ((-1 : ℂ) + ζ₅^4 * (z + 1)) := by
+    (hz : z ∈ leftDisk r_crit)
+    (hz' : (-1 : ℂ) + ζ₅ * (z + 1) ∈ leftDisk r_crit)
+    (hz'' : (-1 : ℂ) + ζ₅^2 * (z + 1) ∈ leftDisk r_crit)
+    (hz''' : (-1 : ℂ) + ζ₅^3 * (z + 1) ∈ leftDisk r_crit) :
+    genA r_crit (genA r_crit (genA r_crit (genA r_crit z))) =
+    (-1 : ℂ) + ζ₅^4 * (z + 1) := by
   rw [genA_eq_zeta5_rotation z hz]
   rw [show -1 + ζ₅ * (z - -1) = -1 + ζ₅ * (z + 1) by ring]
   rw [genA_eq_zeta5_rotation _ hz']
@@ -356,21 +384,55 @@ lemma genA_inv_eq_zeta5_pow4_rotation (z : ℂ)
   rw [genA_eq_zeta5_rotation _ hz''']
   rw [show -1 + ζ₅ * (-1 + ζ₅ ^ 3 * (z + 1) - -1) = -1 + ζ₅^4 * (z + 1) by ring]
 
-/-- B⁻¹ = B⁴ means multiplying by ζ₅⁴. -/
+/-- B⁻¹ = B⁴ means multiplying by ζ₅⁴ (ℂ version). -/
 lemma genB_inv_eq_zeta5_pow4_rotation (z : ℂ)
-    (hz : TDCSG.Definitions.toPlane z ∈ rightDisk r_crit)
-    (hz' : TDCSG.Definitions.toPlane ((1 : ℂ) + ζ₅ * (z - 1)) ∈ rightDisk r_crit)
-    (hz'' : TDCSG.Definitions.toPlane ((1 : ℂ) + ζ₅^2 * (z - 1)) ∈ rightDisk r_crit)
-    (hz''' : TDCSG.Definitions.toPlane ((1 : ℂ) + ζ₅^3 * (z - 1)) ∈ rightDisk r_crit) :
-    genB r_crit (genB r_crit (genB r_crit
-      (genB r_crit (TDCSG.Definitions.toPlane z)))) =
-    TDCSG.Definitions.toPlane ((1 : ℂ) + ζ₅^4 * (z - 1)) := by
+    (hz : z ∈ rightDisk r_crit)
+    (hz' : (1 : ℂ) + ζ₅ * (z - 1) ∈ rightDisk r_crit)
+    (hz'' : (1 : ℂ) + ζ₅^2 * (z - 1) ∈ rightDisk r_crit)
+    (hz''' : (1 : ℂ) + ζ₅^3 * (z - 1) ∈ rightDisk r_crit) :
+    genB r_crit (genB r_crit (genB r_crit (genB r_crit z))) =
+    (1 : ℂ) + ζ₅^4 * (z - 1) := by
   rw [genB_eq_zeta5_rotation z hz]
   rw [genB_eq_zeta5_rotation _ hz']
   rw [show 1 + ζ₅ * (1 + ζ₅ * (z - 1) - 1) = 1 + ζ₅^2 * (z - 1) by ring]
   rw [genB_eq_zeta5_rotation _ hz'']
   rw [show 1 + ζ₅ * (1 + ζ₅ ^ 2 * (z - 1) - 1) = 1 + ζ₅^3 * (z - 1) by ring]
   rw [genB_eq_zeta5_rotation _ hz''']
+  rw [show 1 + ζ₅ * (1 + ζ₅ ^ 3 * (z - 1) - 1) = 1 + ζ₅^4 * (z - 1) by ring]
+
+/-- A⁻¹ = A⁴ means multiplying by ζ₅⁴ (Plane version). -/
+lemma genAPlane_inv_eq_zeta5_pow4_rotation (z : ℂ)
+    (hz : TDCSG.Definitions.toPlane z ∈ leftDiskPlane r_crit)
+    (hz' : TDCSG.Definitions.toPlane ((-1 : ℂ) + ζ₅ * (z + 1)) ∈ leftDiskPlane r_crit)
+    (hz'' : TDCSG.Definitions.toPlane ((-1 : ℂ) + ζ₅^2 * (z + 1)) ∈ leftDiskPlane r_crit)
+    (hz''' : TDCSG.Definitions.toPlane ((-1 : ℂ) + ζ₅^3 * (z + 1)) ∈ leftDiskPlane r_crit) :
+    genAPlane r_crit (genAPlane r_crit (genAPlane r_crit
+      (genAPlane r_crit (TDCSG.Definitions.toPlane z)))) =
+    TDCSG.Definitions.toPlane ((-1 : ℂ) + ζ₅^4 * (z + 1)) := by
+  rw [genAPlane_eq_zeta5_rotation z hz]
+  rw [show -1 + ζ₅ * (z - -1) = -1 + ζ₅ * (z + 1) by ring]
+  rw [genAPlane_eq_zeta5_rotation _ hz']
+  rw [show -1 + ζ₅ * (-1 + ζ₅ * (z + 1) - -1) = -1 + ζ₅^2 * (z + 1) by ring]
+  rw [genAPlane_eq_zeta5_rotation _ hz'']
+  rw [show -1 + ζ₅ * (-1 + ζ₅ ^ 2 * (z + 1) - -1) = -1 + ζ₅^3 * (z + 1) by ring]
+  rw [genAPlane_eq_zeta5_rotation _ hz''']
+  rw [show -1 + ζ₅ * (-1 + ζ₅ ^ 3 * (z + 1) - -1) = -1 + ζ₅^4 * (z + 1) by ring]
+
+/-- B⁻¹ = B⁴ means multiplying by ζ₅⁴ (Plane version). -/
+lemma genBPlane_inv_eq_zeta5_pow4_rotation (z : ℂ)
+    (hz : TDCSG.Definitions.toPlane z ∈ rightDiskPlane r_crit)
+    (hz' : TDCSG.Definitions.toPlane ((1 : ℂ) + ζ₅ * (z - 1)) ∈ rightDiskPlane r_crit)
+    (hz'' : TDCSG.Definitions.toPlane ((1 : ℂ) + ζ₅^2 * (z - 1)) ∈ rightDiskPlane r_crit)
+    (hz''' : TDCSG.Definitions.toPlane ((1 : ℂ) + ζ₅^3 * (z - 1)) ∈ rightDiskPlane r_crit) :
+    genBPlane r_crit (genBPlane r_crit (genBPlane r_crit
+      (genBPlane r_crit (TDCSG.Definitions.toPlane z)))) =
+    TDCSG.Definitions.toPlane ((1 : ℂ) + ζ₅^4 * (z - 1)) := by
+  rw [genBPlane_eq_zeta5_rotation z hz]
+  rw [genBPlane_eq_zeta5_rotation _ hz']
+  rw [show 1 + ζ₅ * (1 + ζ₅ * (z - 1) - 1) = 1 + ζ₅^2 * (z - 1) by ring]
+  rw [genBPlane_eq_zeta5_rotation _ hz'']
+  rw [show 1 + ζ₅ * (1 + ζ₅ ^ 2 * (z - 1) - 1) = 1 + ζ₅^3 * (z - 1) by ring]
+  rw [genBPlane_eq_zeta5_rotation _ hz''']
   rw [show 1 + ζ₅ * (1 + ζ₅ ^ 3 * (z - 1) - 1) = 1 + ζ₅^4 * (z - 1) by ring]
 
 end TDCSG.CompoundSymmetry.GG5
