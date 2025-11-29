@@ -200,7 +200,7 @@ Rotation formulas:
 - B⁻¹: z ↦ 1 + ζ₅⁴ * (z - 1)   (rotation by -2π/5 about 1)
 
 Word2 = [A⁻¹, B⁻¹, A⁻¹, B⁻¹, B⁻¹] applied left to right.
-Encoded as: [(false, false), (true, false), (false, false), (true, false), (true, false)]
+Encoded as: [Generator.Ainv, Generator.Binv, Generator.Ainv, Generator.Binv, Generator.Binv]
 
 Intermediate steps for z₀ = c•E:
 - z₁ = -1 + ζ₅⁴(z₀ + 1)   -- After A⁻¹
@@ -545,7 +545,7 @@ lemma word1_produces_displacement0 (x : ℝ) (hx : x ∈ Set.Ico 0 1) (hx_int : 
     exact hw
 
   -- Step 1: First A application
-  have step1 : applyGen r_crit (toPlane z0) (false, true) = toPlane z1 := by
+  have step1 : applyGen r_crit (toPlane z0) Generator.A = toPlane z1 := by
     unfold applyGen
     simp only
     rw [genA_eq_zeta5_rotation z0 h_in_left]
@@ -561,7 +561,7 @@ lemma word1_produces_displacement0 (x : ℝ) (hx : x ∈ Set.Ico 0 1) (hx_int : 
     exact h
 
   -- Step 2: Second A application
-  have step2 : applyGen r_crit (toPlane z1) (false, true) = toPlane z2 := by
+  have step2 : applyGen r_crit (toPlane z1) Generator.A = toPlane z2 := by
     unfold applyGen
     simp only
     rw [genA_eq_zeta5_rotation z1 h_z1_in_left]
@@ -609,7 +609,7 @@ lemma word1_produces_displacement0 (x : ℝ) (hx : x ∈ Set.Ico 0 1) (hx_int : 
     exact cross_disk_z2_bound_restricted c hc_lo hc_upper
 
   -- Step 3: B application
-  have step3 : applyGen r_crit (toPlane z2) (true, true) = toPlane z3 := by
+  have step3 : applyGen r_crit (toPlane z2) Generator.B = toPlane z3 := by
     unfold applyGen
     simp only
     rw [genB_eq_zeta5_rotation z2 h_z2_in_right]
@@ -653,7 +653,7 @@ lemma word1_produces_displacement0 (x : ℝ) (hx : x ∈ Set.Ico 0 1) (hx_int : 
     exact cross_disk_z3_bound_restricted c hc_lo hc_upper
 
   -- Step 4: A application
-  have step4 : applyGen r_crit (toPlane z3) (false, true) = toPlane z4 := by
+  have step4 : applyGen r_crit (toPlane z3) Generator.A = toPlane z4 := by
     unfold applyGen
     simp only
     rw [genA_eq_zeta5_rotation z3 h_z3_in_left]
@@ -702,17 +702,17 @@ lemma word1_produces_displacement0 (x : ℝ) (hx : x ∈ Set.Ico 0 1) (hx_int : 
     exact cross_disk_z4_bound_restricted c hc_lo hc_upper
 
   -- Step 5: B application
-  have step5 : applyGen r_crit (toPlane z4) (true, true) = toPlane z5 := by
+  have step5 : applyGen r_crit (toPlane z4) Generator.B = toPlane z5 := by
     unfold applyGen
     simp only
     rw [genB_eq_zeta5_rotation z4 h_z4_in_right]
 
   -- Chain all steps together
-  calc applyGen r_crit (applyGen r_crit (applyGen r_crit (applyGen r_crit (applyGen r_crit (toPlane z0) (false, true)) (false, true)) (true, true)) (false, true)) (true, true)
-      = applyGen r_crit (applyGen r_crit (applyGen r_crit (applyGen r_crit (toPlane z1) (false, true)) (true, true)) (false, true)) (true, true) := by rw [step1]
-    _ = applyGen r_crit (applyGen r_crit (applyGen r_crit (toPlane z2) (true, true)) (false, true)) (true, true) := by rw [step2]
-    _ = applyGen r_crit (applyGen r_crit (toPlane z3) (false, true)) (true, true) := by rw [step3]
-    _ = applyGen r_crit (toPlane z4) (true, true) := by rw [step4]
+  calc applyGen r_crit (applyGen r_crit (applyGen r_crit (applyGen r_crit (applyGen r_crit (toPlane z0) Generator.A) Generator.A) Generator.B) Generator.A) Generator.B
+      = applyGen r_crit (applyGen r_crit (applyGen r_crit (applyGen r_crit (toPlane z1) Generator.A) Generator.B) Generator.A) Generator.B := by rw [step1]
+    _ = applyGen r_crit (applyGen r_crit (applyGen r_crit (toPlane z2) Generator.B) Generator.A) Generator.B := by rw [step2]
+    _ = applyGen r_crit (applyGen r_crit (toPlane z3) Generator.A) Generator.B := by rw [step3]
+    _ = applyGen r_crit (toPlane z4) Generator.B := by rw [step4]
     _ = toPlane z5 := by rw [step5]
     _ = toPlane (z0 + (2 * displacement0) • E) := by rw [h_alg]
     _ = toPlane (c • E + (2 * displacement0) • E) := by rw [hz0]
@@ -726,7 +726,7 @@ The proof tracks each rotation through the 5 generators:
 - A⁻¹ uses ζ₅⁴ rotation about -1
 - B uses ζ₅ rotation about 1
 
-word2 = [(false, false), (true, true), (false, false), (true, true), (true, true)]
+word2 = [Generator.Ainv, Generator.B, Generator.Ainv, Generator.B, Generator.B]
      = [A⁻¹, B, A⁻¹, B, B] applied left-to-right -/
 lemma word2_produces_displacement1 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     (hx_lo : length1 ≤ x) (hx_hi : x < length1 + length2) :
@@ -835,7 +835,7 @@ lemma word2_produces_displacement1 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     rotation_preserves_left z0 h_in_left 3
 
   -- Step 1: A⁻¹ on z0 gives z1
-  have hstep1 : applyGen r_crit (toPlane z0) (false, false) = toPlane z1 := by
+  have hstep1 : applyGen r_crit (toPlane z0) Generator.Ainv = toPlane z1 := by
     unfold applyGen
     have h := genA_inv_eq_zeta5_pow4_rotation z0 h_in_left hz0_A1 hz0_A2 hz0_A3
     rw [h, hz1]
@@ -877,7 +877,7 @@ lemma word2_produces_displacement1 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     rotation_preserves_right z1 hz1_right 3
 
   -- Step 2: B⁻¹ on z1 gives z2
-  have hstep2 : applyGen r_crit (toPlane z1) (true, false) = toPlane z2 := by
+  have hstep2 : applyGen r_crit (toPlane z1) Generator.Binv = toPlane z2 := by
     unfold applyGen
     have h := genB_inv_eq_zeta5_pow4_rotation z1 hz1_right hz1_B1 hz1_B2 hz1_B3
     rw [h, hz2]
@@ -908,7 +908,7 @@ lemma word2_produces_displacement1 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     rotation_preserves_left z2 hz2_left 3
 
   -- Step 3: A⁻¹ on z2 gives z3
-  have hstep3 : applyGen r_crit (toPlane z2) (false, false) = toPlane z3 := by
+  have hstep3 : applyGen r_crit (toPlane z2) Generator.Ainv = toPlane z3 := by
     unfold applyGen
     have h := genA_inv_eq_zeta5_pow4_rotation z2 hz2_left hz2_A1 hz2_A2 hz2_A3
     rw [h, hz3]
@@ -929,7 +929,7 @@ lemma word2_produces_displacement1 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     rotation_preserves_right z3 hz3_right 3
 
   -- Step 4: B⁻¹ on z3 gives z4
-  have hstep4 : applyGen r_crit (toPlane z3) (true, false) = toPlane z4 := by
+  have hstep4 : applyGen r_crit (toPlane z3) Generator.Binv = toPlane z4 := by
     unfold applyGen
     have h := genB_inv_eq_zeta5_pow4_rotation z3 hz3_right hz3_B1 hz3_B2 hz3_B3
     rw [h, hz4]
@@ -948,17 +948,17 @@ lemma word2_produces_displacement1 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     rotation_preserves_right z4 hz4_right 3
 
   -- Step 5: B⁻¹ on z4 gives z5
-  have hstep5 : applyGen r_crit (toPlane z4) (true, false) = toPlane z5 := by
+  have hstep5 : applyGen r_crit (toPlane z4) Generator.Binv = toPlane z5 := by
     unfold applyGen
     have h := genB_inv_eq_zeta5_pow4_rotation z4 hz4_right hz4_B1 hz4_B2 hz4_B3
     rw [h, hz5]
 
   -- Chain all steps together
-  calc applyGen r_crit (applyGen r_crit (applyGen r_crit (applyGen r_crit (applyGen r_crit (toPlane z0) (false, false)) (true, false)) (false, false)) (true, false)) (true, false)
-      = applyGen r_crit (applyGen r_crit (applyGen r_crit (applyGen r_crit (toPlane z1) (true, false)) (false, false)) (true, false)) (true, false) := by rw [hstep1]
-    _ = applyGen r_crit (applyGen r_crit (applyGen r_crit (toPlane z2) (false, false)) (true, false)) (true, false) := by rw [hstep2]
-    _ = applyGen r_crit (applyGen r_crit (toPlane z3) (true, false)) (true, false) := by rw [hstep3]
-    _ = applyGen r_crit (toPlane z4) (true, false) := by rw [hstep4]
+  calc applyGen r_crit (applyGen r_crit (applyGen r_crit (applyGen r_crit (applyGen r_crit (toPlane z0) Generator.Ainv) Generator.Binv) Generator.Ainv) Generator.Binv) Generator.Binv
+      = applyGen r_crit (applyGen r_crit (applyGen r_crit (applyGen r_crit (toPlane z1) Generator.Binv) Generator.Ainv) Generator.Binv) Generator.Binv := by rw [hstep1]
+    _ = applyGen r_crit (applyGen r_crit (applyGen r_crit (toPlane z2) Generator.Ainv) Generator.Binv) Generator.Binv := by rw [hstep2]
+    _ = applyGen r_crit (applyGen r_crit (toPlane z3) Generator.Binv) Generator.Binv := by rw [hstep3]
+    _ = applyGen r_crit (toPlane z4) Generator.Binv := by rw [hstep4]
     _ = toPlane z5 := by rw [hstep5]
     _ = toPlane (z0 + (2 * displacement1) • E) := by rw [h_alg]
     _ = toPlane (c • E + (2 * displacement1) • E) := by rw [hz0]
@@ -974,7 +974,7 @@ The proof structure:
    produce a translation by 2*displacement2 in the E direction
 4. This corresponds to x → x + displacement2 in the segment parameterization
 
-Note: word3 = [(false, false), (true, false), (false, false), (true, true), (false, true), (true, true)]
+Note: word3 = [Generator.Ainv, Generator.Binv, Generator.Ainv, Generator.B, Generator.A, Generator.B]
     = [A⁻¹, B⁻¹, A⁻¹, B, A, B] applied left-to-right -/
 lemma word3_produces_displacement2 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     (hx_interval2 : length1 + length2 ≤ x) :
@@ -1135,7 +1135,7 @@ lemma word3_produces_displacement2 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     rotation_preserves_left z0 h_in_left 3
 
   -- Step 1: A⁻¹ on z0 gives z1
-  have hstep1 : applyGen r_crit (toPlane z0) (false, false) = toPlane z1 := by
+  have hstep1 : applyGen r_crit (toPlane z0) Generator.Ainv = toPlane z1 := by
     unfold applyGen
     have h := genA_inv_eq_zeta5_pow4_rotation z0 h_in_left hz0_A1 hz0_A2 hz0_A3
     rw [h, hz1]
@@ -1191,7 +1191,7 @@ lemma word3_produces_displacement2 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     rotation_preserves_right z1 hz1_right 3
 
   -- Step 2: B⁻¹ on z1 gives z2
-  have hstep2 : applyGen r_crit (toPlane z1) (true, false) = toPlane z2 := by
+  have hstep2 : applyGen r_crit (toPlane z1) Generator.Binv = toPlane z2 := by
     unfold applyGen
     have h := genB_inv_eq_zeta5_pow4_rotation z1 hz1_right hz1_B1 hz1_B2 hz1_B3
     rw [h, hz2]
@@ -1234,7 +1234,7 @@ lemma word3_produces_displacement2 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     rotation_preserves_left z2 hz2_left 3
 
   -- Step 3: A⁻¹ on z2 gives z3
-  have hstep3 : applyGen r_crit (toPlane z2) (false, false) = toPlane z3 := by
+  have hstep3 : applyGen r_crit (toPlane z2) Generator.Ainv = toPlane z3 := by
     unfold applyGen
     have h := genA_inv_eq_zeta5_pow4_rotation z2 hz2_left hz2_A1 hz2_A2 hz2_A3
     rw [h, hz3]
@@ -1268,7 +1268,7 @@ lemma word3_produces_displacement2 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     exact cross_disk_w3_z3_bound c hc_interval2 hc_hi
 
   -- Step 4: B on z3 gives z4
-  have hstep4 : applyGen r_crit (toPlane z3) (true, true) = toPlane z4 := by
+  have hstep4 : applyGen r_crit (toPlane z3) Generator.B = toPlane z4 := by
     unfold applyGen
     rw [genB_eq_zeta5_rotation z3 hz3_right, hz4]
 
@@ -1303,7 +1303,7 @@ lemma word3_produces_displacement2 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     exact cross_disk_w3_z4_bound c hc_interval2 hc_hi
 
   -- Step 5: A on z4 gives z5
-  have hstep5 : applyGen r_crit (toPlane z4) (false, true) = toPlane z5 := by
+  have hstep5 : applyGen r_crit (toPlane z4) Generator.A = toPlane z5 := by
     unfold applyGen
     simp only
     rw [genA_eq_zeta5_rotation z4 hz4_left, hz5]
@@ -1343,22 +1343,22 @@ lemma word3_produces_displacement2 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     exact cross_disk_w3_z5_bound c hc_interval2 hc_hi
 
   -- Step 6: B on z5 gives z6
-  have hstep6 : applyGen r_crit (toPlane z5) (true, true) = toPlane z6 := by
+  have hstep6 : applyGen r_crit (toPlane z5) Generator.B = toPlane z6 := by
     unfold applyGen
     rw [genB_eq_zeta5_rotation z5 hz5_right, hz6]
 
   -- Chain all steps together
   calc applyGen r_crit (applyGen r_crit (applyGen r_crit
-         (applyGen r_crit (applyGen r_crit (applyGen r_crit (toPlane (c • E)) (false, false))
-           (true, false)) (false, false)) (true, true)) (false, true)) (true, true)
+         (applyGen r_crit (applyGen r_crit (applyGen r_crit (toPlane (c • E)) Generator.Ainv)
+           Generator.Binv) Generator.Ainv) Generator.B) Generator.A) Generator.B
       = applyGen r_crit (applyGen r_crit (applyGen r_crit
-          (applyGen r_crit (applyGen r_crit (toPlane z1) (true, false))
-            (false, false)) (true, true)) (false, true)) (true, true) := by rw [hstep1]
+          (applyGen r_crit (applyGen r_crit (toPlane z1) Generator.Binv)
+            Generator.Ainv) Generator.B) Generator.A) Generator.B := by rw [hstep1]
     _ = applyGen r_crit (applyGen r_crit (applyGen r_crit
-          (applyGen r_crit (toPlane z2) (false, false)) (true, true)) (false, true)) (true, true) := by rw [hstep2]
-    _ = applyGen r_crit (applyGen r_crit (applyGen r_crit (toPlane z3) (true, true)) (false, true)) (true, true) := by rw [hstep3]
-    _ = applyGen r_crit (applyGen r_crit (toPlane z4) (false, true)) (true, true) := by rw [hstep4]
-    _ = applyGen r_crit (toPlane z5) (true, true) := by rw [hstep5]
+          (applyGen r_crit (toPlane z2) Generator.Ainv) Generator.B) Generator.A) Generator.B := by rw [hstep2]
+    _ = applyGen r_crit (applyGen r_crit (applyGen r_crit (toPlane z3) Generator.B) Generator.A) Generator.B := by rw [hstep3]
+    _ = applyGen r_crit (applyGen r_crit (toPlane z4) Generator.A) Generator.B := by rw [hstep4]
+    _ = applyGen r_crit (toPlane z5) Generator.B := by rw [hstep5]
     _ = toPlane z6 := hstep6
     _ = toPlane (z0 + (2 * displacement2) • E) := by rw [h_alg]
     _ = toPlane (c • E + (2 * displacement2) • E) := rfl

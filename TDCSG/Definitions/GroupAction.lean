@@ -34,12 +34,11 @@ noncomputable def genB (r : Real) (p : Plane) : Plane := by
   exact if p ∈ rightDisk r then rotateAroundPoint rightCenter (2 * π / 5) p else p
 
 /-- Apply a generator or its inverse to a point. -/
-noncomputable def applyGen (r : Real) (p : Plane) (g : Bool × Bool) : Plane :=
-  match g with
-  | (false, true)  => genA r p                            -- A
-  | (false, false) => genA r (genA r (genA r (genA r p))) -- A^-1 = A^4
-  | (true, true)   => genB r p                            -- B
-  | (true, false)  => genB r (genB r (genB r (genB r p))) -- B^-1 = B^4
+noncomputable def applyGen (r : Real) (p : Plane) : Generator → Plane
+  | .A    => genA r p                            -- A
+  | .Ainv => genA r (genA r (genA r (genA r p))) -- A^-1 = A^4
+  | .B    => genB r p                            -- B
+  | .Binv => genB r (genB r (genB r (genB r p))) -- B^-1 = B^4
 
 /-- Apply a word to a point. -/
 noncomputable def applyWord (r : Real) (w : Word) (p : Plane) : Plane :=
