@@ -326,6 +326,41 @@ lemma zeta5_pow_eight : ζ₅^8 = ζ₅^3 := by
   norm_num at this
   exact this
 
+lemma zeta5_pow_nine : ζ₅^9 = ζ₅^4 := by
+  have : ζ₅^9 = ζ₅^(9 % 5) := zeta5_pow_reduce 9
+  norm_num at this
+  exact this
+
+lemma zeta5_pow_ten : ζ₅^10 = 1 := by
+  have : ζ₅^10 = ζ₅^(10 % 5) := zeta5_pow_reduce 10
+  norm_num at this
+  exact this
+
+lemma zeta5_pow_eleven : ζ₅^11 = ζ₅ := by
+  have : ζ₅^11 = ζ₅^(11 % 5) := zeta5_pow_reduce 11
+  norm_num at this
+  exact this
+
+lemma zeta5_pow_twelve : ζ₅^12 = ζ₅^2 := by
+  have : ζ₅^12 = ζ₅^(12 % 5) := zeta5_pow_reduce 12
+  norm_num at this
+  exact this
+
+lemma zeta5_pow_fifteen : ζ₅^15 = 1 := by
+  have : ζ₅^15 = ζ₅^(15 % 5) := zeta5_pow_reduce 15
+  norm_num at this
+  exact this
+
+lemma zeta5_pow_sixteen : ζ₅^16 = ζ₅ := by
+  have : ζ₅^16 = ζ₅^(16 % 5) := zeta5_pow_reduce 16
+  norm_num at this
+  exact this
+
+lemma zeta5_pow_seventeen : ζ₅^17 = ζ₅^2 := by
+  have : ζ₅^17 = ζ₅^(17 % 5) := zeta5_pow_reduce 17
+  norm_num at this
+  exact this
+
 /-- ζ₅.re = cos(2π/5). -/
 lemma zeta5_re_eq_cos : ζ₅.re = Real.cos (2 * π / 5) := by
   unfold ζ₅ zeta5
@@ -422,7 +457,7 @@ lemma zeta5_cubed_re : (ζ₅^3).re = -(Real.sqrt 5 + 1) / 4 := by
   rw [zeta5_cubed_eq]
   rw [Complex.exp_mul_I]
   simp only [Complex.add_re, Complex.mul_re, Complex.I_re, Complex.I_im]
-  simp only [mul_zero, mul_one, sub_zero]
+  simp only [mul_zero, mul_one]
   rw [Complex.cos_ofReal_re, Complex.sin_ofReal_im]
   simp only [sub_zero, add_zero]
   exact cos_six_pi_fifth

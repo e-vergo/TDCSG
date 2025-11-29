@@ -9,18 +9,17 @@ Formal verification in Lean 4 of the critical radius theorem for two-disk compou
 | Metric | Value |
 |--------|-------|
 | Build | Compiles |
-| Sorries | Multiple (see below) |
+| Sorries | 11 (cross-disk membership) |
 | Axioms | Standard only (propext, Quot.sound, Classical.choice) |
 | Kim Morrison Standard | Structure passes, axiom soundness pending |
 
-**In Progress.** The proof structure is complete but several lemmas remain:
+**In Progress.** The proof structure is complete but cross-disk membership proofs remain:
 
 | File | Sorries | Description |
 |------|---------|-------------|
-| Definitions/TwoDisk.lean | 12 | PiecewiseIsometry conversions |
-| Definitions/Composition.lean | 5 | Partition refinement |
-| Definitions/IET.lean | 10 | IET structure proofs |
-| Proofs/WordCorrespondence.lean | 4 | Group word correspondence |
+| Proofs/WordCorrespondence.lean | 11 | Cross-disk membership for intermediate rotation steps |
+
+The remaining sorries are all geometric obligations proving that intermediate points in the word applications stay within the lens-shaped disk intersection. These are the same geometric calculation repeated for each word (word1: 3, word2: 3, word3: 5).
 
 ## Main Theorem Statement
 
