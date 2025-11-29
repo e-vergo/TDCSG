@@ -2,7 +2,7 @@
 
 Formal verification in Lean 4 of the critical radius theorem for two-disk compound symmetry groups from [arXiv:2302.12950v1](https://arxiv.org/abs/2302.12950).
 
-**Main Theorem (Theorem 2):** The compound symmetry group GG₅ at the critical radius is infinite.
+**Main Theorem (Theorem 2):** The compound symmetry group GG5 at the critical radius is infinite.
 
 ## Project Status
 
@@ -25,16 +25,25 @@ The remaining sorries are geometric obligations proving that intermediate points
 ## Main Theorem Statement
 
 ```lean
-/-- Theorem 2: The compound symmetry group GG₅ at the critical radius is infinite. -/
+/-- Theorem 2: The compound symmetry group GG5 at the critical radius is infinite. -/
 def StatementOfTheorem : Prop :=
-  ∃ p, (orbit GG5_critical.r1 p).Infinite
+  exists p, (orbit GG5_critical.r1 p).Infinite
 ```
 
 Where:
 
-- `GG5_critical` is the GG(5,5) two-disk system at r_crit = √(3 + φ)
+- `GG5_critical` is the GG(5,5) two-disk system at r_crit = sqrt(3 + phi)
 - `orbit r p` is the set of points reachable from p under the group action
-- φ = (1 + √5)/2 is the golden ratio
+- phi = (1 + sqrt(5))/2 is the golden ratio
+
+## Architecture
+
+The codebase uses a complex-native architecture:
+
+- **Primary type**: Complex numbers (C) as source of truth
+- **Rotation system**: Mathlib's `Circle` type with `rotation : Circle ->* C =(li)[R] C`
+- **Rotation direction**: Clockwise (-2pi/5) using zeta5^4, matching the paper
+- **Generator encoding**: Inductive type `Generator` with A, Ainv, B, Binv constructors
 
 ## Kim Morrison Standard Compliance
 
@@ -43,7 +52,6 @@ This project follows the [Kim Morrison standard](https://leanprover.zulipchat.co
 - `MainTheorem.lean` contains the statement, importing from Definitions
 - `ProofOfMainTheorem.lean` provides the proof (no sorries)
 - Uses only standard axioms
-- Review burden: 97 lines (MainTheorem: 38 + ProofOfMainTheorem: 59)
 
 Run verification:
 
@@ -55,26 +63,28 @@ lake build TDCSG.ProofOfMainTheorem && lake env lean --run KMVerify.lean
 
 ```text
 TDCSG/
-  MainTheorem.lean          # Statement + GG5_critical definition (38 lines)
-  ProofOfMainTheorem.lean   # Proof of main theorem (59 lines)
-  Definitions/              # All definitions (no proofs)
-    Core.lean               # φ, ψ, r_crit, Plane, Word
-    Geometry.lean           # Disk geometry, rotations
-    GroupAction.lean        # genA, genB, orbit
+  MainTheorem.lean          # Statement + GG5_critical definition
+  ProofOfMainTheorem.lean   # Proof of main theorem
+  Definitions/              # All definitions (9 files)
+    Core.lean               # phi, psi, r_crit, Generator, Word
+    Cyclotomic.lean         # zeta5 definition
+    Geometry.lean           # Disk geometry, rotations (C-native)
+    GroupAction.lean        # genA, genB, applyWord, orbit
     TwoDisk.lean            # TwoDiskSystem structure
     IET.lean                # Interval exchange transformations
-    Points.lean             # E, E', F, G point definitions
-    Conversions.lean        # Complex ↔ R² conversions
+    Points.lean             # E, E', F, G, segmentPoint
+    Orbit.lean              # Orbit definitions
     WordCorrespondence.lean # word1, word2, word3 definitions
-  Proofs/                   # All supporting lemmas and proofs
-    Zeta5.lean              # ζ₅ identities, trig values
+  Proofs/                   # All supporting lemmas (9 files)
+    Zeta5.lean              # zeta5 identities, zeta5Circle
     Points.lean             # Point properties, F/G scalar relations
     OrbitInfinite.lean      # GG5_IET_has_infinite_orbit
-    WordCorrespondence.lean # IET ↔ group word correspondence (3 sorries)
+    WordCorrespondence.lean # IET <-> group word correspondence (3 sorries)
     CrossDiskBounds.lean    # Cross-disk membership bounds (5 sorries)
-    Geometry.lean           # r_crit lemmas, re-exports
+    Geometry.lean           # r_crit lemmas
     SegmentGeometry.lean    # Segment lengths and ratios
-    PlaneConversion.lean    # Complex ↔ plane bridge lemmas
+    IET.lean                # IET interval properties
+    Orbit.lean              # Orbit theory lemmas
 KMVerify.lean               # Kim Morrison standard verification
 ```
 
@@ -84,9 +94,9 @@ The proof proceeds through:
 
 1. **GG5 Definition**: Two-disk system with 5-fold rotations at critical radius
 2. **IET Embedding**: Group action induces interval exchange on segment E'E
-3. **Golden Ratio Structure**: Interval lengths are in ratio 1 : φ : φ²
-4. **Linear Independence**: {1, φ} linearly independent over ℤ
-5. **Infinite Orbits**: No periodic orbits possible → orbits are infinite
+3. **Golden Ratio Structure**: Interval lengths are in ratio 1 : phi : phi^2
+4. **Linear Independence**: {1, phi} linearly independent over Z
+5. **Infinite Orbits**: No periodic orbits possible -> orbits are infinite
 
 ## Build Commands
 
