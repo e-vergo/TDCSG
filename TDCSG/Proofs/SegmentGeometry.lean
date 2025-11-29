@@ -3,15 +3,16 @@ Copyright (c) 2025 Eric Hearn. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Hearn
 -/
-import TDCSG.Definitions.Conversions
 import TDCSG.Proofs.Points
+import TDCSG.Definitions.GroupAction
 
 /-!
 # Segment Geometry for GG(5,5)
 
-Defines segment lengths, ratios, and proves key irrationality results.
+Defines segment lengths, ratios, disk intersection, and rotation correspondence.
 
-The conversion functions (toR2, E_R2, etc.) are imported from TDCSG.Definitions.Conversions.
+The segment definitions are imported from TDCSG.Definitions.Points.
+The generator actions are imported from TDCSG.Definitions.GroupAction.
 -/
 
 namespace TDCSG.CompoundSymmetry.GG5
@@ -19,9 +20,6 @@ namespace TDCSG.CompoundSymmetry.GG5
 open Complex Real TDCSG.Definitions
 
 /-! ### Translation Lengths -/
-
--- The definitions translation_length_1, translation_length_2, and segment_length
--- are imported from TDCSG.Definitions.Conversions
 
 /-- E is nonzero. -/
 lemma E_ne_zero : E ≠ 0 := by
@@ -261,8 +259,144 @@ lemma translations_irrational : ∀ (q r : ℤ),
     push_cast
     rfl
 
-/-! ### Conversion to ℝ² -/
+/-! ### Segment Parameterization Injectivity -/
 
--- The conversion functions (toR2, E_R2, E'_R2, F_R2, G_R2) are now in TDCSG.Definitions.Conversions
+/-- The segment parameterization is injective: different parameters give different points. -/
+theorem segmentPoint_injective : Function.Injective segmentPoint := by
+  intro t₁ t₂ h
+  unfold segmentPoint at h
+  have hne : E - E' ≠ 0 := by
+    unfold E'
+    simp only [sub_neg_eq_add, ne_eq]
+    have hE_ne : E ≠ 0 := E_ne_zero
+    intro h
+    apply hE_ne
+    calc E = (E + E) / 2 := by ring
+         _ = 0 / 2 := by rw [h]
+         _ = 0 := by ring
+  have : t₁ • (E - E') = t₂ • (E - E') := by
+    have h' : E' + t₁ • (E - E') = E' + t₂ • (E - E') := h
+    exact add_left_cancel h'
+  -- From t₁ • v = t₂ • v with v ≠ 0, conclude t₁ = t₂
+  by_contra h_ne
+  have : t₁ • (E - E') - t₂ • (E - E') = 0 := by
+    rw [this]; ring
+  rw [← sub_smul] at this
+  have hsub_ne : t₁ - t₂ ≠ 0 := sub_ne_zero.mpr h_ne
+  have : E - E' = 0 := by
+    have h_smul : (t₁ - t₂) • (E - E') = 0 := this
+    exact smul_eq_zero.mp h_smul |>.resolve_left hsub_ne
+  exact hne this
+
+/-- The Plane parameterization is also injective. -/
+theorem segmentPointPlane_injective : Function.Injective segmentPointPlane := by
+  intro t₁ t₂ h
+  apply segmentPoint_injective
+  unfold segmentPointPlane toPlane at h
+  -- If ![z₁.re, z₁.im] = ![z₂.re, z₂.im], then z₁ = z₂
+  have hre : (segmentPoint t₁).re = (segmentPoint t₂).re := by
+    have := congrFun h 0
+    simp only [Matrix.cons_val_zero] at this
+    exact this
+  have him : (segmentPoint t₁).im = (segmentPoint t₂).im := by
+    have := congrFun h 1
+    simp only [Matrix.cons_val_one] at this
+    exact this
+  exact Complex.ext hre him
+
+/-! ### Disk Intersection Lemmas -/
+
+/-- E' is on the RIGHT disk boundary (since E is on left disk boundary). -/
+lemma E'_on_right_disk_boundary : ‖E' - 1‖ = r_crit := by
+  unfold E'
+  rw [show ((-E : ℂ) - (1 : ℂ)) = -(E + 1) by ring]
+  rw [norm_neg]
+  exact E_on_left_disk_boundary
+
+/-- E' is in the LEFT disk (since E is in right disk). -/
+lemma E'_in_left_disk : ‖E' - (-1)‖ ≤ r_crit := by
+  unfold E'
+  rw [show ((-E : ℂ) - (-1 : ℂ)) = -(E - 1) by ring]
+  rw [norm_neg]
+  exact E_in_right_disk
+
+/-- Point E has positive real part. -/
+lemma E_re_pos : 0 < E.re := by
+  rw [E_re]
+  have sqrt5_pos : 0 < Real.sqrt 5 := Real.sqrt_pos.mpr (by norm_num : (0 : ℝ) < 5)
+  linarith
+
+/-- Point E' has negative real part. -/
+lemma E'_re_neg : E'.re < 0 := by
+  unfold E'
+  simp [E_re_pos]
+
+/-- Points on segment E'E lie in the disk intersection. -/
+lemma segment_in_disk_intersection (t : ℝ)
+    (ht : 0 ≤ t ∧ t ≤ 1) :
+    let p := E' + t • (E - E')
+    ‖p + 1‖ ≤ r_crit ∧ ‖p - 1‖ ≤ r_crit := by
+  intro p
+  have hp_segment : p ∈ segment ℝ E' E := by
+    use (1 - t), t
+    constructor; · linarith [ht.1]
+    constructor; · exact ht.1
+    constructor; · linarith [ht.2]
+    calc (1 - t) • E' + t • E
+        = E' - t • E' + t • E := by
+          rw [sub_smul, one_smul]
+      _ = E' + (t • E - t • E') := by
+          ring
+      _ = E' + t • (E - E') := by
+          rw [smul_sub]
+  constructor
+  · have h_E'_in_left :
+        E' ∈ Metric.closedBall ((-1) : ℂ) r_crit := by
+      rw [Metric.mem_closedBall]
+      simp only [dist_eq_norm]
+      exact E'_in_left_disk
+    have h_E_in_left :
+        E ∈ Metric.closedBall ((-1) : ℂ) r_crit := by
+      rw [Metric.mem_closedBall]
+      simp only [dist_eq_norm]
+      rw [show (E - (-1) : ℂ) = E + 1 by ring]
+      exact E_on_left_disk_boundary.le
+    have h_convex : Convex ℝ
+        (Metric.closedBall ((-1) : ℂ) r_crit) :=
+      convex_closedBall ((-1) : ℂ) r_crit
+    have h_segment_subset :
+        segment ℝ E' E ⊆
+          Metric.closedBall ((-1) : ℂ) r_crit :=
+      h_convex.segment_subset h_E'_in_left h_E_in_left
+    have hp_in_left :
+        p ∈ Metric.closedBall ((-1) : ℂ) r_crit :=
+      h_segment_subset hp_segment
+    rw [Metric.mem_closedBall] at hp_in_left
+    simp only [dist_eq_norm] at hp_in_left
+    rw [show (p - (-1) : ℂ) = p + 1 by ring] at hp_in_left
+    exact hp_in_left
+  · have h_E'_in_right :
+        E' ∈ Metric.closedBall (1 : ℂ) r_crit := by
+      rw [Metric.mem_closedBall]
+      simp only [dist_eq_norm]
+      exact E'_on_right_disk_boundary.le
+    have h_E_in_right :
+        E ∈ Metric.closedBall (1 : ℂ) r_crit := by
+      rw [Metric.mem_closedBall]
+      simp only [dist_eq_norm]
+      rw [show (E - 1 : ℂ) = E - 1 by ring]
+      exact E_in_right_disk
+    have h_convex : Convex ℝ
+        (Metric.closedBall (1 : ℂ) r_crit) :=
+      convex_closedBall (1 : ℂ) r_crit
+    have h_segment_subset :
+        segment ℝ E' E ⊆ Metric.closedBall (1 : ℂ) r_crit :=
+      h_convex.segment_subset h_E'_in_right h_E_in_right
+    have hp_in_right :
+        p ∈ Metric.closedBall (1 : ℂ) r_crit :=
+      h_segment_subset hp_segment
+    rw [Metric.mem_closedBall] at hp_in_right
+    simp only [dist_eq_norm] at hp_in_right
+    exact hp_in_right
 
 end TDCSG.CompoundSymmetry.GG5

@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Hearn
 -/
 import TDCSG.Proofs.Zeta5
+import TDCSG.Definitions.Geometry
 
 /-!
 # Geometric Points for GG5
@@ -17,6 +18,9 @@ that are critical for the interval exchange transformation analysis.
 - `F`, `G` : Points on segment E'E
 - `psi` : Positive golden conjugate = -Real.goldenConj
 - `t_F`, `t_G` : Parametric coordinates (t_G = psi)
+- `segmentPoint` : Parametric representation of segment E'E in complex plane
+- `segmentPointPlane` : Parametric representation of segment E'E in Plane
+- `translation_length_1`, `translation_length_2`, `segment_length` : Segment lengths
 
 ## References
 - Two-Disk Compound Symmetry Groups, arXiv:2302.12950v1
@@ -60,5 +64,29 @@ noncomputable def t_F : ℝ := (1 + Real.sqrt 5) / 4
 /-- The parameter value for G on segment E'E: t_G = ψ = (√5-1)/2 ≈ 0.618.
     This equals psi, the positive golden conjugate. -/
 noncomputable abbrev t_G : ℝ := psi
+
+/-! ### Segment Parameterization -/
+
+/-- Parametric representation of segment E'E.
+    At t=0, this gives E'; at t=1, this gives E.
+    The segment passes through F at t=t_F and G at t=t_G. -/
+noncomputable def segmentPoint (t : ℝ) : ℂ := E' + t • (E - E')
+
+/-- Segment parameterization in Plane coordinates. -/
+noncomputable def segmentPointPlane (t : ℝ) : Plane :=
+  toPlane (segmentPoint t)
+
+/-! ### Translation and Segment Lengths -/
+
+/-- The translation length |F - (-F)| = 2|F|.
+    This is the length of translation by word w1 in the IET. -/
+noncomputable def translation_length_1 : ℝ := ‖F - (-F)‖
+
+/-- The translation length |E - G|.
+    This is the length of translation by word w2 in the IET. -/
+noncomputable def translation_length_2 : ℝ := ‖E - G‖
+
+/-- The total segment length |E - E'| = 2|E|. -/
+noncomputable def segment_length : ℝ := ‖E - E'‖
 
 end TDCSG.Definitions

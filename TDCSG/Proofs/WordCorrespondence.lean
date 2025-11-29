@@ -10,7 +10,6 @@ import TDCSG.MainTheorem
 import TDCSG.Proofs.IET
 import TDCSG.Definitions.Core
 import TDCSG.Definitions.IET
-import TDCSG.Definitions.Conversions
 import TDCSG.Definitions.WordCorrespondence
 import TDCSG.Proofs.CrossDiskBounds
 
@@ -30,35 +29,6 @@ Proves the correspondence between IET orbits and group orbits.
 namespace TDCSG.CompoundSymmetry.GG5
 
 open Complex Real TDCSG.Definitions CompoundSymmetry.GG5
-
-/-! ### Segment parameterization -/
-
-/-- The segment parameterization is injective: different parameters give different points. -/
-theorem segmentPoint_injective : Function.Injective TDCSG.Definitions.segmentPoint := by
-  intro t₁ t₂ h
-  unfold TDCSG.Definitions.segmentPoint at h
-  have hne : E - E' ≠ 0 := by
-    unfold E'
-    simp only [sub_neg_eq_add, ne_eq]
-    have hE_ne : E ≠ 0 := E_ne_zero
-    intro h
-    apply hE_ne
-    calc E = (E + E) / 2 := by ring
-         _ = 0 / 2 := by rw [h]
-         _ = 0 := by ring
-  have : t₁ • (E - E') = t₂ • (E - E') := by
-    have h' : E' + t₁ • (E - E') = E' + t₂ • (E - E') := h
-    exact add_left_cancel h'
-  -- From t₁ • v = t₂ • v with v ≠ 0, conclude t₁ = t₂
-  by_contra h_ne
-  have : t₁ • (E - E') - t₂ • (E - E') = 0 := by
-    rw [this]; ring
-  rw [← sub_smul] at this
-  have hsub_ne : t₁ - t₂ ≠ 0 := sub_ne_zero.mpr h_ne
-  have : E - E' = 0 := by
-    have h_smul : (t₁ - t₂) • (E - E') = 0 := this
-    exact smul_eq_zero.mp h_smul |>.resolve_left hsub_ne
-  exact hne this
 
 /-! ### Word selection and iteration -/
 
