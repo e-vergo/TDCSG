@@ -296,7 +296,7 @@ lemma word2_algebraic_identity :
     ring_nf
     -- After ring_nf, reduce powers modulo 5
     have h9 : ζ₅^9 = ζ₅^4 := by have := zeta5_pow_reduce 9; norm_num at this; exact this
-    simp only [h9, h8, h7, h6, h5]
+    simp only [h9, h8, h5]
     -- Use cyclotomic sum identity: 1 + ζ₅ + ζ₅² + ζ₅³ + ζ₅⁴ = 0
     have h_zeta_sum : (1 : ℂ) + ζ₅ + ζ₅^2 + ζ₅^3 + ζ₅^4 = 0 := cyclotomic5_sum
     have h4_expand : ζ₅^4 = -1 - ζ₅ - ζ₅^2 - ζ₅^3 := by
@@ -394,7 +394,7 @@ lemma word3_algebraic_identity :
     ring
   -- √5 - 3 = 1 + 2(ζ₅ + ζ₅⁴) - 3 = -2 + 2ζ₅ + 2ζ₅⁴
   have h_sqrt5_minus_3 : (Real.sqrt 5 - 3 : ℂ) = -2 + 2 * ζ₅ + 2 * ζ₅^4 := by
-    calc (Real.sqrt 5 - 3 : ℂ) = (Real.sqrt 5 : ℂ) - 3 := by push_cast; ring
+    calc (Real.sqrt 5 - 3 : ℂ) = (Real.sqrt 5 : ℂ) - 3 := by simp [sub_eq_add_neg]
       _ = (1 + 2 * (ζ₅ + ζ₅^4)) - 3 := by rw [h_sqrt5]
       _ = -2 + 2 * ζ₅ + 2 * ζ₅^4 := by ring
   -- The full expansion of word3 = A⁻¹B⁻¹A⁻¹BAB

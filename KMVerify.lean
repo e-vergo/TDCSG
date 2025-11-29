@@ -61,7 +61,7 @@ def isStandardAxiom (ax : Name) : Bool :=
     Allows the tool to be used with any project following this standard. -/
 structure KMVerifyConfig where
   /-- The main theorem declaration name -/
-  theoremName : Name := `mainTheorem
+  theoremName : Name := `GG5_infinite_at_critical_radius
   /-- The statement/proposition declaration name -/
   statementName : Name := `StatementOfTheorem
   /-- Project prefix for filtering declarations (e.g., "TDCSG") -/
