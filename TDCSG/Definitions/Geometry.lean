@@ -7,7 +7,7 @@ import TDCSG.Definitions.Core
 import Mathlib.Analysis.InnerProductSpace.PiL2
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
 import Mathlib.Topology.MetricSpace.Basic
-import Mathlib.Data.Complex.Basic
+import Mathlib.Analysis.Complex.Circle
 
 /-!
 # Geometric Definitions - Disks and Rotations
@@ -18,7 +18,8 @@ The radius parameter determines disk size, not center position.
 ## Main definitions
 - `leftCenter`, `rightCenter` : Fixed disk centers at (-1, 0) and (1, 0)
 - `closedDisk`, `leftDisk`, `rightDisk` : Disk sets
-- `rotationMatrix`, `applyMatrix`, `rotateAround` : Rotation operations
+- `rotateAboutC` : Rotation by angle θ about a center
+- `rotateAboutCircle` : Rotation using Circle element (unit complex number)
 - `toPlane` : Convert a complex number to a Plane point
 
 Note: `Plane` is defined in TDCSG.Definitions.Core
@@ -30,42 +31,65 @@ open Real
 
 /-! ### Disk Centers (FIXED positions) -/
 
-/-- Center of the left disk, positioned at (-1, 0).
-    This is a FIXED position, independent of radius. -/
-def leftCenter : Plane :=
-  fun i => if i = 0 then -1 else 0
+/-- Center of the left disk in complex plane: -1. -/
+def leftCenter : ℂ := -1
 
-/-- Center of the right disk, positioned at (1, 0).
-    This is a FIXED position, independent of radius. -/
-def rightCenter : Plane :=
-  fun i => if i = 0 then 1 else 0
+/-- Center of the right disk in complex plane: 1. -/
+def rightCenter : ℂ := 1
 
 /-! ### Disk Definitions -/
 
-/-- A closed disk in the plane with given center and radius. -/
-def closedDisk (center : Plane) (radius : ℝ) : Set Plane :=
-  Metric.closedBall center radius
+/-- A closed disk in complex plane with given center and radius. -/
+def closedDiskC (c : ℂ) (r : ℝ) : Set ℂ := {z | ‖z - c‖ ≤ r}
 
-/-- The left disk with radius r centered at (-1, 0). -/
-noncomputable def leftDisk (r : ℝ) : Set Plane := closedDisk leftCenter r
+/-- The left disk in ℂ with radius r centered at -1. -/
+def leftDisk (r : ℝ) : Set ℂ := closedDiskC (-1) r
 
-/-- The right disk with radius r centered at (1, 0). -/
-noncomputable def rightDisk (r : ℝ) : Set Plane := closedDisk rightCenter r
+/-- The right disk in ℂ with radius r centered at 1. -/
+def rightDisk (r : ℝ) : Set ℂ := closedDiskC 1 r
 
 /-! ### Rotation Operations -/
 
-/-- Rotation matrix in R^2 by angle theta. -/
-noncomputable def rotationMatrix (θ : ℝ) : Matrix (Fin 2) (Fin 2) ℝ :=
-  !![cos θ, -sin θ; sin θ, cos θ]
+/-- Rotation in the complex plane about a center by angle θ. -/
+noncomputable def rotateAboutC (c : ℂ) (θ : ℝ) (z : ℂ) : ℂ :=
+  c + Complex.exp (θ * Complex.I) * (z - c)
 
-/-- Apply a 2x2 matrix to a point in R^2. -/
-noncomputable def applyMatrix (M : Matrix (Fin 2) (Fin 2) ℝ) (p : Plane) : Plane :=
-  fun i => ∑ j, M i j * p j
+/-- Rotation about a center using a Circle element (unit complex number).
+    This is simpler than angle-based rotation and leverages Circle's group structure. -/
+def rotateAboutCircle (c : ℂ) (a : Circle) (z : ℂ) : ℂ :=
+  c + a * (z - c)
 
-/-- Rotation about a given center point by angle theta.
-    Returns the rotated point (simple version, not an isometry equivalence). -/
-noncomputable def rotateAroundPoint (center : Plane) (θ : ℝ) (p : Plane) : Plane :=
-  center + applyMatrix (rotationMatrix θ) (p - center)
+/-- rotateAboutCircle with Circle.exp θ equals rotateAboutC with angle θ. -/
+lemma rotateAboutCircle_eq_rotateAboutC (c : ℂ) (θ : ℝ) (z : ℂ) :
+    rotateAboutCircle c (Circle.exp θ) z = rotateAboutC c θ z := by
+  simp only [rotateAboutCircle, rotateAboutC, Circle.coe_exp]
+
+/-- Rotation by 1 (identity element of Circle) is the identity. -/
+lemma rotateAboutCircle_one (c z : ℂ) : rotateAboutCircle c 1 z = z := by
+  simp [rotateAboutCircle]
+
+/-- Composition of rotations corresponds to multiplication in Circle. -/
+lemma rotateAboutCircle_mul (c : ℂ) (a b : Circle) (z : ℂ) :
+    rotateAboutCircle c (a * b) z = rotateAboutCircle c a (rotateAboutCircle c b z) := by
+  simp only [rotateAboutCircle, Circle.coe_mul]
+  ring
+
+/-- Inverse rotation undoes the rotation. -/
+lemma rotateAboutCircle_inv (c : ℂ) (a : Circle) (z : ℂ) :
+    rotateAboutCircle c a⁻¹ (rotateAboutCircle c a z) = z := by
+  simp only [rotateAboutCircle, Circle.coe_inv]
+  have h : (a : ℂ) ≠ 0 := Circle.coe_ne_zero a
+  field_simp [h]
+  ring
+
+/-- n-fold rotation using Circle power. -/
+lemma rotateAboutCircle_pow (c : ℂ) (a : Circle) (n : ℕ) (z : ℂ) :
+    (rotateAboutCircle c a)^[n] z = rotateAboutCircle c (a ^ n) z := by
+  induction n with
+  | zero => simp [rotateAboutCircle_one]
+  | succ n ih =>
+    rw [Function.iterate_succ_apply', ih, pow_succ, mul_comm]
+    exact (rotateAboutCircle_mul c a (a ^ n) z).symm
 
 /-! ### Complex to Plane Conversion -/
 
@@ -96,17 +120,5 @@ lemma toPlane_dist_eq_complex_norm (z w : ℂ) : dist (toPlane z) (toPlane w) = 
   simp only [Complex.sub_re, Complex.sub_im]
   congr 1
   simp only [sq_abs]
-
-/-- leftCenter equals toPlane (-1). -/
-lemma leftCenter_eq_toPlane : leftCenter = toPlane (-1 : ℂ) := by
-  unfold leftCenter toPlane
-  ext i
-  fin_cases i <;> simp [Complex.neg_re, Complex.neg_im]
-
-/-- rightCenter equals toPlane (1). -/
-lemma rightCenter_eq_toPlane : rightCenter = toPlane (1 : ℂ) := by
-  unfold rightCenter toPlane
-  ext i
-  fin_cases i <;> simp [Complex.one_re, Complex.one_im]
 
 end TDCSG.Definitions

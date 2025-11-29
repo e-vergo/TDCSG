@@ -21,6 +21,7 @@ Note: applyWord uses foldl, so words are applied left-to-right.
 namespace TDCSG.CompoundSymmetry.GG5
 
 open TDCSG.Definitions
+open Generator
 
 /-! ### Group words corresponding to IET intervals
 
@@ -38,17 +39,26 @@ to any point on segment E'E produces translation by 2F = 2ψE, where F = ψE and
     This word produces translation by 2F = 2ψE where ψ = (√5-1)/2.
     Algebraically: (ζ₅ + ζ₅⁴)(ζ₅ - ζ₅²) = 1 - ζ₅ + ζ₅² - ζ₅³ = F. -/
 def word1 : Word :=
-  [(false, true), (false, true), (true, true), (false, true), (true, true)]
+  [TDCSG.Definitions.Generator.A, TDCSG.Definitions.Generator.A, TDCSG.Definitions.Generator.B, TDCSG.Definitions.Generator.A, TDCSG.Definitions.Generator.B]
 
-/-- Word 2: a²bab = AABAB (for interval 1: [length1, length1 + length2))
-    Since displacement1 = displacement0 = ψ, word2 produces the same translation as word1.
+/-- Word 2: a⁻¹b⁻¹a⁻¹b⁻¹b⁻¹ = A⁻¹B⁻¹A⁻¹B⁻¹B⁻¹ (for interval 1: [length1, length1 + length2))
     This word produces translation by 2F = 2ψE where ψ = (√5-1)/2.
 
-    Note: The original word abab² = ABABB produces translation 2(1 - ζ₅² + ζ₅³ - ζ₅⁴)
-    which is NOT parallel to E and thus does not preserve segment membership.
-    The correct word must produce translation parallel to E, which is 2F = 2ψE. -/
+    Unlike word1 (AABAB) which works for interval 0, interval 1 requires a different
+    word because AABAB's intermediate points leave the disk intersection for
+    c ∈ [(1-√5)/2, 2-√5]. The word A⁻¹B⁻¹A⁻¹B⁻¹B⁻¹ keeps all intermediate points
+    within the appropriate disks while producing the same displacement 2ψE.
+
+    The algebraic derivation:
+    Starting from z₀ = c•E, applying A⁻¹B⁻¹A⁻¹B⁻¹B⁻¹:
+    z₁ = -1 + ζ₅⁴(z₀ + 1)
+    z₂ = 1 + ζ₅⁴(z₁ - 1)
+    z₃ = -1 + ζ₅⁴(z₂ + 1)
+    z₄ = 1 + ζ₅⁴(z₃ - 1)
+    z₅ = 1 + ζ₅⁴(z₄ - 1)
+    The composition gives z₅ = z₀ + 2ψE. -/
 def word2 : Word :=
-  [(false, true), (false, true), (true, true), (false, true), (true, true)]
+  [TDCSG.Definitions.Generator.Ainv, TDCSG.Definitions.Generator.Binv, TDCSG.Definitions.Generator.Ainv, TDCSG.Definitions.Generator.Binv, TDCSG.Definitions.Generator.Binv]
 
 /-- Word 3: a⁻¹b⁻¹a⁻¹bab = A⁻¹B⁻¹A⁻¹BAB (for interval 2: [length1 + length2, 1))
     This word produces translation by -2ψ²E = 2·displacement2·E where ψ² = 1/(1+φ).
@@ -68,6 +78,6 @@ def word2 : Word :=
     which equals 6 + 4ζ₅ + 2ζ₅² + 8ζ₅³ (using cyclotomic). This is NOT a scalar multiple
     of E = ζ₅ - ζ₅² and thus does not preserve segment membership. -/
 def word3 : Word :=
-  [(false, false), (true, false), (false, false), (true, true), (false, true), (true, true)]
+  [TDCSG.Definitions.Generator.Ainv, TDCSG.Definitions.Generator.Binv, TDCSG.Definitions.Generator.Ainv, TDCSG.Definitions.Generator.B, TDCSG.Definitions.Generator.A, TDCSG.Definitions.Generator.B]
 
 end TDCSG.CompoundSymmetry.GG5

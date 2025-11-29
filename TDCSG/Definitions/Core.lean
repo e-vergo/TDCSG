@@ -28,10 +28,17 @@ open Real
 /-- The Euclidean plane ℝ². -/
 abbrev Plane := EuclideanSpace ℝ (Fin 2)
 
-/-- A word in generators A, B and their inverses.
-    First component: false = A, true = B.
-    Second component: true = generator, false = inverse. -/
-abbrev Word := List (Bool × Bool)
+/-- Generator for the group action. -/
+inductive Generator where
+  | A | Ainv | B | Binv
+  deriving DecidableEq, Repr
+
+/-- Notation for generator inverses. -/
+notation "A⁻¹" => Generator.Ainv
+notation "B⁻¹" => Generator.Binv
+
+/-- A word in generators A, B and their inverses. -/
+abbrev Word := List Generator
 
 /-! ### Core Constants -/
 

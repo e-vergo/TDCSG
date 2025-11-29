@@ -9,7 +9,7 @@ Formal verification in Lean 4 of the critical radius theorem for two-disk compou
 | Metric | Value |
 |--------|-------|
 | Build | Compiles |
-| Sorries | 11 (cross-disk membership) |
+| Sorries | 8 (cross-disk membership) |
 | Axioms | Standard only (propext, Quot.sound, Classical.choice) |
 | Kim Morrison Standard | Structure passes, axiom soundness pending |
 
@@ -17,9 +17,10 @@ Formal verification in Lean 4 of the critical radius theorem for two-disk compou
 
 | File | Sorries | Description |
 |------|---------|-------------|
-| Proofs/WordCorrespondence.lean | 11 | Cross-disk membership for intermediate rotation steps |
+| Proofs/WordCorrespondence.lean | 3 | Cross-disk bounds for word2 intermediate steps (z1, z2, z3) |
+| Proofs/CrossDiskBounds.lean | 5 | Cross-disk bounds for word3 intermediate steps (z1-z5) |
 
-The remaining sorries are all geometric obligations proving that intermediate points in the word applications stay within the lens-shaped disk intersection. These are the same geometric calculation repeated for each word (word1: 3, word2: 3, word3: 5).
+The remaining sorries are geometric obligations proving that intermediate points in word applications stay within the lens-shaped disk intersection. Word1 bounds are complete; word2 needs 3 bounds and word3 needs 5 bounds.
 
 ## Main Theorem Statement
 
@@ -40,9 +41,9 @@ Where:
 This project follows the [Kim Morrison standard](https://leanprover.zulipchat.com/#narrow/channel/219941-Machine-Learning-for-Theorem-Proving/topic/Discussion.3A.20AI-written.20mathematical.proofs/with/558843568) for AI-assisted formal mathematics:
 
 - `MainTheorem.lean` contains the statement, importing from Definitions
-- `ProofOfMainTheorem.lean` provides the proof
+- `ProofOfMainTheorem.lean` provides the proof (no sorries)
 - Uses only standard axioms
-- Review burden: 81 lines (MainTheorem + ProofOfMainTheorem)
+- Review burden: 97 lines (MainTheorem: 38 + ProofOfMainTheorem: 59)
 
 Run verification:
 
@@ -54,8 +55,8 @@ lake build TDCSG.ProofOfMainTheorem && lake env lean --run KMVerify.lean
 
 ```text
 TDCSG/
-  MainTheorem.lean          # Statement + GG5_critical definition
-  ProofOfMainTheorem.lean   # Proof of main theorem
+  MainTheorem.lean          # Statement + GG5_critical definition (38 lines)
+  ProofOfMainTheorem.lean   # Proof of main theorem (59 lines)
   Definitions/              # All definitions (no proofs)
     Core.lean               # φ, ψ, r_crit, Plane, Word
     Geometry.lean           # Disk geometry, rotations
@@ -64,11 +65,13 @@ TDCSG/
     IET.lean                # Interval exchange transformations
     Points.lean             # E, E', F, G point definitions
     Conversions.lean        # Complex ↔ R² conversions
+    WordCorrespondence.lean # word1, word2, word3 definitions
   Proofs/                   # All supporting lemmas and proofs
-    Zeta5.lean              # ζ₅ identities, trig values (authoritative)
+    Zeta5.lean              # ζ₅ identities, trig values
     Points.lean             # Point properties, F/G scalar relations
     OrbitInfinite.lean      # GG5_IET_has_infinite_orbit
-    WordCorrespondence.lean # IET ↔ group word correspondence (11 sorries)
+    WordCorrespondence.lean # IET ↔ group word correspondence (3 sorries)
+    CrossDiskBounds.lean    # Cross-disk membership bounds (5 sorries)
     Geometry.lean           # r_crit lemmas, re-exports
     SegmentGeometry.lean    # Segment lengths and ratios
     PlaneConversion.lean    # Complex ↔ plane bridge lemmas

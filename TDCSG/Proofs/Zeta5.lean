@@ -10,6 +10,8 @@ import Mathlib.NumberTheory.Real.GoldenRatio
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Complex
 import Mathlib.RingTheory.RootsOfUnity.Complex
 import Mathlib.Analysis.Normed.Module.Convex
+import Mathlib.Analysis.Complex.Circle
+import Mathlib.Analysis.Complex.Isometry
 
 /-!
 # Fifth Roots of Unity
@@ -24,6 +26,7 @@ The critical radius r_crit is imported from TDCSG.Definitions.Core.
 ## Main Definitions
 
 * `ζ₅`: Unicode alias for `zeta5`, the primitive 5th root of unity e^(2πi/5)
+* `zeta5Circle`: ζ₅ as an element of Mathlib's `Circle` type (unit complex numbers)
 
 ## Main Results
 
@@ -31,6 +34,7 @@ The critical radius r_crit is imported from TDCSG.Definitions.Core.
 * `zeta5_isPrimitiveRoot`: ζ₅ is a primitive 5th root of unity
 * `cyclotomic5_sum`: 1 + ζ₅ + ζ₅² + ζ₅³ + ζ₅⁴ = 0
 * `zeta5_abs`: |ζ₅| = 1
+* `circle_exp_two_pi_fifth`: Circle.exp (2π/5) = zeta5Circle
 -/
 
 namespace TDCSG.CompoundSymmetry.GG5
@@ -321,8 +325,33 @@ lemma zeta5_pow_seven : ζ₅^7 = ζ₅^2 := by
   norm_num at this
   exact this
 
+lemma zeta5_pow_eight : ζ₅^8 = ζ₅^3 := by
+  have : ζ₅^8 = ζ₅^(8 % 5) := zeta5_pow_reduce 8
+  norm_num at this
+  exact this
+
+lemma zeta5_pow_nine : ζ₅^9 = ζ₅^4 := by
+  have : ζ₅^9 = ζ₅^(9 % 5) := zeta5_pow_reduce 9
+  norm_num at this
+  exact this
+
+lemma zeta5_pow_ten : ζ₅^10 = 1 := by
+  have : ζ₅^10 = ζ₅^(10 % 5) := zeta5_pow_reduce 10
+  norm_num at this
+  exact this
+
 lemma zeta5_pow_eleven : ζ₅^11 = ζ₅ := by
   have : ζ₅^11 = ζ₅^(11 % 5) := zeta5_pow_reduce 11
+  norm_num at this
+  exact this
+
+lemma zeta5_pow_twelve : ζ₅^12 = ζ₅^2 := by
+  have : ζ₅^12 = ζ₅^(12 % 5) := zeta5_pow_reduce 12
+  norm_num at this
+  exact this
+
+lemma zeta5_pow_thirteen : ζ₅^13 = ζ₅^3 := by
+  have : ζ₅^13 = ζ₅^(13 % 5) := zeta5_pow_reduce 13
   norm_num at this
   exact this
 
@@ -471,5 +500,55 @@ lemma zeta5_powers_re_sum : ζ₅.re + (ζ₅^2).re + (ζ₅^3).re + (ζ₅^4).r
   have h_re := congr_arg Complex.re h
   simp only [Complex.add_re, Complex.one_re, Complex.zero_re] at h_re
   linarith
+
+/-! ### Circle Infrastructure
+
+The `Circle` type from Mathlib represents unit complex numbers with group structure.
+Using `Circle` instead of raw angles gives us certified linear isometries via `rotation`.
+-/
+
+/-- ζ₅ as an element of the unit circle in ℂ.
+    This leverages Mathlib's `Circle` type which provides group structure on unit complex numbers. -/
+noncomputable def zeta5Circle : Circle :=
+  ⟨ζ₅, mem_sphere_zero_iff_norm.2 zeta5_abs⟩
+
+/-- The coercion of zeta5Circle back to ℂ is ζ₅. -/
+@[simp]
+lemma zeta5Circle_coe : (zeta5Circle : ℂ) = ζ₅ := rfl
+
+/-- Powers of ζ₅ as Circle elements. -/
+noncomputable def zeta5CirclePow (n : ℕ) : Circle := zeta5Circle ^ n
+
+/-- The coercion of zeta5Circle^n is ζ₅^n. -/
+lemma zeta5CirclePow_coe (n : ℕ) : (zeta5CirclePow n : ℂ) = ζ₅ ^ n := by
+  induction n with
+  | zero => simp [zeta5CirclePow]
+  | succ n ih =>
+    simp only [zeta5CirclePow, pow_succ, Circle.coe_mul]
+    rw [← zeta5CirclePow, ih, zeta5Circle_coe]
+
+/-- ζ₅⁻¹ as a Circle element (equals ζ₅⁴ for clockwise rotation). -/
+noncomputable def zeta5CircleInv : Circle := zeta5Circle⁻¹
+
+/-- The coercion of zeta5CircleInv is ζ₅⁻¹. -/
+@[simp]
+lemma zeta5CircleInv_coe : (zeta5CircleInv : ℂ) = ζ₅⁻¹ := rfl
+
+/-- ζ₅⁴ = ζ₅⁻¹ in Circle (since ζ₅⁵ = 1). -/
+lemma zeta5CirclePow4_eq_inv : zeta5CirclePow 4 = zeta5CircleInv := by
+  apply Circle.ext
+  simp only [zeta5CirclePow, zeta5CircleInv, Circle.coe_inv, zeta5Circle_coe]
+  show (zeta5Circle ^ 4 : ℂ) = ζ₅⁻¹
+  simp only [pow_succ, pow_zero, zeta5Circle_coe, zeta5_inv_as_pow4]
+
+/-- Circle.exp (2π/5) equals zeta5Circle.
+    This connects Mathlib's Circle.exp to our ζ₅ definition. -/
+lemma circle_exp_two_pi_fifth : Circle.exp (2 * π / 5) = zeta5Circle := by
+  apply Circle.ext
+  simp only [Circle.coe_exp, zeta5Circle_coe]
+  unfold ζ₅ zeta5
+  congr 1
+  push_cast
+  ring
 
 end TDCSG.CompoundSymmetry.GG5
