@@ -357,4 +357,102 @@ lemma zeta5_sq_eq : ζ₅^2 = ↑(Real.cos (4 * π / 5)) + I * ↑(Real.sin (4 *
   rw [Complex.exp_mul_I, Complex.ofReal_cos, Complex.ofReal_sin]
   ring
 
+/-! ### Explicit ζ₅ values in terms of golden ratio
+
+These give exact algebraic values for the real and imaginary parts of ζ₅ powers.
+Key identities:
+- cos(2π/5) = (√5 - 1)/4 = (φ - 1)/2
+- cos(4π/5) = -(√5 + 1)/4 = -φ/2
+-/
+
+/-- ζ₅.re = (√5 - 1)/4 = (φ - 1)/2 -/
+lemma zeta5_re : ζ₅.re = (Real.sqrt 5 - 1) / 4 := by
+  rw [zeta5_re_eq_cos, cos_two_pi_fifth]
+  unfold Real.goldenRatio
+  ring
+
+/-- ζ₅.re in terms of φ -/
+lemma zeta5_re_eq_phi : ζ₅.re = (Real.goldenRatio - 1) / 2 := by
+  rw [zeta5_re_eq_cos, cos_two_pi_fifth]
+
+/-- ζ₅.im > 0 -/
+lemma zeta5_im_pos : 0 < ζ₅.im := by
+  rw [zeta5_im_eq_sin]
+  apply Real.sin_pos_of_pos_of_lt_pi
+  · linarith [Real.pi_pos]
+  · linarith [Real.pi_pos]
+
+/-- cos(4π/5) = -(√5 + 1)/4 = -φ/2 -/
+private lemma cos_four_pi_fifth' : Real.cos (4 * π / 5) = -(Real.sqrt 5 + 1) / 4 := by
+  rw [show (4 * π / 5 : ℝ) = π - π / 5 by ring]
+  rw [Real.cos_pi_sub]
+  rw [Real.cos_pi_div_five]
+  ring
+
+/-- (ζ₅²).re = -(√5 + 1)/4 = -φ/2 -/
+lemma zeta5_sq_re : (ζ₅^2).re = -(Real.sqrt 5 + 1) / 4 := by
+  rw [zeta5_sq_eq]
+  simp only [Complex.add_re, Complex.ofReal_re, Complex.mul_re,
+             Complex.I_re, Complex.I_im, Complex.ofReal_im]
+  rw [cos_four_pi_fifth']
+  ring
+
+/-- (ζ₅²).re in terms of φ -/
+lemma zeta5_sq_re_eq_phi : (ζ₅^2).re = -Real.goldenRatio / 2 := by
+  rw [zeta5_sq_re]
+  unfold Real.goldenRatio
+  ring
+
+/-- ζ₅³ = exp(6πi/5) -/
+lemma zeta5_cubed_eq : ζ₅^3 = Complex.exp ((6 * π / 5 : ℝ) * I) := by
+  unfold ζ₅ zeta5
+  rw [← Complex.exp_nat_mul]
+  congr 1
+  push_cast
+  ring
+
+/-- cos(6π/5) = cos(π + π/5) = -cos(π/5) -/
+lemma cos_six_pi_fifth : Real.cos (6 * π / 5) = -(Real.sqrt 5 + 1) / 4 := by
+  rw [show (6 * π / 5 : ℝ) = π / 5 + π by ring]
+  rw [Real.cos_add_pi, Real.cos_pi_div_five]
+  ring
+
+/-- (ζ₅³).re = -(√5 + 1)/4 -/
+lemma zeta5_cubed_re : (ζ₅^3).re = -(Real.sqrt 5 + 1) / 4 := by
+  rw [zeta5_cubed_eq]
+  rw [Complex.exp_mul_I]
+  simp only [Complex.add_re, Complex.mul_re, Complex.I_re, Complex.I_im]
+  simp only [mul_zero, mul_one, sub_zero]
+  rw [Complex.cos_ofReal_re, Complex.sin_ofReal_im]
+  simp only [sub_zero, add_zero]
+  exact cos_six_pi_fifth
+
+/-- (ζ₅⁴).re = ζ₅.re (by conjugate symmetry: ζ₅⁴ = conj(ζ₅)) -/
+lemma zeta5_pow4_re : (ζ₅^4).re = (Real.sqrt 5 - 1) / 4 := by
+  have h : (ζ₅^4).re = (starRingEnd ℂ ζ₅).re := by
+    rw [← zeta5_conj]
+  rw [h, Complex.conj_re, zeta5_re]
+
+/-- (ζ₅⁴).im = -ζ₅.im (by conjugate symmetry) -/
+lemma zeta5_pow4_im_neg : (ζ₅^4).im = -ζ₅.im := by
+  have h : ζ₅^4 = starRingEnd ℂ ζ₅ := by rw [← zeta5_conj]
+  rw [h, Complex.conj_im]
+
+/-! ### Useful algebraic identities for rotation compositions -/
+
+/-- Key identity: 1 + ζ₅⁴ real part -/
+lemma one_add_zeta5_pow4_re : (1 + ζ₅^4).re = 1 + (Real.sqrt 5 - 1) / 4 := by
+  simp only [Complex.add_re, Complex.one_re, zeta5_pow4_re]
+
+/-- 1 - ζ₅⁴ real part -/
+lemma one_sub_zeta5_pow4_re : (1 - ζ₅^4).re = 1 - (Real.sqrt 5 - 1) / 4 := by
+  simp only [Complex.sub_re, Complex.one_re, zeta5_pow4_re]
+
+/-- Sum of all ζ₅ power real parts is -1 (from cyclotomic sum) -/
+lemma zeta5_powers_re_sum : ζ₅.re + (ζ₅^2).re + (ζ₅^3).re + (ζ₅^4).re = -1 := by
+  have h := cyclotomic5_sum
+  have h_re := congr_arg Complex.re h
+  simp only [Complex.add_re, Complex.one_re, Complex.zero_re] at h_re
+  linarith
+
 end TDCSG.CompoundSymmetry.GG5

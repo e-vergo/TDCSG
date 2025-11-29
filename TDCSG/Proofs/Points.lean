@@ -23,6 +23,25 @@ namespace TDCSG.CompoundSymmetry.GG5
 
 open Complex Real TDCSG.Definitions
 
+/-! ### E Real and Imaginary Parts -/
+
+/-- E.re = √5/2 -/
+lemma E_re : E.re = Real.sqrt 5 / 2 := by
+  unfold E
+  simp only [Complex.sub_re]
+  rw [zeta5_re, zeta5_sq_re]
+  ring
+
+/-- E.im = sin(2π/5) - sin(4π/5) -/
+lemma E_im : E.im = Real.sin (2 * π / 5) - Real.sin (4 * π / 5) := by
+  unfold E
+  simp only [Complex.sub_im]
+  rw [zeta5_im_eq_sin]
+  have h2 := zeta5_sq_eq
+  rw [h2]
+  simp only [Complex.add_im, Complex.mul_im, Complex.I_re, Complex.I_im, Complex.ofReal_re, Complex.ofReal_im]
+  ring
+
 /-! ### Point Properties -/
 
 /-- Compute real part of E + 1 -/

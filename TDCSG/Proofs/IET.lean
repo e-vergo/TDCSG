@@ -388,34 +388,58 @@ def HasEmergentIET (r : ℝ) : Prop :=
 
 /-! ### Basic properties of interval lengths -/
 
-/-- The denominator 1 + φ + φ² is positive. -/
-private lemma denom_pos : 0 < 1 + goldenRatio + goldenRatio ^ 2 := by
+/-- 1 + φ is positive. -/
+private lemma one_plus_phi_pos : 0 < 1 + goldenRatio := by
   have h1 : 0 < goldenRatio := goldenRatio_pos
-  have h2 : 0 < goldenRatio ^ 2 := by positivity
   linarith
 
 /-- The first interval length is positive. -/
 lemma length1_pos : 0 < length1 := by
   unfold length1
-  exact div_pos one_pos denom_pos
+  exact div_pos one_pos (by linarith [one_plus_phi_pos])
 
 /-- The second interval length is positive. -/
 lemma length2_pos : 0 < length2 := by
   unfold length2
-  exact div_pos goldenRatio_pos denom_pos
+  exact div_pos one_pos (by linarith [one_plus_phi_pos])
 
 /-- The third interval length is positive. -/
 lemma length3_pos : 0 < length3 := by
   unfold length3
-  have h : 0 < goldenRatio ^ 2 := by positivity
-  exact div_pos h denom_pos
+  exact div_pos one_pos goldenRatio_pos
 
-/-- The three interval lengths sum to one. -/
+/-- The three interval lengths sum to one.
+    Proof: length1 + length2 + length3 = 1/(2(1+φ)) + 1/(2(1+φ)) + 1/φ
+         = 1/(1+φ) + 1/φ = (φ + 1 + φ) / (φ(1+φ))
+         = (1 + 2φ) / (φ + φ²) = (1 + 2φ) / (1 + 2φ) = 1  [using φ² = φ + 1] -/
 lemma lengths_sum_to_one : length1 + length2 + length3 = 1 := by
   unfold length1 length2 length3
-  have h_denom_ne : 1 + goldenRatio + goldenRatio ^ 2 ≠ 0 := by
-    linarith [denom_pos]
-  field_simp [h_denom_ne]
+  have h_phi_pos : 0 < goldenRatio := goldenRatio_pos
+  have h_one_plus_phi_pos : 0 < 1 + goldenRatio := one_plus_phi_pos
+  have h_phi_ne : goldenRatio ≠ 0 := ne_of_gt h_phi_pos
+  have h_one_plus_phi_ne : 1 + goldenRatio ≠ 0 := ne_of_gt h_one_plus_phi_pos
+  have h_two_ne : (2 : ℝ) ≠ 0 := by norm_num
+  have h_sq := Real.goldenRatio_sq  -- φ² = φ + 1
+  -- Using φ² = φ + 1, we have φ(1+φ) = φ + φ² = φ + φ + 1 = 1 + 2φ
+  have h_key : goldenRatio * (1 + goldenRatio) = 1 + 2 * goldenRatio := by
+    calc goldenRatio * (1 + goldenRatio)
+        = goldenRatio + goldenRatio ^ 2 := by ring
+      _ = goldenRatio + (goldenRatio + 1) := by rw [h_sq]
+      _ = 1 + 2 * goldenRatio := by ring
+  -- Also: 1 + 2φ = φ + (1 + φ)
+  have h_sum : goldenRatio + (1 + goldenRatio) = 1 + 2 * goldenRatio := by ring
+  -- Compute directly
+  have h_prod_pos : 0 < goldenRatio * (1 + goldenRatio) := by positivity
+  have h_prod_ne : goldenRatio * (1 + goldenRatio) ≠ 0 := ne_of_gt h_prod_pos
+  calc 1 / (2 * (1 + goldenRatio)) + 1 / (2 * (1 + goldenRatio)) + 1 / goldenRatio
+      = 2 / (2 * (1 + goldenRatio)) + 1 / goldenRatio := by ring
+    _ = 1 / (1 + goldenRatio) + 1 / goldenRatio := by
+        congr 1; field_simp
+    _ = (goldenRatio + (1 + goldenRatio)) / (goldenRatio * (1 + goldenRatio)) := by
+        field_simp
+    _ = (1 + 2 * goldenRatio) / (goldenRatio * (1 + goldenRatio)) := by rw [h_sum]
+    _ = (1 + 2 * goldenRatio) / (1 + 2 * goldenRatio) := by rw [h_key]
+    _ = 1 := by field_simp
 
 /-- length1 < 1 -/
 lemma length1_lt_one : length1 < 1 := by
@@ -429,8 +453,21 @@ lemma length12_lt_one : length1 + length2 < 1 := by
 
 /-! ### GG5 Induced IET -/
 
+/-- The cyclic permutation (0 → 1 → 2 → 0) on Fin 3.
+    This permutation maps:
+    - Interval 0 [E', F') to range position 1 [G, F)
+    - Interval 1 [F', G') to range position 2 [F, E)
+    - Interval 2 [G', E) to range position 0 [E', G) -/
+def cyclicPerm3 : Equiv.Perm (Fin 3) :=
+  Equiv.swap (0 : Fin 3) 1 * Equiv.swap 1 2
+
 /-- The 3-interval exchange transformation induced by GG(5,5)
-dynamics at criticality. -/
+dynamics at criticality.
+
+The permutation is cyclic (0 → 1 → 2 → 0), matching the paper geometry:
+- Word1 maps E'F' → GF (domain 0 → range 1)
+- Word2 maps F'G' → FE (domain 1 → range 2)
+- Word3 maps G'E → E'G (domain 2 → range 0) -/
 noncomputable def GG5_induced_IET : IntervalExchangeTransformation 3 where
   n_pos := by norm_num
   lengths := fun i =>
@@ -456,7 +493,7 @@ noncomputable def GG5_induced_IET : IntervalExchangeTransformation 3 where
       exact h
     · decide
     · decide
-  permutation := Equiv.swap 0 2
+  permutation := cyclicPerm3
 
 /-- The emergent IET at a given radius. -/
 noncomputable def EmergentIET (r : ℝ) (_ : HasEmergentIET r) :
@@ -485,73 +522,62 @@ theorem IET_structure_golden_ratio
   · rfl
   · rfl
 
-/-- The interval lengths satisfy golden ratio relations. -/
-theorem interval_lengths_golden_ratio_relations :
-    length2 = goldenRatio * length1 ∧
-    length3 = goldenRatio * length2 := by
-  constructor
-  · unfold length1 length2
-    field_simp
-  · unfold length2 length3
-    field_simp
+/-- The interval lengths satisfy: length1 = length2 (equal short segments). -/
+theorem length1_eq_length2 : length1 = length2 := rfl
+
+/-- length3 = 1/φ = ψ (the golden conjugate, positive version). -/
+theorem length3_eq_one_over_phi : length3 = 1 / goldenRatio := rfl
+
+/-- length1 + length2 = ψ² = 1 - ψ (using ψ + ψ² = 1). -/
+lemma length12_sum : length1 + length2 = 1 / (1 + goldenRatio) := by
+  unfold length1 length2
+  have h_pos : 0 < 1 + goldenRatio := one_plus_phi_pos
+  have h_ne : 2 * (1 + goldenRatio) ≠ 0 := by linarith
+  field_simp; norm_num
 
 /-! ### Displacement formulas in terms of golden ratio -/
 
-/-- The denominator 1 + φ + φ² equals 2(1 + φ) using φ² = φ + 1. -/
-lemma denom_eq_two_one_plus_phi :
-    1 + goldenRatio + goldenRatio ^ 2 = 2 * (1 + goldenRatio) := by
-  have h := Real.goldenRatio_sq  -- φ² = φ + 1
-  rw [h]
-  ring
+/-- Displacement 0 formula: d₀ = length3 = 1/φ = ψ ≈ 0.618. -/
+lemma displacement0_formula : displacement0 = 1 / goldenRatio := by
+  unfold displacement0 length3
+  rfl
 
-/-- Displacement 0 formula: d₀ = (1 + 2φ)/(2(1+φ)). -/
-lemma displacement0_formula :
-    displacement0 = (1 + 2 * goldenRatio) / (2 * (1 + goldenRatio)) := by
-  unfold displacement0 length1
-  rw [denom_eq_two_one_plus_phi]
-  have h_pos : 0 < 1 + goldenRatio := by linarith [goldenRatio_pos]
+/-- Displacement 1 formula: d₁ = length3 = 1/φ = ψ ≈ 0.618.
+    Same as displacement0 since both intervals shift by the same amount. -/
+lemma displacement1_formula : displacement1 = 1 / goldenRatio := by
+  unfold displacement1 length3
+  rfl
+
+/-- Displacement 2 formula: d₂ = -(length1 + length2) = -1/(1+φ) = -ψ² ≈ -0.382. -/
+lemma displacement2_formula : displacement2 = -1 / (1 + goldenRatio) := by
+  unfold displacement2 length1 length2
+  have h_pos : 0 < 1 + goldenRatio := one_plus_phi_pos
   have h_ne : 2 * (1 + goldenRatio) ≠ 0 := by linarith
-  field_simp
-  ring
+  have h_ne' : (1 + goldenRatio) ≠ 0 := by linarith
+  calc -(1 / (2 * (1 + goldenRatio)) + 1 / (2 * (1 + goldenRatio)))
+      = -(2 / (2 * (1 + goldenRatio))) := by ring
+    _ = -(1 / (1 + goldenRatio)) := by field_simp
+    _ = -1 / (1 + goldenRatio) := by ring
 
-/-- Displacement 1 formula: d₁ = φ/(2(1+φ)).
-    Note: length3 - length1 = (φ² - 1)/(2(1+φ)) = φ/(2(1+φ)) using φ² - 1 = φ. -/
-lemma displacement1_formula :
-    displacement1 = goldenRatio / (2 * (1 + goldenRatio)) := by
-  unfold displacement1 length3 length1
-  rw [denom_eq_two_one_plus_phi]
-  -- φ² - 1 = φ by the golden ratio property φ² = φ + 1
-  have h_sq : goldenRatio ^ 2 = goldenRatio + 1 := Real.goldenRatio_sq
-  have h_sq' : goldenRatio ^ 2 - 1 = goldenRatio := by linarith [h_sq]
-  rw [← sub_div, h_sq']
+/-- displacement0 = displacement1 (both equal ψ). -/
+lemma displacement0_eq_displacement1 : displacement0 = displacement1 := by
+  rw [displacement0_formula, displacement1_formula]
 
-/-- Displacement 2 formula: d₂ = -(1+φ)/(2(1+φ)) = -1/2. -/
-lemma displacement2_formula :
-    displacement2 = -(1 + goldenRatio) / (2 * (1 + goldenRatio)) := by
-  unfold displacement2
-  have h_pos : 0 < 1 + goldenRatio := by linarith [goldenRatio_pos]
-  have h_ne : 2 * (1 + goldenRatio) ≠ 0 := by linarith
-  field_simp
+/-- displacement2 = -(length1 + length2) = -ψ². -/
+lemma displacement2_eq_neg_length12 : displacement2 = -(length1 + length2) := rfl
 
-/-- The emergent IET has golden ratio structure. -/
-theorem emergent_IET_golden_structure
+/-- The emergent IET structure: two short intervals of length ψ²/2,
+    one long interval of length ψ. -/
+theorem emergent_IET_structure
     (h : HasEmergentIET criticalRadius) :
     let iet := EmergentIET criticalRadius h
-    ∃ (base : ℝ), base > 0 ∧
-      iet.lengths 0 = base ∧
-      iet.lengths 1 = goldenRatio * base ∧
-      iet.lengths 2 = goldenRatio ^ 2 * base := by
-  use length1
+    iet.lengths 0 = length1 ∧
+    iet.lengths 1 = length2 ∧
+    iet.lengths 2 = length3 := by
   constructor
-  · exact length1_pos
+  · rfl
   constructor
-  · unfold EmergentIET GG5_induced_IET; rfl
-  constructor
-  · unfold EmergentIET GG5_induced_IET length1 length2
-    simp
-    field_simp
-  · unfold EmergentIET GG5_induced_IET length1 length3
-    simp
-    field_simp
+  · rfl
+  · rfl
 
 end TDCSG.CompoundSymmetry.GG5

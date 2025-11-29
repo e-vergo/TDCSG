@@ -67,9 +67,11 @@ noncomputable def domainLeft (i : Fin n) : ℝ :=
 noncomputable def domainRight (i : Fin n) : ℝ :=
   iet.domainLeft i + iet.lengths i
 
-/-- The left endpoint of the ith interval in the range (after permutation). -/
+/-- The left endpoint of the ith interval in the range (after permutation).
+    The range ordering places interval π⁻¹(j) at position j, so rangeLeft(i)
+    sums the lengths of intervals π⁻¹(0), π⁻¹(1), ..., π⁻¹(i-1). -/
 noncomputable def rangeLeft (i : Fin n) : ℝ :=
-  ∑ j : Fin i.val, iet.lengths (iet.permutation ⟨j, Nat.lt_trans j.isLt i.isLt⟩)
+  ∑ j : Fin i.val, iet.lengths (iet.permutation.symm ⟨j, Nat.lt_trans j.isLt i.isLt⟩)
 
 /-- The right endpoint of the ith interval in the range. -/
 noncomputable def rangeRight (i : Fin n) : ℝ :=
@@ -163,34 +165,50 @@ def IET_three_example (α β : ℝ) (hα : 0 < α) (hβ : 0 < β) (hsum : α + �
 
 end Examples
 
-/-! ## Golden ratio IET definitions -/
+/-! ## Golden ratio IET definitions
+
+Based on the paper geometry, the segment E'E is divided into three sub-segments:
+- [E', F') of length ψ²/2 ≈ 0.191
+- [F', G') of length ψ²/2 ≈ 0.191
+- [G', E) of length ψ ≈ 0.618
+
+where ψ = (√5-1)/2 = 1/φ is the golden conjugate (positive version).
+
+The IET permutation is cyclic: (0 → 1 → 2 → 0), mapping:
+- E'F' → GF (interval 0 → range position 1)
+- F'G' → FE (interval 1 → range position 2)
+- G'E → E'G (interval 2 → range position 0)
+-/
 
 namespace TDCSG.Definitions
 
 open Real
 
-/-- First fundamental length in the emergent 3-interval IET. -/
+/-- First interval length: |E'F'| = ψ²/2 = 1/(2(1+φ)) ≈ 0.191.
+    This is the length of segment from E' to F'. -/
 noncomputable def length1 : ℝ :=
-  1 / (1 + goldenRatio + goldenRatio ^ 2)
+  1 / (2 * (1 + goldenRatio))
 
-/-- Second fundamental length in the emergent 3-interval IET. -/
+/-- Second interval length: |F'G'| = ψ²/2 = 1/(2(1+φ)) ≈ 0.191.
+    This is the length of segment from F' to G'. -/
 noncomputable def length2 : ℝ :=
-  goldenRatio / (1 + goldenRatio + goldenRatio ^ 2)
+  1 / (2 * (1 + goldenRatio))
 
-/-- Third fundamental length in the emergent 3-interval IET. -/
+/-- Third interval length: |G'E| = ψ = 1/φ ≈ 0.618.
+    This is the length of segment from G' to E. -/
 noncomputable def length3 : ℝ :=
-  (goldenRatio ^ 2) / (1 + goldenRatio + goldenRatio ^ 2)
+  1 / goldenRatio
 
-/-- Displacement for interval 0: d_0 = 1 - length1.
-    This is the amount by which points in interval 0 are translated. -/
-noncomputable def displacement0 : ℝ := 1 - length1
+/-- Displacement for interval 0: d_0 = length3 = ψ ≈ 0.618.
+    Points in [E', F') are translated by ψ to [G, F). -/
+noncomputable def displacement0 : ℝ := length3
 
-/-- Displacement for interval 1: d_1 = length3 - length1.
-    This is the amount by which points in interval 1 are translated. -/
-noncomputable def displacement1 : ℝ := length3 - length1
+/-- Displacement for interval 1: d_1 = length3 = ψ ≈ 0.618.
+    Points in [F', G') are translated by ψ to [F, E). -/
+noncomputable def displacement1 : ℝ := length3
 
-/-- Displacement for interval 2: d_2 = -1/2.
-    This is the amount by which points in interval 2 are translated. -/
-noncomputable def displacement2 : ℝ := -1/2
+/-- Displacement for interval 2: d_2 = -(length1 + length2) = -ψ² ≈ -0.382.
+    Points in [G', E) are translated by -ψ² to [E', G). -/
+noncomputable def displacement2 : ℝ := -(length1 + length2)
 
 end TDCSG.Definitions

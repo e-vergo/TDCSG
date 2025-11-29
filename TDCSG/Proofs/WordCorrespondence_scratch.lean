@@ -109,51 +109,85 @@ lemma IET_toFun_interval2 (x : ℝ)
 These lemmas show that each word produces the correct displacement when applied to a segment point.
 The proofs are computational verifications tracking the point through each rotation. -/
 
-/-- Key algebraic identity for word1 = A^{-2}B^{-1}A^{-1}B^{-1} acting on E-multiples.
+/-- Key algebraic identity for word1 = AABAB (a²bab) acting on E-multiples.
 
 For any point of the form c*E on segment E'E, applying word1 translates it by 2*displacement0*E.
-This is the core algebraic fact verified by computing through the zeta5 rotations. -/
+This is the core algebraic fact verified by computing through the zeta5 rotations.
+
+Forward rotation formulas:
+- A: z ↦ -1 + ζ₅ * (z + 1)  (rotation by 2π/5 about -1)
+- B: z ↦ 1 + ζ₅ * (z - 1)   (rotation by 2π/5 about 1)
+
+Word1 = [A, A, B, A, B] applied left to right. -/
 lemma word1_algebraic_identity :
     ∀ c : ℝ, c ∈ Set.Icc (-1 : ℝ) 1 →
     let z := (c : ℂ) • E
-    let result := -- A^{-1} A^{-1} B^{-1} A^{-1} B^{-1} applied in complex form
-      let step1 := (-1 : ℂ) + ζ₅^4 * (z + 1)       -- A^{-1}
-      let step2 := (-1 : ℂ) + ζ₅^4 * (step1 + 1)   -- A^{-1}
-      let step3 := (1 : ℂ) + ζ₅^4 * (step2 - 1)    -- B^{-1}
-      let step4 := (-1 : ℂ) + ζ₅^4 * (step3 + 1)   -- A^{-1}
-      (1 : ℂ) + ζ₅^4 * (step4 - 1)                 -- B^{-1}
+    let result := -- A A B A B applied in complex form (forward rotations with ζ₅)
+      let step1 := (-1 : ℂ) + ζ₅ * (z + 1)         -- A
+      let step2 := (-1 : ℂ) + ζ₅ * (step1 + 1)     -- A
+      let step3 := (1 : ℂ) + ζ₅ * (step2 - 1)      -- B
+      let step4 := (-1 : ℂ) + ζ₅ * (step3 + 1)     -- A
+      (1 : ℂ) + ζ₅ * (step4 - 1)                   -- B
     result = z + (2 * displacement0) • E := by
-  intro c hc
-  -- The algebraic verification using zeta5^5 = 1 and cyclotomic identities
-  -- Expanding and simplifying gives the translation by 2*displacement0*E
+  intro c _hc
   simp only
-  unfold displacement0 length3
-  -- Use the cyclotomic identity: 1 + zeta5 + zeta5^2 + zeta5^3 + zeta5^4 = 0
-  -- and zeta5^5 = 1 to simplify the composition
-  ring_nf
-  -- Reduce powers of zeta5 using zeta5^5 = 1
-  have h8 : ζ₅^8 = ζ₅^3 := zeta5_pow_eight
-  have h12 : ζ₅^12 = ζ₅^2 := by rw [show (12 : ℕ) = 5 + 5 + 2 by norm_num, pow_add, pow_add, zeta5_pow_five]; ring
-  have h20 : ζ₅^20 = 1 := by rw [show (20 : ℕ) = 5 * 4 by norm_num, pow_mul, zeta5_pow_five]; ring
-  rw [h8, h12, h20]
-  -- Now zeta5^20 = 1, so 1 * c * E = c * E
-  simp only [one_mul]
-  -- The remaining goal is a polynomial identity in zeta5
-  apply Complex.ext
-  · -- Real part: simplify re 2 = 2, im 2 = 0
-    simp only [Complex.add_re, Complex.mul_re, Complex.sub_re, Complex.ofReal_re,
-               Complex.ofReal_im, Complex.one_re, smul_eq_mul]
-    norm_num [Complex.re, Complex.im]
-    -- Goal: 2 - (zeta5^4).re*2 + 2*(zeta5^3).re - 2*(zeta5^2).re + c*E.re =
-    --       c*E.re + (2 - (3+sqrt5)/normSq(3+sqrt5)*2)*E.re
+  -- Key power reduction lemmas
+  have h5 : ζ₅^5 = (1 : ℂ) := zeta5_pow_five
+  have h6 : ζ₅^6 = ζ₅ := zeta5_pow_six
+  have h7 : ζ₅^7 = ζ₅^2 := zeta5_pow_seven
+  -- sqrt 5 squared equals 5
+  have hsqrt5_sq : Real.sqrt 5 ^ 2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
+  -- The key identity: F = (1/φ)*E where F = 1 - ζ₅ + ζ₅² - ζ₅³ and E = ζ₅ - ζ₅²
+  have h_sum1 : ζ₅ + ζ₅^4 = ((Real.sqrt 5 - 1) / 2 : ℝ) := by
+    apply Complex.ext
+    · simp only [Complex.add_re, Complex.ofReal_re]
+      rw [zeta5_re, zeta5_pow4_re]
+      ring
+    · simp only [Complex.add_im, Complex.ofReal_im]
+      rw [zeta5_im_eq_sin, zeta5_pow4_im_neg, zeta5_im_eq_sin]
+      ring
+  have h_F_eq : (1 : ℂ) - ζ₅ + ζ₅^2 - ζ₅^3 = (1 / Real.goldenRatio : ℝ) * (ζ₅ - ζ₅^2) := by
+    -- F = (ζ₅ + ζ₅⁴)*(ζ₅ - ζ₅²) and ζ₅ + ζ₅⁴ = (√5-1)/2 = 1/φ
+    -- First prove (ζ₅ + ζ₅⁴)*(ζ₅ - ζ₅²) = 1 - ζ₅ + ζ₅² - ζ₅³
+    have h_factor : (ζ₅ + ζ₅^4) * (ζ₅ - ζ₅^2) = (1 : ℂ) - ζ₅ + ζ₅^2 - ζ₅^3 := by
+      -- Expand: ζ₅² - ζ₅³ + ζ₅⁵ - ζ₅⁶ = ζ₅² - ζ₅³ + 1 - ζ₅ = 1 - ζ₅ + ζ₅² - ζ₅³
+      calc (ζ₅ + ζ₅^4) * (ζ₅ - ζ₅^2)
+          = ζ₅^2 - ζ₅^3 + ζ₅^5 - ζ₅^6 := by ring
+        _ = ζ₅^2 - ζ₅^3 + 1 - ζ₅ := by rw [h5, h6]
+        _ = 1 - ζ₅ + ζ₅^2 - ζ₅^3 := by ring
+    -- Now use h_sum1 and h_factor
+    calc (1 : ℂ) - ζ₅ + ζ₅^2 - ζ₅^3
+        = (ζ₅ + ζ₅^4) * (ζ₅ - ζ₅^2) := h_factor.symm
+      _ = ((Real.sqrt 5 - 1) / 2 : ℝ) * (ζ₅ - ζ₅^2) := by rw [h_sum1]
+      _ = (1 / Real.goldenRatio : ℝ) * (ζ₅ - ζ₅^2) := by
+          congr 1
+          simp only [Complex.ofReal_inj]
+          unfold Real.goldenRatio
+          -- Goal: (√5 - 1) / 2 = 1 / ((1 + √5) / 2) = 2 / (1 + √5)
+          have h_cross : (Real.sqrt 5 - 1) * (1 + Real.sqrt 5) = 4 := by
+            calc (Real.sqrt 5 - 1) * (1 + Real.sqrt 5)
+                = Real.sqrt 5 + Real.sqrt 5 ^ 2 - 1 - Real.sqrt 5 := by ring
+              _ = Real.sqrt 5 + 5 - 1 - Real.sqrt 5 := by rw [hsqrt5_sq]
+              _ = 4 := by ring
+          field_simp
+          linarith
+  -- Now unfold and compute
+  unfold displacement0 length3 E
+  -- Convert smul to mul for complex arithmetic
+  have hcE : (c : ℂ) • (ζ₅ - ζ₅^2) = c * (ζ₅ - ζ₅^2) := by rfl
+  have h2dE : (2 * (1 / Real.goldenRatio)) • (ζ₅ - ζ₅^2) =
+              (2 * (1 / Real.goldenRatio) : ℝ) * (ζ₅ - ζ₅^2) := by rfl
+  rw [hcE, h2dE]
+  -- Now prove the algebraic identity by direct expansion
+  -- The LHS expands to: c*(ζ₅ - ζ₅²) + 2*(1 - ζ₅ + ζ₅² - ζ₅³) after using ζ₅^5=1, ζ₅^6=ζ₅, ζ₅^7=ζ₅²
+  have h_expand : (1 : ℂ) + ζ₅ * ((-1 : ℂ) + ζ₅ * ((1 : ℂ) + ζ₅ * ((-1 : ℂ) + ζ₅ * ((-1 : ℂ) + ζ₅ * (↑c * (ζ₅ - ζ₅^2) + 1) + 1) - 1) + 1) - 1)
+      = ↑c * (ζ₅ - ζ₅^2) + 2 * ((1 : ℂ) - ζ₅ + ζ₅^2 - ζ₅^3) := by
     ring_nf
-    sorry
-  · -- Imaginary part: simplify re 2 = 2, im 2 = 0
-    simp only [Complex.add_im, Complex.mul_im, Complex.sub_im, Complex.ofReal_re,
-               Complex.ofReal_im, Complex.one_im, smul_eq_mul]
-    norm_num [Complex.re, Complex.im]
-    ring_nf
-    sorry
+    rw [h5, h6, h7]
+    ring
+  rw [h_expand, h_F_eq]
+  push_cast
+  ring
 
 /-- Word 1 action on segment points: translates by displacement0.
 

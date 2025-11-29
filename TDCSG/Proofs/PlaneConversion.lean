@@ -85,8 +85,8 @@ lemma E'_in_left_disk : ‖E' - (-1)‖ ≤ r_crit := by
   rw [norm_neg]
   exact E_in_right_disk
 
-/-- Compute real part of E -/
-private lemma E_re : E.re = Real.cos (2 * π / 5) - Real.cos (4 * π / 5) := by
+/-- Compute real part of E in trigonometric form -/
+private lemma E_re_trig : E.re = Real.cos (2 * π / 5) - Real.cos (4 * π / 5) := by
   unfold E
   have h1 := zeta5_eq
   have h2 := zeta5_sq_eq
@@ -106,7 +106,7 @@ private lemma cos_four_pi_fifth : Real.cos (4 * π / 5) = -Real.cos (π / 5) := 
 /-- Point E has positive real part.
 This is a computationally verifiable fact using E = ζ₅ - ζ₅². -/
 lemma E_re_pos : 0 < E.re := by
-  rw [E_re, cos_four_pi_fifth, cos_two_pi_fifth, Real.cos_pi_div_five]
+  rw [E_re_trig, cos_four_pi_fifth, cos_two_pi_fifth, Real.cos_pi_div_five]
   unfold Real.goldenRatio
   -- E.re = (φ - 1)/2 - (-cos(π/5)) = ((1+√5)/2 - 1)/2 + (1+√5)/4
   --      = (√5 - 1)/4 + (1+√5)/4 = √5/2 > 0

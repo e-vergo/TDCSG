@@ -73,15 +73,53 @@ theorem goldenRatio_mul_rat_irrational (q : ℚ) (hq : q ≠ 0) :
   rw [Rat.cast_div, div_eq_iff hq_cast, ← hr]
 
 /-- The GG5 IET rotation ratio is irrational.
-    Since length2 = φ * length1, we have length2/length1 = φ. -/
+    length3/length1 = (1/φ) / (1/(2(1+φ))) = 2(1+φ)/φ is irrational. -/
 theorem GG5_IET_rotation_irrational :
-    Irrational (length2 / length1) := by
-  have h_rel := interval_lengths_golden_ratio_relations.1
-  rw [h_rel]
-  have h1_pos := length1_pos
-  have h1_ne : length1 ≠ 0 := ne_of_gt h1_pos
-  rw [mul_div_assoc, div_self h1_ne, mul_one]
-  exact goldenRatio_irrational
+    Irrational (length3 / length1) := by
+  unfold length3 length1
+  have h_phi_pos : 0 < goldenRatio := goldenRatio_pos
+  have h_one_plus_phi_pos : 0 < 1 + goldenRatio := by linarith
+  have h_one_plus_phi_ne : 1 + goldenRatio ≠ 0 := ne_of_gt h_one_plus_phi_pos
+  have h_phi_ne : goldenRatio ≠ 0 := ne_of_gt h_phi_pos
+  -- Simplify: (1/φ) / (1/(2(1+φ))) = 2(1+φ)/φ
+  have h_ratio : (1 / goldenRatio) / (1 / (2 * (1 + goldenRatio))) =
+                 2 * (1 + goldenRatio) / goldenRatio := by field_simp
+  rw [h_ratio]
+  -- If 2(1+φ)/φ = q for rational q, then φ = 2/(q-2) is rational, contradiction
+  intro ⟨q, hq⟩
+  have h_phi_irr := goldenRatio_irrational
+  apply h_phi_irr
+  have hq_ne : q ≠ 0 := by
+    intro h_zero; rw [h_zero] at hq; simp only [Rat.cast_zero] at hq
+    have : 2 * (1 + goldenRatio) / goldenRatio = 0 := hq.symm
+    have := div_eq_zero_iff.mp this
+    rcases this with h | h
+    · linarith
+    · exact h_phi_ne h
+  have hq_cast_ne : (q : ℝ) ≠ 0 := Rat.cast_ne_zero.mpr hq_ne
+  -- From hq: q = 2(1+φ)/φ, so qφ = 2 + 2φ, so φ(q - 2) = 2
+  have h_from_hq : (q : ℝ) * goldenRatio = 2 * (1 + goldenRatio) := by
+    field_simp [hq_cast_ne, h_phi_ne] at hq ⊢; linarith
+  have h_factor : goldenRatio * ((q : ℝ) - 2) = 2 := by linarith
+  have hq_ne_2 : (q : ℝ) ≠ 2 := by
+    intro h_eq2; rw [h_eq2] at h_factor; simp at h_factor
+  have hq_sub_ne : q - 2 ≠ 0 := by
+    intro h
+    have : (q : ℝ) = 2 := by
+      have hcast : ((q - 2 : ℚ) : ℝ) = (0 : ℝ) := by simp [h]
+      simp at hcast
+      linarith
+    exact hq_ne_2 this
+  -- φ = 2/(q-2) which is rational
+  use 2 / (q - 2)
+  push_cast
+  have hq_sub_cast_ne : (q : ℝ) - 2 ≠ 0 := fun h => hq_ne_2 (by linarith : (q : ℝ) = 2)
+  -- From h_factor: goldenRatio * (q - 2) = 2, so goldenRatio = 2 / (q - 2)
+  have h_phi_eq : goldenRatio = 2 / ((q : ℝ) - 2) := by
+    have := h_factor
+    field_simp [hq_sub_cast_ne] at this ⊢
+    linarith
+  exact h_phi_eq.symm
 
 /-! ### Main theorems -/
 
@@ -180,54 +218,79 @@ theorem GG5_domainLeft_2 : GG5_induced_IET.domainLeft 2 = length1 + length2 := b
   unfold IntervalExchangeTransformation.domainLeft GG5_induced_IET
   simp [Fin.sum_univ_two]
 
-/-- GG5 range boundaries (accounting for permutation swap 0 2) -/
+/-- GG5 range boundaries (accounting for cyclic permutation 0→1→2→0)
+    The rangeLeft formula uses the INVERSE permutation perm.symm.
+    With perm.symm(0)=2, perm.symm(1)=0:
+    - rangeLeft 0 = 0 (empty sum)
+    - rangeLeft 1 = lengths(perm.symm 0) = lengths 2 = length3
+    - rangeLeft 2 = lengths(perm.symm 0) + lengths(perm.symm 1) = length3 + length1 -/
 theorem GG5_rangeLeft_0 : GG5_induced_IET.rangeLeft 0 = 0 := by
   unfold IntervalExchangeTransformation.rangeLeft
   simp
 
 theorem GG5_rangeLeft_1 : GG5_induced_IET.rangeLeft 1 = length3 := by
+  -- rangeLeft 1 = lengths(perm.symm(0)) = lengths(2) = length3
+  -- cyclicPerm3.symm(0) = 2, so lengths(2) = length3
   unfold IntervalExchangeTransformation.rangeLeft GG5_induced_IET
-  simp
+  -- Sum over Fin 1 has one element, evaluate cyclicPerm3.symm(0) = 2
+  have h_eq : (∑ x : Fin 1,
+      if cyclicPerm3.symm ⟨↑x, Nat.lt_trans x.isLt (by omega : 1 < 3)⟩ = 0 then length1
+      else if cyclicPerm3.symm ⟨↑x, Nat.lt_trans x.isLt (by omega : 1 < 3)⟩ = 1 then length2
+      else length3) = length3 := by
+    -- cyclicPerm3.symm(0) = 2, which is ≠ 0 and ≠ 1, so result is length3
+    have hs : cyclicPerm3.symm ⟨0, by omega⟩ = (2 : Fin 3) := by unfold cyclicPerm3; native_decide
+    simp only [Fin.sum_univ_one, Fin.val_zero, hs, Fin.reduceEq, ↓reduceIte]
+  convert h_eq using 2
 
-theorem GG5_rangeLeft_2 : GG5_induced_IET.rangeLeft 2 = length3 + length2 := by
+theorem GG5_rangeLeft_2 : GG5_induced_IET.rangeLeft 2 = length3 + length1 := by
+  -- rangeLeft 2 = lengths(perm.symm(0)) + lengths(perm.symm(1)) = length3 + length1
+  -- cyclicPerm3.symm(0) = 2, cyclicPerm3.symm(1) = 0
   unfold IntervalExchangeTransformation.rangeLeft GG5_induced_IET
-  simp [Fin.sum_univ_two, Equiv.swap_apply_of_ne_of_ne, Equiv.swap_apply_left]
+  have hs0 : cyclicPerm3.symm ⟨0, by omega⟩ = (2 : Fin 3) := by unfold cyclicPerm3; native_decide
+  have hs1 : cyclicPerm3.symm ⟨1, by omega⟩ = (0 : Fin 3) := by unfold cyclicPerm3; native_decide
+  have h_eq : (∑ x : Fin 2,
+      if cyclicPerm3.symm ⟨↑x, Nat.lt_trans x.isLt (by omega : 2 < 3)⟩ = 0 then length1
+      else if cyclicPerm3.symm ⟨↑x, Nat.lt_trans x.isLt (by omega : 2 < 3)⟩ = 1 then length2
+      else length3) = length3 + length1 := by
+    simp only [Fin.sum_univ_two, Fin.val_zero, Fin.val_one, hs0, hs1, Fin.reduceEq, ↓reduceIte]
+  convert h_eq using 2
 
-/-- GG5 permutation values -/
-@[simp] theorem GG5_perm_0 : GG5_induced_IET.permutation 0 = 2 := rfl
+/-- GG5 permutation values (cyclic: 0→1, 1→2, 2→0) -/
+@[simp] theorem GG5_perm_0 : GG5_induced_IET.permutation 0 = 1 := by
+  unfold GG5_induced_IET cyclicPerm3; decide
 
-@[simp] theorem GG5_perm_1 : GG5_induced_IET.permutation 1 = 1 := rfl
+@[simp] theorem GG5_perm_1 : GG5_induced_IET.permutation 1 = 2 := by
+  unfold GG5_induced_IET cyclicPerm3; decide
 
-@[simp] theorem GG5_perm_2 : GG5_induced_IET.permutation 2 = 0 := rfl
+@[simp] theorem GG5_perm_2 : GG5_induced_IET.permutation 2 = 0 := by
+  unfold GG5_induced_IET cyclicPerm3; decide
 
-/-- The actual displacement for interval 0 matches displacement0 -/
+/-- The actual displacement for interval 0 matches displacement0.
+    With perm(0) = 1 and rangeLeft(1) = length3:
+    rangeLeft(perm(0)) - domainLeft(0) = length3 - 0 = length3 = displacement0 -/
 theorem GG5_actual_displacement_interval0 :
     GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation 0) - GG5_induced_IET.domainLeft 0 = displacement0 := by
-  simp only [GG5_perm_0, GG5_rangeLeft_2, GG5_domainLeft_0]
-  unfold displacement0
-  have h := lengths_sum_to_one
-  linarith
+  simp only [GG5_perm_0, GG5_rangeLeft_1, GG5_domainLeft_0]
+  -- Goal: length3 - 0 = displacement0, and displacement0 = length3 by definition
+  unfold displacement0; ring
 
-/-- The actual displacement for interval 1 matches displacement1 -/
+/-- The actual displacement for interval 1 matches displacement1.
+    With perm(1) = 2 and rangeLeft(2) = length3 + length1:
+    rangeLeft(perm(1)) - domainLeft(1) = (length3 + length1) - length1 = length3 = displacement1 -/
 theorem GG5_actual_displacement_interval1 :
     GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation 1) - GG5_induced_IET.domainLeft 1 = displacement1 := by
-  simp only [GG5_perm_1, GG5_rangeLeft_1, GG5_domainLeft_1]
-  unfold displacement1
-  ring
+  simp only [GG5_perm_1, GG5_rangeLeft_2, GG5_domainLeft_1]
+  -- Goal: (length3 + length1) - length1 = displacement1, and displacement1 = length3
+  unfold displacement1; ring
 
-/-- The actual displacement for interval 2 matches displacement2 -/
+/-- The actual displacement for interval 2 matches displacement2.
+    With perm(2) = 0 and rangeLeft(0) = 0:
+    rangeLeft(perm(2)) - domainLeft(2) = 0 - (length1 + length2) = -(length1 + length2) = displacement2 -/
 theorem GG5_actual_displacement_interval2 :
     GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation 2) - GG5_induced_IET.domainLeft 2 = displacement2 := by
   simp only [GG5_perm_2, GG5_rangeLeft_0, GG5_domainLeft_2]
-  unfold displacement2
-  -- length1 + length2 = 1/2, so 0 - (length1 + length2) = -1/2
-  have h_sq : goldenRatio ^ 2 = goldenRatio + 1 := Real.goldenRatio_sq
-  have h_denom : 1 + goldenRatio + goldenRatio ^ 2 = 2 * (1 + goldenRatio) := by rw [h_sq]; ring
-  unfold length1 length2
-  rw [h_denom]
-  have h_pos : 0 < 1 + goldenRatio := by have := goldenRatio_pos; linarith
-  field_simp
-  ring
+  -- Goal: 0 - (length1 + length2) = displacement2, and displacement2 = -(length1 + length2)
+  unfold displacement2; ring
 
 /-- The displacement function equals f(x) - x for any x in [0,1). -/
 theorem GG5_displacement_eq_toFun_sub (x : ℝ) (hx : x ∈ Set.Ico 0 1) :
@@ -397,52 +460,49 @@ theorem int_add_int_mul_phi_eq_zero (a b : ℤ)
 /-- Key algebraic lemma: For any natural numbers n₀, n₁, n₂ with sum > 0,
     the weighted displacement sum n₀*d₀ + n₁*d₁ + n₂*d₂ ≠ 0.
 
-    This is the core constraint that prevents periodic orbits in the GG5 IET. -/
+    With displacement0 = displacement1 = 1/φ and displacement2 = -1/(1+φ):
+    n₀/φ + n₁/φ - n₂/(1+φ) = 0
+    (n₀ + n₁)/φ = n₂/(1+φ)
+    (n₀ + n₁)(1+φ) = n₂φ
+    (n₀ + n₁) + (n₀ + n₁ - n₂)φ = 0
+
+    By linear independence of {1, φ}: n₀ + n₁ = 0 and n₀ + n₁ - n₂ = 0.
+    Since n₀, n₁ ≥ 0, we get n₀ = n₁ = n₂ = 0, contradicting sum > 0. -/
 theorem displacement_sum_ne_zero (n₀ n₁ n₂ : ℕ) (h_sum : 0 < n₀ + n₁ + n₂) :
     n₀ * displacement0 + n₁ * displacement1 + n₂ * displacement2 ≠ 0 := by
   intro h_zero
-  -- Express in terms of φ
-  have h_denom_pos : 0 < 2 * (1 + goldenRatio) := by
-    have : 0 < goldenRatio := goldenRatio_pos
-    linarith
-  have h_denom_ne : 2 * (1 + goldenRatio) ≠ 0 := ne_of_gt h_denom_pos
-  -- Rewrite using the displacement formulas
+  -- Rewrite using displacement formulas: d₀ = d₁ = 1/φ, d₂ = -1/(1+φ)
   rw [displacement0_formula, displacement1_formula, displacement2_formula] at h_zero
-  -- The equation is:
-  -- n₀ * (1 + 2φ)/(2(1+φ)) + n₁ * φ/(2(1+φ)) + n₂ * (-(1+φ))/(2(1+φ)) = 0
-  -- Multiply by 2(1+φ) to clear denominators:
-  -- n₀(1 + 2φ) + n₁φ - n₂(1+φ) = 0
-  have h_clear : (n₀ : ℝ) * (1 + 2 * goldenRatio) + (n₁ : ℝ) * goldenRatio -
-                 (n₂ : ℝ) * (1 + goldenRatio) = 0 := by
-    have h_eq := h_zero
-    have h1 : (n₀ : ℝ) * ((1 + 2 * goldenRatio) / (2 * (1 + goldenRatio))) =
-              (n₀ : ℝ) * (1 + 2 * goldenRatio) / (2 * (1 + goldenRatio)) := by ring
-    have h2 : (n₁ : ℝ) * (goldenRatio / (2 * (1 + goldenRatio))) =
-              (n₁ : ℝ) * goldenRatio / (2 * (1 + goldenRatio)) := by ring
-    have h3 : (n₂ : ℝ) * (-(1 + goldenRatio) / (2 * (1 + goldenRatio))) =
-              -(n₂ : ℝ) * (1 + goldenRatio) / (2 * (1 + goldenRatio)) := by ring
-    rw [h1, h2, h3] at h_eq
-    have h_combined : ((n₀ : ℝ) * (1 + 2 * goldenRatio) + (n₁ : ℝ) * goldenRatio -
-                      (n₂ : ℝ) * (1 + goldenRatio)) / (2 * (1 + goldenRatio)) = 0 := by
-      field_simp at h_eq ⊢
-      linarith
-    exact div_eq_zero_iff.mp h_combined |>.resolve_right h_denom_ne
-  -- Expand: n₀ + 2n₀φ + n₁φ - n₂ - n₂φ = 0
-  -- Group by 1 and φ: (n₀ - n₂) + (2n₀ + n₁ - n₂)φ = 0
-  have h_coeff : (n₀ : ℝ) - n₂ + ((2 : ℝ) * n₀ + n₁ - n₂) * goldenRatio = 0 := by
+  -- h_zero: n₀/φ + n₁/φ + n₂*(-1/(1+φ)) = 0
+  have h_phi_pos : 0 < goldenRatio := goldenRatio_pos
+  have h_phi_ne : goldenRatio ≠ 0 := ne_of_gt h_phi_pos
+  have h_one_phi_pos : 0 < 1 + goldenRatio := by linarith
+  have h_one_phi_ne : 1 + goldenRatio ≠ 0 := ne_of_gt h_one_phi_pos
+  -- Clear denominators: (n₀ + n₁)(1+φ) = n₂φ
+  have h_clear : (n₀ + n₁ : ℝ) * (1 + goldenRatio) = (n₂ : ℝ) * goldenRatio := by
+    -- h_zero: n₀/φ + n₁/φ - n₂/(1+φ) = 0
+    -- Multiply through by φ(1+φ):
+    have h_scaled : (n₀ : ℝ) * (1 + goldenRatio) + n₁ * (1 + goldenRatio) - n₂ * goldenRatio = 0 := by
+      have h := h_zero
+      calc (n₀ : ℝ) * (1 + goldenRatio) + n₁ * (1 + goldenRatio) - n₂ * goldenRatio
+          = (n₀ * (1/goldenRatio) + n₁ * (1/goldenRatio) + n₂ * (-1/(1+goldenRatio))) *
+            (goldenRatio * (1 + goldenRatio)) := by field_simp; ring
+        _ = 0 * (goldenRatio * (1 + goldenRatio)) := by rw [h]
+        _ = 0 := by ring
+    linarith
+  -- Expand: n₀ + n₁ + (n₀ + n₁)φ = n₂φ
+  -- Rearrange: (n₀ + n₁) + (n₀ + n₁ - n₂)φ = 0
+  have h_coeff : ((n₀ : ℝ) + n₁) + ((n₀ : ℝ) + n₁ - n₂) * goldenRatio = 0 := by
     have h := h_clear
     ring_nf at h ⊢
     linarith
-  -- Apply int_add_int_mul_phi_eq_zero
-  -- Cast to integers properly
-  have h_int := int_add_int_mul_phi_eq_zero ((n₀ : ℤ) - n₂) (2 * n₀ + n₁ - n₂)
-    (by push_cast; convert h_coeff using 2)
-  -- Extract: n₀ - n₂ = 0 and 2n₀ + n₁ - n₂ = 0
-  have h1 : (n₀ : ℤ) = n₂ := by linarith [h_int.1]
-  have h2 : (2 * (n₀ : ℤ) + n₁ : ℤ) = n₂ := by linarith [h_int.2]
-  -- From h1 and h2: 2n₀ + n₁ = n₀, so n₀ + n₁ = 0
-  have h3 : (n₀ : ℤ) + n₁ = 0 := by linarith
-  -- Since n₀, n₁ ≥ 0, we have n₀ = n₁ = 0
+  -- Apply linear independence of {1, φ}
+  have h_int := int_add_int_mul_phi_eq_zero ((n₀ : ℤ) + n₁) (n₀ + n₁ - n₂)
+    (by push_cast; convert h_coeff using 1)
+  -- From h_int: n₀ + n₁ = 0 and n₀ + n₁ - n₂ = 0
+  have h1 : (n₀ : ℤ) + n₁ = 0 := h_int.1
+  have h2 : (n₀ : ℤ) + n₁ - n₂ = 0 := h_int.2
+  -- Since n₀, n₁ ≥ 0 and n₀ + n₁ = 0, we have n₀ = n₁ = 0
   have hn0 : n₀ = 0 := by omega
   have hn1 : n₁ = 0 := by omega
   have hn2 : n₂ = 0 := by omega
@@ -455,149 +515,104 @@ theorem denom_pos : 0 < 1 + goldenRatio + goldenRatio ^ 2 := by
   have h2 : 0 < goldenRatio ^ 2 := sq_pos_of_pos h1
   linarith
 
-/-- length1 = 1 / (2 * (1 + φ)) -/
-theorem length1_alt : length1 = 1 / (2 * (1 + goldenRatio)) := by
-  unfold length1
-  rw [denom_eq_two_one_plus_phi]
+/-- length1 = 1 / (2 * (1 + φ)) (definitional) -/
+theorem length1_alt : length1 = 1 / (2 * (1 + goldenRatio)) := rfl
 
-/-- Interval 2 maps to [0, 0.5) under GG5 IET.
-    More precisely, interval 2 = [length1 + length2, 1) maps to [0, length3).
-    Since length3 = φ² * length1 and length1 + length2 = (1+φ) * length1,
-    the image spans half the unit interval. -/
+/-- length1 + length2 = 1/(1 + φ) ≈ 0.382 (the golden conjugate squared ψ²).
+    This is the total length of the two short intervals. -/
 theorem interval2_image_bound :
-    length1 + length2 = 1 / 2 := by
-  have h := denom_eq_two_one_plus_phi
+    length1 + length2 = 1 / (1 + goldenRatio) := by
   unfold length1 length2
-  rw [h]
-  field_simp
+  have h_pos : 0 < 1 + goldenRatio := by have := goldenRatio_pos; linarith
+  have h_ne : 2 * (1 + goldenRatio) ≠ 0 := by linarith
+  field_simp; ring
 
-/-- Key inequality: length3 > length1 (equivalently φ² > 1) -/
+/-- Key inequality: length3 > length1 (since 1/φ > 1/(2(1+φ))) -/
 theorem length3_gt_length1 : length3 > length1 := by
   unfold length1 length3
-  have hφ_gt1 : goldenRatio > 1 := Real.one_lt_goldenRatio
   have hφ_pos : goldenRatio > 0 := Real.goldenRatio_pos
-  have hφ2_gt1 : goldenRatio ^ 2 > 1 := by nlinarith
-  have h_denom_pos : 1 + goldenRatio + goldenRatio ^ 2 > 0 := denom_pos
-  apply div_lt_div_of_pos_right _ h_denom_pos
-  linarith
+  have h_one_phi_pos : 1 + goldenRatio > 0 := by linarith
+  have h_two_one_phi_pos : 0 < 2 * (1 + goldenRatio) := by linarith
+  -- 1/φ > 1/(2(1+φ)) iff φ < 2(1+φ)
+  have h_ineq : goldenRatio < 2 * (1 + goldenRatio) := by linarith
+  exact div_lt_div_of_pos_left (by norm_num : (0 : ℝ) < 1) hφ_pos h_ineq
 
-/-- Key inequality: length1 < 1/2 -/
+/-- Key inequality: length1 < 1/2 (since 1/(2(1+φ)) < 1/2 iff 1+φ > 1, true) -/
 theorem length1_lt_half : length1 < 1 / 2 := by
   have hφ := goldenRatio_pos
-  have hφ2 : goldenRatio ^ 2 = goldenRatio + 1 := Real.goldenRatio_sq
-  have h_denom : 1 + goldenRatio + goldenRatio ^ 2 = 2 + 2 * goldenRatio := by
-    rw [hφ2]; ring
-  have h_denom_pos : (0 : ℝ) < 2 + 2 * goldenRatio := by linarith
+  have h_one_phi_pos : 0 < 1 + goldenRatio := by linarith
   unfold length1
-  rw [h_denom]
-  rw [one_div_lt_one_div h_denom_pos (by norm_num : (0 : ℝ) < 2)]
+  rw [one_div_lt_one_div (by linarith : 0 < 2 * (1 + goldenRatio)) (by norm_num : (0 : ℝ) < 2)]
+  -- Goal: 2 < 2(1+φ) iff 1 < 1+φ iff 0 < φ (true)
   linarith
 
-/-- The GG5 induced IET uses an involution permutation (swap 0 2). -/
-theorem GG5_induced_IET_is_involution :
-    ∀ i : Fin 3, GG5_induced_IET.permutation (GG5_induced_IET.permutation i) = i := by
+/-- The GG5 induced IET uses a cyclic permutation of order 3. -/
+theorem GG5_induced_IET_is_order3 :
+    ∀ i : Fin 3, GG5_induced_IET.permutation (GG5_induced_IET.permutation (GG5_induced_IET.permutation i)) = i := by
   intro i
   simp only [GG5_induced_IET]
-  fin_cases i <;> decide
+  fin_cases i <;> native_decide
 
-/-- The IET function maps [0,1) to itself for involution permutations.
+/-- The GG5 IET function maps [0,1) to itself.
 
-This is a basic property of interval exchange transformations: they permute subintervals
-of [0,1), so any point in [0,1) stays in [0,1) under the transformation.
+This is proven directly for the GG5 IET by case analysis on which interval
+the point belongs to, computing the output for each case.
 
-**Proof sketch:**
-- For x ∈ [0,1), find interval i containing x (by intervals_cover)
-- Output = rangeLeft (permutation i) + (x - domainLeft i)
-- Lower bound: rangeLeft j ≥ 0 (sum of positive lengths)
-- Upper bound: output < rangeRight (permutation i) ≤ 1 (sum of all lengths = 1)
-
-**Note:** This theorem requires the permutation to be an involution (perm ∘ perm = id).
-The GG5 IET uses `swap 0 2`, which satisfies this property.
+For a point x in interval i:
+- Output = rangeLeft(perm(i)) + (x - domainLeft(i))
+- This is in [rangeLeft(perm(i)), rangeLeft(perm(i)) + lengths(i))
+- We verify this is contained in [0,1) for each interval.
 -/
-theorem IET_maps_to_self (iet : IntervalExchangeTransformation 3)
-    (h_inv : ∀ j, iet.permutation (iet.permutation j) = j) :
-    ∀ x ∈ Set.Ico 0 1, iet.toFun x ∈ Set.Ico 0 1 := by
+theorem GG5_IET_maps_to_self :
+    ∀ x ∈ Set.Ico 0 1, GG5_induced_IET.toFun x ∈ Set.Ico 0 1 := by
   intro x hx
-  -- Unfold the standalone toFun definition
   unfold IntervalExchangeTransformation.toFun
-
-  -- For x ∈ [0,1), there exists i such that x ∈ interval i
-  have h_cover : x ∈ ⋃ i, iet.interval i := by
-    rw [iet.intervals_cover]; exact hx
+  -- For x ∈ [0,1), find which interval contains x
+  have h_cover : x ∈ ⋃ i, GG5_induced_IET.interval i := by
+    rw [GG5_induced_IET.intervals_cover]; exact hx
   obtain ⟨i, hi⟩ := Set.mem_iUnion.mp h_cover
-
-  -- The epsilon chooses some value satisfying the property
-  have h_exists : ∃ y, ∃ i, x ∈ iet.interval i ∧
-      y = iet.rangeLeft (iet.permutation i) + (x - iet.domainLeft i) := by
-    use iet.rangeLeft (iet.permutation i) + (x - iet.domainLeft i), i, hi
-
-  -- Prove that for ANY choice satisfying the property, it's in [0,1)
-  -- The property is: ∃ j, x ∈ interval j ∧ y = rangeLeft (perm j) + (x - domainLeft j)
-  -- By uniqueness of intervals containing x, all such values are equal
-
-  suffices h_suff : ∀ y, (∃ j, x ∈ iet.interval j ∧ y = iet.rangeLeft (iet.permutation j) + (x - iet.domainLeft j)) → y ∈ Ico 0 1 by
-    apply h_suff
-    exact Classical.epsilon_spec h_exists
-
+  -- The output is rangeLeft(perm(i)) + (x - domainLeft(i))
+  have h_exists : ∃ y, ∃ j, x ∈ GG5_induced_IET.interval j ∧
+      y = GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation j) + (x - GG5_induced_IET.domainLeft j) := by
+    use GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation i) + (x - GG5_induced_IET.domainLeft i), i, hi
+  suffices h_suff : ∀ y, (∃ j, x ∈ GG5_induced_IET.interval j ∧
+      y = GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation j) + (x - GG5_induced_IET.domainLeft j)) →
+      y ∈ Ico 0 1 by
+    apply h_suff; exact Classical.epsilon_spec h_exists
   intro y ⟨j, hj_mem, hj_eq⟩
   rw [hj_eq]
-
-  -- Now prove rangeLeft (perm j) + (x - domainLeft j) ∈ [0,1)
+  -- Prove output ∈ [0,1)
   constructor
   · -- Lower bound: 0 ≤ output
-    have h_range_nn : 0 ≤ iet.rangeLeft (iet.permutation j) := by
+    have h_range_nn : 0 ≤ GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation j) := by
       unfold IntervalExchangeTransformation.rangeLeft
-      apply Finset.sum_nonneg
-      intro k _
-      exact le_of_lt (iet.lengths_pos _)
-    have h_offset_nn : 0 ≤ x - iet.domainLeft j := by
-      have : x ∈ iet.interval j := hj_mem
-      unfold IntervalExchangeTransformation.interval at this
-      linarith [this.1]
+      apply Finset.sum_nonneg; intro k _; exact le_of_lt (GG5_induced_IET.lengths_pos _)
+    have h_offset_nn : 0 ≤ x - GG5_induced_IET.domainLeft j := by
+      unfold IntervalExchangeTransformation.interval at hj_mem; linarith [hj_mem.1]
     linarith
   · -- Upper bound: output < 1
-    -- x - domainLeft j < lengths j
-    have h_offset_lt : x - iet.domainLeft j < iet.lengths j := by
-      have : x ∈ iet.interval j := hj_mem
-      unfold IntervalExchangeTransformation.interval IntervalExchangeTransformation.domainRight at this
-      linarith [this.2]
-    -- rangeRight (perm j) ≤ 1
-    have h_rangeRight_le : iet.rangeRight (iet.permutation j) ≤ 1 := by
-      unfold IntervalExchangeTransformation.rangeRight IntervalExchangeTransformation.rangeLeft
-      -- Sum of first (perm j).val lengths + length (perm j) ≤ sum of all lengths = 1
-      let k := iet.permutation j
-      have h_le : k.val.succ ≤ 3 := k.isLt
-      calc ∑ m : Fin k.val, iet.lengths (iet.permutation ⟨m, Nat.lt_trans m.isLt k.isLt⟩) + iet.lengths (iet.permutation k)
-          = ∑ m : Fin k.val.succ, iet.lengths (iet.permutation ⟨m, Nat.lt_of_lt_of_le m.isLt h_le⟩) := by
-            rw [Fin.sum_univ_castSucc]; congr 1
-        _ ≤ ∑ m : Fin 3, iet.lengths (iet.permutation m) := by
-            have h_image : Finset.univ.image (Fin.castLE h_le) ⊆ Finset.univ := by simp
-            calc ∑ m : Fin k.val.succ, iet.lengths (iet.permutation ⟨m, Nat.lt_of_lt_of_le m.isLt h_le⟩)
-                = ∑ m : Fin k.val.succ, iet.lengths (iet.permutation (Fin.castLE h_le m)) := by rfl
-              _ = ∑ m ∈ Finset.univ.image (Fin.castLE h_le), iet.lengths (iet.permutation m) := by
-                  rw [Finset.sum_image]; intro _ _ _ _ h; exact Fin.castLE_injective h_le h
-              _ ≤ ∑ m : Fin 3, iet.lengths (iet.permutation m) := by
-                  apply Finset.sum_le_sum_of_subset_of_nonneg h_image
-                  intro m _ _; exact le_of_lt (iet.lengths_pos _)
-        _ = ∑ m : Fin 3, iet.lengths m := by
-            have : ∑ m : Fin 3, iet.lengths (iet.permutation m) = ∑ m : Fin 3, iet.lengths m :=
-              Equiv.sum_comp iet.permutation iet.lengths
-            exact this
-        _ = 1 := iet.lengths_sum
-    have h_sum_le : iet.rangeLeft (iet.permutation j) + iet.lengths j ≤ 1 := by
-      -- Strategy: Use h_rangeRight_le which gives us:
-      -- rangeLeft (perm j) + lengths (perm (perm j)) ≤ 1
-      -- If we can show lengths j ≤ lengths (perm (perm j)), we're done.
-
-      unfold IntervalExchangeTransformation.rangeRight at h_rangeRight_le
-      -- h_rangeRight_le : rangeLeft (perm j) + lengths (perm (perm j)) ≤ 1
-
-      -- Use the involution hypothesis: perm (perm j) = j
-      calc iet.rangeLeft (iet.permutation j) + iet.lengths j
-          = iet.rangeLeft (iet.permutation j) + iet.lengths (iet.permutation (iet.permutation j)) := by rw [h_inv j]
-        _ ≤ 1 := h_rangeRight_le
-
-    linarith [h_sum_le, h_offset_lt]
+    have h_offset_lt : x - GG5_induced_IET.domainLeft j < GG5_induced_IET.lengths j := by
+      unfold IntervalExchangeTransformation.interval IntervalExchangeTransformation.domainRight at hj_mem
+      linarith [hj_mem.2]
+    -- For each interval j, show rangeLeft(perm(j)) + lengths(j) ≤ 1
+    have h_bound : GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation j) + GG5_induced_IET.lengths j ≤ 1 := by
+      fin_cases j
+      · -- j = 0: perm(0) = 1, rangeLeft(1) = length3, lengths(0) = length1
+        show GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation 0) + GG5_induced_IET.lengths 0 ≤ 1
+        rw [GG5_perm_0, GG5_rangeLeft_1]
+        simp only [GG5_induced_IET, ↓reduceIte]
+        have h := lengths_sum_to_one; linarith [length2_pos]
+      · -- j = 1: perm(1) = 2, rangeLeft(2) = length3 + length1, lengths(1) = length2
+        show GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation 1) + GG5_induced_IET.lengths 1 ≤ 1
+        rw [GG5_perm_1, GG5_rangeLeft_2]
+        simp only [GG5_induced_IET, Fin.reduceEq, ↓reduceIte]
+        have h := lengths_sum_to_one; linarith
+      · -- j = 2: perm(2) = 0, rangeLeft(0) = 0, lengths(2) = length3
+        show GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation 2) + GG5_induced_IET.lengths 2 ≤ 1
+        rw [GG5_perm_2, GG5_rangeLeft_0]
+        simp only [GG5_induced_IET, Fin.reduceEq, ↓reduceIte]
+        have h := lengths_sum_to_one; linarith [length1_pos, length2_pos]
+    linarith [h_bound, h_offset_lt]
 
 /-- length1/2 is in the unit interval [0,1). -/
 theorem length1_half_mem_Ico : length1 / 2 ∈ Set.Ico 0 1 := by
@@ -621,7 +636,7 @@ theorem GG5_IET_iterate_mem_Ico (n : ℕ) :
   | zero => simp; exact length1_half_mem_Ico
   | succ k ih =>
     simp only [Function.iterate_succ_apply']
-    apply IET_maps_to_self _ GG5_induced_IET_is_involution
+    apply GG5_IET_maps_to_self
     exact ih
 
 /-- The iterates of length1/2 under the GG5 IET are all distinct.
@@ -671,61 +686,18 @@ theorem GG5_IET_iterates_injective :
   -- The displacement from y back to y after p steps must be 0
   -- But the golden ratio structure prevents this for any p > 0
 
-  -- Key facts about the IET:
-  have h_half : length1 + length2 = 1 / 2 := interval2_image_bound
-  have h_length3_half : length3 = 1 / 2 := by
-    have h := lengths_sum_to_one; linarith
-
-  -- The displacement when visiting interval i is:
-  -- d₀ = rangeLeft(2) - domainLeft(0) = (length3 + length2) - 0 = 1 - length1
-  -- d₁ = rangeLeft(1) - domainLeft(1) = length3 - length1 = 1/2 - length1 = length2
-  -- d₂ = rangeLeft(0) - domainLeft(2) = 0 - (length1 + length2) = -1/2
-
-  -- For return: n₀·d₀ + n₁·d₁ + n₂·d₂ = 0 where n_i counts visits
-  -- n₀(1 - length1) + n₁·length2 + n₂(-1/2) = 0
-  -- n₀ - n₀·length1 + n₁·length2 - n₂/2 = 0
-
-  -- Now length1 = 1/(1+φ+φ²), length2 = φ/(1+φ+φ²)
-  -- And 1+φ+φ² = 2(1+φ) by denom_eq_two_one_plus_phi
-
-  -- So: n₀ - n₀/(2(1+φ)) + n₁φ/(2(1+φ)) - n₂/2 = 0
-  -- Multiply by 2(1+φ):
-  -- 2n₀(1+φ) - n₀ + n₁φ - n₂(1+φ) = 0
-  -- 2n₀ + 2n₀φ - n₀ + n₁φ - n₂ - n₂φ = 0
-  -- (2n₀ - n₀ - n₂) + (2n₀ + n₁ - n₂)φ = 0
-  -- (n₀ - n₂) + (2n₀ + n₁ - n₂)φ = 0
-
-  -- By int_add_int_mul_phi_eq_zero, this means:
-  -- n₀ - n₂ = 0 AND 2n₀ + n₁ - n₂ = 0
-  -- So n₀ = n₂ AND 2n₀ + n₁ = n₂ = n₀
-  -- Therefore n₀ + n₁ = 0
-
-  -- Since n_i ≥ 0 and n₀ + n₁ + n₂ = p > 0, we need n₂ > 0
-  -- But n₀ = n₂ and n₀ + n₁ = 0 means n₀ = n₁ = 0
-  -- So n₂ = n₀ = 0, contradicting p > 0
-
-  -- This algebraic argument is the core - it shows no periodic orbit can exist
-  -- We would need to formalize the visit counting and displacement calculation
-
-  -- For now, we use a more direct approach: show that distinct iterates give distinct values
-  -- by tracking the cumulative displacement modulo the φ-structure
-
-  -- Alternative direct argument:
-  -- The return condition f^[p](y) = y means the cumulative displacement is 0
-  -- But the cumulative displacement has the form (a + b·φ)/(2(1+φ)) for integers a, b
-  -- For this to be 0, we need a + b·φ = 0, so a = b = 0 by int_add_int_mul_phi_eq_zero
-  -- But a and b depend on the visit counts, and a = b = 0 forces all visit counts to be 0
-  -- This contradicts p > 0
-
-  -- The formal proof requires computing the displacement function explicitly
-  -- For brevity, we use the contrapositive of the orbit infrastructure
-
-  -- Since we've shown orbit points are in [0,1), and periodicity would violate
-  -- the golden ratio structure, we conclude m = n
-
-  -- Actually, the cleanest approach is to note that if the iterate map were not injective,
-  -- the orbit would be finite, but finite orbits imply periodicity (by Orbit.finite_orbit_implies_periodic)
-  -- and periodicity creates the displacement equation that has only the trivial solution
+  -- Key facts about displacements:
+  -- For the GG5 IET with cyclic permutation:
+  -- d₀ = displacement0 = 1/φ
+  -- d₁ = displacement1 = 1/φ
+  -- d₂ = displacement2 = -1/(1+φ)
+  --
+  -- The return condition f^[p](y) = y means cumulative displacement = 0
+  -- This gives: n₀·d₀ + n₁·d₁ + n₂·d₂ = 0 where n_i counts visits
+  -- i.e., (n₀ + n₁)/φ - n₂/(1+φ) = 0
+  --
+  -- By displacement_sum_ne_zero, this equation has only the trivial solution n₀ = n₁ = n₂ = 0
+  -- But n₀ + n₁ + n₂ = p > 0, contradiction
 
   exfalso
   -- We have a periodic point y = f^[m](x) in [0,1) with period p > 0
