@@ -14,9 +14,8 @@ import TDCSG.Definitions.Points
 This module re-exports from the split modules and contains the main theorem infrastructure.
 
 The GG5 geometric construction has been refactored into:
-- `Points.lean`: Key geometric points E, E', F, G and their properties
-- `SegmentGeometry.lean`: Translation lengths, segment ratios, irrationality
-- `PlaneConversion.lean`: Complex to Plane conversion, segment parameterization
+- `Points.lean`: Key geometric points E, E', F, G, segment parameterization
+- `SegmentGeometry.lean`: Translation lengths, segment ratios, irrationality, disk intersection, rotation correspondence
 - `WordCorrespondence.lean`: Group words for IET intervals, orbit correspondence
 
 ## Main Definitions

@@ -4,7 +4,6 @@ import TDCSG.Definitions.Cyclotomic
 import TDCSG.Definitions.Points
 import TDCSG.Definitions.Geometry
 import TDCSG.Definitions.IET
-import TDCSG.Definitions.Conversions
 import TDCSG.Definitions.Rotations
 import TDCSG.Definitions.TwoDisk
 import TDCSG.Definitions.Orbit
@@ -15,7 +14,6 @@ import TDCSG.Definitions.GroupAction
 import TDCSG.Proofs.Zeta5
 import TDCSG.Proofs.Points
 import TDCSG.Proofs.SegmentGeometry
-import TDCSG.Proofs.PlaneConversion
 import TDCSG.Proofs.IET
 import TDCSG.Proofs.Orbit
 import TDCSG.Proofs.OrbitInfinite
@@ -36,24 +34,22 @@ is the golden ratio.
 
 ## Module Organization
 
-### Definitions (11 files)
+### Definitions (10 files)
 - `Core`: Fundamental constants (r_c, generators, angles)
 - `Cyclotomic`: ζ₅ algebra, critical radius calculations
-- `Points`: E, E', F, G point definitions
-- `Geometry`: Geometric primitives (segments, distances)
+- `Points`: E, E', F, G point definitions, segment parameterization
+- `Geometry`: Geometric primitives (disks, rotations, toPlane conversion)
 - `IET`: Interval exchange transformation structure
-- `Conversions`: Complex↔Plane conversions
 - `Rotations`: Rotation definitions
 - `TwoDisk`: Two-disk system structure
 - `Orbit`: Orbit set definitions
 - `WordCorrespondence`: Group word definitions
 - `GroupAction`: Group action on E'E segment
 
-### Proofs (9 files)
+### Proofs (8 files)
 - `Zeta5`: ζ₅ algebraic properties
 - `Points`: Point calculation proofs
-- `SegmentGeometry`: Segment length calculations
-- `PlaneConversion`: Conversion lemmas
+- `SegmentGeometry`: Segment lengths, disk intersection, rotation correspondence
 - `IET`: IET interval properties, `GG5_induced_IET` construction
 - `Orbit`: Orbit theory lemmas
 - `OrbitInfinite`: `GG5_IET_has_infinite_orbit`

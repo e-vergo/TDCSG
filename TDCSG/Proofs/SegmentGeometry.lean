@@ -3,15 +3,16 @@ Copyright (c) 2025 Eric Hearn. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Hearn
 -/
-import TDCSG.Definitions.Conversions
 import TDCSG.Proofs.Points
+import TDCSG.Definitions.GroupAction
 
 /-!
 # Segment Geometry for GG(5,5)
 
-Defines segment lengths, ratios, and proves key irrationality results.
+Defines segment lengths, ratios, disk intersection, and rotation correspondence.
 
-The conversion functions (toR2, E_R2, etc.) are imported from TDCSG.Definitions.Conversions.
+The segment definitions are imported from TDCSG.Definitions.Points.
+The generator actions are imported from TDCSG.Definitions.GroupAction.
 -/
 
 namespace TDCSG.CompoundSymmetry.GG5
@@ -19,9 +20,6 @@ namespace TDCSG.CompoundSymmetry.GG5
 open Complex Real TDCSG.Definitions
 
 /-! ### Translation Lengths -/
-
--- The definitions translation_length_1, translation_length_2, and segment_length
--- are imported from TDCSG.Definitions.Conversions
 
 /-- E is nonzero. -/
 lemma E_ne_zero : E ≠ 0 := by
@@ -256,8 +254,262 @@ lemma translations_irrational : ∀ (q r : ℤ),
     push_cast
     rfl
 
-/-! ### Conversion to ℝ² -/
+/-! ### Segment Parameterization Injectivity -/
 
--- The conversion functions (toR2, E_R2, E'_R2, F_R2, G_R2) are now in TDCSG.Definitions.Conversions
+/-- The segment parameterization is injective: different parameters give different points. -/
+theorem segmentPoint_injective : Function.Injective segmentPoint := by
+  intro t₁ t₂ h
+  unfold segmentPoint at h
+  have hne : E - E' ≠ 0 := by
+    unfold E'
+    simp only [sub_neg_eq_add, ne_eq]
+    have hE_ne : E ≠ 0 := E_ne_zero
+    intro h
+    apply hE_ne
+    calc E = (E + E) / 2 := by ring
+         _ = 0 / 2 := by rw [h]
+         _ = 0 := by ring
+  have : t₁ • (E - E') = t₂ • (E - E') := by
+    have h' : E' + t₁ • (E - E') = E' + t₂ • (E - E') := h
+    exact add_left_cancel h'
+  -- From t₁ • v = t₂ • v with v ≠ 0, conclude t₁ = t₂
+  by_contra h_ne
+  have : t₁ • (E - E') - t₂ • (E - E') = 0 := by
+    rw [this]; ring
+  rw [← sub_smul] at this
+  have hsub_ne : t₁ - t₂ ≠ 0 := sub_ne_zero.mpr h_ne
+  have : E - E' = 0 := by
+    have h_smul : (t₁ - t₂) • (E - E') = 0 := this
+    exact smul_eq_zero.mp h_smul |>.resolve_left hsub_ne
+  exact hne this
+
+/-- The Plane parameterization is also injective. -/
+theorem segmentPointPlane_injective : Function.Injective segmentPointPlane := by
+  intro t₁ t₂ h
+  apply segmentPoint_injective
+  unfold segmentPointPlane toPlane at h
+  -- If ![z₁.re, z₁.im] = ![z₂.re, z₂.im], then z₁ = z₂
+  have hre : (segmentPoint t₁).re = (segmentPoint t₂).re := by
+    have := congrFun h 0
+    simp only [Matrix.cons_val_zero] at this
+    exact this
+  have him : (segmentPoint t₁).im = (segmentPoint t₂).im := by
+    have := congrFun h 1
+    simp only [Matrix.cons_val_one] at this
+    exact this
+  exact Complex.ext hre him
+
+/-! ### Disk Intersection Lemmas -/
+
+/-- E' is on the RIGHT disk boundary (since E is on left disk boundary). -/
+lemma E'_on_right_disk_boundary : ‖E' - 1‖ = r_crit := by
+  unfold E'
+  rw [show ((-E : ℂ) - (1 : ℂ)) = -(E + 1) by ring]
+  rw [norm_neg]
+  exact E_on_left_disk_boundary
+
+/-- E' is in the LEFT disk (since E is in right disk). -/
+lemma E'_in_left_disk : ‖E' - (-1)‖ ≤ r_crit := by
+  unfold E'
+  rw [show ((-E : ℂ) - (-1 : ℂ)) = -(E - 1) by ring]
+  rw [norm_neg]
+  exact E_in_right_disk
+
+/-- Compute real part of E in trigonometric form -/
+private lemma E_re_trig : E.re = Real.cos (2 * π / 5) - Real.cos (4 * π / 5) := by
+  unfold E
+  have h1 := zeta5_eq
+  have h2 := zeta5_sq_eq
+  calc (ζ₅ - ζ₅ ^ 2).re
+      = ((↑(Real.cos (2 * π / 5)) + I * ↑(Real.sin (2 * π / 5))) -
+        (↑(Real.cos (4 * π / 5)) + I * ↑(Real.sin (4 * π / 5)))).re := by
+        rw [← h1, ← h2]
+    _ = Real.cos (2 * π / 5) - Real.cos (4 * π / 5) := by
+      simp only [Complex.sub_re, Complex.add_re, Complex.ofReal_re,
+        Complex.mul_re, Complex.I_re, Complex.I_im, Complex.ofReal_im]
+      ring
+
+/-- Point E has positive real part. -/
+lemma E_re_pos : 0 < E.re := by
+  rw [E_re_trig, cos_four_pi_fifth, cos_two_pi_fifth, Real.cos_pi_div_five]
+  unfold Real.goldenRatio
+  have h : ((1 + Real.sqrt 5) / 2 - 1) / 2 - -((1 + Real.sqrt 5) / 4) = Real.sqrt 5 / 2 := by
+    field_simp; ring
+  rw [h]
+  have sqrt5_pos : 0 < Real.sqrt 5 := Real.sqrt_pos.mpr (by norm_num : (0 : ℝ) < 5)
+  linarith
+
+/-- Point E' has negative real part. -/
+lemma E'_re_neg : E'.re < 0 := by
+  unfold E'
+  simp [E_re_pos]
+
+/-- Points on segment E'E lie in the disk intersection. -/
+lemma segment_in_disk_intersection (t : ℝ)
+    (ht : 0 ≤ t ∧ t ≤ 1) :
+    let p := E' + t • (E - E')
+    ‖p + 1‖ ≤ r_crit ∧ ‖p - 1‖ ≤ r_crit := by
+  intro p
+  have hp_segment : p ∈ segment ℝ E' E := by
+    use (1 - t), t
+    constructor; · linarith [ht.1]
+    constructor; · exact ht.1
+    constructor; · linarith [ht.2]
+    calc (1 - t) • E' + t • E
+        = E' - t • E' + t • E := by
+          rw [sub_smul, one_smul]
+      _ = E' + (t • E - t • E') := by
+          ring
+      _ = E' + t • (E - E') := by
+          rw [smul_sub]
+  constructor
+  · have h_E'_in_left :
+        E' ∈ Metric.closedBall ((-1) : ℂ) r_crit := by
+      rw [Metric.mem_closedBall]
+      simp only [dist_eq_norm]
+      exact E'_in_left_disk
+    have h_E_in_left :
+        E ∈ Metric.closedBall ((-1) : ℂ) r_crit := by
+      rw [Metric.mem_closedBall]
+      simp only [dist_eq_norm]
+      rw [show (E - (-1) : ℂ) = E + 1 by ring]
+      exact E_on_left_disk_boundary.le
+    have h_convex : Convex ℝ
+        (Metric.closedBall ((-1) : ℂ) r_crit) :=
+      convex_closedBall ((-1) : ℂ) r_crit
+    have h_segment_subset :
+        segment ℝ E' E ⊆
+          Metric.closedBall ((-1) : ℂ) r_crit :=
+      h_convex.segment_subset h_E'_in_left h_E_in_left
+    have hp_in_left :
+        p ∈ Metric.closedBall ((-1) : ℂ) r_crit :=
+      h_segment_subset hp_segment
+    rw [Metric.mem_closedBall] at hp_in_left
+    simp only [dist_eq_norm] at hp_in_left
+    rw [show (p - (-1) : ℂ) = p + 1 by ring] at hp_in_left
+    exact hp_in_left
+  · have h_E'_in_right :
+        E' ∈ Metric.closedBall (1 : ℂ) r_crit := by
+      rw [Metric.mem_closedBall]
+      simp only [dist_eq_norm]
+      exact E'_on_right_disk_boundary.le
+    have h_E_in_right :
+        E ∈ Metric.closedBall (1 : ℂ) r_crit := by
+      rw [Metric.mem_closedBall]
+      simp only [dist_eq_norm]
+      rw [show (E - 1 : ℂ) = E - 1 by ring]
+      exact E_in_right_disk
+    have h_convex : Convex ℝ
+        (Metric.closedBall (1 : ℂ) r_crit) :=
+      convex_closedBall (1 : ℂ) r_crit
+    have h_segment_subset :
+        segment ℝ E' E ⊆ Metric.closedBall (1 : ℂ) r_crit :=
+      h_convex.segment_subset h_E'_in_right h_E_in_right
+    have hp_in_right :
+        p ∈ Metric.closedBall (1 : ℂ) r_crit :=
+      h_segment_subset hp_segment
+    rw [Metric.mem_closedBall] at hp_in_right
+    simp only [dist_eq_norm] at hp_in_right
+    exact hp_in_right
+
+/-! ### Complex Multiplication and Rotation Correspondence -/
+
+/-- Complex multiplication as a matrix. -/
+lemma complex_mul_as_matrix (a z : ℂ) :
+    toPlane (a * z) = applyMatrix !![a.re, -a.im; a.im, a.re] (toPlane z) := by
+  unfold toPlane applyMatrix
+  ext i
+  fin_cases i <;> simp [Complex.mul_re, Complex.mul_im, Fin.sum_univ_two] <;> ring
+
+/-- Rotation in ℂ by ζ₅ corresponds to rotateAroundPoint in Plane. -/
+theorem zeta5_rotation_eq_rotateAroundPoint (z c : ℂ) :
+    toPlane (c + ζ₅ * (z - c)) = rotateAroundPoint (toPlane c) (2 * π / 5) (toPlane z) := by
+  unfold rotateAroundPoint
+  rw [toPlane_add]
+  congr 1
+  rw [← toPlane_sub]
+  rw [complex_mul_as_matrix]
+  congr 1
+  unfold rotationMatrix
+  rw [zeta5_re_eq_cos, zeta5_im_eq_sin]
+
+/-- Segment points are in the left disk at r_crit. -/
+lemma segmentPointPlane_in_leftDisk (t : ℝ) (ht : t ∈ Set.Ico 0 1) :
+    segmentPointPlane t ∈ leftDisk r_crit := by
+  unfold leftDisk closedDisk
+  rw [Metric.mem_closedBall]
+  rw [leftCenter_eq_toPlane]
+  unfold segmentPointPlane
+  rw [toPlane_dist_eq_complex_norm]
+  rw [show segmentPoint t - (-1 : ℂ) = segmentPoint t + 1 by ring]
+  have h_mem := segment_in_disk_intersection t ⟨ht.1, le_of_lt ht.2⟩
+  unfold segmentPoint at h_mem ⊢
+  exact h_mem.1
+
+/-- Segment points are in the right disk at r_crit. -/
+lemma segmentPointPlane_in_rightDisk (t : ℝ) (ht : t ∈ Set.Ico 0 1) :
+    segmentPointPlane t ∈ rightDisk r_crit := by
+  unfold rightDisk closedDisk
+  rw [Metric.mem_closedBall]
+  rw [rightCenter_eq_toPlane]
+  unfold segmentPointPlane
+  rw [toPlane_dist_eq_complex_norm]
+  rw [show segmentPoint t - (1 : ℂ) = segmentPoint t - 1 by ring]
+  have h_mem := segment_in_disk_intersection t ⟨ht.1, le_of_lt ht.2⟩
+  unfold segmentPoint at h_mem ⊢
+  exact h_mem.2
+
+/-! ### Generator Actions in Complex Form -/
+
+/-- genA on a point in the left disk equals rotation by ζ₅ about -1 in complex coords. -/
+lemma genA_eq_zeta5_rotation (z : ℂ) (hz : toPlane z ∈ leftDisk r_crit) :
+    genA r_crit (toPlane z) = toPlane ((-1 : ℂ) + ζ₅ * (z - (-1))) := by
+  unfold genA
+  rw [if_pos hz]
+  rw [leftCenter_eq_toPlane]
+  exact (zeta5_rotation_eq_rotateAroundPoint z (-1)).symm
+
+/-- genB on a point in the right disk equals rotation by ζ₅ about 1 in complex coords. -/
+lemma genB_eq_zeta5_rotation (z : ℂ) (hz : toPlane z ∈ rightDisk r_crit) :
+    genB r_crit (toPlane z) = toPlane ((1 : ℂ) + ζ₅ * (z - 1)) := by
+  unfold genB
+  rw [if_pos hz]
+  rw [rightCenter_eq_toPlane]
+  exact (zeta5_rotation_eq_rotateAroundPoint z 1).symm
+
+/-- A⁻¹ = A⁴ means multiplying by ζ₅⁴. -/
+lemma genA_inv_eq_zeta5_pow4_rotation (z : ℂ)
+    (hz : toPlane z ∈ leftDisk r_crit)
+    (hz' : toPlane ((-1 : ℂ) + ζ₅ * (z + 1)) ∈ leftDisk r_crit)
+    (hz'' : toPlane ((-1 : ℂ) + ζ₅^2 * (z + 1)) ∈ leftDisk r_crit)
+    (hz''' : toPlane ((-1 : ℂ) + ζ₅^3 * (z + 1)) ∈ leftDisk r_crit) :
+    genA r_crit (genA r_crit (genA r_crit
+      (genA r_crit (toPlane z)))) =
+    toPlane ((-1 : ℂ) + ζ₅^4 * (z + 1)) := by
+  rw [genA_eq_zeta5_rotation z hz]
+  rw [show -1 + ζ₅ * (z - -1) = -1 + ζ₅ * (z + 1) by ring]
+  rw [genA_eq_zeta5_rotation _ hz']
+  rw [show -1 + ζ₅ * (-1 + ζ₅ * (z + 1) - -1) = -1 + ζ₅^2 * (z + 1) by ring]
+  rw [genA_eq_zeta5_rotation _ hz'']
+  rw [show -1 + ζ₅ * (-1 + ζ₅ ^ 2 * (z + 1) - -1) = -1 + ζ₅^3 * (z + 1) by ring]
+  rw [genA_eq_zeta5_rotation _ hz''']
+  rw [show -1 + ζ₅ * (-1 + ζ₅ ^ 3 * (z + 1) - -1) = -1 + ζ₅^4 * (z + 1) by ring]
+
+/-- B⁻¹ = B⁴ means multiplying by ζ₅⁴. -/
+lemma genB_inv_eq_zeta5_pow4_rotation (z : ℂ)
+    (hz : toPlane z ∈ rightDisk r_crit)
+    (hz' : toPlane ((1 : ℂ) + ζ₅ * (z - 1)) ∈ rightDisk r_crit)
+    (hz'' : toPlane ((1 : ℂ) + ζ₅^2 * (z - 1)) ∈ rightDisk r_crit)
+    (hz''' : toPlane ((1 : ℂ) + ζ₅^3 * (z - 1)) ∈ rightDisk r_crit) :
+    genB r_crit (genB r_crit (genB r_crit
+      (genB r_crit (toPlane z)))) =
+    toPlane ((1 : ℂ) + ζ₅^4 * (z - 1)) := by
+  rw [genB_eq_zeta5_rotation z hz]
+  rw [genB_eq_zeta5_rotation _ hz']
+  rw [show 1 + ζ₅ * (1 + ζ₅ * (z - 1) - 1) = 1 + ζ₅^2 * (z - 1) by ring]
+  rw [genB_eq_zeta5_rotation _ hz'']
+  rw [show 1 + ζ₅ * (1 + ζ₅ ^ 2 * (z - 1) - 1) = 1 + ζ₅^3 * (z - 1) by ring]
+  rw [genB_eq_zeta5_rotation _ hz''']
+  rw [show 1 + ζ₅ * (1 + ζ₅ ^ 3 * (z - 1) - 1) = 1 + ζ₅^4 * (z - 1) by ring]
 
 end TDCSG.CompoundSymmetry.GG5
