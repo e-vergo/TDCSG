@@ -87,4 +87,19 @@ lemma rotateAboutCircle_pow (c : ℂ) (a : Circle) (n : ℕ) (z : ℂ) :
     rw [Function.iterate_succ_apply', ih, pow_succ, mul_comm]
     exact (rotateAboutCircle_mul c a (a ^ n) z).symm
 
+/-- Rotation about a center preserves membership in a disk centered at that point.
+    Key fact: rotation by a unit complex number preserves distance from the center. -/
+lemma rotateAboutCircle_preserves_disk (c : ℂ) (a : Circle) (r : ℝ) (z : ℂ)
+    (hz : z ∈ closedDiskC c r) : rotateAboutCircle c a z ∈ closedDiskC c r := by
+  unfold closedDiskC at hz ⊢
+  simp only [Set.mem_setOf_eq] at hz ⊢
+  -- rotateAboutCircle c a z - c = a * (z - c)
+  have h_eq : rotateAboutCircle c a z - c = a * (z - c) := by
+    unfold rotateAboutCircle
+    ring
+  rw [h_eq, Complex.norm_mul]
+  -- ‖a‖ = 1 for a ∈ Circle
+  rw [Circle.norm_coe, one_mul]
+  exact hz
+
 end TDCSG.Definitions

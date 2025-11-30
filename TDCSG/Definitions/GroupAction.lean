@@ -61,6 +61,24 @@ lemma genB_in_disk_eq_rotateAboutCircle (r : ℝ) (z : ℂ) (hz : z ∈ rightDis
     genB r z = rotateAboutCircle rightCenter (Circle.exp (-2 * π / 5)) z := by
   simp only [genB, hz, ↓reduceIte, rotateAboutCircle_eq_rotateAboutC]
 
+/-- genA preserves leftDisk membership: rotation about disk center preserves distance. -/
+lemma genA_preserves_leftDisk (r : ℝ) (z : ℂ) (hz : z ∈ leftDisk r) :
+    genA r z ∈ leftDisk r := by
+  rw [genA_in_disk_eq_rotateAboutCircle r z hz]
+  unfold leftDisk
+  have h_center : leftCenter = (-1 : ℂ) := by unfold leftCenter; simp
+  rw [h_center]
+  exact rotateAboutCircle_preserves_disk (-1) _ r z hz
+
+/-- genB preserves rightDisk membership: rotation about disk center preserves distance. -/
+lemma genB_preserves_rightDisk (r : ℝ) (z : ℂ) (hz : z ∈ rightDisk r) :
+    genB r z ∈ rightDisk r := by
+  rw [genB_in_disk_eq_rotateAboutCircle r z hz]
+  unfold rightDisk
+  have h_center : rightCenter = (1 : ℂ) := by unfold rightCenter; simp
+  rw [h_center]
+  exact rotateAboutCircle_preserves_disk 1 _ r z hz
+
 /-- Apply a generator or its inverse to a point in ℂ. -/
 noncomputable def applyGen (r : ℝ) (z : ℂ) : Generator → ℂ
   | .A    => genA r z                            -- A

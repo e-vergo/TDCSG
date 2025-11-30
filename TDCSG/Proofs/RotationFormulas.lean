@@ -112,6 +112,64 @@ lemma applyGen_B_formula (z : ℂ) (hz : z ∈ rightDisk r_crit) :
   unfold applyGen
   exact genB_rotation_formula z hz
 
+/-- Simplified Ainv formula: Only requires initial disk membership.
+    Uses genA_preserves_leftDisk to derive chain membership automatically. -/
+lemma applyGen_Ainv_formula' (z : ℂ) (hz : z ∈ leftDisk r_crit) :
+    applyGen r_crit z .Ainv = (-1 : ℂ) + ζ₅ * (z + 1) := by
+  -- Derive chain membership using preservation lemma
+  have h1 : genA r_crit z ∈ leftDisk r_crit := TDCSG.Definitions.genA_preserves_leftDisk r_crit z hz
+  have h2 : genA r_crit (genA r_crit z) ∈ leftDisk r_crit :=
+    TDCSG.Definitions.genA_preserves_leftDisk r_crit _ h1
+  have h3 : genA r_crit (genA r_crit (genA r_crit z)) ∈ leftDisk r_crit :=
+    TDCSG.Definitions.genA_preserves_leftDisk r_crit _ h2
+  -- Translate chain membership to explicit form
+  have hf1 : genA r_crit z = (-1 : ℂ) + ζ₅^4 * (z + 1) := genA_rotation_formula z hz
+  have hf1' : (-1 : ℂ) + ζ₅^4 * (z + 1) ∈ leftDisk r_crit := hf1 ▸ h1
+  have hf2_eq : genA r_crit (genA r_crit z) = (-1 : ℂ) + ζ₅^4 * (genA r_crit z + 1) :=
+    genA_rotation_formula _ h1
+  have hf2' : (-1 : ℂ) + ζ₅^4 * ((-1 : ℂ) + ζ₅^4 * (z + 1) + 1) ∈ leftDisk r_crit := by
+    have : genA r_crit (genA r_crit z) = (-1 : ℂ) + ζ₅^4 * ((-1 : ℂ) + ζ₅^4 * (z + 1) + 1) := by
+      rw [hf2_eq, hf1]
+    rw [← this]; exact h2
+  have hf3_eq : genA r_crit (genA r_crit (genA r_crit z)) =
+      (-1 : ℂ) + ζ₅^4 * (genA r_crit (genA r_crit z) + 1) := genA_rotation_formula _ h2
+  have hf3' : (-1 : ℂ) + ζ₅^4 * ((-1 : ℂ) + ζ₅^4 * ((-1 : ℂ) + ζ₅^4 * (z + 1) + 1) + 1) ∈ leftDisk r_crit := by
+    have : genA r_crit (genA r_crit (genA r_crit z)) =
+        (-1 : ℂ) + ζ₅^4 * ((-1 : ℂ) + ζ₅^4 * ((-1 : ℂ) + ζ₅^4 * (z + 1) + 1) + 1) := by
+      rw [hf3_eq, hf2_eq, hf1]
+    rw [← this]; exact h3
+  -- Apply the original Ainv formula
+  exact applyGen_Ainv_formula z hz hf1' hf2' hf3'
+
+/-- Simplified Binv formula: Only requires initial disk membership.
+    Uses genB_preserves_rightDisk to derive chain membership automatically. -/
+lemma applyGen_Binv_formula' (z : ℂ) (hz : z ∈ rightDisk r_crit) :
+    applyGen r_crit z .Binv = (1 : ℂ) + ζ₅ * (z - 1) := by
+  -- Derive chain membership using preservation lemma
+  have h1 : genB r_crit z ∈ rightDisk r_crit := TDCSG.Definitions.genB_preserves_rightDisk r_crit z hz
+  have h2 : genB r_crit (genB r_crit z) ∈ rightDisk r_crit :=
+    TDCSG.Definitions.genB_preserves_rightDisk r_crit _ h1
+  have h3 : genB r_crit (genB r_crit (genB r_crit z)) ∈ rightDisk r_crit :=
+    TDCSG.Definitions.genB_preserves_rightDisk r_crit _ h2
+  -- Translate chain membership to explicit form
+  have hf1 : genB r_crit z = (1 : ℂ) + ζ₅^4 * (z - 1) := genB_rotation_formula z hz
+  have hf1' : (1 : ℂ) + ζ₅^4 * (z - 1) ∈ rightDisk r_crit := hf1 ▸ h1
+  have hf2_eq : genB r_crit (genB r_crit z) = (1 : ℂ) + ζ₅^4 * (genB r_crit z - 1) :=
+    genB_rotation_formula _ h1
+  have hf2' : (1 : ℂ) + ζ₅^4 * ((1 : ℂ) + ζ₅^4 * (z - 1) - 1) ∈ rightDisk r_crit := by
+    have : genB r_crit (genB r_crit z) = (1 : ℂ) + ζ₅^4 * ((1 : ℂ) + ζ₅^4 * (z - 1) - 1) := by
+      rw [hf2_eq, hf1]
+    rw [← this]; exact h2
+  have hf3_eq : genB r_crit (genB r_crit (genB r_crit z)) =
+      (1 : ℂ) + ζ₅^4 * (genB r_crit (genB r_crit z) - 1) := genB_rotation_formula _ h2
+  have hf3' : (1 : ℂ) + ζ₅^4 * ((1 : ℂ) + ζ₅^4 * ((1 : ℂ) + ζ₅^4 * (z - 1) - 1) - 1) ∈ rightDisk r_crit := by
+    have : genB r_crit (genB r_crit (genB r_crit z)) =
+        (1 : ℂ) + ζ₅^4 * ((1 : ℂ) + ζ₅^4 * ((1 : ℂ) + ζ₅^4 * (z - 1) - 1) - 1) := by
+      rw [hf3_eq, hf2_eq, hf1]
+    rw [← this]; exact h3
+  -- Apply the original Binv formula
+  exact applyGen_Binv_formula z hz hf1' hf2' hf3'
+
 /-- Convenience: length1 + length2 = (3 - √5)/2. -/
 lemma length12_eq_sqrt5 : length1 + length2 = (3 - Real.sqrt 5) / 2 := by
   have h_goldenRatio : Real.goldenRatio = (1 + Real.sqrt 5) / 2 := Real.goldenRatio.eq_1
