@@ -462,24 +462,44 @@ lemma w3_z5_vertex_below_interval : (95 - 37*√5) / 20 < 2 - √5 := by
 lemma w3_z5_at_one_expr : ((-4 : ℂ) + 4*ζ₅ - 2*ζ₅^2 + ζ₅^4) + (1 : ℂ) * (1 - ζ₅) =
     -3 + 3*ζ₅ - 2*ζ₅^2 + ζ₅^4 := by ring
 
-/-- Re(-3 + 3ζ₅ - 2ζ₅² + ζ₅⁴) -/
-lemma w3_z5_at_one_re : ((-3 : ℂ) + 3*ζ₅ - 2*ζ₅^2 + ζ₅^4).re = (5*√5 - 13) / 4 := by
-  sorry
+/-- Re(-3 + 3ζ₅ - 2ζ₅² + ζ₅⁴) = (6√5 - 14)/4 = (3√5 - 7)/2
+    Calculation: -3 + 3*(√5-1)/4 + 2*(√5+1)/4 + (√5-1)/4 = (6√5 - 14)/4 -/
+lemma w3_z5_at_one_re : ((-3 : ℂ) + 3*ζ₅ - 2*ζ₅^2 + ζ₅^4).re = (6*√5 - 14) / 4 := by
+  have h1 : ζ₅.re = (√5 - 1) / 4 := zeta5_re
+  have h2 : (ζ₅^2).re = -(√5 + 1) / 4 := zeta5_sq_re
+  have h3 : (ζ₅^4).re = (√5 - 1) / 4 := zeta5_pow4_re
+  have h4 : ζ₅.im = Real.sin (2 * π / 5) := zeta5_im_eq_sin
+  have h5 : (ζ₅^2).im = Real.sin (π / 5) := zeta5_sq_im_eq
+  simp only [Complex.add_re, Complex.sub_re, Complex.neg_re, Complex.mul_re, h1, h2, h3, h4, h5]
+  norm_num
+  ring
 
-/-- Im(-3 + 3ζ₅ - 2ζ₅² + ζ₅⁴) -/
+/-- Im(-3 + 3ζ₅ - 2ζ₅² + ζ₅⁴) = 3*sin(2π/5) - 2*sin(π/5) - sin(2π/5) = 2*sin(2π/5) - 2*sin(π/5) -/
 lemma w3_z5_at_one_im : ((-3 : ℂ) + 3*ζ₅ - 2*ζ₅^2 + ζ₅^4).im =
     2 * Real.sin (2 * π / 5) - 2 * Real.sin (π / 5) := by
-  sorry
+  have h1 : ζ₅.re = (√5 - 1) / 4 := zeta5_re
+  have h2 : (ζ₅^2).re = -(√5 + 1) / 4 := zeta5_sq_re
+  have h3 : ζ₅.im = Real.sin (2 * π / 5) := zeta5_im_eq_sin
+  have h4 : (ζ₅^2).im = Real.sin (π / 5) := zeta5_sq_im_eq
+  have h5 : (ζ₅^4).im = -Real.sin (2 * π / 5) := zeta5_pow4_im
+  simp only [Complex.add_im, Complex.sub_im, Complex.neg_im, Complex.mul_im, h1, h2, h3, h4, h5]
+  norm_num
+  ring
 
 /-- ||-3 + 3ζ₅ - 2ζ₅² + ζ₅⁴||² at c=1
     Using sin(2π/5) = sin(π/5)*(1+√5)/2:
       2*sin(2π/5) - 2*sin(π/5) = 2*sin(π/5)*((1+√5)/2 - 1) = sin(π/5)*(√5-1)
       Im² = sin²(π/5)*(√5-1)² = ((5-√5)/8)*(6-2√5) = (5-√5)(6-2√5)/8
           = (30 - 10√5 - 6√5 + 2*5)/8 = (40 - 16√5)/8 = 5 - 2√5
-    Re² = (5√5-13)²/16 = (125 - 130√5 + 169)/16 = (294 - 130√5)/16 = (147 - 65√5)/8
-    Total = (147 - 65√5 + 40 - 16√5)/8 = (187 - 81√5)/8
-    But we need this to equal 3 + φ = (7 + √5)/2 = (28 + 4√5)/8?
-    Let me recompute... -/
+    Re = (6√5 - 14)/4
+    Re² = (6√5-14)²/16 = (36*5 - 168√5 + 196)/16 = (376 - 168√5)/16 = (94 - 42√5)/4
+    Total = (94 - 42√5)/4 + (5 - 2√5) = (94 - 42√5 + 20 - 8√5)/4 = (114 - 50√5)/4
+    Need: Total ≤ 3 + φ = 3 + (1+√5)/2 = (7 + √5)/2 = (14 + 2√5)/4
+    So need: (114 - 50√5)/4 ≤ (14 + 2√5)/4
+    i.e., 114 - 50√5 ≤ 14 + 2√5
+    i.e., 100 ≤ 52√5
+    i.e., 25 ≤ 13√5
+    i.e., 625 ≤ 169*5 = 845 ✓ -/
 lemma normSq_w3_z5_at_one : Complex.normSq ((-3 : ℂ) + 3*ζ₅ - 2*ζ₅^2 + ζ₅^4) ≤ 3 + φ := by
   rw [Complex.normSq_apply, w3_z5_at_one_re, w3_z5_at_one_im]
   have h_sin_double : Real.sin (2 * π / 5) = Real.sin (π / 5) * (1 + √5) / 2 := by
@@ -493,7 +513,8 @@ lemma normSq_w3_z5_at_one : Complex.normSq ((-3 : ℂ) + 3*ζ₅ - 2*ζ₅^2 + �
     ring
   simp only [← sq]
   rw [h_im_simp]
-  have h_re_sq : ((5*√5 - 13) / 4)^2 = (294 - 130*√5) / 16 := by nlinarith [sqrt5_sq]
+  -- Re² = ((6√5 - 14)/4)² = (376 - 168√5)/16
+  have h_re_sq : ((6*√5 - 14) / 4)^2 = (376 - 168*√5) / 16 := by nlinarith [sqrt5_sq]
   have h_im_sq : (Real.sin (π / 5) * (√5 - 1))^2 = Real.sin (π / 5)^2 * (√5 - 1)^2 := by ring
   have h_sqrt5_minus_1_sq : (√5 - 1)^2 = 6 - 2*√5 := by nlinarith [sqrt5_sq]
   rw [h_re_sq, h_im_sq, h_sin_sq, h_sqrt5_minus_1_sq]
