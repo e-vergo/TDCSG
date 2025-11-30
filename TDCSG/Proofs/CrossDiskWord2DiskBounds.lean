@@ -63,13 +63,7 @@ lemma interval1_c_lower_bound (x : ℝ) (hx : length1 ≤ x) :
   have h_sqrt5_pos : √5 > 0 := Real.sqrt_pos.mpr (by norm_num : (0 : ℝ) < 5)
   have h_denom_pos : 1 + goldenRatio > 0 := by
     rw [h_goldenRatio]; linarith
-  have h_length1_val : 1 / (2 * (1 + goldenRatio)) = (3 - √5) / 4 := by
-    rw [h_goldenRatio]
-    have h_denom : 2 * (1 + (1 + √5) / 2) = 3 + √5 := by ring
-    rw [h_denom]
-    have h_cross : (3 - √5) * (3 + √5) = 4 := by nlinarith [h_sqrt5_sq]
-    field_simp
-    linarith [h_cross]
+  have h_length1_val : 1 / (2 * (1 + goldenRatio)) = (3 - √5) / 4 := by grind
   calc 2 * x - 1 ≥ 2 * (1 / (2 * (1 + goldenRatio))) - 1 := by
         rw [← h_length1]; linarith
     _ = 2 * ((3 - √5) / 4) - 1 := by rw [h_length1_val]
@@ -172,6 +166,7 @@ lemma cross_disk_w2_z1_bound (c : ℝ) (hc_lo : (1 - √5) / 2 ≤ c) (hc_hi : c
     have h1 : ((-2 - √5) / 2)^2 = (9 + 4*√5) / 4 := by nlinarith [h_sqrt5_sq]
     have h2 : ((√5 - 3) / 2)^2 = (14 - 6*√5) / 4 := by nlinarith [h_sqrt5_sq]
     have h3 : (14 - 6*√5) * ((5 + √5) / 8) = (40 - 16*√5) / 8 := by nlinarith [h_sqrt5_sq]
+
     calc ((-2 - √5) / 2)^2 + (Real.sin (2 * π / 5) * ((√5 - 3) / 2))^2
         = (9 + 4*√5) / 4 + Real.sin (2 * π / 5)^2 * ((14 - 6*√5) / 4) := by
           rw [h1, mul_pow, h2]
@@ -441,7 +436,6 @@ lemma cross_disk_w2_z2_bound (c : ℝ) (hc_lo : (1 - √5) / 2 ≤ c) (hc_hi : c
     linarith [h_diff, h_prod_nonpos]
 
   rw [hA_def, hB_def, ← Complex.normSq_eq_norm_sq]
-
   calc Complex.normSq ((2 + ζ₅^3 - 2*ζ₅^4) + (c : ℂ) * (ζ₅^4 - 1))
       ≤ Complex.normSq ((2 + ζ₅^3 - 2*ζ₅^4) + (((1 - √5)/2 : ℝ) : ℂ) * (ζ₅^4 - 1)) := by
         apply h_mono ((1 - √5)/2) c (le_refl _) hc_lo hc_hi

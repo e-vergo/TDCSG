@@ -122,9 +122,7 @@ lemma cross_disk_w3_z1_bound (c : ℝ) (hc_lo : 2 - √5 ≤ c) (hc_hi : c ≤ 1
         have h1 : c * ((5 - √5) / 2) * 2 + 2 * ((2*√5 - 5) / 2) = c * (5 - √5) + (2*√5 - 5) := by ring
         rw [h1]
         have h_5_minus_sqrt5_pos : 5 - √5 > 0 := by nlinarith [h_sqrt5_sq]
-        have h_vertex_eq : (5 - 2*√5) / (5 - √5) = (3 - √5) / 4 := by
-          field_simp
-          nlinarith [h_sqrt5_sq]
+        have h_vertex_eq : (5 - 2*√5) / (5 - √5) = (3 - √5) / 4 := by grind
         have h_ineq : c * (5 - √5) < 5 - 2*√5 := by
           calc c * (5 - √5) < (3 - √5) / 4 * (5 - √5) := by
                 apply mul_lt_mul_of_pos_right hc_lt_vertex h_5_minus_sqrt5_pos

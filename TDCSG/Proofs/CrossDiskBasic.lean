@@ -35,8 +35,7 @@ lemma zeta5_cubed_minus_fourth_ne_zero : ζ₅^3 - ζ₅^4 ≠ 0 := by
   have h3_ne : ζ₅^3 ≠ 0 := pow_ne_zero 3 hζ_ne
   have h1 : ζ₅ = 1 := by
     have hdiv : ζ₅^4 / ζ₅^3 = 1 := by rw [← heq]; exact div_self h3_ne
-    calc ζ₅ = ζ₅^4 / ζ₅^3 := by rw [pow_succ]; field_simp
-         _ = 1 := hdiv
+    grind
   exact zeta5_ne_one h1
 
 /-! ### Endpoint norm bounds -/
@@ -130,17 +129,10 @@ lemma sin_sq_pi_div_5 : Real.sin (π / 5)^2 = (5 - √5) / 8 := by
   have h_cos : Real.cos (π / 5) = (1 + √5) / 4 := Real.cos_pi_div_five
   have h := Real.sin_sq_add_cos_sq (π / 5)
   have h1 : Real.sin (π / 5)^2 = 1 - Real.cos (π / 5)^2 := by linarith
-  calc Real.sin (π / 5)^2 = 1 - Real.cos (π / 5)^2 := h1
-    _ = 1 - ((1 + √5) / 4)^2 := by rw [h_cos]
-    _ = 1 - (1 + 2*√5 + √5^2) / 16 := by ring
-    _ = 1 - (1 + 2*√5 + 5) / 16 := by simp only [sqrt5_sq]
-    _ = (5 - √5) / 8 := by ring
+  grind
 
 /-- (sqrt5-1)^2 = 6 - 2*sqrt5 -/
-lemma sqrt5_minus_1_sq : (√5 - 1)^2 = 6 - 2*√5 := by
-  calc (√5 - 1)^2 = √5^2 - 2*√5 + 1 := by ring
-    _ = 5 - 2*√5 + 1 := by simp only [sqrt5_sq]
-    _ = 6 - 2*√5 := by ring
+lemma sqrt5_minus_1_sq : (√5 - 1)^2 = 6 - 2*√5 := by grind
 
 /-- Im(zeta5^2) = sin(pi/5) -/
 lemma zeta5_sq_im' : (ζ₅^2).im = Real.sin (π / 5) := by
@@ -278,12 +270,7 @@ lemma normSq_at_upper_endpoint :
     have h_cos : Real.cos (π / 5) = (1 + √5) / 4 := Real.cos_pi_div_five
     rw [h_sin_double, h_cos]
     have h1 : (1 - √5) * (√5 - 1) = -(√5 - 1)^2 := by ring
-    calc -0 + Real.sin (π / 5) + ((1 - √5) / 2 * (-Real.sin (π / 5) - (-(2 * Real.sin (π / 5) * ((1 + √5) / 4)))) + 0 * (-√5 / 2))
-        = Real.sin (π / 5) + (1 - √5) / 2 * (-Real.sin (π / 5) + 2 * Real.sin (π / 5) * ((1 + √5) / 4)) := by ring
-      _ = Real.sin (π / 5) * (1 + (1 - √5) * (√5 - 1) / 4) := by ring
-      _ = Real.sin (π / 5) * (1 - (√5 - 1)^2 / 4) := by rw [h1]; ring
-      _ = Real.sin (π / 5) * (1 - (6 - 2*√5) / 4) := by rw [h_sq]
-      _ = Real.sin (π / 5) * (√5 - 1) / 2 := by ring
+    grind
 
   rw [h_re, h_im]
   calc ((-2 - √5) / 2)^2 + (Real.sin (π / 5) * (√5 - 1) / 2)^2

@@ -77,6 +77,7 @@ lemma cross_disk_z2_bound_restricted (c : ℝ) (hc_lo : -1 ≤ c) (hc_hi : c ≤
                         Complex.normSq (-2 + ζ₅^2 + (((1 - √5)/2 : ℝ) : ℂ) * (ζ₅^3 - ζ₅^4)) := by
 
       let c_upper : ℝ := (1 - √5) / 2
+
       have h_re_AB : (((-2 : ℂ) + ζ₅^2) * starRingEnd ℂ (ζ₅^3 - ζ₅^4)).re = 3 * √5 / 2 :=
         re_A_mul_conj_B
       have h_normSq_B : Complex.normSq (ζ₅^3 - ζ₅^4) = (5 - √5) / 2 := normSq_B
@@ -94,17 +95,10 @@ lemma cross_disk_z2_bound_restricted (c : ℝ) (hc_lo : -1 ≤ c) (hc_hi : c ≤
       have h_c_le_upper : c ≤ c_upper := hc_hi
       have h_diff_nonneg : c_upper - c ≥ 0 := by linarith
 
-      have h_vertex_lt_c : -(3 * √5 / 2) / ((5 - √5) / 2) < c := by
-        calc -(3 * √5 / 2) / ((5 - √5) / 2) < -1 := h_vertex
-          _ ≤ c := hc_lo
+      have h_vertex_lt_c : -(3 * √5 / 2) / ((5 - √5) / 2) < c := by grind
 
       have h_sum_gt_2vertex : c + c_upper > 2 * (-(3 * √5 / 2) / ((5 - √5) / 2)) := by
-        have hv : -(3 * √5 / 2) / ((5 - √5) / 2) < -1 := h_vertex
-        have h_upper_gt_vertex : c_upper > -(3 * √5 / 2) / ((5 - √5) / 2) := by
-          have h_upper_val : c_upper = (1 - √5) / 2 := rfl
-          calc -(3 * √5 / 2) / ((5 - √5) / 2) < -1 := h_vertex
-            _ < (1 - √5) / 2 := by nlinarith [sqrt5_sq, Real.sqrt_nonneg 5]
-        linarith
+        grind
 
       have h_factor_pos : 2 * (3 * √5 / 2) + (c + c_upper) * ((5 - √5) / 2) > 0 := by
         have h_5_minus_sqrt5_pos : 0 < 5 - √5 := by
@@ -158,9 +152,7 @@ lemma cross_disk_z2_bound_restricted (c : ℝ) (hc_lo : -1 ≤ c) (hc_hi : c ≤
 
     convert h_convex_max using 2
     rw [h_coerce]
-
-  calc ‖A + (c : ℂ) * B‖^2 ≤ ‖A + (((1 - √5)/2) : ℂ) * B‖^2 := h_mono
-    _ = 3 + φ := h_f_at_upper_eq
+  grind
 
 /-! ### z3 cross-disk bound lemmas -/
 
@@ -188,16 +180,8 @@ lemma normSq_B3 : Complex.normSq (ζ₅^4 - 1) = (5 - √5) / 2 := by
       ring
     have h := Real.sin_sq_add_cos_sq (2 * π / 5)
     have h1 : Real.sin (2 * π / 5)^2 = 1 - Real.cos (2 * π / 5)^2 := by linarith
-    calc Real.sin (2 * π / 5)^2 = 1 - Real.cos (2 * π / 5)^2 := h1
-      _ = 1 - ((√5 - 1) / 4)^2 := by rw [h_cos]
-      _ = 1 - (√5^2 - 2*√5 + 1) / 16 := by ring
-      _ = 1 - (5 - 2*√5 + 1) / 16 := by simp only [sqrt5_sq]
-      _ = (5 + √5) / 8 := by ring
-  calc ((√5 - 5) / 4)^2 + (-Real.sin (2 * π / 5))^2
-      = (√5 - 5)^2 / 16 + Real.sin (2 * π / 5)^2 := by ring
-    _ = (√5^2 - 10*√5 + 25) / 16 + (5 + √5) / 8 := by rw [h_sin_sq]; ring
-    _ = (5 - 10*√5 + 25) / 16 + (5 + √5) / 8 := by simp only [sqrt5_sq]
-    _ = (5 - √5) / 2 := by ring
+    grind
+  grind
 
 /-- sin²(2π/5) = (5 + √5)/8 -/
 lemma sin_sq_two_pi_div_5 : Real.sin (2 * π / 5)^2 = (5 + √5) / 8 := by
@@ -207,11 +191,7 @@ lemma sin_sq_two_pi_div_5 : Real.sin (2 * π / 5)^2 = (5 + √5) / 8 := by
     ring
   have h := Real.sin_sq_add_cos_sq (2 * π / 5)
   have h1 : Real.sin (2 * π / 5)^2 = 1 - Real.cos (2 * π / 5)^2 := by linarith
-  calc Real.sin (2 * π / 5)^2 = 1 - Real.cos (2 * π / 5)^2 := h1
-    _ = 1 - ((√5 - 1) / 4)^2 := by rw [h_cos]
-    _ = 1 - (√5^2 - 2*√5 + 1) / 16 := by ring
-    _ = 1 - (5 - 2*√5 + 1) / 16 := by simp only [sqrt5_sq]
-    _ = (5 + √5) / 8 := by ring
+  grind
 
 /-- normSq at c = (1-√5)/2 for z3
 
@@ -272,30 +252,15 @@ lemma z3_normSq_at_c_upper :
     have h1 : (1 + √5) * (5 - √5) = 5 - √5 + 5*√5 - √5^2 := by ring
     have h2 : (1 + √5) * (5 - √5) = 4 * √5 := by nlinarith [sqrt5_sq, h1]
     have h3 : Real.sin (π / 5) * (1 + √5) * (5 - √5) = Real.sin (π / 5) * (4 * √5) := by
-      calc Real.sin (π / 5) * (1 + √5) * (5 - √5)
-          = Real.sin (π / 5) * ((1 + √5) * (5 - √5)) := by ring
-        _ = Real.sin (π / 5) * (4 * √5) := by rw [h2]
-    calc Real.sin (π / 5) * (1 + √5) / 2 * (5 - √5) / 2
-        = Real.sin (π / 5) * (1 + √5) * (5 - √5) / 4 := by ring
-      _ = Real.sin (π / 5) * (4 * √5) / 4 := by rw [h3]
-      _ = Real.sin (π / 5) * √5 := by ring
+      grind
+    grind
 
   -- So Im = -sin(π/5)*√5 - sin(π/5) = -sin(π/5)*(√5 + 1)
   have h_im_simp : -Real.sin (2 * π / 5) * (5 - √5) / 2 - Real.sin (π / 5) =
                    -Real.sin (π / 5) * (√5 + 1) := by
     have h := h_product
     linarith
-
-  calc (1 : ℝ)^2 + (-Real.sin (2 * π / 5) * (5 - √5) / 2 - Real.sin (π / 5))^2
-      = 1 + (-Real.sin (π / 5) * (√5 + 1))^2 := by rw [h_im_simp]; ring
-    _ = 1 + Real.sin (π / 5)^2 * (√5 + 1)^2 := by ring
-    _ = 1 + ((5 - √5) / 8) * (√5 + 1)^2 := by rw [h_sin_pi5_sq]
-    _ = 1 + ((5 - √5) / 8) * (√5^2 + 2*√5 + 1) := by ring
-    _ = 1 + ((5 - √5) / 8) * (6 + 2*√5) := by nlinarith [sqrt5_sq]
-    _ = 1 + (5 - √5) * (6 + 2*√5) / 8 := by ring
-    _ = 1 + (20 + 4*√5) / 8 := by nlinarith [sqrt5_sq]
-    _ = 1 + (5 + √5) / 2 := by ring
-    _ = (7 + √5) / 2 := by ring
+  grind
 
 /-- (7 + √5)/2 = 3 + φ -/
 lemma seven_plus_sqrt5_div_2_eq : (7 + √5) / 2 = 3 + φ := by
@@ -333,6 +298,7 @@ lemma cross_disk_z3_bound_restricted (c : ℝ) (hc_lo : -1 ≤ c) (hc_hi : c ≤
     have h_sqrt5_gt : √5 > 5/3 := by
       have h_sq : (5/3 : ℝ)^2 = 25/9 := by norm_num
       have h_lt : (25/9 : ℝ) < 5 := by norm_num
+
       calc √5 > √(25/9) := Real.sqrt_lt_sqrt (by norm_num) h_lt
         _ = 5/3 := by rw [← h_sq, Real.sqrt_sq (by norm_num : (0:ℝ) ≤ 5/3)]
     linarith
@@ -458,6 +424,7 @@ lemma cross_disk_z3_bound_restricted (c : ℝ) (hc_lo : -1 ≤ c) (hc_hi : c ≤
       have h_ge : (4*√5 - 5) + (c + c_upper) * ((5 - √5) / 2) ≥ 3*√5 - 5 := by
         have h1 : (5 - √5) / 2 > 0 := by linarith
         have h2 : c + c_upper ≥ -(1 + √5) / 2 := by rw [← h_lo_val]; exact h_c_plus_cupper_lo
+
         calc (4*√5 - 5) + (c + c_upper) * ((5 - √5) / 2)
             ≥ (4*√5 - 5) + (-(1 + √5) / 2) * ((5 - √5) / 2) := by nlinarith
           _ = 3*√5 - 5 := h_at_min
@@ -468,9 +435,7 @@ lemma cross_disk_z3_bound_restricted (c : ℝ) (hc_lo : -1 ≤ c) (hc_hi : c ≤
       linarith [hc_hi]
 
     nlinarith [h_factor_pos, h_cupper_minus_c, h_diff_expand, sqrt5_sq]
-
-  calc ‖A + (c : ℂ) * B‖^2 ≤ ‖A + (((1 - √5)/2 : ℝ) : ℂ) * B‖^2 := h_mono
-    _ = 3 + φ := h_at_c_upper
+  grind
 
 /-! ### Helper lemmas for z4 bound -/
 
@@ -492,12 +457,7 @@ lemma normSq_B4 : Complex.normSq (1 - ζ₅) = (5 - √5) / 2 := by
   simp only [← sq]
   rw [B4_re, B4_im]
   have h_sin_sq : Real.sin (2 * π / 5)^2 = (5 + √5) / 8 := sin_sq_two_pi_div_5
-  calc ((5 - √5) / 4)^2 + (-Real.sin (2 * π / 5))^2
-      = (5 - √5)^2 / 16 + Real.sin (2 * π / 5)^2 := by ring
-    _ = (5 - √5)^2 / 16 + (5 + √5) / 8 := by rw [h_sin_sq]
-    _ = (25 - 10*√5 + √5^2) / 16 + (5 + √5) / 8 := by ring
-    _ = (25 - 10*√5 + 5) / 16 + (5 + √5) / 8 := by simp only [sqrt5_sq]
-    _ = (5 - √5) / 2 := by ring
+  grind
 
 /-- Re(A4) = (-9 + 5√5) / 4 where A4 = -2 + 2ζ₅ - 2ζ₅² + ζ₅⁴ -/
 lemma A4_re : ((-2 : ℂ) + 2*ζ₅ - 2*ζ₅^2 + ζ₅^4).re = (-9 + 5*√5) / 4 := by
@@ -741,11 +701,7 @@ lemma cross_disk_z4_bound_restricted (c : ℝ) (hc_lo : -1 ≤ c) (hc_hi : c ≤
 
     -- The second factor is POSITIVE, so f(-1) - f(c) ≥ 0, i.e., f(c) ≤ f(-1)
     have h_second_factor_pos : 0 ≤ -(5*√5 - 10) + (1 - c) * ((5 - √5) / 2) := by
-      have h_lower : 10 - 4*√5 ≤ -(5*√5 - 10) + (1 - c) * ((5 - √5) / 2) := by
-        calc -(5*√5 - 10) + (1 - c) * ((5 - √5) / 2)
-            = (10 - 5*√5) + (1 - c) * ((5 - √5) / 2) := by ring
-          _ ≥ (10 - 5*√5) + √5 := by linarith [h_prod_lower]
-          _ = 10 - 4*√5 := by ring
+      have h_lower : 10 - 4*√5 ≤ -(5*√5 - 10) + (1 - c) * ((5 - √5) / 2) := by grind
       have h_pos : 0 < 10 - 4*√5 := by nlinarith [sqrt5_sq]
       linarith
 
@@ -757,8 +713,6 @@ lemma cross_disk_z4_bound_restricted (c : ℝ) (hc_lo : -1 ≤ c) (hc_hi : c ≤
           = (c + 1) * (-(5*√5 - 10) + (1 - c) * ((5 - √5) / 2)) := by ring
         _ ≥ 0 := mul_nonneg h_c_plus_1_nonneg h_second_factor_pos
     linarith
-
-  calc ‖A + (c : ℂ) * B‖^2 ≤ ‖A + ((-1 : ℝ) : ℂ) * B‖^2 := h_mono
-    _ ≤ 3 + φ := h_at_neg1
+  grind
 
 end TDCSG.CompoundSymmetry.GG5

@@ -70,19 +70,14 @@ lemma normSq_A_w3_z1 : Complex.normSq (ζ₅^4 - 2) = 6 - √5 := by
   have h_sqrt5_sq : √5^2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
   have h_sin_sq : Real.sin (2 * π / 5)^2 = (5 + √5) / 8 := sin_sq_two_pi_div_5
   simp only [← sq]
-  have h_re_sq : ((√5 - 9) / 4)^2 = (86 - 18*√5) / 16 := by nlinarith [h_sqrt5_sq]
+  have h_re_sq : ((√5 - 9) / 4)^2 = (86 - 18*√5) / 16 := by grind
   have h_neg_sq : (-Real.sin (2 * π / 5))^2 = Real.sin (2 * π / 5)^2 := by ring
-  calc ((√5 - 9) / 4)^2 + (-Real.sin (2 * π / 5))^2
-      = (86 - 18*√5) / 16 + (5 + √5) / 8 := by rw [h_re_sq, h_neg_sq, h_sin_sq]
-    _ = (86 - 18*√5 + 10 + 2*√5) / 16 := by ring
-    _ = (96 - 16*√5) / 16 := by ring
-    _ = 6 - √5 := by ring
+  grind
 
 /-- Re((ζ₅⁴ - 2) * conj(1 - ζ₅)) = (2√5 - 5) / 2 -/
 lemma re_A_w3_z1_mul_conj_B :
     ((ζ₅^4 - 2 : ℂ) * starRingEnd ℂ (1 - ζ₅)).re = (2*√5 - 5) / 2 := by
   rw [conj_B4]
-  have h_sqrt5_sq : √5^2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
   have h_expand : (ζ₅^4 - 2 : ℂ) * (1 - ζ₅^4) = 3*ζ₅^4 - ζ₅^3 - 2 := by
     calc (ζ₅^4 - 2) * (1 - ζ₅^4) = ζ₅^4 - ζ₅^8 - 2 + 2*ζ₅^4 := by ring
       _ = 3*ζ₅^4 - ζ₅^3 - 2 := by rw [zeta5_pow_eight]; ring
@@ -101,10 +96,6 @@ lemma re_A_w3_z1_mul_conj_B :
 lemma w3_z1_vertex : -(((2*√5 - 5) / 2) / ((5 - √5) / 2)) = (3 - √5) / 4 := by
   have h_sqrt5_sq : √5^2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
   have h_5_minus_sqrt5_ne : 5 - √5 ≠ 0 := by nlinarith [Real.sqrt_nonneg 5]
-  have h_denom_ne : (5 - √5) / 2 ≠ 0 := by
-    have h : 5 - √5 > 0 := by nlinarith [Real.sqrt_nonneg 5, h_sqrt5_sq]
-    have : (5 - √5) / 2 > 0 := by linarith
-    linarith
   field_simp
   nlinarith [h_sqrt5_sq]
 
@@ -112,7 +103,6 @@ lemma w3_z1_vertex : -(((2*√5 - 5) / 2) / ((5 - √5) / 2)) = (3 - √5) / 4 :
     so the parabola achieves max at one of the endpoints -/
 lemma w3_z1_vertex_in_interval : (2 - √5) < (3 - √5) / 4 ∧ (3 - √5) / 4 < 1 := by
   have h_sqrt5_sq : √5^2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
-  have h_sqrt5_lt_3 : √5 < 3 := by nlinarith [h_sqrt5_sq]
   constructor <;> nlinarith [Real.sqrt_nonneg 5]
 
 /-- At c = 2 - √5:
@@ -179,13 +169,13 @@ lemma normSq_w3_z1_at_lower : Complex.normSq (ζ₅^4 - (2 - √5)*ζ₅ - √5)
   have h_sqrt5_sq : √5^2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
   have h_sin_sq : Real.sin (2 * π / 5)^2 = (5 + √5) / 8 := sin_sq_two_pi_div_5
   simp only [← sq]
-  have h1 : (3 * (1 - √5) / 2)^2 = 9 * (6 - 2*√5) / 4 := by nlinarith [h_sqrt5_sq]
+  have h1 : (3 * (1 - √5) / 2)^2 = 9 * (6 - 2*√5) / 4 := by grind
   have h2 : (-(3 - √5) * Real.sin (2 * π / 5))^2 = (3 - √5)^2 * Real.sin (2 * π / 5)^2 := by ring
-  have h3 : (3 - √5)^2 = 14 - 6*√5 := by nlinarith [h_sqrt5_sq]
-  rw [h1, h2, h_sin_sq, h3]
-  have h4 : (14 - 6*√5) * ((5 + √5) / 8) = 5 - 2*√5 := by nlinarith [h_sqrt5_sq]
-  rw [h4]
+  have h3 : (3 - √5)^2 = 14 - 6*√5 := by grind
   unfold φ Real.goldenRatio
+  rw [h1, h2, h_sin_sq, h3]
+  have h4 : (14 - 6*√5) * ((5 + √5) / 8) = 5 - 2*√5 := by grind
+  rw [h4]
   nlinarith [h_sqrt5_sq, Real.sqrt_nonneg 5]
 
 /-! ### z2 helper lemmas -/
@@ -216,15 +206,12 @@ lemma normSq_A_w3_z2 : Complex.normSq ((2 : ℂ) + ζ₅^3 - 2*ζ₅^4) = 11 - 4
     rw [Real.cos_pi_div_five]
     ring
   have h_sin_sq : Real.sin (π / 5)^2 = (5 - √5) / 8 := sin_sq_pi_div_5
-  have h_im_simp : 2 * Real.sin (2 * π / 5) - Real.sin (π / 5) = Real.sin (π / 5) * √5 := by
-    rw [h_sin_double]
-    ring
+  have h_im_simp : 2 * Real.sin (2 * π / 5) - Real.sin (π / 5) = Real.sin (π / 5) * √5 := by grind
   simp only [← sq]
   rw [h_im_simp]
-  have h_re_sq : ((9 - 3*√5) / 4)^2 = (126 - 54*√5) / 16 := by nlinarith [h_sqrt5_sq]
-  have h_im_sq : (Real.sin (π / 5) * √5)^2 = Real.sin (π / 5)^2 * 5 := by nlinarith [h_sqrt5_sq]
-  rw [h_re_sq, h_im_sq, h_sin_sq]
-  nlinarith [h_sqrt5_sq, Real.sqrt_nonneg 5]
+  have h_re_sq : ((9 - 3*√5) / 4)^2 = (126 - 54*√5) / 16 := by grind
+  have h_im_sq : (Real.sin (π / 5) * √5)^2 = Real.sin (π / 5)^2 * 5 := by grind
+  grind
 
 /-- conj(ζ₅⁴ - 1) = ζ₅ - 1 -/
 lemma conj_B3 : starRingEnd ℂ (ζ₅^4 - 1) = ζ₅ - 1 := by
@@ -259,12 +246,8 @@ lemma re_A_w3_z2_mul_conj_B :
 lemma w3_z2_vertex : -(((3*√5 - 10) / 2) / ((5 - √5) / 2)) = (7 - √5) / 4 := by
   have h_sqrt5_sq : √5^2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
   have h_5_minus_sqrt5_ne : 5 - √5 ≠ 0 := by nlinarith [Real.sqrt_nonneg 5]
-  have h_denom_ne : (5 - √5) / 2 ≠ 0 := by
-    have h : 5 - √5 > 0 := by nlinarith [Real.sqrt_nonneg 5, h_sqrt5_sq]
-    have : (5 - √5) / 2 > 0 := by linarith
-    linarith
-  field_simp
-  nlinarith [h_sqrt5_sq]
+  have h_denom_ne : (5 - √5) / 2 ≠ 0 := by grind
+  grind
 
 /-- The vertex (7-√5)/4 ≈ 1.19 > 1, so it is above the interval [2-√5, 1] -/
 lemma w3_z2_vertex_above_interval : (7 - √5) / 4 > 1 := by
@@ -297,15 +280,13 @@ lemma normSq_w3_z2_at_one : Complex.normSq ((1 : ℂ) + ζ₅^3 - ζ₅^4) ≤ 3
     ring
   have h_sin_sq : Real.sin (π / 5)^2 = (5 - √5) / 8 := sin_sq_pi_div_5
   have h_im_simp : Real.sin (2 * π / 5) - Real.sin (π / 5) =
-      Real.sin (π / 5) * (√5 - 1) / 2 := by
-    rw [h_sin_double]
-    ring
+      Real.sin (π / 5) * (√5 - 1) / 2 := by grind
   simp only [← sq]
   rw [h_im_simp]
-  have h_re_sq : ((2 - √5) / 2)^2 = (9 - 4*√5) / 4 := by nlinarith [h_sqrt5_sq]
+  have h_re_sq : ((2 - √5) / 2)^2 = (9 - 4*√5) / 4 := by grind
   have h_im_sq : (Real.sin (π / 5) * (√5 - 1) / 2)^2 =
       Real.sin (π / 5)^2 * (√5 - 1)^2 / 4 := by ring
-  have h_sqrt5_minus_1_sq : (√5 - 1)^2 = 6 - 2*√5 := by nlinarith [h_sqrt5_sq]
+  have h_sqrt5_minus_1_sq : (√5 - 1)^2 = 6 - 2*√5 := by grind
   rw [h_re_sq, h_im_sq, h_sin_sq, h_sqrt5_minus_1_sq]
   unfold φ Real.goldenRatio
   nlinarith [h_sqrt5_sq, Real.sqrt_nonneg 5]
@@ -342,17 +323,14 @@ lemma normSq_w3_z2_at_lower : Complex.normSq ((√5 : ℂ) + ζ₅^3 - (√5 : �
   have h_im_simp : √5 * Real.sin (2 * π / 5) - Real.sin (π / 5) =
       Real.sin (π / 5) * (√5 + 3) / 2 := by
     rw [h_sin_double]
-    have h1 : √5 * (1 + √5) = √5 + 5 := by nlinarith [h_sqrt5_sq]
-    calc √5 * (Real.sin (π / 5) * (1 + √5) / 2) - Real.sin (π / 5)
-        = Real.sin (π / 5) * (√5 * (1 + √5) / 2 - 1) := by ring
-      _ = Real.sin (π / 5) * ((√5 + 5) / 2 - 1) := by rw [h1]
-      _ = Real.sin (π / 5) * (√5 + 3) / 2 := by ring
+    have h1 : √5 * (1 + √5) = √5 + 5 := by grind
+    grind
   simp only [← sq]
   rw [h_im_simp]
-  have h_re_sq : ((2*√5 - 3) / 2)^2 = (29 - 12*√5) / 4 := by nlinarith [h_sqrt5_sq]
+  have h_re_sq : ((2*√5 - 3) / 2)^2 = (29 - 12*√5) / 4 := by grind
   have h_im_sq : (Real.sin (π / 5) * (√5 + 3) / 2)^2 =
       Real.sin (π / 5)^2 * (√5 + 3)^2 / 4 := by ring
-  have h_sqrt5_plus_3_sq : (√5 + 3)^2 = 14 + 6*√5 := by nlinarith [h_sqrt5_sq]
+  have h_sqrt5_plus_3_sq : (√5 + 3)^2 = 14 + 6*√5 := by grind
   rw [h_re_sq, h_im_sq, h_sin_sq, h_sqrt5_plus_3_sq]
   unfold φ Real.goldenRatio
   nlinarith [h_sqrt5_sq, Real.sqrt_nonneg 5]
@@ -393,9 +371,9 @@ lemma normSq_A_w3_z3 : Complex.normSq ((-2 : ℂ) + ζ₅^2 - 2*ζ₅^3 + 2*ζ�
     ring
   simp only [← sq]
   rw [h_im_simp]
-  have h_re_sq : ((3*√5 - 9) / 4)^2 = (126 - 54*√5) / 16 := by nlinarith [h_sqrt5_sq]
+  have h_re_sq : ((3*√5 - 9) / 4)^2 = (126 - 54*√5) / 16 := by grind
   have h_im_sq : (Real.sin (π / 5) * (2 - √5))^2 = Real.sin (π / 5)^2 * (2 - √5)^2 := by ring
-  have h_2_minus_sqrt5_sq : (2 - √5)^2 = 9 - 4*√5 := by nlinarith [h_sqrt5_sq]
+  have h_2_minus_sqrt5_sq : (2 - √5)^2 = 9 - 4*√5 := by grind
   rw [h_re_sq, h_im_sq, h_sin_sq, h_2_minus_sqrt5_sq]
   nlinarith [h_sqrt5_sq, Real.sqrt_nonneg 5]
 
@@ -438,7 +416,7 @@ lemma re_A_w3_z3_mul_conj_B :
 /-- Vertex of quadratic f(c) = |A + cB|² is at (5 - 3√5)/4 -/
 lemma w3_z3_vertex : -(((5*√5 - 10) / 2) / ((5 - √5) / 2)) = (5 - 3*√5) / 4 := by
   have h_sqrt5_sq : √5^2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
-  have h_denom_ne : 5 - √5 ≠ 0 := by nlinarith [h_sqrt5_sq]
+  have h_denom_ne : 5 - √5 ≠ 0 := by grind
   field_simp
   nlinarith [h_sqrt5_sq, Real.sqrt_nonneg 5]
 
@@ -481,10 +459,10 @@ lemma normSq_w3_z3_at_one : Complex.normSq ((-2 : ℂ) + ζ₅^2 - ζ₅^3 + ζ�
     ring
   simp only [← sq]
   rw [h_im_simp]
-  have h_re_sq : ((√5 - 9) / 4)^2 = (86 - 18*√5) / 16 := by nlinarith [h_sqrt5_sq]
+  have h_re_sq : ((√5 - 9) / 4)^2 = (86 - 18*√5) / 16 := by grind
   have h_im_sq : (Real.sin (π / 5) * (3 - √5) / 2)^2 =
       Real.sin (π / 5)^2 * (3 - √5)^2 / 4 := by ring
-  have h_3_minus_sqrt5_sq : (3 - √5)^2 = 14 - 6*√5 := by nlinarith [h_sqrt5_sq]
+  have h_3_minus_sqrt5_sq : (3 - √5)^2 = 14 - 6*√5 := by grind
   rw [h_re_sq, h_im_sq, h_sin_sq, h_3_minus_sqrt5_sq]
   unfold φ
   nlinarith [h_sqrt5_sq, Real.sqrt_nonneg 5, Real.goldenRatio_pos]
@@ -524,7 +502,7 @@ lemma w3_z3_at_lower_im :
   have h_factor : s + √5 * s - √5 * (s * (1 + √5) / 2) = s * (√5 - 3) / 2 := by
     have h_expand : √5 * (s * (1 + √5) / 2) = s * √5 * (1 + √5) / 2 := by ring
     rw [h_expand]
-    have h_sqrt5_times : √5 * (1 + √5) = √5 + 5 := by nlinarith [h_sqrt5_sq]
+    have h_sqrt5_times : √5 * (1 + √5) = √5 + 5 := by grind
     calc s + √5 * s - s * √5 * (1 + √5) / 2
         = s + √5 * s - s * (√5 * (1 + √5)) / 2 := by ring
       _ = s + √5 * s - s * (√5 + 5) / 2 := by rw [h_sqrt5_times]
@@ -538,10 +516,10 @@ lemma normSq_w3_z3_at_lower :
   have h_sqrt5_sq : √5^2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
   have h_sin_sq : Real.sin (π / 5)^2 = (5 - √5) / 8 := sin_sq_pi_div_5
   simp only [← sq]
-  have h_re_sq : ((1 - √5) / 4)^2 = (6 - 2*√5) / 16 := by nlinarith [h_sqrt5_sq]
+  have h_re_sq : ((1 - √5) / 4)^2 = (6 - 2*√5) / 16 := by grind
   have h_im_sq : (Real.sin (π / 5) * (√5 - 3) / 2)^2 =
       Real.sin (π / 5)^2 * (√5 - 3)^2 / 4 := by ring
-  have h_sqrt5_minus_3_sq : (√5 - 3)^2 = 14 - 6*√5 := by nlinarith [h_sqrt5_sq]
+  have h_sqrt5_minus_3_sq : (√5 - 3)^2 = 14 - 6*√5 := by grind
   rw [h_re_sq, h_im_sq, h_sin_sq, h_sqrt5_minus_3_sq]
   unfold φ
   nlinarith [h_sqrt5_sq, Real.sqrt_nonneg 5, Real.goldenRatio_pos]
@@ -604,7 +582,7 @@ lemma re_A_w3_z4_mul_conj_B : (((4 : ℂ) - 2*ζ₅ + ζ₅^3 - 2*ζ₅^4) * sta
 /-- Vertex of z4 quadratic is at c_v = (15 - 6√5)/(5 - √5) ≈ 0.57 -/
 lemma w3_z4_vertex : -(((6*√5 - 15) / 2) / ((5 - √5) / 2)) = (15 - 6*√5) / (5 - √5) := by
   have h_sqrt5_sq : √5^2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
-  have h_denom_ne : (5 - √5) / 2 ≠ 0 := by nlinarith [h_sqrt5_sq]
+  have h_denom_ne : (5 - √5) / 2 ≠ 0 := by grind
   field_simp
   ring
 
@@ -827,7 +805,7 @@ lemma w3_z5_at_lower_im : ((-2 - √5 : ℂ) + (2 + √5 : ℂ) * ζ₅ - 2*ζ�
     ring
   rw [h_sin_double]
   have h_sqrt5_sq : √5^2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
-  have h_1_plus_sqrt5_sq : (1 + √5)^2 = 6 + 2*√5 := by nlinarith [h_sqrt5_sq]
+  have h_1_plus_sqrt5_sq : (1 + √5)^2 = 6 + 2*√5 := by grind
   have h_sin_pos : 0 < Real.sin (π / 5) := Real.sin_pos_of_pos_of_lt_pi (by linarith [Real.pi_pos]) (by linarith [Real.pi_pos])
   nlinarith [h_sqrt5_sq, h_1_plus_sqrt5_sq, h_sin_pos, sq_nonneg (1 + √5)]
 
@@ -838,7 +816,7 @@ lemma normSq_w3_z5_at_lower : Complex.normSq ((-2 - √5 : ℂ) + (2 + √5 : �
   have h_sin_sq : Real.sin (π / 5)^2 = (5 - √5) / 8 := sin_sq_pi_div_5
   simp only [← sq]
   have h_im_sq : (Real.sin (π / 5) * (1 + √5))^2 = Real.sin (π / 5)^2 * (1 + √5)^2 := by ring
-  have h_1_plus_sqrt5_sq : (1 + √5)^2 = 6 + 2*√5 := by nlinarith [h_sqrt5_sq]
+  have h_1_plus_sqrt5_sq : (1 + √5)^2 = 6 + 2*√5 := by grind
   rw [h_im_sq, h_sin_sq, h_1_plus_sqrt5_sq]
   unfold φ Real.goldenRatio
   nlinarith [h_sqrt5_sq, Real.sqrt_nonneg 5]

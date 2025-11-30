@@ -96,9 +96,8 @@ lemma applyGen_Binv_formula (z : ℂ)
   rw [genB_rotation_formula _ h1]
   rw [genB_rotation_formula _ h2]
   rw [genB_rotation_formula _ h3]
-  have h16 : ζ₅^16 = ζ₅ := zeta5_pow_sixteen
   ring_nf
-  simp only [h16]
+  simp
 
 /-- Helper: applyGen .A computes the forward rotation formula. -/
 lemma applyGen_A_formula (z : ℂ) (hz : z ∈ leftDisk r_crit) :

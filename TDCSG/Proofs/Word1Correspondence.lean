@@ -49,8 +49,7 @@ lemma interval0_c_upper_bound (x : ℝ) (hx : x < length1) :
     have h_denom_ne : 3 + Real.sqrt 5 ≠ 0 := ne_of_gt h_denom_pos
     field_simp
     nlinarith [h_sqrt5_sq]
-  calc 2 * x - 1 < 2 * length1 - 1 := by linarith
-    _ = (1 - Real.sqrt 5) / 2 := h_target
+  grind
 
 /-- Word 1 action on segment points: translates by displacement0.
 
@@ -148,9 +147,7 @@ lemma word1_produces_displacement0 (x : ℝ) (hx : x ∈ Set.Ico 0 1) (hx_int : 
     simp only [z1]
     rw [show (-1 : ℂ) + ζ₅^4 * (z0 + 1) - (-1) = ζ₅^4 * (z0 + 1) by ring]
     rw [Complex.norm_mul, zeta5_abs_pow4]
-    simp only [one_mul]
-    convert hz0_left' using 2
-    ring
+    grind
 
   -- z2 in leftDisk by rotation
   have hz2_left : z2 ∈ leftDisk r_crit := by
@@ -159,9 +156,7 @@ lemma word1_produces_displacement0 (x : ℝ) (hx : x ∈ Set.Ico 0 1) (hx_int : 
     simp only [z2]
     rw [show (-1 : ℂ) + ζ₅^4 * (z1 + 1) - (-1) = ζ₅^4 * (z1 + 1) by ring]
     rw [Complex.norm_mul, zeta5_abs_pow4]
-    simp only [one_mul]
-    convert hz1_left using 2
-    ring
+    grind
 
   -- z2 in rightDisk requires cross_disk_z2_bound_restricted
   have hz2_right : z2 ∈ rightDisk r_crit := by
@@ -178,10 +173,7 @@ lemma word1_produces_displacement0 (x : ℝ) (hx : x ∈ Set.Ico 0 1) (hx_int : 
       have hpow4_2 : (ζ₅^4)^2 = ζ₅^3 := by rw [← pow_mul]; norm_num [zeta5_pow_eight]
       simp only [hpow4_4, hpow4_3, hpow4_2]
       have hconj2 : (starRingEnd ℂ) (2 : ℂ) = 2 := Complex.conj_ofReal 2
-      simp only [hconj2]
-      ring_nf
-      simp only [zeta5_pow_eight, zeta5_pow_eleven, zeta5_pow_twelve]
-      ring
+      grind
     rw [h_z2_minus_1, Complex.norm_conj]
     exact cross_disk_z2_bound_restricted c hc_lo hc_hi_le'
 
@@ -221,7 +213,7 @@ lemma word1_produces_displacement0 (x : ℝ) (hx : x ∈ Set.Ico 0 1) (hx_int : 
     simp only [z4]
     rw [show (-1 : ℂ) + ζ₅^4 * (z3 + 1) - (-1) = ζ₅^4 * (z3 + 1) by ring]
     rw [Complex.norm_mul, zeta5_abs_pow 4, one_mul]
-    convert hz3_left using 2; ring
+    grind
 
   -- z4 in rightDisk requires cross_disk_z4_bound_restricted
   have hz4_right : z4 ∈ rightDisk r_crit := by
