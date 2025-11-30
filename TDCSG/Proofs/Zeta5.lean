@@ -48,45 +48,6 @@ open Complex Real TDCSG.Definitions
 /-- √5² = 5, tagged for simp to eliminate redundant hypotheses. -/
 @[simp] lemma sqrt5_sq : Real.sqrt 5 ^ 2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
 
-/-! ### Critical Radius Lemmas -/
-
-/-- The critical radius satisfies 2.148 < r_crit < 2.150. -/
-lemma r_crit_approx : 2.148 < r_crit ∧ r_crit < 2.150 := by
-  unfold r_crit φ
-  constructor
-  · rw [show (2.148 : ℝ) = Real.sqrt (2.148 ^ 2) by
-      rw [Real.sqrt_sq]; norm_num]
-    apply Real.sqrt_lt_sqrt
-    · norm_num
-    have h_sq : (2.148 : ℝ) ^ 2 = 4.613904 := by norm_num
-    rw [h_sq]
-    have φ_lower : (1.613904 : ℝ) < Real.goldenRatio := by
-      have h1 : (2.227808 : ℝ) ^ 2 < 5 := by norm_num
-      have h2 : (2.227808 : ℝ) < Real.sqrt 5 := by
-        rw [show (2.227808 : ℝ) =
-            Real.sqrt (2.227808 ^ 2) by
-          rw [Real.sqrt_sq]; norm_num]
-        exact Real.sqrt_lt_sqrt (by norm_num) h1
-      unfold Real.goldenRatio
-      linarith
-    linarith
-  · rw [show (2.150 : ℝ) = Real.sqrt (2.150 ^ 2) by
-      rw [Real.sqrt_sq]; norm_num]
-    apply Real.sqrt_lt_sqrt
-    · linarith [Real.goldenRatio_pos]
-    have h_sq : (2.150 : ℝ) ^ 2 = 4.6225 := by norm_num
-    rw [h_sq]
-    have φ_upper : Real.goldenRatio < (1.6225 : ℝ) := by
-      unfold Real.goldenRatio
-      have h1 : 5 < (2.245 : ℝ) ^ 2 := by norm_num
-      have h2 : Real.sqrt 5 < (2.245 : ℝ) := by
-        rw [show (2.245 : ℝ) =
-            Real.sqrt (2.245 ^ 2) by
-          rw [Real.sqrt_sq]; norm_num]
-        exact Real.sqrt_lt_sqrt (by norm_num) h1
-      linarith
-    linarith
-
 
 /-! ### 5th Roots of Unity -/
 

@@ -205,7 +205,7 @@ lemma word1_produces_displacement0 (x : ℝ) (hx : x ∈ Set.Ico 0 1) (hx_int : 
       have hpow4_4 : (ζ₅^4)^4 = ζ₅ := by rw [← pow_mul]; norm_num [zeta5_pow_sixteen]
       have hpow4_3 : (ζ₅^4)^3 = ζ₅^2 := by rw [← pow_mul]; norm_num [zeta5_pow_twelve]
       have hpow4_2 : (ζ₅^4)^2 = ζ₅^3 := by rw [← pow_mul]; norm_num [zeta5_pow_eight]
-      simp only [hpow4_4, hpow4_3, hpow4_2]
+      simp only [hpow4_4, hpow4_3]
       have hconj2 : (starRingEnd ℂ) (2 : ℂ) = 2 := Complex.conj_ofReal 2
       simp only [hconj2]
       ring_nf
@@ -234,7 +234,7 @@ lemma word1_produces_displacement0 (x : ℝ) (hx : x ∈ Set.Ico 0 1) (hx_int : 
       have hpow4_4 : (ζ₅^4)^4 = ζ₅ := by rw [← pow_mul]; norm_num [zeta5_pow_sixteen]
       have hpow4_3 : (ζ₅^4)^3 = ζ₅^2 := by rw [← pow_mul]; norm_num [zeta5_pow_twelve]
       have hpow4_2 : (ζ₅^4)^2 = ζ₅^3 := by rw [← pow_mul]; norm_num [zeta5_pow_eight]
-      simp only [hpow4_4, hpow4_3, hpow4_2]
+      simp only [hpow4_4, hpow4_2]
       have hconj2 : (starRingEnd ℂ) (2 : ℂ) = 2 := Complex.conj_ofReal 2
       simp only [hconj2]
       ring_nf

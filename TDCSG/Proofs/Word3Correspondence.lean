@@ -282,8 +282,10 @@ lemma word3_produces_displacement2 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
       have hpow4_2 : (ζ₅^4)^2 = ζ₅^3 := by simp only [← pow_mul]; exact zeta5_pow_eight
       have hpow4_3 : (ζ₅^4)^3 = ζ₅^2 := by simp only [← pow_mul]; exact zeta5_pow_twelve
       have hconj2_nat : (starRingEnd ℂ) (2 : ℂ) = 2 := Complex.conj_ofReal 2
-      simp only [hpow4_2, hpow4_3, hconj2_nat, zeta5_pow_six, zeta5_pow_seven, zeta5_pow_sixteen]
-      ring
+      simp only [hpow4_2, hpow4_3, hconj2_nat]
+      ring_nf
+      simp only [zeta5_pow_six, zeta5_pow_seven, zeta5_pow_sixteen]
+      grind only
     rw [h_z3_minus_1, Complex.norm_conj]
     exact cross_disk_w3_z3_bound c hc_lo hc_hi
 
@@ -300,9 +302,12 @@ lemma word3_produces_displacement2 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
       have hpow4_4 : (ζ₅^4)^4 = ζ₅ := by simp only [← pow_mul]; exact zeta5_pow_sixteen
       have hconj4_nat : (starRingEnd ℂ) (4 : ℂ) = 4 := Complex.conj_ofReal 4
       have hconj2_nat : (starRingEnd ℂ) (2 : ℂ) = 2 := Complex.conj_ofReal 2
-      simp only [hpow4_3, hpow4_4, hconj4_nat, hconj2_nat,
-                 zeta5_pow_five, zeta5_pow_six, zeta5_pow_seven, zeta5_pow_ten, zeta5_pow_eleven]
-      ring
+      simp only [hpow4_3, hpow4_4, hconj4_nat, hconj2_nat]
+      ring_nf
+      simp only [zeta5_pow_five, one_mul, zeta5_pow_six, zeta5_pow_seven, zeta5_pow_ten,
+        zeta5_pow_eleven]
+      grind only
+
     rw [show z4 - (-1 : ℂ) = z4 + 1 by ring, h_z4_plus_1, Complex.norm_conj]
     exact cross_disk_w3_z4_bound c hc_lo hc_hi
 
@@ -337,10 +342,11 @@ lemma word3_produces_displacement2 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
       have hpow4_2 : (ζ₅^4)^2 = ζ₅^3 := by simp only [← pow_mul]; exact zeta5_pow_eight
       have hconj4_nat : (starRingEnd ℂ) (4 : ℂ) = 4 := Complex.conj_ofReal 4
       have hconj2_nat : (starRingEnd ℂ) (2 : ℂ) = 2 := Complex.conj_ofReal 2
-      simp only [hpow4_4, hpow4_2, hconj4_nat, hconj2_nat,
-                 zeta5_pow_eight, zeta5_pow_nine, zeta5_pow_ten, zeta5_pow_eleven,
-                 zeta5_pow_fourteen, zeta5_pow_fifteen]
-      ring
+      simp only [hpow4_4, hpow4_2, hconj4_nat, hconj2_nat]
+      ring_nf
+      simp only [zeta5_pow_eight, zeta5_pow_nine, zeta5_pow_ten, one_mul, zeta5_pow_eleven,
+        zeta5_pow_fourteen, zeta5_pow_fifteen, add_left_inj]
+      grind only
     rw [h_z5_minus_1, Complex.norm_conj]
     exact cross_disk_w3_z5_bound c hc_lo hc_hi
 
