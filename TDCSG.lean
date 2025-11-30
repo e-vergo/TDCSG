@@ -15,7 +15,12 @@ import TDCSG.Proofs.SegmentGeometry
 import TDCSG.Proofs.IET
 import TDCSG.Proofs.Orbit
 import TDCSG.Proofs.OrbitInfinite
-import TDCSG.Proofs.WordCorrespondence
+import TDCSG.Proofs.AlgebraicIdentities
+import TDCSG.Proofs.RotationFormulas
+import TDCSG.Proofs.Word1Correspondence
+import TDCSG.Proofs.Word2Correspondence
+import TDCSG.Proofs.Word3Correspondence
+import TDCSG.Proofs.IETOrbit
 import TDCSG.Proofs.Geometry
 
 -- Main theorem
