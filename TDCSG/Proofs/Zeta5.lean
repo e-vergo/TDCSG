@@ -43,6 +43,11 @@ open Complex Real TDCSG.Definitions
 
 -- ζ₅ is imported from TDCSG.Definitions.Core via the open statement below
 
+/-! ### Real Number Helpers -/
+
+/-- √5² = 5, tagged for simp to eliminate redundant hypotheses. -/
+@[simp] lemma sqrt5_sq : Real.sqrt 5 ^ 2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
+
 /-! ### Critical Radius Lemmas -/
 
 /-- The critical radius satisfies 2.148 < r_crit < 2.150. -/
@@ -86,7 +91,7 @@ lemma r_crit_approx : 2.148 < r_crit ∧ r_crit < 2.150 := by
 /-! ### 5th Roots of Unity -/
 
 /-- ζ₅ is a 5th root of unity. -/
-lemma zeta5_pow_five : ζ₅ ^ 5 = 1 := by
+@[simp] lemma zeta5_pow_five : ζ₅ ^ 5 = 1 := by
   unfold ζ₅ zeta5
   rw [← Complex.exp_nat_mul]
   convert Complex.exp_two_pi_mul_I using 2
@@ -242,6 +247,11 @@ lemma zeta5_pow_reduce (n : ℕ) : ζ₅ ^ n = ζ₅ ^ (n % 5) := by
   rw [pow_add, pow_mul]
   simp [zeta5_pow_five]
 
+/-- Simp lemma for reducing ζ₅ powers: ζ₅^(n + 5*k) = ζ₅^n.
+    This allows simp to automatically normalize ζ₅ powers mod 5. -/
+@[simp] lemma zeta5_pow_add_five_mul (n k : ℕ) : ζ₅ ^ (n + 5 * k) = ζ₅ ^ n := by
+  rw [pow_add, pow_mul, zeta5_pow_five, one_pow, mul_one]
+
 /-- Simplify ζ₅⁻¹ * ζ₅ -/
 lemma zeta5_inv_mul : ζ₅⁻¹ * ζ₅ = 1 := by
   field_simp [zeta5_ne_zero]
@@ -314,57 +324,57 @@ lemma zeta5_pow4_eq : ζ₅^4 = -1 - ζ₅ - ζ₅^2 - ζ₅^3 := by
     _ = -1 - ζ₅ - ζ₅^2 - ζ₅^3 := by ring
 
 /-- Helper lemmas for reducing higher powers of ζ₅ -/
-lemma zeta5_pow_six : ζ₅^6 = ζ₅ := by
+@[simp] lemma zeta5_pow_six : ζ₅^6 = ζ₅ := by
   have : ζ₅^6 = ζ₅^(6 % 5) := zeta5_pow_reduce 6
   norm_num at this
   exact this
 
-lemma zeta5_pow_seven : ζ₅^7 = ζ₅^2 := by
+@[simp] lemma zeta5_pow_seven : ζ₅^7 = ζ₅^2 := by
   have : ζ₅^7 = ζ₅^(7 % 5) := zeta5_pow_reduce 7
   norm_num at this
   exact this
 
-lemma zeta5_pow_eight : ζ₅^8 = ζ₅^3 := by
+@[simp] lemma zeta5_pow_eight : ζ₅^8 = ζ₅^3 := by
   have : ζ₅^8 = ζ₅^(8 % 5) := zeta5_pow_reduce 8
   norm_num at this
   exact this
 
-lemma zeta5_pow_nine : ζ₅^9 = ζ₅^4 := by
+@[simp] lemma zeta5_pow_nine : ζ₅^9 = ζ₅^4 := by
   have : ζ₅^9 = ζ₅^(9 % 5) := zeta5_pow_reduce 9
   norm_num at this
   exact this
 
-lemma zeta5_pow_ten : ζ₅^10 = 1 := by
+@[simp] lemma zeta5_pow_ten : ζ₅^10 = 1 := by
   have : ζ₅^10 = ζ₅^(10 % 5) := zeta5_pow_reduce 10
   norm_num at this
   exact this
 
-lemma zeta5_pow_eleven : ζ₅^11 = ζ₅ := by
+@[simp] lemma zeta5_pow_eleven : ζ₅^11 = ζ₅ := by
   have : ζ₅^11 = ζ₅^(11 % 5) := zeta5_pow_reduce 11
   norm_num at this
   exact this
 
-lemma zeta5_pow_twelve : ζ₅^12 = ζ₅^2 := by
+@[simp] lemma zeta5_pow_twelve : ζ₅^12 = ζ₅^2 := by
   have : ζ₅^12 = ζ₅^(12 % 5) := zeta5_pow_reduce 12
   norm_num at this
   exact this
 
-lemma zeta5_pow_thirteen : ζ₅^13 = ζ₅^3 := by
+@[simp] lemma zeta5_pow_thirteen : ζ₅^13 = ζ₅^3 := by
   have : ζ₅^13 = ζ₅^(13 % 5) := zeta5_pow_reduce 13
   norm_num at this
   exact this
 
-lemma zeta5_pow_fifteen : ζ₅^15 = 1 := by
+@[simp] lemma zeta5_pow_fifteen : ζ₅^15 = 1 := by
   have : ζ₅^15 = ζ₅^(15 % 5) := zeta5_pow_reduce 15
   norm_num at this
   exact this
 
-lemma zeta5_pow_sixteen : ζ₅^16 = ζ₅ := by
+@[simp] lemma zeta5_pow_sixteen : ζ₅^16 = ζ₅ := by
   have : ζ₅^16 = ζ₅^(16 % 5) := zeta5_pow_reduce 16
   norm_num at this
   exact this
 
-lemma zeta5_pow_seventeen : ζ₅^17 = ζ₅^2 := by
+@[simp] lemma zeta5_pow_seventeen : ζ₅^17 = ζ₅^2 := by
   have : ζ₅^17 = ζ₅^(17 % 5) := zeta5_pow_reduce 17
   norm_num at this
   exact this
@@ -482,6 +492,80 @@ lemma zeta5_pow4_re : (ζ₅^4).re = (Real.sqrt 5 - 1) / 4 := by
 lemma zeta5_pow4_im_neg : (ζ₅^4).im = -ζ₅.im := by
   have h : ζ₅^4 = starRingEnd ℂ ζ₅ := by rw [← zeta5_conj]
   rw [h, Complex.conj_im]
+
+/-! ### Sine value lemmas for 5th roots angles -/
+
+/-- sin(4π/5) = sin(π/5) (supplementary angle identity) -/
+lemma sin_four_pi_fifth : Real.sin (4 * π / 5) = Real.sin (π / 5) := by
+  rw [show (4 * π / 5 : ℝ) = π - π / 5 by ring, Real.sin_pi_sub]
+
+/-- sin(6π/5) = -sin(π/5) (since 6π/5 = π + π/5) -/
+lemma sin_six_pi_fifth : Real.sin (6 * π / 5) = -Real.sin (π / 5) := by
+  rw [show (6 * π / 5 : ℝ) = π / 5 + π by ring, Real.sin_add_pi]
+
+/-- sin(8π/5) = -sin(2π/5) (since 8π/5 = 2π - 2π/5) -/
+lemma sin_eight_pi_fifth : Real.sin (8 * π / 5) = -Real.sin (2 * π / 5) := by
+  rw [show (8 * π / 5 : ℝ) = 2 * π - 2 * π / 5 by ring]
+  rw [Real.sin_two_pi_sub]
+
+/-! ### Imaginary parts of ζ₅ powers -/
+
+/-- (ζ₅²).im = sin(4π/5) -/
+lemma zeta5_sq_im : (ζ₅^2).im = Real.sin (4 * π / 5) := by
+  rw [zeta5_sq_eq]
+  simp only [Complex.add_im, Complex.ofReal_im, Complex.mul_im,
+             Complex.I_re, Complex.I_im, Complex.ofReal_re]
+  ring
+
+/-- Helper: express ζ₅³ in terms of cos and sin -/
+lemma zeta5_cubed_eq_trig : ζ₅^3 = ↑(Real.cos (6 * π / 5)) + I * ↑(Real.sin (6 * π / 5)) := by
+  rw [zeta5_cubed_eq]
+  rw [Complex.exp_mul_I, Complex.ofReal_cos, Complex.ofReal_sin]
+  ring
+
+/-- (ζ₅³).im = sin(6π/5) (which is negative) -/
+lemma zeta5_cubed_im : (ζ₅^3).im = Real.sin (6 * π / 5) := by
+  rw [zeta5_cubed_eq_trig]
+  simp only [Complex.add_im, Complex.ofReal_im, Complex.mul_im,
+             Complex.I_re, Complex.I_im, Complex.ofReal_re]
+  ring
+
+/-- (ζ₅⁴).im = -sin(2π/5) (by conjugate symmetry: ζ₅⁴ = conj(ζ₅)) -/
+lemma zeta5_pow4_im : (ζ₅^4).im = -Real.sin (2 * π / 5) := by
+  rw [zeta5_pow4_im_neg, zeta5_im_eq_sin]
+
+/-! ### Alternative forms connecting to sin(π/5) -/
+
+/-- (ζ₅²).im = sin(π/5) -/
+lemma zeta5_sq_im_eq : (ζ₅^2).im = Real.sin (π / 5) := by
+  rw [zeta5_sq_im, sin_four_pi_fifth]
+
+/-- (ζ₅³).im = -sin(π/5) -/
+lemma zeta5_cubed_im_eq : (ζ₅^3).im = -Real.sin (π / 5) := by
+  rw [zeta5_cubed_im, sin_six_pi_fifth]
+
+/-- (ζ₅³).im is negative -/
+lemma zeta5_cubed_im_neg : (ζ₅^3).im < 0 := by
+  rw [zeta5_cubed_im_eq]
+  apply neg_neg_of_pos
+  apply Real.sin_pos_of_pos_of_lt_pi
+  · linarith [Real.pi_pos]
+  · linarith [Real.pi_pos]
+
+/-- (ζ₅⁴).im is negative -/
+lemma zeta5_pow4_im_neg' : (ζ₅^4).im < 0 := by
+  rw [zeta5_pow4_im]
+  apply neg_neg_of_pos
+  apply Real.sin_pos_of_pos_of_lt_pi
+  · linarith [Real.pi_pos]
+  · linarith [Real.pi_pos]
+
+/-- (ζ₅²).im is positive -/
+lemma zeta5_sq_im_pos : 0 < (ζ₅^2).im := by
+  rw [zeta5_sq_im_eq]
+  apply Real.sin_pos_of_pos_of_lt_pi
+  · linarith [Real.pi_pos]
+  · linarith [Real.pi_pos]
 
 /-! ### Useful algebraic identities for rotation compositions -/
 

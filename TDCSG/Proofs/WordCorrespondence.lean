@@ -294,7 +294,7 @@ lemma word2_algebraic_identity :
       = ↑c * (ζ₅^4 - ζ₅^3) + 2 * ((1 : ℂ) - ζ₅^4 + ζ₅^3 - ζ₅^2) := by
     ring_nf
     -- After ring_nf, reduce powers modulo 5
-    have h9 : ζ₅^9 = ζ₅^4 := by have := zeta5_pow_reduce 9; norm_num at this; exact this
+    have h9 : ζ₅^9 = ζ₅^4 := zeta5_pow_nine
     simp only [h9, h8, h5]
     -- Use cyclotomic sum identity: 1 + ζ₅ + ζ₅² + ζ₅³ + ζ₅⁴ = 0
     have h_zeta_sum : (1 : ℂ) + ζ₅ + ζ₅^2 + ζ₅^3 + ζ₅^4 = 0 := cyclotomic5_sum
@@ -341,7 +341,7 @@ lemma word3_algebraic_identity :
   have h12 : ζ₅^12 = ζ₅^2 := zeta5_pow_twelve
   have h13 : ζ₅^13 = ζ₅^3 := zeta5_pow_thirteen
   have h14 : ζ₅^14 = ζ₅^4 := by have := zeta5_pow_reduce 14; norm_num at this; exact this
-  have h15 : ζ₅^15 = (1 : ℂ) := by have := zeta5_pow_reduce 15; norm_num at this; exact this
+  have h15 : ζ₅^15 = (1 : ℂ) := zeta5_pow_fifteen
   have h18 : ζ₅^18 = ζ₅^3 := by have := zeta5_pow_reduce 18; norm_num at this; exact this
   have h19 : ζ₅^19 = ζ₅^4 := by have := zeta5_pow_reduce 19; norm_num at this; exact this
   -- sqrt 5 squared equals 5

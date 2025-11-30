@@ -123,10 +123,6 @@ private lemma E_plus_one_im : (E + 1).im = Real.sin (4 * π / 5) - Real.sin (2 *
     _ = (ζ₅^2).im - ζ₅.im := by ring
     _ = Real.sin (4 * π / 5) - Real.sin (2 * π / 5) := by rw [h2_im, zeta5_im_eq_sin]
 
-/-- Trigonometric identity: sin(4*pi/5) = sin(pi/5) -/
-private lemma sin_four_pi_fifth : Real.sin (4 * π / 5) = Real.sin (π / 5) := by
-  rw [show (4 * π / 5 : ℝ) = π - π / 5 by ring, Real.sin_pi_sub]
-
 /-- sin(2*pi/5) in terms of sin(pi/5) and cos(pi/5) -/
 private lemma sin_two_pi_fifth : Real.sin (2 * π / 5) = 2 * Real.sin (π / 5) * Real.cos (π / 5) := by
   rw [show (2 * π / 5 : ℝ) = 2 * (π / 5) by ring]
