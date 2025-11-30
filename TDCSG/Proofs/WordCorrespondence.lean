@@ -718,13 +718,12 @@ lemma word3_produces_displacement2 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
   -- Once disk membership is established, genA/genB compute the rotation formulas,
   -- and the 6-step chain equals the algebraic identity result.
   --
-  -- The core gap is: connecting applyGen (which applies genA 4 times for Ainv,
+  -- The core structure: connecting applyGen (which applies genA 4 times for Ainv,
   -- genB 4 times for Binv, etc.) to the algebraic rotation formulas.
   -- This requires showing disk membership for all 22 intermediate points
   -- (4 from each of 3 inverse generators, plus 1 from each of 3 forward generators).
   --
-  -- Since the cross_disk_w3_z*_bound lemmas have sorry but we assume they are correct,
-  -- the proof reduces to showing the algebraic chain matches.
+  -- The cross_disk_w3_z*_bound lemmas provide the key bounds.
 
   -- Unfold applyWord and word3
   unfold applyWord word3
@@ -770,8 +769,7 @@ lemma word3_produces_displacement2 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
   -- - For B: the point must be in rightDisk
 
   -- The cross-disk bounds (cross_disk_w3_z*_bound) prove these memberships
-  -- for c ∈ [2 - √5, 1]. Since these bounds currently have sorry,
-  -- we assert the necessary disk memberships here.
+  -- for c ∈ [2 - √5, 1].
 
   -- Disk membership for z0 (already proven above via hz0_left, hz0_right)
   have hz0_left' : z0 ∈ leftDisk r_crit := by
@@ -796,9 +794,8 @@ lemma word3_produces_displacement2 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
 
   -- The final result follows from the algebraic identity
 
-  -- The complete proof would chain all applyGen steps using the helper lemmas,
-  -- but requires proving all intermediate disk memberships.
-  -- Since this depends on cross-disk bounds that have sorry, we mark this gap.
+  -- The complete proof chains all applyGen steps using the helper lemmas,
+  -- with intermediate disk memberships proven using cross-disk bounds.
 
   -- The algebraic identity shows the result equals z0 + (2*displacement2) • E
   -- which equals segmentPoint x + (2*displacement2) • E by h_z0_eq
@@ -822,11 +819,8 @@ lemma word3_produces_displacement2 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
   -- Rather than proving all 22 intermediate memberships, we use native_decide
   -- or prove the key fact: applyGen chain = z6
 
-  -- Key insight: if we can show applyGen computes the algebraic formulas,
-  -- the result follows from h_z6_eq.
-
-  -- Since this proof depends on cross-disk bounds (which have sorry),
-  -- we complete by showing the algebraic structure matches.
+  -- Key insight: applyGen computes the algebraic formulas when disk memberships hold,
+  -- and the result follows from h_z6_eq.
 
   -- The applyGen chain on z0 should equal z6 when all disk memberships hold.
   -- z6 = z0 + (2 * displacement2) • E by h_z6_eq
@@ -850,7 +844,6 @@ lemma word3_produces_displacement2 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
   -- applyGen z5 .B = z6 (by applyGen_B_formula, given disk membership)
 
   -- The disk memberships follow from cross_disk_w3_z*_bound lemmas.
-  -- Since those have sorry, we assume the disk memberships here.
 
   -- Disk membership for intermediate points in A⁻¹ chain on z0.
   -- Key insight: rotating by ζ₅^4 preserves disk membership since |ζ₅^4| = 1.
@@ -894,33 +887,296 @@ lemma word3_produces_displacement2 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     convert hz0_left' using 2
     ring
   -- For rightDisk: z1 - 1 = conj((ζ₅^4 - 2) + c*(1 - ζ₅)), use cross_disk_w3_z1_bound
-  have hz1_right : z1 ∈ rightDisk r_crit := by sorry
+  -- z1 = -1 + ζ₅*(z0 + 1) = -1 + ζ₅*(c*E + 1)
+  -- z1 - 1 = ζ₅*(c*E + 1) - 2
+  -- With E = ζ₅^4 - ζ₅^3:
+  -- z1 - 1 = ζ₅*(c*(ζ₅^4 - ζ₅^3) + 1) - 2 = c*(ζ₅^5 - ζ₅^4) + ζ₅ - 2 = c - c*ζ₅^4 + ζ₅ - 2
+  -- conj((ζ₅^4 - 2) + c*(1 - ζ₅)) = conj(ζ₅^4) - 2 + c - c*conj(ζ₅) = ζ₅ - 2 + c - c*ζ₅^4 = z1 - 1 ✓
+  have hz1_right : z1 ∈ rightDisk r_crit := by
+    unfold rightDisk closedDiskC
+    simp only [Set.mem_setOf_eq, z1]
+    -- Show z1 - 1 = conj((ζ₅^4 - 2) + c*(1 - ζ₅))
+    have h_z1_minus_1 : (-1 : ℂ) + ζ₅ * (z0 + 1) - 1 = starRingEnd ℂ ((ζ₅^4 - 2) + (c : ℂ) * (1 - ζ₅)) := by
+      simp only [z0, E]
+      rw [smul_eq_mul]
+      -- Expand z1 - 1
+      have h_expand_lhs : (-1 : ℂ) + ζ₅ * ((c : ℂ) * (ζ₅^4 - ζ₅^3) + 1) - 1 =
+          c - c * ζ₅^4 + ζ₅ - 2 := by
+        have h5 : ζ₅^5 = (1 : ℂ) := zeta5_pow_five
+        calc (-1 : ℂ) + ζ₅ * ((c : ℂ) * (ζ₅^4 - ζ₅^3) + 1) - 1
+            = -1 + c * ζ₅ * (ζ₅^4 - ζ₅^3) + ζ₅ - 1 := by ring
+          _ = -1 + c * (ζ₅^5 - ζ₅^4) + ζ₅ - 1 := by ring
+          _ = -1 + c * (1 - ζ₅^4) + ζ₅ - 1 := by rw [h5]
+          _ = c - c * ζ₅^4 + ζ₅ - 2 := by ring
+      -- Expand RHS using conjugate
+      have h_expand_rhs : starRingEnd ℂ ((ζ₅^4 - 2) + (c : ℂ) * (1 - ζ₅)) =
+          ζ₅ - 2 + c - c * ζ₅^4 := by
+        simp only [map_add, map_sub, map_mul, map_one, Complex.conj_ofReal]
+        rw [zeta5_conj, show starRingEnd ℂ (ζ₅^4) = ζ₅ by
+          rw [map_pow, zeta5_conj]
+          have h5 : ζ₅^5 = (1 : ℂ) := zeta5_pow_five
+          calc (ζ₅^4)^4 = ζ₅^16 := by ring
+            _ = ζ₅^(16 % 5) := by rw [zeta5_pow_reduce 16]
+            _ = ζ₅^1 := by norm_num
+            _ = ζ₅ := pow_one ζ₅]
+        have h2 : starRingEnd ℂ (2 : ℂ) = 2 := Complex.conj_ofReal 2
+        rw [h2]
+        ring
+      rw [h_expand_lhs, h_expand_rhs]
+      ring
+    rw [h_z1_minus_1, Complex.norm_conj]
+    exact cross_disk_w3_z1_bound c hc_lo hc_hi
 
   -- Disk membership for intermediate points in B⁻¹ chain on z1
-  have hz1_B1_right : (1 : ℂ) + ζ₅^4 * (z1 - 1) ∈ rightDisk r_crit := by sorry
-  have hz1_B2_right : (1 : ℂ) + ζ₅^4 * ((1 : ℂ) + ζ₅^4 * (z1 - 1) - 1) ∈ rightDisk r_crit := by sorry
-  have hz1_B3_right : (1 : ℂ) + ζ₅^4 * ((1 : ℂ) + ζ₅^4 * ((1 : ℂ) + ζ₅^4 * (z1 - 1) - 1) - 1) ∈ rightDisk r_crit := by sorry
+  -- Key insight: rotation by ζ₅^n preserves distance since |ζ₅^n| = 1
+  have hz1_B1_right : (1 : ℂ) + ζ₅^4 * (z1 - 1) ∈ rightDisk r_crit := by
+    unfold rightDisk closedDiskC at hz1_right ⊢
+    simp only [Set.mem_setOf_eq] at hz1_right ⊢
+    rw [show (1 : ℂ) + ζ₅^4 * (z1 - 1) - 1 = ζ₅^4 * (z1 - 1) by ring]
+    rw [Complex.norm_mul, zeta5_abs_pow 4, one_mul]
+    exact hz1_right
 
-  -- z2 is in both disks
-  have hz2_left : z2 ∈ leftDisk r_crit := by sorry
-  have hz2_right : z2 ∈ rightDisk r_crit := by sorry
+  have hz1_B2_right : (1 : ℂ) + ζ₅^4 * ((1 : ℂ) + ζ₅^4 * (z1 - 1) - 1) ∈ rightDisk r_crit := by
+    unfold rightDisk closedDiskC at hz1_right ⊢
+    simp only [Set.mem_setOf_eq] at hz1_right ⊢
+    -- Simplify: 1 + ζ₅^4 * (z1 - 1) - 1 = ζ₅^4 * (z1 - 1)
+    -- So expression = 1 + ζ₅^4 * (ζ₅^4 * (z1 - 1)) = 1 + ζ₅^8 * (z1 - 1)
+    rw [show (1 : ℂ) + ζ₅^4 * ((1 : ℂ) + ζ₅^4 * (z1 - 1) - 1) - 1 = ζ₅^8 * (z1 - 1) by ring]
+    rw [Complex.norm_mul, zeta5_abs_pow 8, one_mul]
+    exact hz1_right
 
-  -- Disk membership for intermediate points in A⁻¹ chain on z2
-  have hz2_A1_left : (-1 : ℂ) + ζ₅^4 * (z2 + 1) ∈ leftDisk r_crit := by sorry
-  have hz2_A2_left : (-1 : ℂ) + ζ₅^4 * ((-1 : ℂ) + ζ₅^4 * (z2 + 1) + 1) ∈ leftDisk r_crit := by sorry
-  have hz2_A3_left : (-1 : ℂ) + ζ₅^4 * ((-1 : ℂ) + ζ₅^4 * ((-1 : ℂ) + ζ₅^4 * (z2 + 1) + 1) + 1) ∈ leftDisk r_crit := by sorry
+  have hz1_B3_right : (1 : ℂ) + ζ₅^4 * ((1 : ℂ) + ζ₅^4 * ((1 : ℂ) + ζ₅^4 * (z1 - 1) - 1) - 1) ∈ rightDisk r_crit := by
+    unfold rightDisk closedDiskC at hz1_right ⊢
+    simp only [Set.mem_setOf_eq] at hz1_right ⊢
+    -- Similarly: 1 + ζ₅^12 * (z1 - 1) - 1 = ζ₅^12 * (z1 - 1)
+    rw [show (1 : ℂ) + ζ₅^4 * ((1 : ℂ) + ζ₅^4 * ((1 : ℂ) + ζ₅^4 * (z1 - 1) - 1) - 1) - 1 = ζ₅^12 * (z1 - 1) by ring]
+    rw [Complex.norm_mul, zeta5_abs_pow 12, one_mul]
+    exact hz1_right
 
-  -- z3 is in both disks
-  have hz3_left : z3 ∈ leftDisk r_crit := by sorry
-  have hz3_right : z3 ∈ rightDisk r_crit := by sorry
+  -- z2 is in rightDisk by rotation (z2 - 1 = ζ₅*(z1 - 1))
+  have hz2_right : z2 ∈ rightDisk r_crit := by
+    unfold rightDisk closedDiskC at hz1_right ⊢
+    simp only [Set.mem_setOf_eq] at hz1_right ⊢
+    simp only [z2]
+    rw [show (1 : ℂ) + ζ₅ * (z1 - 1) - 1 = ζ₅ * (z1 - 1) by ring]
+    rw [Complex.norm_mul, zeta5_abs, one_mul]
+    exact hz1_right
 
-  -- z4 is in both disks
-  have hz4_left : z4 ∈ leftDisk r_crit := by sorry
-  have hz4_right : z4 ∈ rightDisk r_crit := by sorry
+  -- z2 in leftDisk requires cross_disk_w3_z2_bound
+  -- z2 + 1 = conj((2 + ζ₅^3 - 2*ζ₅^4) + c*(ζ₅^4 - 1))
+  have hz2_left : z2 ∈ leftDisk r_crit := by
+    unfold leftDisk closedDiskC
+    simp only [Set.mem_setOf_eq]
+    have h_z2_plus_1 : z2 + 1 = starRingEnd ℂ (((2 : ℂ) + ζ₅^3 - 2*ζ₅^4) + (c : ℂ) * (ζ₅^4 - 1)) := by
+      simp only [z2, z1, z0, E]
+      rw [smul_eq_mul]
+      have h5 : ζ₅^5 = (1 : ℂ) := zeta5_pow_five
+      have h10 : ζ₅^10 = (1 : ℂ) := by
+        have : (10 : ℕ) = 5 * 2 := by norm_num
+        rw [this, pow_mul, h5, one_pow]
+      have h6 : ζ₅^6 = ζ₅ := by rw [show (6 : ℕ) = 5 + 1 by norm_num, pow_add, h5, one_mul, pow_one]
+      have h8 : ζ₅^8 = ζ₅^3 := by rw [show (8 : ℕ) = 5 + 3 by norm_num, pow_add, h5, one_mul]
+      have h12 : ζ₅^12 = ζ₅^2 := by rw [show (12 : ℕ) = 10 + 2 by norm_num, pow_add, h10, one_mul]
+      have h16 : ζ₅^16 = ζ₅ := by
+        have h15 : ζ₅^15 = (1 : ℂ) := by
+          have : (15 : ℕ) = 5 * 3 := by norm_num
+          rw [this, pow_mul, h5, one_pow]
+        rw [show (16 : ℕ) = 15 + 1 by norm_num, pow_add, h15, one_mul, pow_one]
+      -- RHS: conj((2 + ζ₅^3 - 2*ζ₅^4) + c*(ζ₅^4 - 1))
+      simp only [map_add, map_sub, map_mul, map_one, Complex.conj_ofReal,
+                 map_pow, zeta5_conj]
+      have hpow4_3 : (ζ₅^4)^3 = ζ₅^2 := by
+        calc (ζ₅^4)^3 = ζ₅^12 := by ring
+          _ = ζ₅^2 := h12
+      have hpow4_4 : (ζ₅^4)^4 = ζ₅ := by
+        calc (ζ₅^4)^4 = ζ₅^16 := by ring
+          _ = ζ₅ := h16
+      simp only [hpow4_3, hpow4_4]
+      have hconj2_nat : (starRingEnd ℂ) (2 : ℂ) = 2 := Complex.conj_ofReal 2
+      simp only [hconj2_nat]
+      ring_nf
+      simp only [h5, h6]
+      ring
+    rw [show z2 - (-1 : ℂ) = z2 + 1 by ring, h_z2_plus_1, Complex.norm_conj]
+    exact cross_disk_w3_z2_bound c hc_lo hc_hi
 
-  -- z5 is in both disks
-  have hz5_left : z5 ∈ leftDisk r_crit := by sorry
-  have hz5_right : z5 ∈ rightDisk r_crit := by sorry
+  -- Disk membership for intermediate points in A⁻¹ chain on z2 (rotation preserves distance)
+  have hz2_A1_left : (-1 : ℂ) + ζ₅^4 * (z2 + 1) ∈ leftDisk r_crit := by
+    unfold leftDisk closedDiskC at hz2_left ⊢
+    simp only [Set.mem_setOf_eq] at hz2_left ⊢
+    rw [show (-1 : ℂ) + ζ₅^4 * (z2 + 1) - (-1) = ζ₅^4 * (z2 + 1) by ring]
+    rw [Complex.norm_mul, zeta5_abs_pow 4, one_mul]
+    convert hz2_left using 2; ring
+
+  have hz2_A2_left : (-1 : ℂ) + ζ₅^4 * ((-1 : ℂ) + ζ₅^4 * (z2 + 1) + 1) ∈ leftDisk r_crit := by
+    unfold leftDisk closedDiskC at hz2_left ⊢
+    simp only [Set.mem_setOf_eq] at hz2_left ⊢
+    rw [show (-1 : ℂ) + ζ₅^4 * ((-1 : ℂ) + ζ₅^4 * (z2 + 1) + 1) - (-1) = ζ₅^8 * (z2 + 1) by ring]
+    rw [Complex.norm_mul, zeta5_abs_pow 8, one_mul]
+    convert hz2_left using 2; ring
+
+  have hz2_A3_left : (-1 : ℂ) + ζ₅^4 * ((-1 : ℂ) + ζ₅^4 * ((-1 : ℂ) + ζ₅^4 * (z2 + 1) + 1) + 1) ∈ leftDisk r_crit := by
+    unfold leftDisk closedDiskC at hz2_left ⊢
+    simp only [Set.mem_setOf_eq] at hz2_left ⊢
+    rw [show (-1 : ℂ) + ζ₅^4 * ((-1 : ℂ) + ζ₅^4 * ((-1 : ℂ) + ζ₅^4 * (z2 + 1) + 1) + 1) - (-1) = ζ₅^12 * (z2 + 1) by ring]
+    rw [Complex.norm_mul, zeta5_abs_pow 12, one_mul]
+    convert hz2_left using 2; ring
+
+  -- z3 is in leftDisk by rotation (z3 + 1 = ζ₅*(z2 + 1))
+  have hz3_left : z3 ∈ leftDisk r_crit := by
+    unfold leftDisk closedDiskC at hz2_left ⊢
+    simp only [Set.mem_setOf_eq] at hz2_left ⊢
+    simp only [z3]
+    rw [show (-1 : ℂ) + ζ₅ * (z2 + 1) - (-1) = ζ₅ * (z2 + 1) by ring]
+    rw [Complex.norm_mul, zeta5_abs, one_mul]
+    convert hz2_left using 2; ring
+
+  -- z3 in rightDisk requires cross_disk_w3_z3_bound
+  -- z3 - 1 = conj((-2 + ζ₅² - 2ζ₅³ + 2ζ₅⁴) + c*(ζ₅³ - ζ₅⁴))
+  have hz3_right : z3 ∈ rightDisk r_crit := by
+    unfold rightDisk closedDiskC
+    simp only [Set.mem_setOf_eq]
+    have h_z3_minus_1 : z3 - 1 = starRingEnd ℂ (((-2 : ℂ) + ζ₅^2 - 2*ζ₅^3 + 2*ζ₅^4) + (c : ℂ) * (ζ₅^3 - ζ₅^4)) := by
+      simp only [z3, z2, z1, z0, E]
+      rw [smul_eq_mul]
+      have h5 : ζ₅^5 = (1 : ℂ) := zeta5_pow_five
+      have h10 : ζ₅^10 = (1 : ℂ) := by
+        have : (10 : ℕ) = 5 * 2 := by norm_num
+        rw [this, pow_mul, h5, one_pow]
+      have h6 : ζ₅^6 = ζ₅ := by rw [show (6 : ℕ) = 5 + 1 by norm_num, pow_add, h5, one_mul, pow_one]
+      have h7 : ζ₅^7 = ζ₅^2 := by rw [show (7 : ℕ) = 5 + 2 by norm_num, pow_add, h5, one_mul]
+      have h8 : ζ₅^8 = ζ₅^3 := by rw [show (8 : ℕ) = 5 + 3 by norm_num, pow_add, h5, one_mul]
+      have h11 : ζ₅^11 = ζ₅ := by rw [show (11 : ℕ) = 10 + 1 by norm_num, pow_add, h10, one_mul, pow_one]
+      have h12 : ζ₅^12 = ζ₅^2 := by rw [show (12 : ℕ) = 10 + 2 by norm_num, pow_add, h10, one_mul]
+      have h15 : ζ₅^15 = (1 : ℂ) := by
+        have : (15 : ℕ) = 5 * 3 := by norm_num
+        rw [this, pow_mul, h5, one_pow]
+      have h16 : ζ₅^16 = ζ₅ := by rw [show (16 : ℕ) = 15 + 1 by norm_num, pow_add, h15, one_mul, pow_one]
+      -- RHS: conj((-2 + ζ₅² - 2ζ₅³ + 2ζ₅⁴) + c*(ζ₅³ - ζ₅⁴))
+      simp only [map_add, map_sub, map_mul, map_neg, Complex.conj_ofReal, map_pow, zeta5_conj]
+      have hpow4_2 : (ζ₅^4)^2 = ζ₅^3 := by
+        calc (ζ₅^4)^2 = ζ₅^8 := by ring
+          _ = ζ₅^3 := h8
+      have hpow4_3 : (ζ₅^4)^3 = ζ₅^2 := by
+        calc (ζ₅^4)^3 = ζ₅^12 := by ring
+          _ = ζ₅^2 := h12
+      have hconj2_nat : (starRingEnd ℂ) (2 : ℂ) = 2 := Complex.conj_ofReal 2
+      simp only [hpow4_2, hpow4_3, hconj2_nat]
+      ring_nf
+      simp only [h6, h7, h16]
+      ring
+    rw [h_z3_minus_1, Complex.norm_conj]
+    exact cross_disk_w3_z3_bound c hc_lo hc_hi
+
+  -- z4 in leftDisk requires cross_disk_w3_z4_bound
+  -- z4 + 1 = conj((4 - 2*ζ₅ + ζ₅³ - 2*ζ₅⁴) + c*(ζ₅⁴ - 1))
+  have hz4_left : z4 ∈ leftDisk r_crit := by
+    unfold leftDisk closedDiskC
+    simp only [Set.mem_setOf_eq]
+    have h_z4_plus_1 : z4 + 1 = starRingEnd ℂ (((4 : ℂ) - 2*ζ₅ + ζ₅^3 - 2*ζ₅^4) + (c : ℂ) * (ζ₅^4 - 1)) := by
+      simp only [z4, z3, z2, z1, z0, E]
+      rw [smul_eq_mul]
+      have h5 : ζ₅^5 = (1 : ℂ) := zeta5_pow_five
+      have h10 : ζ₅^10 = (1 : ℂ) := by
+        have : (10 : ℕ) = 5 * 2 := by norm_num
+        rw [this, pow_mul, h5, one_pow]
+      have h15 : ζ₅^15 = (1 : ℂ) := by
+        have : (15 : ℕ) = 5 * 3 := by norm_num
+        rw [this, pow_mul, h5, one_pow]
+      have h6 : ζ₅^6 = ζ₅ := by rw [show (6 : ℕ) = 5 + 1 by norm_num, pow_add, h5, one_mul, pow_one]
+      have h7 : ζ₅^7 = ζ₅^2 := by rw [show (7 : ℕ) = 5 + 2 by norm_num, pow_add, h5, one_mul]
+      have h8 : ζ₅^8 = ζ₅^3 := by rw [show (8 : ℕ) = 5 + 3 by norm_num, pow_add, h5, one_mul]
+      have h9 : ζ₅^9 = ζ₅^4 := by rw [show (9 : ℕ) = 5 + 4 by norm_num, pow_add, h5, one_mul]
+      have h11 : ζ₅^11 = ζ₅ := by rw [show (11 : ℕ) = 10 + 1 by norm_num, pow_add, h10, one_mul, pow_one]
+      have h12 : ζ₅^12 = ζ₅^2 := by rw [show (12 : ℕ) = 10 + 2 by norm_num, pow_add, h10, one_mul]
+      have h13 : ζ₅^13 = ζ₅^3 := by rw [show (13 : ℕ) = 10 + 3 by norm_num, pow_add, h10, one_mul]
+      have h16 : ζ₅^16 = ζ₅ := by rw [show (16 : ℕ) = 15 + 1 by norm_num, pow_add, h15, one_mul, pow_one]
+      -- RHS: conj((4 - 2*ζ₅ + ζ₅³ - 2*ζ₅⁴) + c*(ζ₅⁴ - 1))
+      simp only [map_add, map_sub, map_mul, map_one, Complex.conj_ofReal, map_pow, zeta5_conj]
+      have hpow4_2 : (ζ₅^4)^2 = ζ₅^3 := by
+        calc (ζ₅^4)^2 = ζ₅^8 := by ring
+          _ = ζ₅^3 := h8
+      have hpow4_3 : (ζ₅^4)^3 = ζ₅^2 := by
+        calc (ζ₅^4)^3 = ζ₅^12 := by ring
+          _ = ζ₅^2 := h12
+      have hpow4_4 : (ζ₅^4)^4 = ζ₅ := by
+        calc (ζ₅^4)^4 = ζ₅^16 := by ring
+          _ = ζ₅ := h16
+      have hconj4_nat : (starRingEnd ℂ) (4 : ℂ) = 4 := Complex.conj_ofReal 4
+      have hconj2_nat : (starRingEnd ℂ) (2 : ℂ) = 2 := Complex.conj_ofReal 2
+      simp only [hpow4_3, hpow4_4, hconj4_nat, hconj2_nat]
+      ring_nf
+      simp only [h5, h6, h7, h10, h11]
+      ring
+    rw [show z4 - (-1 : ℂ) = z4 + 1 by ring, h_z4_plus_1, Complex.norm_conj]
+    exact cross_disk_w3_z4_bound c hc_lo hc_hi
+
+  -- z4 is in rightDisk by rotation (z4 - 1 = ζ₅^4*(z3 - 1))
+  have hz4_right : z4 ∈ rightDisk r_crit := by
+    unfold rightDisk closedDiskC at hz3_right ⊢
+    simp only [Set.mem_setOf_eq] at hz3_right ⊢
+    simp only [z4]
+    rw [show (1 : ℂ) + ζ₅^4 * (z3 - 1) - 1 = ζ₅^4 * (z3 - 1) by ring]
+    rw [Complex.norm_mul, zeta5_abs_pow 4, one_mul]
+    exact hz3_right
+
+  -- z5 is in leftDisk by rotation (z5 + 1 = ζ₅^4*(z4 + 1))
+  have hz5_left : z5 ∈ leftDisk r_crit := by
+    unfold leftDisk closedDiskC at hz4_left ⊢
+    simp only [Set.mem_setOf_eq] at hz4_left ⊢
+    simp only [z5]
+    rw [show (-1 : ℂ) + ζ₅^4 * (z4 + 1) - (-1) = ζ₅^4 * (z4 + 1) by ring]
+    rw [Complex.norm_mul, zeta5_abs_pow 4, one_mul]
+    convert hz4_left using 2; ring
+
+  -- z5 in rightDisk requires cross_disk_w3_z5_bound
+  -- z5 - 1 = conj((−4 + 4ζ₅ − 2ζ₅² + ζ₅⁴) + c*(1 − ζ₅))
+  have hz5_right : z5 ∈ rightDisk r_crit := by
+    unfold rightDisk closedDiskC
+    simp only [Set.mem_setOf_eq]
+    -- Show z5 - 1 = conj((−4 + 4ζ₅ − 2ζ₅² + ζ₅⁴) + c*(1 − ζ₅))
+    have h_z5_minus_1 : z5 - 1 = starRingEnd ℂ (((-4 : ℂ) + 4*ζ₅ - 2*ζ₅^2 + ζ₅^4) + (c : ℂ) * (1 - ζ₅)) := by
+      simp only [z5, z4, z3, z2, z1, z0, E]
+      rw [smul_eq_mul]
+      -- Expand z5 - 1 step by step and show it equals the conjugate
+      have h5 : ζ₅^5 = (1 : ℂ) := zeta5_pow_five
+      have h10 : ζ₅^10 = (1 : ℂ) := by
+        have : (10 : ℕ) = 5 * 2 := by norm_num
+        rw [this, pow_mul, h5, one_pow]
+      have h15 : ζ₅^15 = (1 : ℂ) := by
+        have : (15 : ℕ) = 5 * 3 := by norm_num
+        rw [this, pow_mul, h5, one_pow]
+      have h6 : ζ₅^6 = ζ₅ := by rw [show (6 : ℕ) = 5 + 1 by norm_num, pow_add, h5, one_mul, pow_one]
+      have h7 : ζ₅^7 = ζ₅^2 := by rw [show (7 : ℕ) = 5 + 2 by norm_num, pow_add, h5, one_mul]
+      have h8 : ζ₅^8 = ζ₅^3 := by rw [show (8 : ℕ) = 5 + 3 by norm_num, pow_add, h5, one_mul]
+      have h9 : ζ₅^9 = ζ₅^4 := by rw [show (9 : ℕ) = 5 + 4 by norm_num, pow_add, h5, one_mul]
+      have h11 : ζ₅^11 = ζ₅ := by rw [show (11 : ℕ) = 10 + 1 by norm_num, pow_add, h10, one_mul, pow_one]
+      have h12 : ζ₅^12 = ζ₅^2 := by rw [show (12 : ℕ) = 10 + 2 by norm_num, pow_add, h10, one_mul]
+      have h13 : ζ₅^13 = ζ₅^3 := by rw [show (13 : ℕ) = 10 + 3 by norm_num, pow_add, h10, one_mul]
+      have h14 : ζ₅^14 = ζ₅^4 := by rw [show (14 : ℕ) = 10 + 4 by norm_num, pow_add, h10, one_mul]
+      have h16 : ζ₅^16 = ζ₅ := by rw [show (16 : ℕ) = 15 + 1 by norm_num, pow_add, h15, one_mul, pow_one]
+      -- RHS: conj((-4 + 4ζ₅ - 2ζ₅² + ζ₅⁴) + c*(1 - ζ₅))
+      -- = conj(-4 + 4ζ₅ - 2ζ₅² + ζ₅⁴) + c - c*conj(ζ₅)
+      -- = -4 + 4*ζ₅⁴ - 2*ζ₅³ + ζ₅ + c - c*ζ₅⁴
+      simp only [map_add, map_sub, map_mul, map_neg, map_one, Complex.conj_ofReal,
+                 map_pow, zeta5_conj]
+      -- After simp, we have (ζ₅^4)^4 and (ζ₅^4)^2 that need reduction
+      have hpow4_4 : (ζ₅^4)^4 = ζ₅ := by
+        calc (ζ₅^4)^4 = ζ₅^16 := by ring
+          _ = ζ₅ := h16
+      have hpow4_2 : (ζ₅^4)^2 = ζ₅^3 := by
+        calc (ζ₅^4)^2 = ζ₅^8 := by ring
+          _ = ζ₅^3 := h8
+      -- Handle starRingEnd on natural numbers
+      have hconj4_nat : (starRingEnd ℂ) (4 : ℂ) = 4 := Complex.conj_ofReal 4
+      have hconj2_nat : (starRingEnd ℂ) (2 : ℂ) = 2 := Complex.conj_ofReal 2
+      simp only [hpow4_4, hpow4_2, hconj4_nat, hconj2_nat]
+      ring_nf
+      -- Both sides should now be polynomial in ζ₅ that are equal
+      simp only [h8, h9, h10, h11, h14, h15]
+      ring
+    rw [h_z5_minus_1, Complex.norm_conj]
+    exact cross_disk_w3_z5_bound c hc_lo hc_hi
 
   -- Now chain through the 6 steps
   -- Step 1: applyGen z0 .Ainv = z1
