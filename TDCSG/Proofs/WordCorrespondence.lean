@@ -11,7 +11,7 @@ import TDCSG.Proofs.IET
 import TDCSG.Definitions.Core
 import TDCSG.Definitions.IET
 import TDCSG.Definitions.WordCorrespondence
-import TDCSG.Proofs.CrossDiskBounds
+import TDCSG.Proofs.CrossDiskWord3
 
 /-!
 # Word Correspondence for GG(5,5)
@@ -431,12 +431,125 @@ word1 = [A, A, B, A, B] = [(false,true), (false,true), (true,true), (false,true)
 Note: This lemma requires x to be in interval 0 [0, length1) for the cross-disk membership
 proofs to hold. The intermediate rotation points stay in the disk intersection only for
 this interval range. -/
+/-- Helper: exp(-2πi/5) = ζ₅⁴.
+    This connects the rotation angle used in genA/genB to the 5th root of unity. -/
+lemma exp_neg_two_pi_fifth : Complex.exp ((-2 * π / 5 : ℝ) * I) = ζ₅^4 := by
+  unfold ζ₅ zeta5
+  rw [show ((-2 : ℝ) * π / 5) * I = -(2 * π * I / 5) by push_cast; ring]
+  rw [Complex.exp_neg, ← zeta5_inv_eq_pow4]
+  rfl
+
+/-- Helper: genA on a point in leftDisk computes the rotation formula. -/
+lemma genA_rotation_formula (z : ℂ) (hz : z ∈ leftDisk r_crit) :
+    genA r_crit z = (-1 : ℂ) + ζ₅^4 * (z + 1) := by
+  unfold genA
+  simp only [hz, ↓reduceIte]
+  unfold rotateAboutC leftCenter
+  simp only [neg_add_cancel, zero_mul, add_zero]
+  rw [exp_neg_two_pi_fifth]
+  ring
+
+/-- Helper: genB on a point in rightDisk computes the rotation formula. -/
+lemma genB_rotation_formula (z : ℂ) (hz : z ∈ rightDisk r_crit) :
+    genB r_crit z = (1 : ℂ) + ζ₅^4 * (z - 1) := by
+  unfold genB
+  simp only [hz, ↓reduceIte]
+  unfold rotateAboutC rightCenter
+  simp only [add_zero, mul_zero]
+  rw [exp_neg_two_pi_fifth]
+  ring
+
+/-- Helper: segmentPoint expressed in terms of E. -/
+lemma segmentPoint_eq_smul_E (x : ℝ) : segmentPoint x = (2 * x - 1) • E := by
+  unfold segmentPoint E'
+  rw [sub_neg_eq_add, show E + E = (2 : ℝ) • E by simp [two_smul], smul_smul]
+  rw [show -E + (x * 2) • E = (x * 2 - 1) • E by rw [sub_smul, one_smul]; ring_nf]
+  congr 1; ring
+
+/-- Helper: translation property of segmentPoint. -/
+lemma segmentPoint_add_displacement (x d : ℝ) :
+    segmentPoint (x + d) = segmentPoint x + (2 * d) • E := by
+  rw [segmentPoint_eq_smul_E, segmentPoint_eq_smul_E]
+  simp only [Complex.real_smul]
+  ring_nf
+  rw [add_smul]
+  congr 1
+  ring
+
 lemma word1_produces_displacement0 (x : ℝ) (hx : x ∈ Set.Ico 0 1) (hx_int : x < length1) :
     applyWord r_crit word1 (segmentPoint x) =
     segmentPoint (x + displacement0) := by
-  -- This proof requires cross-disk bounds that depend on E = ζ₅^4 - ζ₅^3 (clockwise convention)
-  -- The intermediate rotation points z1-z5 must stay in the appropriate disks
-  -- The algebraic identity word1_algebraic_identity provides the translation formula
+  -- Rewrite the RHS using the translation property
+  rw [segmentPoint_add_displacement]
+
+  -- Set up parameter c = 2x - 1
+  set c := 2 * x - 1 with hc_def
+  have hc_lo : -1 ≤ c := by simp only [hc_def]; linarith [hx.1]
+  have hc_hi_le : c ≤ 1 := by simp only [hc_def]; linarith [hx.2]
+  have h_c_mem : c ∈ Set.Icc (-1 : ℝ) 1 := ⟨hc_lo, hc_hi_le⟩
+
+  -- Express segmentPoint x in terms of c
+  have h_z0_eq : segmentPoint x = (c : ℂ) • E := by
+    rw [segmentPoint_eq_smul_E, hc_def]; simp only [Complex.real_smul]
+
+  -- Get disk membership for the starting point
+  have h_in_disks := segment_in_disk_intersection x ⟨hx.1, le_of_lt hx.2⟩
+  have hz0_left : segmentPoint x ∈ leftDisk r_crit := by
+    unfold leftDisk closedDiskC
+    simp only [Set.mem_setOf_eq]
+    rw [show segmentPoint x - (-1 : ℂ) = segmentPoint x + 1 by ring]
+    unfold segmentPoint
+    exact h_in_disks.1
+  have hz0_right : segmentPoint x ∈ rightDisk r_crit := by
+    unfold rightDisk closedDiskC
+    simp only [Set.mem_setOf_eq]
+    unfold segmentPoint
+    exact h_in_disks.2
+
+  -- Unfold applyWord and word1
+  unfold applyWord word1
+  simp only [List.foldl_cons, List.foldl_nil]
+
+  -- Define intermediate points (algebraically)
+  let z0 := segmentPoint x
+  let z1_alg := (-1 : ℂ) + ζ₅^4 * (z0 + 1)           -- After A
+  let z2_alg := (-1 : ℂ) + ζ₅^4 * (z1_alg + 1)       -- After A
+  let z3_alg := (1 : ℂ) + ζ₅^4 * (z2_alg - 1)        -- After B
+  let z4_alg := (-1 : ℂ) + ζ₅^4 * (z3_alg + 1)       -- After A
+  let z5_alg := (1 : ℂ) + ζ₅^4 * (z4_alg - 1)        -- After B
+
+  -- The algebraic identity tells us z5_alg = z0 + (2 * displacement0) • E
+  have h_alg := word1_algebraic_identity c h_c_mem
+  simp only at h_alg
+
+  -- We need to show applyGen computes the same as the algebraic formulas
+  -- This requires showing each intermediate point is in the appropriate disk
+
+  -- Step 1: genA z0 = z1_alg (since z0 ∈ leftDisk)
+  have h_step1 : applyGen r_crit z0 .A = z1_alg := by
+    unfold applyGen
+    exact genA_rotation_formula z0 hz0_left
+
+  -- For remaining steps, we need disk membership of intermediate points
+  -- These bounds depend on the cross-disk analysis in CrossDiskBounds.lean
+  -- For now, we assume these hold and proceed with the proof
+
+  -- The key insight: all segment points in [0, length1) have their word1
+  -- intermediate points staying within the lens intersection
+
+  -- This is the gap requiring cross-disk bounds:
+  -- We need to show z1_alg, z2_alg, z3_alg, z4_alg are in the appropriate disks
+
+  -- Assuming disk membership for intermediate points (to be proven with cross-disk bounds):
+  -- z1_alg ∈ leftDisk ∩ rightDisk
+  -- z2_alg ∈ leftDisk ∩ rightDisk
+  -- z3_alg ∈ leftDisk ∩ rightDisk
+  -- z4_alg ∈ leftDisk ∩ rightDisk
+
+  -- Then the proof follows from chaining the rotation formulas and the algebraic identity
+
+  -- Current status: the algebraic identity is proven, but disk membership
+  -- for intermediate points requires completing the cross-disk bounds proofs
   sorry
 
 /-- Word 2 action on segment points: translates by displacement1.
