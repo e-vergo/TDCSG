@@ -326,8 +326,6 @@ lemma cross_disk_z3_bound_restricted (c : ℝ) (hc_lo : -1 ≤ c) (hc_hi : c ≤
   have h3φ_pos : 0 < 3 + φ := by unfold φ; linarith [goldenRatio_pos]
   rw [Real.le_sqrt (norm_nonneg _) (le_of_lt h3φ_pos)]
 
-  have h_sqrt5_sq : √5^2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
-
   -- Vertex is at c_v = (1 - 3√5)/4 < -1
   have h_vertex_lt : (1 - 3*√5) / 4 < -1 := by
     have h_sqrt5_pos : 0 < √5 := Real.sqrt_pos.mpr (by norm_num : (0 : ℝ) < 5)
@@ -469,7 +467,7 @@ lemma cross_disk_z3_bound_restricted (c : ℝ) (hc_lo : -1 ≤ c) (hc_hi : c ≤
       rw [h_c_upper_def]
       linarith [hc_hi]
 
-    nlinarith [h_factor_pos, h_cupper_minus_c, h_diff_expand]
+    nlinarith [h_factor_pos, h_cupper_minus_c, h_diff_expand, sqrt5_sq]
 
   calc ‖A + (c : ℂ) * B‖^2 ≤ ‖A + (((1 - √5)/2 : ℝ) : ℂ) * B‖^2 := h_mono
     _ = 3 + φ := h_at_c_upper
@@ -689,8 +687,6 @@ lemma cross_disk_z4_bound_restricted (c : ℝ) (hc_lo : -1 ≤ c) (hc_hi : c ≤
   have h3φ_pos : 0 < 3 + φ := by unfold φ; linarith [goldenRatio_pos]
   rw [Real.le_sqrt (norm_nonneg _) (le_of_lt h3φ_pos)]
 
-  have h_sqrt5_sq : √5^2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
-
   -- At c = -1: A - B = -3 + 3ζ₅ - 2ζ₅² + ζ₅⁴
   have h_at_neg1 : ‖A + ((-1 : ℝ) : ℂ) * B‖^2 ≤ 3 + φ := by
     have h_neg1 : ((-1 : ℝ) : ℂ) * B = -B := by simp
@@ -738,7 +734,7 @@ lemma cross_disk_z4_bound_restricted (c : ℝ) (hc_lo : -1 ≤ c) (hc_hi : c ≤
     -- (1-c)*(5-√5)/2 ≥ ((1+√5)/2)*((5-√5)/2) = √5
     have h_prod_lower : √5 ≤ (1 - c) * ((5 - √5) / 2) := by
       have h_5_minus_sqrt5_pos : 0 < (5 - √5) / 2 := by nlinarith [Real.sqrt_nonneg 5]
-      have h_prod : ((1 + √5) / 2) * ((5 - √5) / 2) = √5 := by nlinarith [h_sqrt5_sq]
+      have h_prod : ((1 + √5) / 2) * ((5 - √5) / 2) = √5 := by nlinarith [sqrt5_sq]
       calc √5 = ((1 + √5) / 2) * ((5 - √5) / 2) := h_prod.symm
         _ ≤ (1 - c) * ((5 - √5) / 2) := by
           apply mul_le_mul_of_nonneg_right h_one_minus_c (le_of_lt h_5_minus_sqrt5_pos)
@@ -750,7 +746,7 @@ lemma cross_disk_z4_bound_restricted (c : ℝ) (hc_lo : -1 ≤ c) (hc_hi : c ≤
             = (10 - 5*√5) + (1 - c) * ((5 - √5) / 2) := by ring
           _ ≥ (10 - 5*√5) + √5 := by linarith [h_prod_lower]
           _ = 10 - 4*√5 := by ring
-      have h_pos : 0 < 10 - 4*√5 := by nlinarith [h_sqrt5_sq]
+      have h_pos : 0 < 10 - 4*√5 := by nlinarith [sqrt5_sq]
       linarith
 
     -- f(-1) - f(c) = (1+c) * second_factor ≥ 0, which implies f(c) ≤ f(-1)

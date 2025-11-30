@@ -131,12 +131,10 @@ lemma word2_produces_displacement1 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     have h_z1_minus_1 : z1 - 1 = starRingEnd ℂ ((ζ₅^4 - 2 : ℂ) + (c : ℂ) * (1 - ζ₅)) := by
       simp only [z1, z0, E]
       rw [smul_eq_mul]
-      have h5 : ζ₅^5 = (1 : ℂ) := zeta5_pow_five
-      have h16 : ζ₅^16 = ζ₅ := zeta5_pow_sixteen
       have hconj2 : (starRingEnd ℂ) (2 : ℂ) = 2 := Complex.conj_ofReal 2
       simp only [map_add, map_sub, map_mul, Complex.conj_ofReal, map_pow, zeta5_conj, map_one]
       ring_nf
-      simp only [h5, h16, hconj2]
+      simp only [zeta5_pow_five, zeta5_pow_sixteen, hconj2]
       ring
     rw [h_z1_minus_1, Complex.norm_conj]
     exact cross_disk_w2_z1_bound c hc_interval_lo hc_interval_hi_le
@@ -157,14 +155,10 @@ lemma word2_produces_displacement1 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     have h_z2_plus_1 : z2 + 1 = starRingEnd ℂ (((2 : ℂ) - 2*ζ₅^4 + ζ₅^3) + (c : ℂ) * (ζ₅^4 - 1)) := by
       simp only [z2, z1, z0, E]
       rw [smul_eq_mul]
-      have h5 : ζ₅^5 = (1 : ℂ) := zeta5_pow_five
-      have h6 : ζ₅^6 = ζ₅ := zeta5_pow_six
-      have h12 : ζ₅^12 = ζ₅^2 := zeta5_pow_twelve
-      have h16 : ζ₅^16 = ζ₅ := zeta5_pow_sixteen
       have hconj2 : (starRingEnd ℂ) (2 : ℂ) = 2 := Complex.conj_ofReal 2
       simp only [map_add, map_sub, map_mul, Complex.conj_ofReal, map_pow, zeta5_conj, map_one]
       ring_nf
-      simp only [h5, h6, h12, h16, hconj2]
+      simp only [zeta5_pow_five, zeta5_pow_six, zeta5_pow_twelve, zeta5_pow_sixteen, hconj2]
       ring
     rw [show z2 - (-1 : ℂ) = z2 + 1 by ring, h_z2_plus_1, Complex.norm_conj]
     exact cross_disk_w2_z2_bound c hc_interval_lo hc_interval_hi_le
@@ -185,16 +179,11 @@ lemma word2_produces_displacement1 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     have h_z3_minus_1 : z3 - 1 = starRingEnd ℂ (((-2 : ℂ) + 2*ζ₅^4 - 2*ζ₅^3 + ζ₅^2) + (c : ℂ) * (ζ₅^3 - ζ₅^4)) := by
       simp only [z3, z2, z1, z0, E]
       rw [smul_eq_mul]
-      have h5 : ζ₅^5 = (1 : ℂ) := zeta5_pow_five
-      have h6 : ζ₅^6 = ζ₅ := zeta5_pow_six
-      have h7 : ζ₅^7 = ζ₅^2 := zeta5_pow_seven
-      have h8 : ζ₅^8 = ζ₅^3 := zeta5_pow_eight
-      have h12 : ζ₅^12 = ζ₅^2 := zeta5_pow_twelve
-      have h16 : ζ₅^16 = ζ₅ := zeta5_pow_sixteen
       have hconj2 : (starRingEnd ℂ) (2 : ℂ) = 2 := Complex.conj_ofReal 2
       simp only [map_add, map_sub, map_mul, Complex.conj_ofReal, map_pow, zeta5_conj, map_neg]
       ring_nf
-      simp only [h6, h7, h8, h12, h16, hconj2]
+      simp only [zeta5_pow_six, zeta5_pow_seven, zeta5_pow_eight, zeta5_pow_twelve,
+        zeta5_pow_sixteen, hconj2]
       ring
     rw [h_z3_minus_1, Complex.norm_conj]
     exact cross_disk_w2_z3_bound c hc_interval_lo hc_interval_hi_le

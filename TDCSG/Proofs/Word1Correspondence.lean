@@ -172,20 +172,15 @@ lemma word1_produces_displacement0 (x : ℝ) (hx : x ∈ Set.Ico 0 1) (hx_int : 
     have h_z2_minus_1 : z2 - 1 = starRingEnd ℂ ((-2 : ℂ) + ζ₅^2 + (c : ℂ) * (ζ₅^3 - ζ₅^4)) := by
       simp only [z2, z1, z0, E]
       rw [smul_eq_mul]
-      have h5 : ζ₅^5 = (1 : ℂ) := zeta5_pow_five
-      have h8 : ζ₅^8 = ζ₅^3 := zeta5_pow_eight
-      have h12 : ζ₅^12 = ζ₅^2 := zeta5_pow_twelve
-      have h16 : ζ₅^16 = ζ₅ := zeta5_pow_sixteen
       simp only [map_add, map_sub, map_mul, Complex.conj_ofReal, map_pow, zeta5_conj, map_neg]
-      have hpow4_4 : (ζ₅^4)^4 = ζ₅ := by rw [← pow_mul]; norm_num [h16]
-      have hpow4_3 : (ζ₅^4)^3 = ζ₅^2 := by rw [← pow_mul]; norm_num [h12]
-      have hpow4_2 : (ζ₅^4)^2 = ζ₅^3 := by rw [← pow_mul]; norm_num [h8]
+      have hpow4_4 : (ζ₅^4)^4 = ζ₅ := by rw [← pow_mul]; norm_num [zeta5_pow_sixteen]
+      have hpow4_3 : (ζ₅^4)^3 = ζ₅^2 := by rw [← pow_mul]; norm_num [zeta5_pow_twelve]
+      have hpow4_2 : (ζ₅^4)^2 = ζ₅^3 := by rw [← pow_mul]; norm_num [zeta5_pow_eight]
       simp only [hpow4_4, hpow4_3, hpow4_2]
       have hconj2 : (starRingEnd ℂ) (2 : ℂ) = 2 := Complex.conj_ofReal 2
       simp only [hconj2]
-      have h11 : ζ₅^11 = ζ₅ := zeta5_pow_eleven
       ring_nf
-      simp only [h8, h11, h12]
+      simp only [zeta5_pow_eight, zeta5_pow_eleven, zeta5_pow_twelve]
       ring
     rw [h_z2_minus_1, Complex.norm_conj]
     exact cross_disk_z2_bound_restricted c hc_lo hc_hi_le'
@@ -206,20 +201,15 @@ lemma word1_produces_displacement0 (x : ℝ) (hx : x ∈ Set.Ico 0 1) (hx_int : 
     have h_z3_plus_1 : z3 + 1 = starRingEnd ℂ ((2 : ℂ) - 2*ζ₅ + ζ₅^3 + (c : ℂ) * (ζ₅^4 - 1)) := by
       simp only [z3, z2, z1, z0, E]
       rw [smul_eq_mul]
-      have h5 : ζ₅^5 = (1 : ℂ) := zeta5_pow_five
-      have h8 : ζ₅^8 = ζ₅^3 := zeta5_pow_eight
-      have h12 : ζ₅^12 = ζ₅^2 := zeta5_pow_twelve
-      have h16 : ζ₅^16 = ζ₅ := zeta5_pow_sixteen
       simp only [map_add, map_sub, map_mul, Complex.conj_ofReal, map_pow, zeta5_conj, map_one]
-      have hpow4_4 : (ζ₅^4)^4 = ζ₅ := by rw [← pow_mul]; norm_num [h16]
-      have hpow4_3 : (ζ₅^4)^3 = ζ₅^2 := by rw [← pow_mul]; norm_num [h12]
-      have hpow4_2 : (ζ₅^4)^2 = ζ₅^3 := by rw [← pow_mul]; norm_num [h8]
+      have hpow4_4 : (ζ₅^4)^4 = ζ₅ := by rw [← pow_mul]; norm_num [zeta5_pow_sixteen]
+      have hpow4_3 : (ζ₅^4)^3 = ζ₅^2 := by rw [← pow_mul]; norm_num [zeta5_pow_twelve]
+      have hpow4_2 : (ζ₅^4)^2 = ζ₅^3 := by rw [← pow_mul]; norm_num [zeta5_pow_eight]
       simp only [hpow4_4, hpow4_3, hpow4_2]
       have hconj2 : (starRingEnd ℂ) (2 : ℂ) = 2 := Complex.conj_ofReal 2
       simp only [hconj2]
-      have h15 : ζ₅^15 = (1 : ℂ) := zeta5_pow_fifteen
       ring_nf
-      simp only [h12, h15, h16]
+      simp only [zeta5_pow_twelve, zeta5_pow_fifteen, zeta5_pow_sixteen]
       ring
     rw [show z3 - (-1 : ℂ) = z3 + 1 by ring, h_z3_plus_1, Complex.norm_conj]
     exact cross_disk_z3_bound_restricted c hc_lo hc_hi_le'
@@ -240,23 +230,15 @@ lemma word1_produces_displacement0 (x : ℝ) (hx : x ∈ Set.Ico 0 1) (hx_int : 
     have h_z4_minus_1 : z4 - 1 = starRingEnd ℂ ((-2 : ℂ) + 2*ζ₅ - 2*ζ₅^2 + ζ₅^4 + (c : ℂ) * (1 - ζ₅)) := by
       simp only [z4, z3, z2, z1, z0, E]
       rw [smul_eq_mul]
-      have h5 : ζ₅^5 = (1 : ℂ) := zeta5_pow_five
-      have h6 : ζ₅^6 = ζ₅ := zeta5_pow_six
-      have h8 : ζ₅^8 = ζ₅^3 := zeta5_pow_eight
-      have h10 : ζ₅^10 = (1 : ℂ) := zeta5_pow_ten
-      have h12 : ζ₅^12 = ζ₅^2 := zeta5_pow_twelve
-      have h16 : ζ₅^16 = ζ₅ := zeta5_pow_sixteen
       simp only [map_add, map_sub, map_mul, Complex.conj_ofReal, map_pow, zeta5_conj, map_one, map_neg]
-      have hpow4_4 : (ζ₅^4)^4 = ζ₅ := by rw [← pow_mul]; norm_num [h16]
-      have hpow4_3 : (ζ₅^4)^3 = ζ₅^2 := by rw [← pow_mul]; norm_num [h12]
-      have hpow4_2 : (ζ₅^4)^2 = ζ₅^3 := by rw [← pow_mul]; norm_num [h8]
+      have hpow4_4 : (ζ₅^4)^4 = ζ₅ := by rw [← pow_mul]; norm_num [zeta5_pow_sixteen]
+      have hpow4_3 : (ζ₅^4)^3 = ζ₅^2 := by rw [← pow_mul]; norm_num [zeta5_pow_twelve]
+      have hpow4_2 : (ζ₅^4)^2 = ζ₅^3 := by rw [← pow_mul]; norm_num [zeta5_pow_eight]
       simp only [hpow4_4, hpow4_3, hpow4_2]
       have hconj2 : (starRingEnd ℂ) (2 : ℂ) = 2 := Complex.conj_ofReal 2
       simp only [hconj2]
-      have h19 : ζ₅^19 = ζ₅^4 := by have := zeta5_pow_reduce 19; norm_num at this; exact this
-      have h20 : ζ₅^20 = (1 : ℂ) := by have := zeta5_pow_reduce 20; norm_num at this; exact this
       ring_nf
-      simp only [h8, h16, h19, h20]
+      simp only [zeta5_pow_eight, zeta5_pow_sixteen, zeta5_pow_nineteen, zeta5_pow_twenty]
       ring
     rw [h_z4_minus_1, Complex.norm_conj]
     exact cross_disk_z4_bound_restricted c hc_lo hc_hi_le'

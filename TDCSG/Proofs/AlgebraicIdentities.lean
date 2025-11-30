@@ -52,20 +52,6 @@ lemma word1_algebraic_identity :
     result = z + (2 * displacement0) • E := by
   intro c _hc
   simp only
-  -- Key power reduction lemmas
-  have h5 : ζ₅^5 = (1 : ℂ) := zeta5_pow_five
-  have h6 : ζ₅^6 = ζ₅ := zeta5_pow_six
-  have h7 : ζ₅^7 = ζ₅^2 := zeta5_pow_seven
-  have h8 : ζ₅^8 = ζ₅^3 := zeta5_pow_eight
-  have h11 : ζ₅^11 = ζ₅ := zeta5_pow_eleven
-  have h12 : ζ₅^12 = ζ₅^2 := zeta5_pow_twelve
-  have h16 : ζ₅^16 = ζ₅ := zeta5_pow_sixteen
-  have h17 : ζ₅^17 = ζ₅^2 := zeta5_pow_seventeen
-  have h18 : ζ₅^18 = ζ₅^3 := by have := zeta5_pow_reduce 18; norm_num at this; exact this
-  have h19 : ζ₅^19 = ζ₅^4 := by have := zeta5_pow_reduce 19; norm_num at this; exact this
-  have h20 : ζ₅^20 = (1 : ℂ) := by have := zeta5_pow_reduce 20; norm_num at this; exact this
-  have h23 : ζ₅^23 = ζ₅^3 := by have := zeta5_pow_reduce 23; norm_num at this; exact this
-  have h24 : ζ₅^24 = ζ₅^4 := by have := zeta5_pow_reduce 24; norm_num at this; exact this
   -- sqrt 5 squared equals 5
   have hsqrt5_sq : Real.sqrt 5 ^ 2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
   -- Key identity: F = (1/φ)*E where F = 1 - ζ₅⁴ + ζ₅³ - ζ₅² and E = ζ₅⁴ - ζ₅³
@@ -84,7 +70,7 @@ lemma word1_algebraic_identity :
     have h_factor : (ζ₅ + ζ₅^4) * (ζ₅^4 - ζ₅^3) = (1 : ℂ) - ζ₅^4 + ζ₅^3 - ζ₅^2 := by
       calc (ζ₅ + ζ₅^4) * (ζ₅^4 - ζ₅^3)
           = ζ₅^5 - ζ₅^4 + ζ₅^8 - ζ₅^7 := by ring
-        _ = 1 - ζ₅^4 + ζ₅^3 - ζ₅^2 := by rw [h5, h8, h7]
+        _ = 1 - ζ₅^4 + ζ₅^3 - ζ₅^2 := by simp only [zeta5_pow_five, zeta5_pow_eight, zeta5_pow_seven]
     calc (1 : ℂ) - ζ₅^4 + ζ₅^3 - ζ₅^2
         = (ζ₅ + ζ₅^4) * (ζ₅^4 - ζ₅^3) := h_factor.symm
       _ = ((Real.sqrt 5 - 1) / 2 : ℝ) * (ζ₅^4 - ζ₅^3) := by rw [h_sum1]
@@ -111,7 +97,7 @@ lemma word1_algebraic_identity :
       = ↑c * (ζ₅^4 - ζ₅^3) + 2 * ((1 : ℂ) - ζ₅^4 + ζ₅^3 - ζ₅^2) := by
     ring_nf
     -- After ring_nf, reduce high powers modulo 5
-    simp only [h24, h23, h20, h12, h8]
+    simp only [zeta5_pow_twentyfour, zeta5_pow_twentythree, zeta5_pow_twenty_C, zeta5_pow_twelve, zeta5_pow_eight]
     -- Use cyclotomic sum identity: 1 + ζ₅ + ζ₅² + ζ₅³ + ζ₅⁴ = 0
     have h_zeta_sum : (1 : ℂ) + ζ₅ + ζ₅^2 + ζ₅^3 + ζ₅^4 = 0 := cyclotomic5_sum
     have h4_expand : ζ₅^4 = -1 - ζ₅ - ζ₅^2 - ζ₅^3 := by
@@ -156,11 +142,6 @@ lemma word2_algebraic_identity :
     result = z + (2 * displacement1) • E := by
   intro c _hc
   simp only
-  -- Key power reduction lemmas
-  have h5 : ζ₅^5 = (1 : ℂ) := zeta5_pow_five
-  have h6 : ζ₅^6 = ζ₅ := zeta5_pow_six
-  have h7 : ζ₅^7 = ζ₅^2 := zeta5_pow_seven
-  have h8 : ζ₅^8 = ζ₅^3 := zeta5_pow_eight
   -- sqrt 5 squared equals 5
   have hsqrt5_sq : Real.sqrt 5 ^ 2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
   -- displacement1 = displacement0 = 1/φ
@@ -183,7 +164,7 @@ lemma word2_algebraic_identity :
     have h_factor : (ζ₅ + ζ₅^4) * (ζ₅^4 - ζ₅^3) = (1 : ℂ) - ζ₅^4 + ζ₅^3 - ζ₅^2 := by
       calc (ζ₅ + ζ₅^4) * (ζ₅^4 - ζ₅^3)
           = ζ₅^5 - ζ₅^4 + ζ₅^8 - ζ₅^7 := by ring
-        _ = 1 - ζ₅^4 + ζ₅^3 - ζ₅^2 := by rw [h5, h8, h7]
+        _ = 1 - ζ₅^4 + ζ₅^3 - ζ₅^2 := by simp only [zeta5_pow_five, zeta5_pow_eight, zeta5_pow_seven]
     calc (1 : ℂ) - ζ₅^4 + ζ₅^3 - ζ₅^2
         = (ζ₅ + ζ₅^4) * (ζ₅^4 - ζ₅^3) := h_factor.symm
       _ = ((Real.sqrt 5 - 1) / 2 : ℝ) * (ζ₅^4 - ζ₅^3) := by rw [h_sum1]
@@ -211,8 +192,7 @@ lemma word2_algebraic_identity :
       = ↑c * (ζ₅^4 - ζ₅^3) + 2 * ((1 : ℂ) - ζ₅^4 + ζ₅^3 - ζ₅^2) := by
     ring_nf
     -- After ring_nf, reduce powers modulo 5
-    have h9 : ζ₅^9 = ζ₅^4 := zeta5_pow_nine
-    simp only [h9, h8, h5]
+    simp only [zeta5_pow_nine, zeta5_pow_eight, zeta5_pow_five]
     -- Use cyclotomic sum identity: 1 + ζ₅ + ζ₅² + ζ₅³ + ζ₅⁴ = 0
     have h_zeta_sum : (1 : ℂ) + ζ₅ + ζ₅^2 + ζ₅^3 + ζ₅^4 = 0 := cyclotomic5_sum
     have h4_expand : ζ₅^4 = -1 - ζ₅ - ζ₅^2 - ζ₅^3 := by
@@ -252,15 +232,6 @@ lemma word3_algebraic_identity :
     result = z + (2 * displacement2) • E := by
   intro c _hc
   simp only
-  -- Key power reduction lemmas
-  have h5 : ζ₅^5 = (1 : ℂ) := zeta5_pow_five
-  have h8 : ζ₅^8 = ζ₅^3 := zeta5_pow_eight
-  have h12 : ζ₅^12 = ζ₅^2 := zeta5_pow_twelve
-  have h13 : ζ₅^13 = ζ₅^3 := zeta5_pow_thirteen
-  have h14 : ζ₅^14 = ζ₅^4 := by have := zeta5_pow_reduce 14; norm_num at this; exact this
-  have h15 : ζ₅^15 = (1 : ℂ) := zeta5_pow_fifteen
-  have h18 : ζ₅^18 = ζ₅^3 := by have := zeta5_pow_reduce 18; norm_num at this; exact this
-  have h19 : ζ₅^19 = ζ₅^4 := by have := zeta5_pow_reduce 19; norm_num at this; exact this
   -- sqrt 5 squared equals 5
   have hsqrt5_sq : Real.sqrt 5 ^ 2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
   -- Key identity: 2*displacement2 = √5 - 3
@@ -317,7 +288,7 @@ lemma word3_algebraic_identity :
   -- Need to verify the algebraic identity
   -- First expand using ring_nf and reduce high powers
   ring_nf
-  simp only [h19, h18, h15, h14, h13, h12, h8]
+  simp only [zeta5_pow_nineteen, zeta5_pow_eighteen, zeta5_pow_fifteen, zeta5_pow_fourteen, zeta5_pow_thirteen, zeta5_pow_twelve, zeta5_pow_eight]
   -- The goal is now in terms of ζ₅, ζ₅², ζ₅³, ζ₅⁴
   -- Use cyclotomic relation to reduce ζ₅⁴
   rw [h4_expand]
@@ -331,10 +302,9 @@ lemma word3_algebraic_identity :
   -- RHS still has ζ₅^4 inside the substituted expression, reduce it
   simp only [h4_expand]
   -- ring_nf expands but produces high powers, so reduce those first
-  have h6 : ζ₅^6 = ζ₅ := zeta5_pow_six
   -- Reduce high powers then ring
   ring_nf
-  simp only [h4_expand, h5, h6]
+  simp only [h4_expand, zeta5_pow_five, zeta5_pow_six]
   -- After simp, we need another ring to finish
   ring_nf
 

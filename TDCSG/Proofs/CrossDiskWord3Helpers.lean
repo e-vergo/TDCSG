@@ -229,7 +229,6 @@ lemma normSq_A_w3_z2 : Complex.normSq ((2 : ℂ) + ζ₅^3 - 2*ζ₅^4) = 11 - 4
 /-- conj(ζ₅⁴ - 1) = ζ₅ - 1 -/
 lemma conj_B3 : starRingEnd ℂ (ζ₅^4 - 1) = ζ₅ - 1 := by
   simp only [map_sub, map_one, map_pow, zeta5_conj]
-  have h5 : ζ₅^5 = (1 : ℂ) := zeta5_pow_five
   calc (ζ₅^4)^4 - 1 = ζ₅^16 - 1 := by ring
     _ = ζ₅^(16 % 5) - 1 := by rw [zeta5_pow_reduce 16]
     _ = ζ₅ - 1 := by norm_num
@@ -238,11 +237,10 @@ lemma conj_B3 : starRingEnd ℂ (ζ₅^4 - 1) = ζ₅ - 1 := by
 lemma re_A_w3_z2_mul_conj_B :
     (((2 : ℂ) + ζ₅^3 - 2*ζ₅^4) * starRingEnd ℂ (ζ₅^4 - 1)).re = (3*√5 - 10) / 2 := by
   rw [conj_B3]
-  have h5 : ζ₅^5 = (1 : ℂ) := zeta5_pow_five
   have h_expand : ((2 : ℂ) + ζ₅^3 - 2*ζ₅^4) * (ζ₅ - 1) = 2*ζ₅ - 4 + 3*ζ₅^4 - ζ₅^3 := by
     calc ((2 : ℂ) + ζ₅^3 - 2*ζ₅^4) * (ζ₅ - 1)
         = 2*ζ₅ - 2 + ζ₅^4 - ζ₅^3 - 2*ζ₅^5 + 2*ζ₅^4 := by ring
-      _ = 2*ζ₅ - 2 + ζ₅^4 - ζ₅^3 - 2*1 + 2*ζ₅^4 := by rw [h5]
+      _ = 2*ζ₅ - 2 + ζ₅^4 - ζ₅^3 - 2*1 + 2*ζ₅^4 := by simp only [zeta5_pow_five_C]
       _ = 2*ζ₅ - 4 + 3*ζ₅^4 - ζ₅^3 := by ring
   rw [h_expand]
   simp only [Complex.add_re, Complex.sub_re, Complex.mul_re]
@@ -419,13 +417,11 @@ lemma re_A_w3_z3_mul_conj_B :
     (((-2 : ℂ) + ζ₅^2 - 2*ζ₅^3 + 2*ζ₅^4) * starRingEnd ℂ (ζ₅^3 - ζ₅^4)).re = (5*√5 - 10) / 2 := by
   rw [conj_B_z3]
   have h_sqrt5_sq : √5^2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
-  have h5 : ζ₅^5 = (1 : ℂ) := zeta5_pow_five
   have h_expand : ((-2 : ℂ) + ζ₅^2 - 2*ζ₅^3 + 2*ζ₅^4) * (ζ₅^2 - ζ₅) =
       -4 + 4*ζ₅ - 2*ζ₅^2 - ζ₅^3 + 3*ζ₅^4 := by
-    have h6 : ζ₅^6 = ζ₅ := by rw [show (6 : ℕ) = 5 + 1 by norm_num, pow_add, h5, one_mul, pow_one]
     calc ((-2 : ℂ) + ζ₅^2 - 2*ζ₅^3 + 2*ζ₅^4) * (ζ₅^2 - ζ₅)
         = -2*ζ₅^2 + 2*ζ₅ + ζ₅^4 - ζ₅^3 - 2*ζ₅^5 + 2*ζ₅^4 + 2*ζ₅^6 - 2*ζ₅^5 := by ring
-      _ = -2*ζ₅^2 + 2*ζ₅ + ζ₅^4 - ζ₅^3 - 2*1 + 2*ζ₅^4 + 2*ζ₅ - 2*1 := by rw [h5, h6]
+      _ = -2*ζ₅^2 + 2*ζ₅ + ζ₅^4 - ζ₅^3 - 2*1 + 2*ζ₅^4 + 2*ζ₅ - 2*1 := by simp only [zeta5_pow_five_C, zeta5_pow_six]
       _ = -4 + 4*ζ₅ - 2*ζ₅^2 - ζ₅^3 + 3*ζ₅^4 := by ring
   rw [h_expand]
   simp only [Complex.add_re, Complex.sub_re, Complex.neg_re, Complex.mul_re]
@@ -710,13 +706,10 @@ lemma re_A_w3_z5_mul_conj_B :
   rw [conj_B4]
   have h_expand : ((-4 : ℂ) + 4*ζ₅ - 2*ζ₅^2 + ζ₅^4) * (1 - ζ₅^4) =
       -4 + 4*ζ₅^4 + 4*ζ₅ - 4*ζ₅^5 - 2*ζ₅^2 + 2*ζ₅^6 + ζ₅^4 - ζ₅^8 := by ring
-  have h5 : ζ₅^5 = (1 : ℂ) := zeta5_pow_five
-  have h6 : ζ₅^6 = ζ₅ := by rw [show (6 : ℕ) = 5 + 1 by rfl, pow_add, h5, one_mul, pow_one]
-  have h8 : ζ₅^8 = ζ₅^3 := by rw [show (8 : ℕ) = 5 + 3 by rfl, pow_add, h5, one_mul]
   have h_simple : ((-4 : ℂ) + 4*ζ₅ - 2*ζ₅^2 + ζ₅^4) * (1 - ζ₅^4) = -8 + 6*ζ₅ - 2*ζ₅^2 - ζ₅^3 + 5*ζ₅^4 := by
     calc ((-4 : ℂ) + 4*ζ₅ - 2*ζ₅^2 + ζ₅^4) * (1 - ζ₅^4)
         = -4 + 4*ζ₅^4 + 4*ζ₅ - 4*ζ₅^5 - 2*ζ₅^2 + 2*ζ₅^6 + ζ₅^4 - ζ₅^8 := by ring
-      _ = -4 + 4*ζ₅^4 + 4*ζ₅ - 4*1 - 2*ζ₅^2 + 2*ζ₅ + ζ₅^4 - ζ₅^3 := by rw [h5, h6, h8]
+      _ = -4 + 4*ζ₅^4 + 4*ζ₅ - 4*1 - 2*ζ₅^2 + 2*ζ₅ + ζ₅^4 - ζ₅^3 := by simp only [zeta5_pow_five_C, zeta5_pow_six, zeta5_pow_eight]
       _ = -8 + 6*ζ₅ - 2*ζ₅^2 - ζ₅^3 + 5*ζ₅^4 := by ring
   rw [h_simple]
   simp only [Complex.add_re, Complex.sub_re, Complex.neg_re, Complex.mul_re]

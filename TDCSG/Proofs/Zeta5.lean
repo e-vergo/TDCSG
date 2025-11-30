@@ -394,6 +394,42 @@ lemma zeta5_pow4_eq : ζ₅^4 = -1 - ζ₅ - ζ₅^2 - ζ₅^3 := by
   norm_num at this
   exact this
 
+@[simp] lemma zeta5_pow_fourteen : ζ₅^14 = ζ₅^4 := by
+  have : ζ₅^14 = ζ₅^(14 % 5) := zeta5_pow_reduce 14
+  norm_num at this
+  exact this
+
+@[simp] lemma zeta5_pow_eighteen : ζ₅^18 = ζ₅^3 := by
+  have : ζ₅^18 = ζ₅^(18 % 5) := zeta5_pow_reduce 18
+  norm_num at this
+  exact this
+
+@[simp] lemma zeta5_pow_nineteen : ζ₅^19 = ζ₅^4 := by
+  have : ζ₅^19 = ζ₅^(19 % 5) := zeta5_pow_reduce 19
+  norm_num at this
+  exact this
+
+@[simp] lemma zeta5_pow_twenty : ζ₅^20 = 1 := by
+  have : ζ₅^20 = ζ₅^(20 % 5) := zeta5_pow_reduce 20
+  norm_num at this
+  exact this
+
+@[simp] lemma zeta5_pow_twentythree : ζ₅^23 = ζ₅^3 := by
+  have : ζ₅^23 = ζ₅^(23 % 5) := zeta5_pow_reduce 23
+  norm_num at this
+  exact this
+
+@[simp] lemma zeta5_pow_twentyfour : ζ₅^24 = ζ₅^4 := by
+  have : ζ₅^24 = ζ₅^(24 % 5) := zeta5_pow_reduce 24
+  norm_num at this
+  exact this
+
+-- Explicit (1 : ℂ) variants for type inference in proof contexts
+lemma zeta5_pow_five_C : ζ₅^5 = (1 : ℂ) := zeta5_pow_five
+lemma zeta5_pow_ten_C : ζ₅^10 = (1 : ℂ) := zeta5_pow_ten
+lemma zeta5_pow_fifteen_C : ζ₅^15 = (1 : ℂ) := zeta5_pow_fifteen
+lemma zeta5_pow_twenty_C : ζ₅^20 = (1 : ℂ) := zeta5_pow_twenty
+
 /-- ζ₅.re = cos(2π/5). -/
 lemma zeta5_re_eq_cos : ζ₅.re = Real.cos (2 * π / 5) := by
   unfold ζ₅ zeta5
