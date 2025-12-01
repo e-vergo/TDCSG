@@ -3,7 +3,6 @@ import TDCSG.Definitions.Core
 import TDCSG.Definitions.Points
 import TDCSG.Definitions.Geometry
 import TDCSG.Definitions.IET
-import TDCSG.Definitions.TwoDisk
 import TDCSG.Definitions.RealDynamics
 import TDCSG.Definitions.WordCorrespondence
 import TDCSG.Definitions.GroupAction
@@ -37,12 +36,11 @@ is the golden ratio.
 
 ## Module Organization
 
-### Definitions (8 files)
+### Definitions (7 files)
 - `Core`: Fundamental constants (r_c, generators, angles, ζ₅)
 - `Points`: E, E', F, G point definitions, segment parameterization
-- `Geometry`: Geometric primitives (disks, rotations)
+- `Geometry`: Geometric primitives (disks, rotations), TwoDiskSystem structure
 - `IET`: Interval exchange transformation structure
-- `TwoDisk`: Two-disk system structure
 - `RealDynamics`: Orbit set definitions
 - `WordCorrespondence`: Group word definitions
 - `GroupAction`: Group action on E'E segment

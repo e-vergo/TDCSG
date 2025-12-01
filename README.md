@@ -8,7 +8,7 @@ Formal verification in Lean 4 of the critical radius theorem for two-disk compou
 
 | Metric | Value |
 |--------|-------|
-| Build | Compiles (2405 jobs) |
+| Build | Compiles (2402 jobs) |
 | Sorries | 0 |
 | Axioms | Standard only (propext, Quot.sound, Classical.choice, funext) |
 | Kim Morrison Standard | All 11 checks pass |
@@ -26,13 +26,13 @@ Project: TDCSG
 TRUST TIER SUMMARY
 --------------------------------------------------------------------------------
   MathlibExtensions/          [NOT PRESENT]
-  Definitions/                10 files    968 lines
-  Proofs/                     18 files    7942 lines
+  Definitions/                7 files     847 lines
+  Proofs/                     18 files    7908 lines
   MainTheorem.lean                        28 lines
   ProofOfMainTheorem.lean                 60 lines
 --------------------------------------------------------------------------------
-  REVIEW BURDEN: 996 lines (Definitions + MainTheorem)
-  TOTAL: 8998 lines (11% requires review)
+  REVIEW BURDEN: 875 lines (Definitions + MainTheorem)
+  TOTAL: 8843 lines (9% requires review)
 
 CHECKS
 --------------------------------------------------------------------------------
@@ -98,18 +98,15 @@ lake build && lake env lean --run KMVerify/Main.lean
 TDCSG/
   MainTheorem.lean            # Statement + GG5_critical definition
   ProofOfMainTheorem.lean     # Proof of main theorem
-  Definitions/                # All definitions (10 files, 968 lines)
+  Definitions/                # All definitions (7 files, 847 lines)
     Core.lean                 # phi, r_crit, Generator, Word, zeta5, Circle defs
-    Geometry.lean             # Disk geometry, rotations (C-native)
+    Geometry.lean             # Disk geometry, rotations, TwoDiskSystem
     GroupAction.lean          # genA, genB, applyWord, orbit
-    TwoDisk.lean              # TwoDiskSystem structure
-    IET.lean                  # Interval exchange transformations
+    IET.lean                  # Interval exchange transformations, IET_word, wordForIterate
     Points.lean               # E, E', F, G, segmentPoint
     RealDynamics.lean         # Orbit definitions, GG5_displacement
     WordCorrespondence.lean   # word1, word2, word3 definitions
-    CrossDiskBounds.lean      # c_lower_word2, c_upper_word2, c_lower_word3
-    IETOrbit.lean             # IET_word, wordForIterate definitions
-  Proofs/                     # All supporting lemmas (18 files, 7942 lines)
+  Proofs/                     # All supporting lemmas (18 files, 7908 lines)
     Zeta5.lean                # zeta5 identities
     Points.lean               # Point properties, F/G scalar relations
     OrbitInfinite.lean        # GG5_IET_has_infinite_orbit

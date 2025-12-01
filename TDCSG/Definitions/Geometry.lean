@@ -28,10 +28,10 @@ open Real
 /-! ### Disk Centers (FIXED positions) -/
 
 /-- Center of the left disk in complex plane: (-1, 0). -/
-def leftCenter : ℂ := -1 + 0 * Complex.I
+def leftCenter : ℂ := -1
 
 /-- Center of the right disk in complex plane: (1, 0). -/
-def rightCenter : ℂ := 1 + 0 * Complex.I
+def rightCenter : ℂ := 1
 
 /-! ### Disk Definitions -/
 
@@ -103,3 +103,28 @@ lemma rotateAboutCircle_preserves_disk (c : ℂ) (a : Circle) (r : ℝ) (z : ℂ
   exact hz
 
 end TDCSG.Definitions
+
+/-!
+## Two-Disk System
+
+A two-disk system with specified radii and rotation orders.
+
+### References
+
+* [Two-Disk Compound Symmetry Groups](https://arxiv.org/abs/2302.12950v1)
+-/
+
+namespace CompoundSymmetry
+
+/-- A two-disk system with specified radii and rotation orders. -/
+structure TwoDiskSystem where
+  /-- Radius of the left disk -/
+  r1 : ℝ
+  /-- Radius of the right disk -/
+  r2 : ℝ
+  /-- Rotation order for the left disk -/
+  n1 : ℕ
+  /-- Rotation order for the right disk -/
+  n2 : ℕ
+
+end CompoundSymmetry

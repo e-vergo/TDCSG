@@ -386,10 +386,10 @@ lemma zeta5_pow4_eq : ζ₅^4 = -1 - ζ₅ - ζ₅^2 - ζ₅^3 := by
   exact this
 
 -- Explicit (1 : ℂ) variants for type inference in proof contexts
-lemma zeta5_pow_five_C : ζ₅^5 = (1 : ℂ) := zeta5_pow_five
-lemma zeta5_pow_ten_C : ζ₅^10 = (1 : ℂ) := zeta5_pow_ten
-lemma zeta5_pow_fifteen_C : ζ₅^15 = (1 : ℂ) := zeta5_pow_fifteen
-lemma zeta5_pow_twenty_C : ζ₅^20 = (1 : ℂ) := zeta5_pow_twenty
+@[simp] lemma zeta5_pow_five_C : ζ₅^5 = (1 : ℂ) := zeta5_pow_five
+@[simp] lemma zeta5_pow_ten_C : ζ₅^10 = (1 : ℂ) := zeta5_pow_ten
+@[simp] lemma zeta5_pow_fifteen_C : ζ₅^15 = (1 : ℂ) := zeta5_pow_fifteen
+@[simp] lemma zeta5_pow_twenty_C : ζ₅^20 = (1 : ℂ) := zeta5_pow_twenty
 
 /-- ζ₅.re = cos(2π/5). -/
 lemma zeta5_re_eq_cos : ζ₅.re = Real.cos (2 * π / 5) := by

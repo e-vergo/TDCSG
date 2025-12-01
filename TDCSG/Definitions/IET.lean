@@ -1,11 +1,12 @@
 /-
-Copyright (c) 2024 Eric Moffat. All rights reserved.
+Copyright (c) 2025 Eric Moffat. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Moffat, Eric Hearn
 -/
 import Mathlib.Data.Real.Basic
 import Mathlib.Algebra.BigOperators.Fin
 import Mathlib.NumberTheory.Real.GoldenRatio
+import TDCSG.Definitions.WordCorrespondence
 
 /-!
 # Interval Exchange Transformation Definitions
@@ -24,10 +25,7 @@ This file contains core definitions for interval exchange transformations (IETs)
 ### Interval sets
 - `interval`: The ith subinterval in the domain
 
-### Standard examples
-- `IET_two_intervals`: 2-interval IET from a single parameter
-- `IET_identity`: Identity IET (1 interval)
-- `IET_three_example`: 3-interval IET example
+### Standard constructions
 - `IET_inverse`: Inverse of an IET
 
 ### Golden ratio IET lengths
@@ -112,38 +110,6 @@ noncomputable def IET_inverse : IntervalExchangeTransformation n where
   permutation := iet.permutation.symm
 
 end GeneralProperties
-
-section Examples
-
-/-- The identity IET: trivial permutation, single interval. -/
-def IET_identity : IntervalExchangeTransformation 1 where
-  n_pos := by norm_num
-  lengths := fun _ => 1
-  lengths_pos := by intro; norm_num
-  lengths_sum := by simp
-  permutation := Equiv.refl _
-
-/-- A 3-interval exchange example. -/
-def IET_three_example (α β : ℝ) (hα : 0 < α) (hβ : 0 < β) (hsum : α + β < 1) :
-    IntervalExchangeTransformation 3 where
-  n_pos := by norm_num
-  lengths := fun i => if i = 0 then α else if i = 1 then β else 1 - α - β
-  lengths_pos := by
-    intro i; fin_cases i
-    · simp; exact hα
-    · simp; exact hβ
-    · simp; linarith
-  lengths_sum := by
-    have : (Finset.univ : Finset (Fin 3)) = {0, 1, 2} := by decide
-    rw [this, Finset.sum_insert, Finset.sum_insert, Finset.sum_singleton]
-    · simp only [show (2 : Fin 3) = 0 ↔ False by decide, show (2 : Fin 3) = 1 ↔ False by decide,
-                 show (1 : Fin 3) = 0 ↔ False by decide]
-      simp only [ite_true, ite_false]; ring
-    · decide
-    · decide
-  permutation := Equiv.swap 0 2
-
-end Examples
 
 /-! ## Golden ratio IET definitions
 
@@ -259,14 +225,6 @@ lemma lengths_sum_to_one : length1 + length2 + length3 = 1 := by
 
 /-! ### IET Definitions -/
 
-/-- The critical radius for GG(5,5). -/
-noncomputable def criticalRadius : ℝ :=
-  Real.sqrt (3 + Real.goldenRatio)
-
-/-- Predicate: an IET emerges from the system dynamics at radius r. -/
-def HasEmergentIET (r : ℝ) : Prop :=
-  r = Real.sqrt (3 + Real.goldenRatio)
-
 /-- The cyclic permutation (0 → 1 → 2 → 0) on Fin 3.
     This permutation maps:
     - Interval 0 [E', F') to range position 1 [G, F)
@@ -291,7 +249,7 @@ noncomputable def GG5_induced_IET : IntervalExchangeTransformation 3 where
   lengths_pos := by
     intro i
     fin_cases i
-    all_goals simp only [ite_true, ite_false]
+    all_goals simp only
     · exact length1_pos
     · exact length2_pos
     · exact length3_pos
@@ -310,9 +268,34 @@ noncomputable def GG5_induced_IET : IntervalExchangeTransformation 3 where
     · decide
   permutation := cyclicPerm3
 
-/-- The emergent IET at a given radius. -/
-noncomputable def EmergentIET (r : ℝ) (_ : HasEmergentIET r) :
-    IntervalExchangeTransformation 3 :=
-  GG5_induced_IET
+/-! ## IET Orbit Definitions
+
+Definitions for relating IET orbits to group word sequences.
+
+### Main definitions
+
+* `IET_word`: Select the word based on which IET interval x falls in
+* `wordForIterate`: Concatenated word for n iterations of the IET
+* `wordForIterate'`: Simplified version for ProofOfMainTheorem
+-/
+
+open TDCSG.CompoundSymmetry.GG5
+
+/-- Select the word based on which IET interval x falls in. -/
+noncomputable def IET_word (x : Real) : Word :=
+  if x < length1 then word1
+  else if x < length1 + length2 then word2
+  else word3
+
+/-- Concatenated word for n iterations of the IET starting from x0.
+Each iteration applies the word corresponding to the current interval. -/
+noncomputable def wordForIterate (x0 : Real) : Nat -> Word
+  | 0 => []
+  | n + 1 => wordForIterate x0 n ++ IET_word (GG5_induced_IET.toFun^[n] x0)
+
+/-- Simplified version that doesn't track starting point - used in ProofOfMainTheorem. -/
+noncomputable def wordForIterate' : Nat -> Word
+  | 0 => []
+  | n + 1 => wordForIterate' n ++ word1  -- Simplified: actual depends on orbit
 
 end TDCSG.Definitions

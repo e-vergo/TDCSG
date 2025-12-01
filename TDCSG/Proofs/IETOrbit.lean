@@ -10,7 +10,6 @@ import TDCSG.Proofs.IET
 import TDCSG.Proofs.Orbit
 import TDCSG.Proofs.OrbitInfinite
 import TDCSG.Definitions.IET
-import TDCSG.Definitions.IETOrbit
 
 /-!
 # IET Orbit Theorems for GG(5,5)
@@ -28,9 +27,6 @@ Proves the correspondence between IET orbits and group orbits.
 namespace TDCSG.CompoundSymmetry.GG5
 
 open Complex Real TDCSG.Definitions CompoundSymmetry.GG5
-
--- Re-export IET orbit definitions from Definitions/IETOrbit.lean
-export TDCSG.Definitions (IET_word wordForIterate wordForIterate')
 
 /-! ### IET interval lemmas -/
 

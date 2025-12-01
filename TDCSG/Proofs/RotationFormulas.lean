@@ -36,7 +36,6 @@ lemma genA_rotation_formula (z : ℂ) (hz : z ∈ leftDisk r_crit) :
   unfold genA
   simp only [hz, ↓reduceIte]
   unfold rotateAboutC leftCenter
-  simp only [zero_mul, add_zero]
   rw [exp_neg_two_pi_fifth]
   ring
 
@@ -46,7 +45,6 @@ lemma genB_rotation_formula (z : ℂ) (hz : z ∈ rightDisk r_crit) :
   unfold genB
   simp only [hz, ↓reduceIte]
   unfold rotateAboutC rightCenter
-  simp only [zero_mul, add_zero]
   rw [exp_neg_two_pi_fifth]
 
 /-- Helper: exp(2πi/5) = ζ₅.

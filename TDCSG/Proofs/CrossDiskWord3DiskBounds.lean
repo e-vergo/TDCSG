@@ -103,8 +103,6 @@ lemma cross_disk_w3_z1_bound (c : ℝ) (hc_lo : 2 - √5 ≤ c) (hc_hi : c ≤ 1
 
     have h_a_pos : (5 - √5) / 2 > 0 := by nlinarith [h_sqrt5_sq]
 
-    have h_lower : 2 - √5 = c_lower_word3 := by unfold c_lower_word3; rfl
-
     have h_at_lower' : 6 - √5 + 2 * (2 - √5) * ((2*√5 - 5) / 2) + (2 - √5)^2 * ((5 - √5) / 2) ≤ 3 + φ := by
       have h_eq : 6 - √5 + 2 * (2 - √5) * ((2*√5 - 5) / 2) + (2 - √5)^2 * ((5 - √5) / 2) =
                   Complex.normSq (ζ₅^4 - (2 - √5)*ζ₅ - √5) := by

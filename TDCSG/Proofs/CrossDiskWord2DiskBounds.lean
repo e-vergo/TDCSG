@@ -31,12 +31,22 @@ namespace TDCSG.CompoundSymmetry.GG5
 open scoped Complex
 open Complex Real TDCSG.Definitions
 
--- Re-export cross-disk bound definitions from Definitions/CrossDiskBounds.lean
-export TDCSG.Definitions (c_lower_word2 c_upper_word2 c_lower_word3)
+/-- The lower bound for c in interval 1 (word2): (1 - √5)/2 = goldenConj -/
+private noncomputable abbrev c_lower_word2 : ℝ := Real.goldenConj
+
+/-- The upper bound for c in interval 1 (word2): 2 - √5 -/
+private noncomputable abbrev c_upper_word2 : ℝ := 2 - √5
+
+/-- The lower bound for c in interval 2 (word3): 2 - √5 (equals c_upper_word2) -/
+private noncomputable abbrev c_lower_word3 : ℝ := 2 - √5
+
+/-- c_lower_word2 = (1 - √5)/2 by definition of goldenConj -/
+lemma c_lower_word2_eq : c_lower_word2 = (1 - √5) / 2 := by
+  unfold c_lower_word2 Real.goldenConj; rfl
 
 /-- (1 - sqrt(5))/2 > -1 since sqrt(5) < 3 -/
 lemma c_lower_word2_gt_neg1 : c_lower_word2 > -1 := by
-  unfold c_lower_word2
+  rw [c_lower_word2_eq]
   have h_sqrt5_sq : √5^2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
   have h_sqrt5_lt_3 : √5 < 3 := by nlinarith [h_sqrt5_sq]
   linarith
@@ -46,7 +56,8 @@ lemma c_upper_word2_eq_c_lower_word3 : c_upper_word2 = c_lower_word3 := rfl
 
 /-- (1 - sqrt(5))/2 < 2 - sqrt(5) -/
 lemma c_lower_lt_upper_word2 : c_lower_word2 < c_upper_word2 := by
-  unfold c_lower_word2 c_upper_word2
+  rw [c_lower_word2_eq]
+  unfold c_upper_word2
   have h_sqrt5_sq : √5^2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
   have h_sqrt5_lt_3 : √5 < 3 := by nlinarith [h_sqrt5_sq]
   linarith

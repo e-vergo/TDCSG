@@ -25,7 +25,7 @@ and the specific GG5-induced IET.
 
 ### GG5 IET
 - `GG5_induced_IET`: 3-interval exchange transformation induced by GG(5,5) dynamics
-- `HasEmergentIET`: Predicate for when an IET emerges from system dynamics
+- Golden ratio displacement formulas
 
 -/
 
@@ -378,7 +378,7 @@ open Real TDCSG.Definitions
 
 -- Re-export definitions from TDCSG.Definitions for backward compatibility
 -- These are now defined in Definitions/IET.lean
-export TDCSG.Definitions (criticalRadius HasEmergentIET cyclicPerm3 GG5_induced_IET EmergentIET
+export TDCSG.Definitions (cyclicPerm3 GG5_induced_IET
   length1_pos length2_pos length3_pos lengths_sum_to_one)
 
 /-- 1 + φ is positive. -/
@@ -395,28 +395,6 @@ lemma length1_lt_one : length1 < 1 := by
 lemma length12_lt_one : length1 + length2 < 1 := by
   have h := lengths_sum_to_one
   linarith [length3_pos]
-
-/-- At the critical radius, the GG(5,5) system dynamics reduce to
-an IET. -/
-theorem GG5_becomes_IET_at_critical :
-    HasEmergentIET criticalRadius := by
-  unfold HasEmergentIET criticalRadius
-  rfl
-
-/-- The emergent IET structure is determined by the golden
-ratio. -/
-theorem IET_structure_golden_ratio
-    (h : HasEmergentIET criticalRadius) :
-    let iet := EmergentIET criticalRadius h
-    iet.lengths 0 = length1 ∧
-    iet.lengths 1 = length2 ∧
-    iet.lengths 2 = length3 := by
-  unfold EmergentIET GG5_induced_IET
-  constructor
-  · rfl
-  constructor
-  · rfl
-  · rfl
 
 /-- The interval lengths satisfy: length1 = length2 (equal short segments). -/
 theorem length1_eq_length2 : length1 = length2 := rfl
@@ -461,19 +439,5 @@ lemma displacement0_eq_displacement1 : displacement0 = displacement1 := by
 
 /-- displacement2 = -(length1 + length2) = -ψ². -/
 lemma displacement2_eq_neg_length12 : displacement2 = -(length1 + length2) := rfl
-
-/-- The emergent IET structure: two short intervals of length ψ²/2,
-    one long interval of length ψ. -/
-theorem emergent_IET_structure
-    (h : HasEmergentIET criticalRadius) :
-    let iet := EmergentIET criticalRadius h
-    iet.lengths 0 = length1 ∧
-    iet.lengths 1 = length2 ∧
-    iet.lengths 2 = length3 := by
-  constructor
-  · rfl
-  constructor
-  · rfl
-  · rfl
 
 end TDCSG.CompoundSymmetry.GG5
