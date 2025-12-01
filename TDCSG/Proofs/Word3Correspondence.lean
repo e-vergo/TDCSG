@@ -52,8 +52,7 @@ lemma word3_produces_displacement2 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
   have hc_hi : c ≤ 1 := by simp only [hc_def]; linarith [hx.2]
   have hc_lo_ge_neg1 : -1 < c := by
     -- 2 - √5 > -1 since √5 < 3
-    have h_sqrt5_sq : Real.sqrt 5 ^ 2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
-    have h_sqrt5_lt_3 : Real.sqrt 5 < 3 := by nlinarith [h_sqrt5_sq]
+    have h_sqrt5_lt_3 : Real.sqrt 5 < 3 := by nlinarith [sqrt5_sq]
     linarith
   have h_c_mem : c ∈ Set.Icc (-1 : ℝ) 1 := ⟨le_of_lt hc_lo_ge_neg1, hc_hi⟩
 

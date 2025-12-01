@@ -176,13 +176,12 @@ lemma length12_eq_sqrt5 : length1 + length2 = (3 - Real.sqrt 5) / 2 := by
   have h_denom_ne : (3 + Real.sqrt 5) ≠ 0 := by
     have hsqrt5_pos : 0 < Real.sqrt 5 := Real.sqrt_pos.mpr (by norm_num : (0 : ℝ) < 5)
     linarith
-  have hsqrt5_sq : Real.sqrt 5 ^ 2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
   field_simp
   -- (3 - √5) * 2 = 2 * (3 + √5) / (3 + √5) * (3 - √5)
   -- Need: 2 * (3 - √5) = 2 * (9 - 5) / (3 + √5) ... no
   -- Actually: 1/(1+φ) = 2/(3+√5) and (3-√5)/2, so need:
   -- 2/(3+√5) = (3-√5)/2 iff 4 = (3-√5)(3+√5) = 9 - 5 = 4. ✓
-  nlinarith [hsqrt5_sq]
+  nlinarith [sqrt5_sq]
 
 /-- Key relationship: when x ≥ length1 + length2, we have c = 2x - 1 ≥ 2 - √5. -/
 lemma interval2_c_lower_bound (x : ℝ) (hx : length1 + length2 ≤ x) :

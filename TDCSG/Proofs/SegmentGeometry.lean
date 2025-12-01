@@ -136,11 +136,10 @@ lemma segment_ratio_is_golden :
   rw [psi_eq, one_div, inv_div]
   rw [show (2 : ℝ) / (Real.sqrt 5 - 1) = Real.goldenRatio by
     unfold Real.goldenRatio
-    have h_sqrt5_sq : Real.sqrt 5 ^ 2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
     have sqrt5_gt_one' : 1 < Real.sqrt 5 := sqrt5_gt_one
     field_simp [ne_of_gt (by linarith : (0 : ℝ) < Real.sqrt 5 - 1)]
     have h1 : (2 : ℝ) ^ 2 = 4 := by ring
-    have h2 : (4 : ℝ) = Real.sqrt 5 ^ 2 - 1 := by rw [h_sqrt5_sq]; ring
+    have h2 : (4 : ℝ) = Real.sqrt 5 ^ 2 - 1 := by rw [sqrt5_sq]; ring
     have h3 : Real.sqrt 5 ^ 2 - 1 = (Real.sqrt 5 - 1) * (Real.sqrt 5 + 1) := by ring
     have h4 : (Real.sqrt 5 - 1) * (Real.sqrt 5 + 1) = (Real.sqrt 5 - 1) * (1 + Real.sqrt 5) := by ring
     calc 2 ^ 2 = 4 := h1

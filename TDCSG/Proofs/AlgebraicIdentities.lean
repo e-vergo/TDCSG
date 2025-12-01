@@ -52,8 +52,6 @@ lemma word1_algebraic_identity :
     result = z + (2 * displacement0) • E := by
   intro c _hc
   simp only
-  -- sqrt 5 squared equals 5
-  have hsqrt5_sq : Real.sqrt 5 ^ 2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
   -- Key identity: F = (1/φ)*E where F = 1 - ζ₅⁴ + ζ₅³ - ζ₅² and E = ζ₅⁴ - ζ₅³
   -- First establish ζ₅ + ζ₅⁴ = (√5-1)/2 = 1/φ
   have h_sum1 : ζ₅ + ζ₅^4 = ((Real.sqrt 5 - 1) / 2 : ℝ) := by
@@ -81,7 +79,7 @@ lemma word1_algebraic_identity :
           have h_cross : (Real.sqrt 5 - 1) * (1 + Real.sqrt 5) = 4 := by
             calc (Real.sqrt 5 - 1) * (1 + Real.sqrt 5)
                 = Real.sqrt 5 + Real.sqrt 5 ^ 2 - 1 - Real.sqrt 5 := by ring
-              _ = Real.sqrt 5 + 5 - 1 - Real.sqrt 5 := by rw [hsqrt5_sq]
+              _ = Real.sqrt 5 + 5 - 1 - Real.sqrt 5 := by rw [sqrt5_sq]
               _ = 4 := by ring
           field_simp
           linarith
@@ -142,8 +140,6 @@ lemma word2_algebraic_identity :
     result = z + (2 * displacement1) • E := by
   intro c _hc
   simp only
-  -- sqrt 5 squared equals 5
-  have hsqrt5_sq : Real.sqrt 5 ^ 2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
   -- displacement1 = displacement0 = 1/φ
   have h_disp : displacement1 = 1 / Real.goldenRatio := by
     rw [displacement0_eq_displacement1.symm]
@@ -175,7 +171,7 @@ lemma word2_algebraic_identity :
           have h_cross : (Real.sqrt 5 - 1) * (1 + Real.sqrt 5) = 4 := by
             calc (Real.sqrt 5 - 1) * (1 + Real.sqrt 5)
                 = Real.sqrt 5 + Real.sqrt 5 ^ 2 - 1 - Real.sqrt 5 := by ring
-              _ = Real.sqrt 5 + 5 - 1 - Real.sqrt 5 := by rw [hsqrt5_sq]
+              _ = Real.sqrt 5 + 5 - 1 - Real.sqrt 5 := by rw [sqrt5_sq]
               _ = 4 := by ring
           field_simp
           linarith
@@ -232,8 +228,6 @@ lemma word3_algebraic_identity :
     result = z + (2 * displacement2) • E := by
   intro c _hc
   simp only
-  -- sqrt 5 squared equals 5
-  have hsqrt5_sq : Real.sqrt 5 ^ 2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
   -- Key identity: 2*displacement2 = √5 - 3
   have h_goldenRatio : Real.goldenRatio = (1 + Real.sqrt 5) / 2 := Real.goldenRatio.eq_1
   have h_one_plus_phi : (1 : ℝ) + Real.goldenRatio = (3 + Real.sqrt 5) / 2 := by
@@ -250,7 +244,7 @@ lemma word3_algebraic_identity :
     have h_prod : (Real.sqrt 5 - 3) * (3 + Real.sqrt 5) = -4 := by
       calc (Real.sqrt 5 - 3) * (3 + Real.sqrt 5)
           = 3 * Real.sqrt 5 + Real.sqrt 5 ^ 2 - 9 - 3 * Real.sqrt 5 := by ring
-        _ = 3 * Real.sqrt 5 + 5 - 9 - 3 * Real.sqrt 5 := by rw [hsqrt5_sq]
+        _ = 3 * Real.sqrt 5 + 5 - 9 - 3 * Real.sqrt 5 := by rw [sqrt5_sq]
         _ = -4 := by ring
     linarith
   -- Now unfold and compute with E = ζ₅⁴ - ζ₅³

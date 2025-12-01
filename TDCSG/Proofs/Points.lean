@@ -166,16 +166,15 @@ lemma E_on_left_disk_boundary : ‖E + 1‖ = r_crit := by
     rw [show (Real.sin (π / 5) * (Real.sqrt 5 - 1) / 2) ^ 2 =
               Real.sin (π / 5) ^ 2 * ((Real.sqrt 5 - 1) / 2) ^ 2 by ring, h_sin_sq]
     field_simp
-    have h_sqrt5_sq : Real.sqrt 5 ^ 2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
     calc (2 + Real.sqrt 5) ^ 2 * 4 ^ 2 + (4 ^ 2 - (1 + Real.sqrt 5) ^ 2) * (Real.sqrt 5 - 1) ^ 2
         = (2 + Real.sqrt 5) ^ 2 * 16 + (16 - (1 + Real.sqrt 5) ^ 2) * (Real.sqrt 5 - 1) ^ 2 := by norm_num
       _ = (4 + 4 * Real.sqrt 5 + Real.sqrt 5 ^ 2) * 16 +
           (16 - 1 - 2 * Real.sqrt 5 - Real.sqrt 5 ^ 2) * (Real.sqrt 5 ^ 2 - 2 * Real.sqrt 5 + 1) := by ring
       _ = (4 + 4 * Real.sqrt 5 + 5) * 16 +
-          (16 - 1 - 2 * Real.sqrt 5 - 5) * (5 - 2 * Real.sqrt 5 + 1) := by rw [h_sqrt5_sq]
+          (16 - 1 - 2 * Real.sqrt 5 - 5) * (5 - 2 * Real.sqrt 5 + 1) := by rw [sqrt5_sq]
       _ = (9 + 4 * Real.sqrt 5) * 16 + (10 - 2 * Real.sqrt 5) * (6 - 2 * Real.sqrt 5) := by ring
       _ = 144 + 64 * Real.sqrt 5 + 60 - 20 * Real.sqrt 5 - 12 * Real.sqrt 5 + 4 * Real.sqrt 5 ^ 2 := by ring
-      _ = 144 + 64 * Real.sqrt 5 + 60 - 20 * Real.sqrt 5 - 12 * Real.sqrt 5 + 4 * 5 := by rw [h_sqrt5_sq]
+      _ = 144 + 64 * Real.sqrt 5 + 60 - 20 * Real.sqrt 5 - 12 * Real.sqrt 5 + 4 * 5 := by rw [sqrt5_sq]
       _ = 144 + 60 + 20 + 64 * Real.sqrt 5 - 32 * Real.sqrt 5 := by ring
       _ = 224 + 32 * Real.sqrt 5 := by ring
       _ = 2 * 16 * (6 + (1 + Real.sqrt 5)) := by ring
@@ -271,7 +270,6 @@ lemma E_in_right_disk : ‖E - 1‖ ≤ r_crit := by
     rw [show (Real.sin (π / 5) * (Real.sqrt 5 - 1) / 2) ^ 2 =
               Real.sin (π / 5) ^ 2 * ((Real.sqrt 5 - 1) / 2) ^ 2 by ring, h_sin_sq]
     field_simp
-    have h_sqrt5_sq : Real.sqrt 5 ^ 2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
     have h_calc : (Real.sqrt 5 - 2) ^ 2 * 4 ^ 2 + (4 ^ 2 - (1 + Real.sqrt 5) ^ 2) * (Real.sqrt 5 - 1) ^ 2
                   = 224 - 96 * Real.sqrt 5 := by
       calc (Real.sqrt 5 - 2) ^ 2 * 4 ^ 2 + (4 ^ 2 - (1 + Real.sqrt 5) ^ 2) * (Real.sqrt 5 - 1) ^ 2
@@ -279,10 +277,10 @@ lemma E_in_right_disk : ‖E - 1‖ ≤ r_crit := by
         _ = (Real.sqrt 5 ^ 2 - 4 * Real.sqrt 5 + 4) * 16 +
             (16 - 1 - 2 * Real.sqrt 5 - Real.sqrt 5 ^ 2) * (Real.sqrt 5 ^ 2 - 2 * Real.sqrt 5 + 1) := by ring
         _ = (5 - 4 * Real.sqrt 5 + 4) * 16 +
-            (16 - 1 - 2 * Real.sqrt 5 - 5) * (5 - 2 * Real.sqrt 5 + 1) := by rw [h_sqrt5_sq]
+            (16 - 1 - 2 * Real.sqrt 5 - 5) * (5 - 2 * Real.sqrt 5 + 1) := by rw [sqrt5_sq]
         _ = (9 - 4 * Real.sqrt 5) * 16 + (10 - 2 * Real.sqrt 5) * (6 - 2 * Real.sqrt 5) := by ring
         _ = 144 - 64 * Real.sqrt 5 + 60 - 20 * Real.sqrt 5 - 12 * Real.sqrt 5 + 4 * Real.sqrt 5 ^ 2 := by ring
-        _ = 144 - 64 * Real.sqrt 5 + 60 - 20 * Real.sqrt 5 - 12 * Real.sqrt 5 + 4 * 5 := by rw [h_sqrt5_sq]
+        _ = 144 - 64 * Real.sqrt 5 + 60 - 20 * Real.sqrt 5 - 12 * Real.sqrt 5 + 4 * 5 := by rw [sqrt5_sq]
         _ = 144 + 60 + 20 - 96 * Real.sqrt 5 := by ring
         _ = 224 - 96 * Real.sqrt 5 := by ring
     rw [h_calc]

@@ -34,7 +34,6 @@ open Complex Real TDCSG.Definitions
     And 2*length1 - 1 = (2-3-√5)/(3+√5) = (1-√5)/2 after rationalization. -/
 lemma interval0_c_upper_bound (x : ℝ) (hx : x < length1) :
     2 * x - 1 < (1 - Real.sqrt 5) / 2 := by
-  have h_sqrt5_sq : Real.sqrt 5 ^ 2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
   have h_phi := Real.goldenRatio.eq_1
   have h_two_length1 : 2 * length1 = 2 / (3 + Real.sqrt 5) := by
     unfold length1
@@ -48,7 +47,7 @@ lemma interval0_c_upper_bound (x : ℝ) (hx : x < length1) :
       linarith
     have h_denom_ne : 3 + Real.sqrt 5 ≠ 0 := ne_of_gt h_denom_pos
     field_simp
-    nlinarith [h_sqrt5_sq]
+    nlinarith [sqrt5_sq]
   grind
 
 /-- Word 1 action on segment points: translates by displacement0.

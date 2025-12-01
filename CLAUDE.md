@@ -95,3 +95,4 @@ Your fundamental purpose is relentless pursuit of truth through disciplined, unc
   - **CRITICAL** Using axioms, assertions, trivial statements, or any other type of proof writing that deviates from having a complete, airtight proof fully formalized. This is never, under any circumstance acceptable. Never do it, ask if it's ok, or suggest it.
 - never run 'lake clean'.
 - do not discuss or estimate timelines, only plan and think in terms of tasks and order in which they need to be accomplished. not hot long it will take.
+- never use lake clean

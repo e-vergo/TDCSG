@@ -47,8 +47,7 @@ lemma c_lower_word2_eq : c_lower_word2 = (1 - √5) / 2 := by
 /-- (1 - sqrt(5))/2 > -1 since sqrt(5) < 3 -/
 lemma c_lower_word2_gt_neg1 : c_lower_word2 > -1 := by
   rw [c_lower_word2_eq]
-  have h_sqrt5_sq : √5^2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
-  have h_sqrt5_lt_3 : √5 < 3 := by nlinarith [h_sqrt5_sq]
+  have h_sqrt5_lt_3 : √5 < 3 := by nlinarith [sqrt5_sq]
   linarith
 
 /-- c_upper_word2 = c_lower_word3 (the intervals are adjacent) -/
@@ -58,8 +57,7 @@ lemma c_upper_word2_eq_c_lower_word3 : c_upper_word2 = c_lower_word3 := rfl
 lemma c_lower_lt_upper_word2 : c_lower_word2 < c_upper_word2 := by
   rw [c_lower_word2_eq]
   unfold c_upper_word2
-  have h_sqrt5_sq : √5^2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
-  have h_sqrt5_lt_3 : √5 < 3 := by nlinarith [h_sqrt5_sq]
+  have h_sqrt5_lt_3 : √5 < 3 := by nlinarith [sqrt5_sq]
   linarith
 
 /-- For x in [length1, length1 + length2), we have c = 2x - 1 >= (1-sqrt(5))/2. -/
@@ -67,7 +65,6 @@ lemma interval1_c_lower_bound (x : ℝ) (hx : length1 ≤ x) :
     (1 - √5) / 2 ≤ 2 * x - 1 := by
   have h_length1 : length1 = 1 / (2 * (1 + goldenRatio)) := rfl
   have h_goldenRatio : goldenRatio = (1 + √5) / 2 := Real.goldenRatio.eq_1
-  have h_sqrt5_sq : √5^2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
   have h_sqrt5_pos : √5 > 0 := Real.sqrt_pos.mpr (by norm_num : (0 : ℝ) < 5)
   have h_denom_pos : 1 + goldenRatio > 0 := by
     rw [h_goldenRatio]; linarith
@@ -116,8 +113,6 @@ lemma cross_disk_w2_z1_bound (c : ℝ) (hc_lo : (1 - √5) / 2 ≤ c) (hc_hi : c
   have h3φ_pos : 0 < 3 + φ := by unfold φ; linarith [goldenRatio_pos]
   rw [Real.le_sqrt (norm_nonneg _) (le_of_lt h3φ_pos)]
 
-  have h_sqrt5_sq : √5^2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
-
   -- At upper endpoint (c = 2 - sqrt5), use word3's bound
   have h_at_upper : ‖A + ((2 - √5 : ℝ) : ℂ) * B‖^2 ≤ 3 + φ := by
     rw [hA_def, hB_def, ← Complex.normSq_eq_norm_sq]
@@ -156,7 +151,7 @@ lemma cross_disk_w2_z1_bound (c : ℝ) (hc_lo : (1 - √5) / 2 ≤ c) (hc_hi : c
       simp only [Complex.sub_re, Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im]
       rw [zeta5_pow4_re, zeta5_re, zeta5_im_eq_sin]
       ring_nf
-      nlinarith [h_sqrt5_sq]
+      nlinarith [sqrt5_sq]
     -- Im part: Im(zeta5^4) = -sin(2*pi/5)
     -- Im(((1-sqrt5)/2)*zeta5) = ((1-sqrt5)/2) * sin(2*pi/5)
     -- Total: -sin(2*pi/5) - ((1-sqrt5)/2)*sin(2*pi/5) = sin(2*pi/5) * (-1 - (1-sqrt5)/2)
@@ -171,15 +166,15 @@ lemma cross_disk_w2_z1_bound (c : ℝ) (hc_lo : (1 - √5) / 2 ≤ c) (hc_hi : c
     simp only [← sq]
     -- ((-2-sqrt5)/2)^2 + (sin(2pi/5) * ((sqrt5-3)/2))^2
     -- = ((2+sqrt5)/2)^2 + sin^2(2pi/5) * ((sqrt5-3)/2)^2
-    have h1 : ((-2 - √5) / 2)^2 = (9 + 4*√5) / 4 := by nlinarith [h_sqrt5_sq]
-    have h2 : ((√5 - 3) / 2)^2 = (14 - 6*√5) / 4 := by nlinarith [h_sqrt5_sq]
-    have h3 : (14 - 6*√5) * ((5 + √5) / 8) = (40 - 16*√5) / 8 := by nlinarith [h_sqrt5_sq]
+    have h1 : ((-2 - √5) / 2)^2 = (9 + 4*√5) / 4 := by nlinarith [sqrt5_sq]
+    have h2 : ((√5 - 3) / 2)^2 = (14 - 6*√5) / 4 := by nlinarith [sqrt5_sq]
+    have h3 : (14 - 6*√5) * ((5 + √5) / 8) = (40 - 16*√5) / 8 := by nlinarith [sqrt5_sq]
 
     calc ((-2 - √5) / 2)^2 + (Real.sin (2 * π / 5) * ((√5 - 3) / 2))^2
         = (9 + 4*√5) / 4 + Real.sin (2 * π / 5)^2 * ((14 - 6*√5) / 4) := by
           rw [h1, mul_pow, h2]
       _ = (9 + 4*√5) / 4 + ((5 + √5) / 8) * ((14 - 6*√5) / 4) := by rw [h_sin_sq]
-      _ = (9 + 4*√5) / 4 + (40 - 16*√5) / 32 := by nlinarith [h_sqrt5_sq]
+      _ = (9 + 4*√5) / 4 + (40 - 16*√5) / 32 := by nlinarith [sqrt5_sq]
       _ = (72 + 32*√5 + 40 - 16*√5) / 32 := by ring
       _ = (112 + 16*√5) / 32 := by ring
       _ = (7 + √5) / 2 := by ring
@@ -191,14 +186,14 @@ lemma cross_disk_w2_z1_bound (c : ℝ) (hc_lo : (1 - √5) / 2 ≤ c) (hc_hi : c
   have h_coeff_a : Complex.normSq B = (5 - √5) / 2 := by rw [hB_def]; exact normSq_B4
   have h_coeff_b : (A * starRingEnd ℂ B).re = (2*√5 - 5) / 2 := by
     rw [hA_def, hB_def]; exact re_A_w3_z1_mul_conj_B
-  have h_a_pos : (5 - √5) / 2 > 0 := by nlinarith [h_sqrt5_sq]
+  have h_a_pos : (5 - √5) / 2 > 0 := by nlinarith [sqrt5_sq]
   have h_vertex : -(((2*√5 - 5) / 2) / ((5 - √5) / 2)) = (3 - √5) / 4 := w3_z1_vertex
 
   -- Vertex is above the interval (both endpoints are negative, vertex is positive)
   have h_sqrt5_gt_2 : √5 > 2 := by
     have : (2 : ℝ)^2 < 5 := by norm_num
     exact (Real.lt_sqrt (by norm_num : (0 : ℝ) ≤ 2)).mpr this
-  have h_vertex_above : (3 - √5) / 4 > 2 - √5 := by nlinarith [h_sqrt5_sq, h_sqrt5_gt_2]
+  have h_vertex_above : (3 - √5) / 4 > 2 - √5 := by nlinarith [sqrt5_sq, h_sqrt5_gt_2]
 
   -- f is decreasing on interval since vertex > upper bound and a > 0
   -- So max is at lower endpoint
@@ -233,10 +228,10 @@ lemma cross_disk_w2_z1_bound (c : ℝ) (hc_lo : (1 - √5) / 2 ≤ c) (hc_hi : c
     have h_factor_neg_at_bound : 2 * ((2*√5 - 5) / 2) + 2 * (2 - √5) * ((5 - √5) / 2) ≤ 0 := by
       have h1 : 2 * ((2*√5 - 5) / 2) = 2*√5 - 5 := by ring
       have h2 : 2 * (2 - √5) * ((5 - √5) / 2) = (2 - √5) * (5 - √5) := by ring
-      have h3 : (2 - √5) * (5 - √5) = 15 - 7*√5 := by nlinarith [h_sqrt5_sq]
+      have h3 : (2 - √5) * (5 - √5) = 15 - 7*√5 := by nlinarith [sqrt5_sq]
       rw [h1, h2, h3]
       -- 2*sqrt5 - 5 + 15 - 7*sqrt5 = 10 - 5*sqrt5 = 5*(2 - sqrt5) < 0
-      nlinarith [h_sqrt5_sq]
+      nlinarith [sqrt5_sq]
     have h_factor_neg : 2 * (A * starRingEnd ℂ B).re + (c₁ + c₂) * Complex.normSq B ≤ 0 := by
       rw [hA_def, hB_def, h_coeff_b, h_coeff_a]
       calc 2 * ((2*√5 - 5) / 2) + (c₁ + c₂) * ((5 - √5) / 2)
@@ -303,13 +298,11 @@ lemma cross_disk_w2_z2_bound (c : ℝ) (hc_lo : (1 - √5) / 2 ≤ c) (hc_hi : c
   have h3φ_pos : 0 < 3 + φ := by unfold φ; linarith [goldenRatio_pos]
   rw [Real.le_sqrt (norm_nonneg _) (le_of_lt h3φ_pos)]
 
-  have h_sqrt5_sq : √5^2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
-
   -- Quadratic coefficients
   have h_coeff_a : Complex.normSq B = (5 - √5) / 2 := by rw [hB_def]; exact normSq_B3
   have h_coeff_b : (A * starRingEnd ℂ B).re = (3*√5 - 10) / 2 := by
     rw [hA_def, hB_def]; exact re_A_w3_z2_mul_conj_B
-  have h_a_pos : (5 - √5) / 2 > 0 := by nlinarith [h_sqrt5_sq]
+  have h_a_pos : (5 - √5) / 2 > 0 := by nlinarith [sqrt5_sq]
   have h_vertex : -(((3*√5 - 10) / 2) / ((5 - √5) / 2)) = (7 - √5) / 4 := w3_z2_vertex
 
   -- Vertex is above the interval (vertex > 1 > 2-√5 > (1-√5)/2)
@@ -361,7 +354,7 @@ lemma cross_disk_w2_z2_bound (c : ℝ) (hc_lo : (1 - √5) / 2 ≤ c) (hc_hi : c
       -- Goal: -sin(π/5) + (3+√5)/2 * (sin(π/5)*(1+√5)/2) = sin(π/5)*(1+√5)
       -- = sin(π/5)*(-1 + (3+√5)*(1+√5)/4) = sin(π/5)*(1+√5)
       -- (3+√5)*(1+√5) = 8 + 4√5, so -1 + (8+4√5)/4 = 1 + √5 ✓
-      have h_prod : (3 + √5) * (1 + √5) = 8 + 4*√5 := by nlinarith [h_sqrt5_sq]
+      have h_prod : (3 + √5) * (1 + √5) = 8 + 4*√5 := by nlinarith [sqrt5_sq]
       have h_factor : -1 + (3 + √5) * (1 + √5) / 4 = 1 + √5 := by
         rw [h_prod]; ring
       -- Transform goal: LHS = sin(π/5)*(-1 + (3+√5)*(1+√5)/4)
@@ -372,16 +365,16 @@ lemma cross_disk_w2_z2_bound (c : ℝ) (hc_lo : (1 - √5) / 2 ≤ c) (hc_hi : c
     -- Re = (3+√5)/2 - (√5+1)/4 - ((3+√5)/2)*((√5-1)/4)
     --    = (3+√5)/2 - (√5+1)/4 - (√5+1)/4 = (3+√5)/2 - (√5+1)/2 = 1
     have h_re_val : (3 + √5) / 2 + (-(√5 + 1) / 4) - ((3 + √5) / 2) * ((√5 - 1) / 4) = 1 := by
-      nlinarith [h_sqrt5_sq]
+      nlinarith [sqrt5_sq]
     -- ||...||^2 = 1 + sin²(π/5)*(1+√5)² = 1 + ((5-√5)/8)*(6+2√5) = 1 + (5+√5)/2 = (7+√5)/2 = 3+φ
     have h_sin_sq : Real.sin (π / 5)^2 = (5 - √5) / 8 := sin_sq_pi_div_5
-    have h_phi_sq : (1 + √5)^2 = 6 + 2*√5 := by nlinarith [h_sqrt5_sq]
+    have h_phi_sq : (1 + √5)^2 = 6 + 2*√5 := by nlinarith [sqrt5_sq]
     simp only [← sq]
     calc ((3 + √5) / 2 + (-(√5 + 1) / 4) - ((3 + √5) / 2) * ((√5 - 1) / 4))^2 +
         (Real.sin (π / 5) * (1 + √5))^2
         = 1 + Real.sin (π / 5)^2 * (1 + √5)^2 := by rw [h_re_val]; ring
       _ = 1 + ((5 - √5) / 8) * (6 + 2*√5) := by rw [h_sin_sq, h_phi_sq]
-      _ = 1 + (30 + 10*√5 - 6*√5 - 2*5) / 8 := by nlinarith [h_sqrt5_sq]
+      _ = 1 + (30 + 10*√5 - 6*√5 - 2*5) / 8 := by nlinarith [sqrt5_sq]
       _ = 1 + (20 + 4*√5) / 8 := by ring
       _ = 1 + (5 + √5) / 2 := by ring
       _ = (7 + √5) / 2 := by ring
@@ -418,10 +411,10 @@ lemma cross_disk_w2_z2_bound (c : ℝ) (hc_lo : (1 - √5) / 2 ≤ c) (hc_hi : c
     have h_factor_neg_at_bound : 2 * ((3*√5 - 10) / 2) + 2 * (2 - √5) * ((5 - √5) / 2) ≤ 0 := by
       have h0 : 2 * ((3*√5 - 10) / 2) = 3*√5 - 10 := by ring
       have h1 : 2 * (2 - √5) * ((5 - √5) / 2) = (2 - √5) * (5 - √5) := by ring
-      have h2 : (2 - √5) * (5 - √5) = 15 - 7*√5 := by nlinarith [h_sqrt5_sq]
+      have h2 : (2 - √5) * (5 - √5) = 15 - 7*√5 := by nlinarith [sqrt5_sq]
       rw [h0, h1, h2]
       -- (3√5 - 10) + (15 - 7√5) = 5 - 4√5 = 5 - 4*2.236... ≈ -3.9 < 0
-      nlinarith [h_sqrt5_sq]
+      nlinarith [sqrt5_sq]
     have h_factor_neg : 2 * (A * starRingEnd ℂ B).re + (c₁ + c₂) * Complex.normSq B ≤ 0 := by
       rw [h_coeff_b, h_coeff_a]
       calc 2 * ((3*√5 - 10) / 2) + (c₁ + c₂) * ((5 - √5) / 2)
@@ -472,7 +465,6 @@ lemma cross_disk_w2_z3_bound (c : ℝ) (hc_lo : (1 - √5) / 2 ≤ c) (hc_hi : c
   -- The expression is the same as word3 z3: A = -2 + ζ₅^2 - 2*ζ₅^3 + 2*ζ₅^4, B = ζ₅^3 - ζ₅^4
   set A : ℂ := -2 + ζ₅^2 - 2*ζ₅^3 + 2*ζ₅^4 with hA_def
   set B : ℂ := ζ₅^3 - ζ₅^4 with hB_def
-  have h_sqrt5_sq : √5^2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
 
   -- Rewrite expression to match A, B (just reordering terms)
   have h_expr_eq : ∀ t : ℝ, ((-2 : ℂ) + 2*ζ₅^4 - 2*ζ₅^3 + ζ₅^2) + (t : ℂ) * (ζ₅^3 - ζ₅^4) =
@@ -497,7 +489,7 @@ lemma cross_disk_w2_z3_bound (c : ℝ) (hc_lo : (1 - √5) / 2 ≤ c) (hc_hi : c
   have h_coeff_b : (A * starRingEnd ℂ B).re = (5*√5 - 10) / 2 := by
     rw [hA_def, hB_def]; exact re_A_w3_z3_mul_conj_B
 
-  have h_a_pos : (5 - √5) / 2 > 0 := by nlinarith [h_sqrt5_sq]
+  have h_a_pos : (5 - √5) / 2 > 0 := by nlinarith [sqrt5_sq]
 
   -- Vertex at (5-3*sqrt5)/4 is INSIDE the interval [(1-√5)/2, 2-√5]
   -- Both endpoints are equidistant from vertex: distance = (3-√5)/4
@@ -530,11 +522,11 @@ lemma cross_disk_w2_z3_bound (c : ℝ) (hc_lo : (1 - √5) / 2 ≤ c) (hc_hi : c
     --      = (16 - 7√5) + c*(5√5-10) + c²*(5-√5)/2
     -- At lower: c = (1-√5)/2, c² = (6-2√5)/4 = (3-√5)/2
     -- At upper: c = 2-√5, c² = (2-√5)² = 9 - 4√5
-    have h_c_lo_sq : ((1 - √5) / 2)^2 = (3 - √5) / 2 := by nlinarith [h_sqrt5_sq]
-    have h_c_hi_sq : (2 - √5)^2 = 9 - 4*√5 := by nlinarith [h_sqrt5_sq]
+    have h_c_lo_sq : ((1 - √5) / 2)^2 = (3 - √5) / 2 := by nlinarith [sqrt5_sq]
+    have h_c_hi_sq : (2 - √5)^2 = 9 - 4*√5 := by nlinarith [sqrt5_sq]
     rw [h_c_lo_sq, h_c_hi_sq]
     ring_nf
-    nlinarith [h_sqrt5_sq]
+    nlinarith [sqrt5_sq]
 
   -- For any c in [lower, upper], f(c) ≤ f(upper) since vertex in interior
   -- and f is convex (a > 0), max at endpoints which are equal
@@ -545,18 +537,18 @@ lemma cross_disk_w2_z3_bound (c : ℝ) (hc_lo : (1 - √5) / 2 ≤ c) (hc_hi : c
     -- Convex quadratic: f(c) ≤ max(f(endpoints))
     -- vertex = (5-3√5)/4 ≈ -0.427, interval ≈ [-0.618, -0.236]
     -- Since endpoints give equal values and f is convex, f(c) ≤ f(endpoints) for c in interval
-    have h_c_hi_sq : (2 - √5)^2 = 9 - 4*√5 := by nlinarith [h_sqrt5_sq]
+    have h_c_hi_sq : (2 - √5)^2 = 9 - 4*√5 := by nlinarith [sqrt5_sq]
     rw [h_c_hi_sq]
     -- f(c') - f(2-√5) = (c' - (2-√5)) * ((5√5-10) + (c' + 2 - √5) * (5-√5)/2)
     -- Need to show this is ≤ 0
     have h_sqrt5_cubed : √5^3 = 5 * √5 := by
       have h1 : √5^3 = √5^2 * √5 := by ring
-      rw [h1, h_sqrt5_sq]
+      rw [h1, sqrt5_sq]
     have h_diff_formula : (16 - 7*√5) + 2 * c' * ((5*√5 - 10) / 2) + c'^2 * ((5 - √5) / 2) -
         ((16 - 7*√5) + 2 * (2 - √5) * ((5*√5 - 10) / 2) + (9 - 4*√5) * ((5 - √5) / 2)) =
         (c' - (2 - √5)) * ((5*√5 - 10) + (c' + 2 - √5) * ((5 - √5) / 2)) := by
       ring_nf
-      nlinarith [h_sqrt5_sq, h_sqrt5_cubed]
+      nlinarith [sqrt5_sq, h_sqrt5_cubed]
     -- c' - (2-√5) ≤ 0 since c' ≤ 2-√5
     have h_first_factor : c' - (2 - √5) ≤ 0 := by linarith
     -- Second factor: (5√5-10) + (c' + 2 - √5)*(5-√5)/2
@@ -568,7 +560,7 @@ lemma cross_disk_w2_z3_bound (c : ℝ) (hc_lo : (1 - √5) / 2 ≤ c) (hc_hi : c
     have h_second_factor : (5*√5 - 10) + (c' + 2 - √5) * ((5 - √5) / 2) ≥ 0 := by
       have h_sum_lo : c' + 2 - √5 ≥ (1 - √5)/2 + 2 - √5 := by linarith
       have h_sum_simplified : (1 - √5)/2 + 2 - √5 = (5 - 3*√5) / 2 := by ring
-      have h_at_lo : (5*√5 - 10) + ((5 - 3*√5) / 2) * ((5 - √5) / 2) = 0 := by nlinarith [h_sqrt5_sq]
+      have h_at_lo : (5*√5 - 10) + ((5 - 3*√5) / 2) * ((5 - √5) / 2) = 0 := by nlinarith [sqrt5_sq]
       calc (5*√5 - 10) + (c' + 2 - √5) * ((5 - √5) / 2)
           ≥ (5*√5 - 10) + ((5 - 3*√5) / 2) * ((5 - √5) / 2) := by
             have h_pos : (5 - √5) / 2 > 0 := h_a_pos
