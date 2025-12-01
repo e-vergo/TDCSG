@@ -5,6 +5,7 @@ Authors: Raven Cyarm, Eric Easley
 -/
 
 import TDCSG.Proofs.CrossDiskRestricted
+import TDCSG.Definitions.CrossDiskBounds
 
 /-!
 # Helper lemmas for cross-disk bounds for word3 parameter range
@@ -29,8 +30,8 @@ namespace TDCSG.CompoundSymmetry.GG5
 open scoped Complex
 open Complex Real TDCSG.Definitions
 
-/-- The lower bound for c in interval 2: 2 - √5 -/
-noncomputable def c_lower_word3 : ℝ := 2 - √5
+-- Re-export cross-disk bound definitions from Definitions/CrossDiskBounds.lean
+export TDCSG.Definitions (c_lower_word3)
 
 /-- 2 - √5 > -1 since √5 < 3 -/
 lemma c_lower_word3_gt_neg1 : c_lower_word3 > -1 := by

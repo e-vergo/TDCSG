@@ -16,3 +16,10 @@ require «doc-gen4» from git "https://github.com/leanprover/doc-gen4" @ "v4.24.
 @[default_target]
 lean_lib «TDCSG» where
   -- add any library configuration options here
+
+lean_lib «KMVerify» where
+  -- Kim Morrison Standard verification tool
+
+lean_exe «km_verify» where
+  root := `KMVerify.Main
+  supportInterpreter := true

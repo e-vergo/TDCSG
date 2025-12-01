@@ -31,11 +31,8 @@ namespace TDCSG.CompoundSymmetry.GG5
 open scoped Complex
 open Complex Real TDCSG.Definitions
 
-/-- The lower bound for c in interval 1: (1 - sqrt(5))/2 approx -0.618 -/
-noncomputable def c_lower_word2 : ℝ := (1 - √5) / 2
-
-/-- The upper bound for c in interval 1: 2 - sqrt(5) approx -0.236 -/
-noncomputable def c_upper_word2 : ℝ := 2 - √5
+-- Re-export cross-disk bound definitions from Definitions/CrossDiskBounds.lean
+export TDCSG.Definitions (c_lower_word2 c_upper_word2 c_lower_word3)
 
 /-- (1 - sqrt(5))/2 > -1 since sqrt(5) < 3 -/
 lemma c_lower_word2_gt_neg1 : c_lower_word2 > -1 := by

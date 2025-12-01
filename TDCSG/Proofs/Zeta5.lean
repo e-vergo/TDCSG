@@ -600,19 +600,12 @@ lemma zeta5_powers_re_sum : ζ₅.re + (ζ₅^2).re + (ζ₅^3).re + (ζ₅^4).r
 
 The `Circle` type from Mathlib represents unit complex numbers with group structure.
 Using `Circle` instead of raw angles gives us certified linear isometries via `rotation`.
+
+The definitions `zeta5Circle`, `zeta5CirclePow`, `zeta5CircleInv` are in Definitions/Core.lean.
 -/
 
-/-- ζ₅ as an element of the unit circle in ℂ.
-    This leverages Mathlib's `Circle` type which provides group structure on unit complex numbers. -/
-noncomputable def zeta5Circle : Circle :=
-  ⟨ζ₅, mem_sphere_zero_iff_norm.2 zeta5_abs⟩
-
-/-- The coercion of zeta5Circle back to ℂ is ζ₅. -/
-@[simp]
-lemma zeta5Circle_coe : (zeta5Circle : ℂ) = ζ₅ := rfl
-
-/-- Powers of ζ₅ as Circle elements. -/
-noncomputable def zeta5CirclePow (n : ℕ) : Circle := zeta5Circle ^ n
+-- Re-export Circle definitions from Definitions/Core.lean
+export TDCSG.Definitions (zeta5Circle zeta5Circle_coe zeta5CirclePow zeta5CircleInv zeta5CircleInv_coe)
 
 /-- The coercion of zeta5Circle^n is ζ₅^n. -/
 lemma zeta5CirclePow_coe (n : ℕ) : (zeta5CirclePow n : ℂ) = ζ₅ ^ n := by
@@ -621,13 +614,6 @@ lemma zeta5CirclePow_coe (n : ℕ) : (zeta5CirclePow n : ℂ) = ζ₅ ^ n := by
   | succ n ih =>
     simp only [zeta5CirclePow, pow_succ, Circle.coe_mul]
     rw [← zeta5CirclePow, ih, zeta5Circle_coe]
-
-/-- ζ₅⁻¹ as a Circle element (equals ζ₅⁴ for clockwise rotation). -/
-noncomputable def zeta5CircleInv : Circle := zeta5Circle⁻¹
-
-/-- The coercion of zeta5CircleInv is ζ₅⁻¹. -/
-@[simp]
-lemma zeta5CircleInv_coe : (zeta5CircleInv : ℂ) = ζ₅⁻¹ := rfl
 
 /-- ζ₅⁴ = ζ₅⁻¹ in Circle (since ζ₅⁵ = 1). -/
 lemma zeta5CirclePow4_eq_inv : zeta5CirclePow 4 = zeta5CircleInv := by

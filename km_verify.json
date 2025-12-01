@@ -1,0 +1,10 @@
+{
+  "project_prefix": "TDCSG",
+  "source_dir": "TDCSG",
+  "definitions_dir": "Definitions",
+  "proofs_dir": "Proofs",
+  "main_theorem_file": "MainTheorem.lean",
+  "proof_of_main_theorem_file": "ProofOfMainTheorem.lean",
+  "statement_name": "StatementOfTheorem",
+  "theorem_name": "GG5_infinite_at_critical_radius"
+}

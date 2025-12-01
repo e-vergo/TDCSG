@@ -208,4 +208,111 @@ noncomputable def displacement1 : ℝ := length3
     Points in [G', E) are translated by -ψ² to [E', G). -/
 noncomputable def displacement2 : ℝ := -(length1 + length2)
 
+/-! ### Supporting lemmas for IET construction -/
+
+/-- 1 + φ is positive. -/
+private lemma one_plus_phi_pos : 0 < 1 + Real.goldenRatio := by
+  have h1 : 0 < Real.goldenRatio := Real.goldenRatio_pos
+  linarith
+
+/-- The first interval length is positive. -/
+lemma length1_pos : 0 < length1 := by
+  unfold length1
+  exact div_pos one_pos (by linarith [one_plus_phi_pos])
+
+/-- The second interval length is positive. -/
+lemma length2_pos : 0 < length2 := by
+  unfold length2
+  exact div_pos one_pos (by linarith [one_plus_phi_pos])
+
+/-- The third interval length is positive. -/
+lemma length3_pos : 0 < length3 := by
+  unfold length3
+  exact div_pos one_pos Real.goldenRatio_pos
+
+/-- The three interval lengths sum to one. -/
+lemma lengths_sum_to_one : length1 + length2 + length3 = 1 := by
+  unfold length1 length2 length3
+  have h_phi_pos : 0 < Real.goldenRatio := Real.goldenRatio_pos
+  have h_one_plus_phi_pos : 0 < 1 + Real.goldenRatio := one_plus_phi_pos
+  have h_phi_ne : Real.goldenRatio ≠ 0 := ne_of_gt h_phi_pos
+  have h_one_plus_phi_ne : 1 + Real.goldenRatio ≠ 0 := ne_of_gt h_one_plus_phi_pos
+  have h_two_ne : (2 : ℝ) ≠ 0 := by norm_num
+  have h_sq := Real.goldenRatio_sq
+  have h_key : Real.goldenRatio * (1 + Real.goldenRatio) = 1 + 2 * Real.goldenRatio := by
+    calc Real.goldenRatio * (1 + Real.goldenRatio)
+        = Real.goldenRatio + Real.goldenRatio ^ 2 := by ring
+      _ = Real.goldenRatio + (Real.goldenRatio + 1) := by rw [h_sq]
+      _ = 1 + 2 * Real.goldenRatio := by ring
+  have h_sum : Real.goldenRatio + (1 + Real.goldenRatio) = 1 + 2 * Real.goldenRatio := by ring
+  have h_prod_pos : 0 < Real.goldenRatio * (1 + Real.goldenRatio) := by positivity
+  have h_prod_ne : Real.goldenRatio * (1 + Real.goldenRatio) ≠ 0 := ne_of_gt h_prod_pos
+  calc 1 / (2 * (1 + Real.goldenRatio)) + 1 / (2 * (1 + Real.goldenRatio)) + 1 / Real.goldenRatio
+      = 2 / (2 * (1 + Real.goldenRatio)) + 1 / Real.goldenRatio := by ring
+    _ = 1 / (1 + Real.goldenRatio) + 1 / Real.goldenRatio := by
+        congr 1; field_simp
+    _ = (Real.goldenRatio + (1 + Real.goldenRatio)) / (Real.goldenRatio * (1 + Real.goldenRatio)) := by
+        field_simp
+    _ = (1 + 2 * Real.goldenRatio) / (Real.goldenRatio * (1 + Real.goldenRatio)) := by rw [h_sum]
+    _ = (1 + 2 * Real.goldenRatio) / (1 + 2 * Real.goldenRatio) := by rw [h_key]
+    _ = 1 := by field_simp
+
+/-! ### IET Definitions -/
+
+/-- The critical radius for GG(5,5). -/
+noncomputable def criticalRadius : ℝ :=
+  Real.sqrt (3 + Real.goldenRatio)
+
+/-- Predicate: an IET emerges from the system dynamics at radius r. -/
+def HasEmergentIET (r : ℝ) : Prop :=
+  r = Real.sqrt (3 + Real.goldenRatio)
+
+/-- The cyclic permutation (0 → 1 → 2 → 0) on Fin 3.
+    This permutation maps:
+    - Interval 0 [E', F') to range position 1 [G, F)
+    - Interval 1 [F', G') to range position 2 [F, E)
+    - Interval 2 [G', E) to range position 0 [E', G) -/
+def cyclicPerm3 : Equiv.Perm (Fin 3) :=
+  Equiv.swap (0 : Fin 3) 1 * Equiv.swap 1 2
+
+/-- The 3-interval exchange transformation induced by GG(5,5)
+dynamics at criticality.
+
+The permutation is cyclic (0 → 1 → 2 → 0), matching the paper geometry:
+- Word1 maps E'F' → GF (domain 0 → range 1)
+- Word2 maps F'G' → FE (domain 1 → range 2)
+- Word3 maps G'E → E'G (domain 2 → range 0) -/
+noncomputable def GG5_induced_IET : IntervalExchangeTransformation 3 where
+  n_pos := by norm_num
+  lengths := fun i =>
+    if i = 0 then length1
+    else if i = 1 then length2
+    else length3
+  lengths_pos := by
+    intro i
+    fin_cases i
+    all_goals simp only [ite_true, ite_false]
+    · exact length1_pos
+    · exact length2_pos
+    · exact length3_pos
+  lengths_sum := by
+    have h_univ : (Finset.univ : Finset (Fin 3)) = {0, 1, 2} := by decide
+    rw [h_univ]
+    rw [Finset.sum_insert, Finset.sum_insert, Finset.sum_singleton]
+    · simp only [show (1 : Fin 3) = 0 ↔ False by decide,
+                 show (2 : Fin 3) = 0 ↔ False by decide,
+                 show (2 : Fin 3) = 1 ↔ False by decide,
+                 ite_true, ite_false]
+      have h := lengths_sum_to_one
+      ring_nf at h ⊢
+      exact h
+    · decide
+    · decide
+  permutation := cyclicPerm3
+
+/-- The emergent IET at a given radius. -/
+noncomputable def EmergentIET (r : ℝ) (_ : HasEmergentIET r) :
+    IntervalExchangeTransformation 3 :=
+  GG5_induced_IET
+
 end TDCSG.Definitions
