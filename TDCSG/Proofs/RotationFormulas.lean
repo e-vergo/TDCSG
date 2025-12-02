@@ -17,7 +17,7 @@ formulas for applying generators A, B, A⁻¹, B⁻¹.
 -/
 
 open Complex Real
-open TDCSG.Definitions hiding φ r_crit
+open TDCSG.Definitions
 
 namespace TDCSG.CompoundSymmetry.GG5
 

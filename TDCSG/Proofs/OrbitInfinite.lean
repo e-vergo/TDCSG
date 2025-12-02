@@ -60,7 +60,7 @@ measure-theoretic arguments beyond current Mathlib ergodic theory coverage.
 namespace TDCSG.CompoundSymmetry.GG5
 
 open Real Function Set RealDynamics
-open TDCSG.Definitions hiding φ r_crit
+open TDCSG.Definitions
 
 /-! ### Irrationality results -/
 

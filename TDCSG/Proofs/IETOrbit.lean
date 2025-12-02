@@ -27,7 +27,7 @@ Proves the correspondence between IET orbits and group orbits.
 namespace TDCSG.CompoundSymmetry.GG5
 
 open Complex Real CompoundSymmetry.GG5
-open TDCSG.Definitions hiding φ r_crit
+open TDCSG.Definitions
 
 /-! ### IET interval lemmas -/
 

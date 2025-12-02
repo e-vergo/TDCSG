@@ -42,7 +42,7 @@ orbit implies an infinite group.
 
 namespace TDCSG.CompoundSymmetry.GG5
 
-open TDCSG.Definitions hiding φ r_crit
+open TDCSG.Definitions
 open scoped Complex
 
 /-! ### Circle Exponential Lemmas
@@ -527,7 +527,7 @@ theorem CompoundSymmetryGroup_infinite_of_infinite_orbit (r : Real) (z : Complex
 /-- GG5 is infinite if it has a point with infinite orbit. -/
 theorem GG5_infinite_of_infinite_orbit (z : Complex)
     (h : (GG5_orbit z).Infinite) : Infinite GG5_At_Critical_radius := by
-  exact CompoundSymmetryGroup_infinite_of_infinite_orbit _root_.r_crit z h
+  exact CompoundSymmetryGroup_infinite_of_infinite_orbit r_crit z h
 
 /-! ### Bridge to Existing Infrastructure -/
 
@@ -541,7 +541,7 @@ theorem GG5_has_infinite_group_orbit :
   -- Need to show this equals the word-based orbit
   show (MulAction.orbit GG5_At_Critical_radius (segmentPoint x0)).Infinite
   -- From IETOrbit.lean: IET infinite orbit implies word-based orbit is infinite
-  have h_word_inf : (orbit _root_.r_crit (segmentPoint x0)).Infinite :=
+  have h_word_inf : (orbit r_crit (segmentPoint x0)).Infinite :=
     IET_orbit_infinite_implies_group_orbit_infinite x0 hx0_mem hx0_inf
   -- From orbit_eq_groupOrbit: word-based orbit = group orbit (MulAction.orbit)
   rw [orbit_eq_groupOrbit] at h_word_inf

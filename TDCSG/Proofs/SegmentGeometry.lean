@@ -18,7 +18,7 @@ The generator actions are imported from TDCSG.Definitions.GroupAction.
 namespace TDCSG.CompoundSymmetry.GG5
 
 open Complex Real
-open TDCSG.Definitions hiding φ r_crit
+open TDCSG.Definitions (segment_length translation_length_1 translation_length_2 segmentPoint psi t_F E E' F G ζ₅ zeta5 zeta5Circle zeta5CirclePow zeta5CircleInv φ r_crit)
 
 /-! ### Translation Lengths -/
 

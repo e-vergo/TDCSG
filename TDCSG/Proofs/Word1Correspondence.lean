@@ -25,7 +25,7 @@ Complete the cross-disk bounds proof for word1 intermediate points.
 namespace TDCSG.CompoundSymmetry.GG5
 
 open Complex Real
-open TDCSG.Definitions hiding φ r_crit
+open TDCSG.Definitions
 
 /-- Key relationship: when x < length1, we have c = 2x - 1 < (1 - √5)/2.
     This is because 2*length1 - 1 = (1 - √5)/2.

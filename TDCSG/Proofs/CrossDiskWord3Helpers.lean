@@ -27,7 +27,7 @@ namespace TDCSG.CompoundSymmetry.GG5
 
 open scoped Complex
 open Complex Real
-open TDCSG.Definitions hiding φ r_crit
+open TDCSG.Definitions (segment_length translation_length_1 translation_length_2 segmentPoint psi t_F E E' F G ζ₅ zeta5 zeta5Circle zeta5CirclePow zeta5CircleInv φ r_crit)
 
 /-- The lower bound for c in interval 2 (word3): 2 - √5 -/
 private noncomputable abbrev c_lower_word3 : ℝ := 2 - √5
@@ -136,7 +136,7 @@ lemma normSq_w3_z1_at_one : Complex.normSq (ζ₅^4 - ζ₅ - 1) = 3 + φ := by
     _ = 1 + (5 + √5) / 2 := by ring
     _ = (7 + √5) / 2 := by ring
     _ = 3 + (1 + √5) / 2 := by ring
-    _ = 3 + φ := by unfold φ TDCSG.Definitions.φ Real.goldenRatio; ring
+    _ = 3 + φ := by unfold φ Real.goldenRatio; ring
 
 /-- Re(ζ₅⁴ - (2-√5)ζ₅ - √5) = (√5-1)/4 - (2-√5)(√5-1)/4 - √5 = 3(1-√5)/2 -/
 lemma w3_z1_at_lower_re : (ζ₅^4 - (2 - √5)*ζ₅ - √5 : ℂ).re = 3 * (1 - √5) / 2 := by
@@ -161,7 +161,7 @@ lemma normSq_w3_z1_at_lower : Complex.normSq (ζ₅^4 - (2 - √5)*ζ₅ - √5)
   rw [Complex.normSq_apply, w3_z1_at_lower_re, w3_z1_at_lower_im]
   have h_sin_sq : Real.sin (2 * π / 5)^2 = (5 + √5) / 8 := sin_sq_two_pi_div_5
   simp only [← sq]
-  unfold φ TDCSG.Definitions.φ Real.goldenRatio
+  unfold φ Real.goldenRatio
   nlinarith [sqrt5_sq, Real.sqrt_nonneg 5, h_sin_sq, sq_nonneg (Real.sin (2 * π / 5))]
 
 /-! ### z2 helper lemmas -/
@@ -265,7 +265,7 @@ lemma normSq_w3_z2_at_one : Complex.normSq ((1 : ℂ) + ζ₅^3 - ζ₅^4) ≤ 3
       Real.sin (π / 5) * (√5 - 1) / 2 := by grind
   simp only [← sq]
   rw [h_im_simp]
-  unfold φ TDCSG.Definitions.φ Real.goldenRatio
+  unfold φ Real.goldenRatio
   nlinarith [sqrt5_sq, Real.sqrt_nonneg 5, h_sin_sq, sq_nonneg (Real.sin (π / 5))]
 
 /-- At c = 2-√5: A + (2-√5)B = √5 + ζ₅³ - √5*ζ₅⁴ -/
@@ -302,7 +302,7 @@ lemma normSq_w3_z2_at_lower : Complex.normSq ((√5 : ℂ) + ζ₅^3 - (√5 : �
     grind
   simp only [← sq]
   rw [h_im_simp]
-  unfold φ TDCSG.Definitions.φ Real.goldenRatio
+  unfold φ Real.goldenRatio
   nlinarith [sqrt5_sq, Real.sqrt_nonneg 5, h_sin_sq, sq_nonneg (Real.sin (π / 5))]
 
 /-! ### z3 helper lemmas -/
@@ -425,7 +425,7 @@ lemma normSq_w3_z3_at_one : Complex.normSq ((-2 : ℂ) + ζ₅^2 - ζ₅^3 + ζ�
       Real.sin (π / 5)^2 * (3 - √5)^2 / 4 := by ring
   have h_3_minus_sqrt5_sq : (3 - √5)^2 = 14 - 6*√5 := by grind
   rw [h_re_sq, h_im_sq, h_sin_sq, h_3_minus_sqrt5_sq]
-  unfold φ TDCSG.Definitions.φ
+  unfold φ
   nlinarith [sqrt5_sq, Real.sqrt_nonneg 5, Real.goldenRatio_pos]
 
 /-- Expression at c = 2-√5 -/
@@ -479,7 +479,7 @@ lemma normSq_w3_z3_at_lower :
       Real.sin (π / 5)^2 * (√5 - 3)^2 / 4 := by ring
   have h_sqrt5_minus_3_sq : (√5 - 3)^2 = 14 - 6*√5 := by grind
   rw [h_re_sq, h_im_sq, h_sin_sq, h_sqrt5_minus_3_sq]
-  unfold φ TDCSG.Definitions.φ
+  unfold φ
   nlinarith [sqrt5_sq, Real.sqrt_nonneg 5, Real.goldenRatio_pos]
 
 /-! ### z4 helper lemmas -/
@@ -583,7 +583,7 @@ lemma normSq_w3_z4_at_one : Complex.normSq ((3 : ℂ) - 2*ζ₅ + ζ₅^3 - ζ�
   have h_neg_sq : (-Real.sin (π / 5) * (3 + √5) / 2)^2 =
       Real.sin (π / 5)^2 * (3 + √5)^2 / 4 := by ring
   rw [h_neg_sq, h_sin_sq]
-  unfold φ TDCSG.Definitions.φ Real.goldenRatio
+  unfold φ Real.goldenRatio
   nlinarith [sqrt5_sq, Real.sqrt_nonneg 5, sq_nonneg (7*√5 - 15)]
 
 /-! ### z5 helper lemmas -/
@@ -716,7 +716,7 @@ lemma normSq_w3_z5_at_one : Complex.normSq ((-3 : ℂ) + 3*ζ₅ - 2*ζ₅^2 + �
   have h_im_sq : (Real.sin (π / 5) * (√5 - 1))^2 = Real.sin (π / 5)^2 * (√5 - 1)^2 := by ring
   have h_sqrt5_minus_1_sq : (√5 - 1)^2 = 6 - 2*√5 := by nlinarith [sqrt5_sq]
   rw [h_re_sq, h_im_sq, h_sin_sq, h_sqrt5_minus_1_sq]
-  unfold φ TDCSG.Definitions.φ Real.goldenRatio
+  unfold φ Real.goldenRatio
   nlinarith [sqrt5_sq, Real.sqrt_nonneg 5]
 
 /-- At c = 2-√5: A + (2-√5)B = (-2-√5) + (2+√5)ζ₅ - 2ζ₅² + ζ₅⁴ -/
@@ -768,7 +768,7 @@ lemma normSq_w3_z5_at_lower : Complex.normSq ((-2 - √5 : ℂ) + (2 + √5 : �
   have h_im_sq : (Real.sin (π / 5) * (1 + √5))^2 = Real.sin (π / 5)^2 * (1 + √5)^2 := by ring
   have h_1_plus_sqrt5_sq : (1 + √5)^2 = 6 + 2*√5 := by grind
   rw [h_im_sq, h_sin_sq, h_1_plus_sqrt5_sq]
-  unfold φ TDCSG.Definitions.φ Real.goldenRatio
+  unfold φ  Real.goldenRatio
   nlinarith [sqrt5_sq, Real.sqrt_nonneg 5]
 
 end TDCSG.CompoundSymmetry.GG5

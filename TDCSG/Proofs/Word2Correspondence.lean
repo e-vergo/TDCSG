@@ -21,7 +21,7 @@ Proves that word2 produces the correct displacement on segment points.
 namespace TDCSG.CompoundSymmetry.GG5
 
 open Complex Real
-open TDCSG.Definitions hiding φ r_crit
+open TDCSG.Definitions
 
 /-- Word 2 action on segment points: translates by displacement1.
 

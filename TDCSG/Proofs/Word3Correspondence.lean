@@ -23,7 +23,7 @@ This is the completed proof using the cross-disk bounds from CrossDiskWord3DiskB
 namespace TDCSG.CompoundSymmetry.GG5
 
 open Complex Real
-open TDCSG.Definitions hiding φ r_crit
+open TDCSG.Definitions
 
 /-- Word 3 action on segment points: translates by displacement2.
 

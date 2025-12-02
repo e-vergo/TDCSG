@@ -20,8 +20,9 @@ Contains proofs about:
 
 namespace TDCSG.CompoundSymmetry.GG5
 
+open scoped Complex
 open Complex Real
-open TDCSG.Definitions hiding φ r_crit
+open TDCSG.Definitions (psi t_F E E' F G ζ₅ zeta5 zeta5Circle zeta5CirclePow zeta5CircleInv φ r_crit)
 
 /-! ### E Real and Imaginary Parts -/
 
@@ -181,6 +182,7 @@ lemma E_on_left_disk_boundary : ‖E + 1‖ = r_crit := by
       _ = 2 * 16 * (6 + (1 + Real.sqrt 5)) := by ring
       _ = 2 * 4 ^ 2 * (2 * 3 + (1 + Real.sqrt 5)) := by norm_num
   rw [← Real.sqrt_sq (norm_nonneg (E + 1)), h_sq]
+
   rfl
 
 /-- Compute real part of E - 1 (E = ζ₅⁴ - ζ₅³) -/

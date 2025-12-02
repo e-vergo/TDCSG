@@ -30,7 +30,7 @@ namespace TDCSG.CompoundSymmetry.GG5
 
 open scoped Complex
 open Complex Real
-open TDCSG.Definitions hiding φ r_crit
+open TDCSG.Definitions
 
 /-- The lower bound for c in interval 1 (word2): (1 - √5)/2 = goldenConj -/
 private noncomputable abbrev c_lower_word2 : ℝ := Real.goldenConj
@@ -111,7 +111,7 @@ lemma cross_disk_w2_z1_bound (c : ℝ) (hc_lo : (1 - √5) / 2 ≤ c) (hc_hi : c
   set B : ℂ := 1 - ζ₅ with hB_def
 
   rw [show r_crit = Real.sqrt (3 + φ) by unfold r_crit; rfl]
-  have h3φ_pos : 0 < 3 + φ := by unfold φ TDCSG.Definitions.φ; linarith [goldenRatio_pos]
+  have h3φ_pos : 0 < 3 + φ := by simp only [φ]; linarith [goldenRatio_pos]
   rw [Real.le_sqrt (norm_nonneg _) (le_of_lt h3φ_pos)]
 
   -- At upper endpoint (c = 2 - sqrt5), use word3's bound
@@ -180,7 +180,7 @@ lemma cross_disk_w2_z1_bound (c : ℝ) (hc_lo : (1 - √5) / 2 ≤ c) (hc_hi : c
       _ = (112 + 16*√5) / 32 := by ring
       _ = (7 + √5) / 2 := by ring
       _ = 3 + (1 + √5) / 2 := by ring
-      _ = 3 + φ := by unfold φ TDCSG.Definitions.φ Real.goldenRatio; ring
+      _ = 3 + φ := by simp only [φ, Real.goldenRatio]
       _ ≤ 3 + φ := le_refl _
 
   -- Quadratic coefficients
@@ -296,7 +296,7 @@ lemma cross_disk_w2_z2_bound (c : ℝ) (hc_lo : (1 - √5) / 2 ≤ c) (hc_hi : c
     intro t; simp only [hA_def, hB_def]; ring
 
   rw [h_expr_eq, show r_crit = Real.sqrt (3 + φ) by unfold r_crit; rfl]
-  have h3φ_pos : 0 < 3 + φ := by unfold φ TDCSG.Definitions.φ; linarith [goldenRatio_pos]
+  have h3φ_pos : 0 < 3 + φ := by simp only [φ]; linarith [goldenRatio_pos]
   rw [Real.le_sqrt (norm_nonneg _) (le_of_lt h3φ_pos)]
 
   -- Quadratic coefficients
@@ -380,7 +380,7 @@ lemma cross_disk_w2_z2_bound (c : ℝ) (hc_lo : (1 - √5) / 2 ≤ c) (hc_hi : c
       _ = 1 + (5 + √5) / 2 := by ring
       _ = (7 + √5) / 2 := by ring
       _ = 3 + (1 + √5) / 2 := by ring
-      _ = 3 + φ := by unfold φ TDCSG.Definitions.φ Real.goldenRatio; ring
+      _ = 3 + φ := by simp only [φ, Real.goldenRatio]
       _ ≤ 3 + φ := le_refl _
 
   have h_normSq_A : Complex.normSq A = 11 - 4*√5 := by rw [hA_def]; exact normSq_A_w3_z2
@@ -472,7 +472,7 @@ lemma cross_disk_w2_z3_bound (c : ℝ) (hc_lo : (1 - √5) / 2 ≤ c) (hc_hi : c
       A + (t : ℂ) * B := by intro t; simp only [hA_def, hB_def]; ring
 
   rw [h_expr_eq, show r_crit = Real.sqrt (3 + φ) by unfold r_crit; rfl]
-  have h3φ_pos : 0 < 3 + φ := by unfold φ TDCSG.Definitions.φ; linarith [goldenRatio_pos]
+  have h3φ_pos : 0 < 3 + φ := by simp only [φ]; linarith [goldenRatio_pos]
   rw [Real.le_sqrt (norm_nonneg _) (le_of_lt h3φ_pos), ← Complex.normSq_eq_norm_sq]
 
   -- At upper endpoint c = 2 - sqrt5, use w3_z3_at_lower

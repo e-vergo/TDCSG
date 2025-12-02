@@ -109,7 +109,7 @@ theorem GG5_infinite_at_critical_radius : StatementOfTheorem := by
 
   -- Stage 3a: Lift IET infinite orbit to word-based infinite orbit
   -- IET_orbit_infinite_implies_group_orbit_infinite shows segmentPoint x₀ has infinite orbit
-  have h_word_inf : (orbit _root_.r_crit (segmentPoint x₀)).Infinite :=
+  have h_word_inf : (orbit r_crit (segmentPoint x₀)).Infinite :=
     IET_orbit_infinite_implies_group_orbit_infinite x₀ hx₀_mem hx₀_inf
 
   -- Stage 3b: Word-based orbit equals MulAction orbit of the subgroup

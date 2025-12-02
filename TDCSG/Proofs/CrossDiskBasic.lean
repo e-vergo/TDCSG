@@ -24,7 +24,7 @@ namespace TDCSG.CompoundSymmetry.GG5
 
 open scoped Complex
 open Complex Real
-open TDCSG.Definitions hiding φ r_crit
+open TDCSG.Definitions (segment_length translation_length_1 translation_length_2 segmentPoint psi t_F E E' F G ζ₅ zeta5 zeta5Circle zeta5CirclePow zeta5CircleInv φ r_crit)
 
 /-! ### B != 0 lemma -/
 
@@ -98,7 +98,7 @@ lemma normSq_at_neg1 : ‖(-2 : ℂ) + ζ₅^2 - ζ₅^3 + ζ₅^4‖^2 ≤ 3 + 
   have h_im_sq : (2 * Real.sin (π / 5) * ((3 - √5) / 4)) ^ 2 =
                  Real.sin (π / 5) ^ 2 * (3 - √5)^2 / 4 := by ring
   rw [h_im_sq, h_sin_sq]
-  unfold φ TDCSG.Definitions.φ Real.goldenRatio
+  unfold φ  Real.goldenRatio
   nlinarith [Real.sqrt_nonneg 5, sqrt5_sq, sq_nonneg (Real.sin (π / 5)), sq_nonneg ((3 - √5) / 4), sq_nonneg ((√5 - 9) / 4)]
 
 /-! ### Main bound lemma for word1/word2
@@ -267,6 +267,6 @@ lemma normSq_at_upper_endpoint :
       = (4 + 4*√5 + √5^2) / 4 + Real.sin (π / 5)^2 * (√5 - 1)^2 / 4 := by ring
     _ = (4 + 4*√5 + 5) / 4 + ((5 - √5) / 8) * (6 - 2*√5) / 4 := by rw [sqrt5_sq, h_sin_sq, h_sq]
     _ = (7 + √5) / 2 := by nlinarith [sqrt5_sq, Real.sqrt_nonneg 5]
-    _ = 3 + φ := by unfold φ TDCSG.Definitions.φ Real.goldenRatio; ring
+    _ = 3 + φ := by unfold φ Real.goldenRatio; ring
 
 end TDCSG.CompoundSymmetry.GG5

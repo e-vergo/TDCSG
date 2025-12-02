@@ -28,7 +28,7 @@ namespace TDCSG.CompoundSymmetry.GG5
 
 open scoped Complex
 open Complex Real
-open TDCSG.Definitions hiding φ r_crit
+open TDCSG.Definitions
 
 set_option maxHeartbeats 2000000 in
 lemma cross_disk_w3_z1_bound (c : ℝ) (hc_lo : 2 - √5 ≤ c) (hc_hi : c ≤ 1) :
@@ -37,7 +37,7 @@ lemma cross_disk_w3_z1_bound (c : ℝ) (hc_lo : 2 - √5 ≤ c) (hc_hi : c ≤ 1
   set B : ℂ := 1 - ζ₅ with hB_def
 
   rw [show r_crit = Real.sqrt (3 + φ) by unfold r_crit; rfl]
-  have h3φ_pos : 0 < 3 + φ := by unfold φ TDCSG.Definitions.φ; linarith [goldenRatio_pos]
+  have h3φ_pos : 0 < 3 + φ := by simp only [φ]; linarith [goldenRatio_pos]
   rw [Real.le_sqrt (norm_nonneg _) (le_of_lt h3φ_pos)]
 
   have h_at_one : ‖A + (1 : ℂ) * B‖^2 = 3 + φ := by
@@ -93,7 +93,7 @@ lemma cross_disk_w3_z1_bound (c : ℝ) (hc_lo : 2 - √5 ≤ c) (hc_hi : c ≤ 1
     rw [h_coeff_c, h_coeff_b, h_coeff_a]
 
     have h_f_at_1 : 6 - √5 + 2 * 1 * ((2*√5 - 5) / 2) + 1^2 * ((5 - √5) / 2) = 3 + φ := by
-      unfold φ TDCSG.Definitions.φ Real.goldenRatio
+      simp only [φ, Real.goldenRatio]
       nlinarith [sqrt5_sq]
 
     have h_diff : (6 - √5 + 2 * c * ((2*√5 - 5) / 2) + c^2 * ((5 - √5) / 2)) -
@@ -188,7 +188,7 @@ lemma cross_disk_w3_z2_bound (c : ℝ) (hc_lo : 2 - √5 ≤ c) (hc_hi : c ≤ 1
   set B : ℂ := ζ₅^4 - 1 with hB_def
 
   rw [show r_crit = Real.sqrt (3 + φ) by unfold r_crit; rfl]
-  have h3φ_pos : 0 < 3 + φ := by unfold φ TDCSG.Definitions.φ; linarith [goldenRatio_pos]
+  have h3φ_pos : 0 < 3 + φ := by simp only [φ]; linarith [goldenRatio_pos]
   rw [Real.le_sqrt (norm_nonneg _) (le_of_lt h3φ_pos)]
 
   -- Value at c = 1
@@ -316,7 +316,7 @@ lemma cross_disk_w3_z3_bound (c : ℝ) (hc_lo : 2 - √5 ≤ c) (hc_hi : c ≤ 1
   set B : ℂ := ζ₅^3 - ζ₅^4 with hB_def
 
   rw [show r_crit = Real.sqrt (3 + φ) by unfold r_crit; rfl]
-  have h3φ_pos : 0 < 3 + φ := by unfold φ TDCSG.Definitions.φ; linarith [goldenRatio_pos]
+  have h3φ_pos : 0 < 3 + φ := by simp only [φ]; linarith [goldenRatio_pos]
   rw [Real.le_sqrt (norm_nonneg _) (le_of_lt h3φ_pos)]
 
   -- Value at c = 1
@@ -407,7 +407,7 @@ lemma cross_disk_w3_z3_bound (c : ℝ) (hc_lo : 2 - √5 ≤ c) (hc_hi : c ≤ 1
     -- We need f(1) ≤ 3 + φ: (17 - 5√5)/2 ≤ (7+√5)/2 iff 17 - 5√5 ≤ 7 + √5 iff 10 ≤ 6√5 iff 5/3 ≤ √5
     -- Since √5 ≈ 2.236 > 5/3 ≈ 1.67, this is true
     have h_f_at_1_le : 16 - 7*√5 + 2 * 1 * ((5*√5 - 10) / 2) + 1^2 * ((5 - √5) / 2) ≤ 3 + φ := by
-      unfold φ TDCSG.Definitions.φ
+      simp only [φ, Real.goldenRatio]
       nlinarith [sqrt5_sq, Real.goldenRatio_pos]
 
     calc 16 - 7*√5 + 2 * c * ((5*√5 - 10) / 2) + c^2 * ((5 - √5) / 2)
@@ -425,7 +425,7 @@ lemma cross_disk_w3_z4_bound (c : ℝ) (hc_lo : 2 - √5 ≤ c) (hc_hi : c ≤ 1
   set B : ℂ := ζ₅^4 - 1 with hB_def
 
   rw [show r_crit = Real.sqrt (3 + φ) by unfold r_crit; rfl]
-  have h3φ_pos : 0 < 3 + φ := by unfold φ TDCSG.Definitions.φ; linarith [goldenRatio_pos]
+  have h3φ_pos : 0 < 3 + φ := by simp only [φ]; linarith [goldenRatio_pos]
   rw [Real.le_sqrt (norm_nonneg _) (le_of_lt h3φ_pos)]
 
   have h_normSq_B := normSq_B3
@@ -462,7 +462,7 @@ lemma cross_disk_w3_z4_bound (c : ℝ) (hc_lo : 2 - √5 ≤ c) (hc_hi : c ≤ 1
     -- f(c) = (31 - 12√5) + c*(6√5 - 15) + c²*(5 - √5)/2
     -- This is a parabola opening upward with vertex in the interval
     -- We verify directly that f(c) ≤ 3 + φ for all c in [2-√5, 1]
-    unfold φ TDCSG.Definitions.φ Real.goldenRatio
+    simp only [φ, Real.goldenRatio]
     nlinarith [sqrt5_sq, hc_lo, hc_hi, sq_nonneg c, sq_nonneg (c - 1),
                sq_nonneg (c - (2 - √5)), Real.sqrt_nonneg 5]
 
@@ -483,7 +483,7 @@ lemma cross_disk_w3_z5_bound (c : ℝ) (hc_lo : 2 - √5 ≤ c) (hc_hi : c ≤ 1
   set B : ℂ := 1 - ζ₅ with hB_def
 
   rw [show r_crit = Real.sqrt (3 + φ) by unfold r_crit; rfl]
-  have h3φ_pos : 0 < 3 + φ := by unfold φ TDCSG.Definitions.φ; linarith [goldenRatio_pos]
+  have h3φ_pos : 0 < 3 + φ := by simp only [φ]; linarith [goldenRatio_pos]
   rw [Real.le_sqrt (norm_nonneg _) (le_of_lt h3φ_pos)]
 
   -- Value at c = 1

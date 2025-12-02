@@ -30,7 +30,7 @@ namespace TDCSG.CompoundSymmetry.GG5
 
 open scoped Complex
 open Complex Real
-open TDCSG.Definitions hiding φ r_crit
+open TDCSG.Definitions (segment_length translation_length_1 translation_length_2 segmentPoint psi t_F E E' F G ζ₅ zeta5 zeta5Circle zeta5CirclePow zeta5CircleInv φ r_crit)
 
 /-! ### z2 cross-disk bound
 
@@ -265,7 +265,7 @@ lemma z3_normSq_at_c_upper :
 
 /-- (7 + √5)/2 = 3 + φ -/
 lemma seven_plus_sqrt5_div_2_eq : (7 + √5) / 2 = 3 + φ := by
-  unfold φ TDCSG.Definitions.φ Real.goldenRatio
+  unfold φ Real.goldenRatio
   ring
 
 /-- For c in [-1, (1-√5)/2], the z3 norm is bounded.
@@ -589,7 +589,7 @@ lemma normSq_A4 : Complex.normSq ((-2 : ℂ) + 2*ζ₅ - 2*ζ₅^2 + ζ₅^4) = 
 /-- (7 - 3√5)/2 ≤ (7 + √5)/2 = 3 + φ -/
 lemma seven_minus_3sqrt5_le_three_plus_phi : (7 - 3*√5) / 2 ≤ 3 + φ := by
   have h_sqrt5_nonneg : 0 ≤ √5 := Real.sqrt_nonneg 5
-  unfold φ TDCSG.Definitions.φ Real.goldenRatio
+  unfold φ Real.goldenRatio
   -- (7 - 3√5)/2 ≤ (7 + √5)/2 iff -3√5 ≤ √5 iff -4√5 ≤ 0
   linarith
 
@@ -629,7 +629,7 @@ lemma normSq_A4_at_neg1_le_three_plus_phi :
   calc ((-7 + 3*√5) / 2)^2 + (2*Real.sin (2 * π / 5) - 2*Real.sin (π / 5))^2
       = (47 - 21*√5) / 2 + (5 - 2*√5) := by rw [h_re_sq, h_im_sq]
     _ ≤ (7 + √5) / 2 := by nlinarith [Real.sqrt_nonneg 5]
-    _ = 3 + φ := by unfold φ TDCSG.Definitions.φ Real.goldenRatio; ring
+    _ = 3 + φ := by unfold φ Real.goldenRatio; ring
 
 /-- For c in [-1, (1-sqrt5)/2], the z4 norm is bounded by r_crit.
 
