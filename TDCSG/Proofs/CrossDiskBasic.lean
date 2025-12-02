@@ -1,6 +1,28 @@
+/-
+Copyright (c) 2024 Eric Vergo. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Eric Vergo
+-/
 import TDCSG.Proofs.SegmentGeometry
 import TDCSG.Proofs.Zeta5
 import Mathlib.Analysis.Convex.Mul
+
+/-!
+# Basic Cross-Disk Bounds
+
+This file establishes fundamental norm bounds for complex expressions involving roots of unity,
+proving that certain intermediate points in word computations remain within disk boundaries.
+
+## Main results
+
+- `normSq_at_neg1`: Norm bound at the lower interval endpoint
+- `normSq_at_upper_endpoint`: Norm bound at the upper interval endpoint
+- `vertex_lt_neg1`: The parabola vertex lies below -1
+
+## References
+
+* [arXiv:2302.12950v1](https://arxiv.org/abs/2302.12950)
+-/
 
 namespace TDCSG.CompoundSymmetry.GG5
 

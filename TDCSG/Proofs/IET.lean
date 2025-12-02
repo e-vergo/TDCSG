@@ -1,8 +1,32 @@
+/-
+Copyright (c) 2024 Eric Vergo. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Eric Vergo
+-/
 import TDCSG.Definitions.IET
 import TDCSG.Proofs.Zeta5
 import Mathlib.NumberTheory.Real.GoldenRatio
 import Mathlib.Data.Real.Basic
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
+
+/-!
+# Interval Exchange Transformation Properties
+
+This file proves fundamental properties of interval exchange transformations, including that
+intervals partition [0,1) and are pairwise disjoint, and establishes specific properties of
+the GG5-induced IET.
+
+## Main results
+
+- `intervals_cover`: The intervals partition [0,1)
+- `intervals_disjoint`: The intervals are pairwise disjoint
+- `interval_injective`: The interval mapping is injective
+- `displacement0_eq_displacement1`: The first two IET displacements are equal
+
+## References
+
+* [arXiv:2302.12950v1](https://arxiv.org/abs/2302.12950)
+-/
 
 namespace IntervalExchangeTransformation
 

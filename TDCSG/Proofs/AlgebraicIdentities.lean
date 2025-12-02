@@ -1,8 +1,30 @@
+/-
+Copyright (c) 2024 Eric Vergo. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Eric Vergo
+-/
 import TDCSG.Definitions.Core
 import TDCSG.Definitions.Points
 import TDCSG.Definitions.WordCorrespondence
 import TDCSG.Proofs.Zeta5
 import TDCSG.Proofs.IET
+
+/-!
+# Algebraic Identities for IET Words
+
+This file proves algebraic identities showing that applying the three IET words (word1, word2,
+word3) to points on the segment produces the correct displacements.
+
+## Main results
+
+- `word1_algebraic_identity`: Word1 produces the correct algebraic displacement
+- `word2_algebraic_identity`: Word2 produces the correct algebraic displacement
+- `word3_algebraic_identity`: Word3 produces the correct algebraic displacement
+
+## References
+
+* [arXiv:2302.12950v1](https://arxiv.org/abs/2302.12950)
+-/
 
 namespace TDCSG.CompoundSymmetry.GG5
 

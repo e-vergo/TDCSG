@@ -1,5 +1,28 @@
+/-
+Copyright (c) 2024 Eric Vergo. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Eric Vergo
+-/
 import TDCSG.Proofs.Points
 import TDCSG.Definitions.GroupAction
+
+/-!
+# Segment Geometry
+
+This file proves geometric properties of the segment connecting E' and E, establishing that it
+lies in the intersection of both disks and that the segment parameterization is injective.
+
+## Main results
+
+- `segmentPoint_injective`: The segment parameterization is injective
+- `E'_on_right_disk_boundary`: Point E' lies on the boundary of the right disk
+- `E'_in_left_disk`: Point E' lies inside the left disk
+- `segment_in_disk_intersection`: The segment lies in both disks
+
+## References
+
+* [arXiv:2302.12950v1](https://arxiv.org/abs/2302.12950)
+-/
 
 namespace TDCSG.CompoundSymmetry.GG5
 

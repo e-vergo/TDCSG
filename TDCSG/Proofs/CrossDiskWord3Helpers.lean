@@ -1,4 +1,28 @@
+/-
+Copyright (c) 2024 Eric Vergo. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Eric Vergo
+-/
 import TDCSG.Proofs.CrossDiskRestricted
+
+/-!
+# Helper Lemmas for Word 3 Cross-Disk Bounds
+
+This file contains detailed algebraic computations supporting the word3 cross-disk bounds,
+including real/imaginary part calculations and norm square evaluations for multiple intermediate
+steps.
+
+## Main results
+
+- `normSq_w3_z1_at_lower`: Norm bound at lower endpoint for z1
+- `normSq_w3_z2_at_lower`: Norm bound at lower endpoint for z2
+- `normSq_w3_z3_at_lower`: Norm bound at lower endpoint for z3
+- `normSq_w3_z5_at_lower`: Norm bound at lower endpoint for z5
+
+## References
+
+* [arXiv:2302.12950v1](https://arxiv.org/abs/2302.12950)
+-/
 
 namespace TDCSG.CompoundSymmetry.GG5
 

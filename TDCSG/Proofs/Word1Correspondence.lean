@@ -1,7 +1,28 @@
+/-
+Copyright (c) 2024 Eric Vergo. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Eric Vergo
+-/
 import TDCSG.Proofs.AlgebraicIdentities
 import TDCSG.Proofs.RotationFormulas
 import TDCSG.Proofs.SegmentGeometry
 import TDCSG.Proofs.CrossDiskRestricted
+
+/-!
+# Word 1 Correspondence
+
+This file proves that applying word1 to points in the first IET interval produces the correct
+displacement, establishing the correspondence between the IET and group action for interval 0.
+
+## Main results
+
+- `interval0_c_upper_bound`: Points in interval 0 satisfy an upper bound
+- `word1_produces_displacement0`: Word1 produces displacement0 for interval 0 points
+
+## References
+
+* [arXiv:2302.12950v1](https://arxiv.org/abs/2302.12950)
+-/
 
 namespace TDCSG.CompoundSymmetry.GG5
 

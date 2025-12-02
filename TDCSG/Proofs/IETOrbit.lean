@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2024 Eric Vergo. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Eric Vergo
+-/
 import TDCSG.Proofs.Word1Correspondence
 import TDCSG.Proofs.Word2Correspondence
 import TDCSG.Proofs.Word3Correspondence
@@ -5,6 +10,25 @@ import TDCSG.Proofs.IET
 import TDCSG.Proofs.Orbit
 import TDCSG.Proofs.OrbitInfinite
 import TDCSG.Definitions.IET
+
+/-!
+# IET Orbit Correspondence
+
+This file establishes the correspondence between the interval exchange transformation (IET)
+dynamics and the group orbit under the compound symmetry group, proving that an infinite IET
+orbit implies an infinite group orbit.
+
+## Main results
+
+- `IET_step_word_correspondence`: Single IET step corresponds to applying a word to the segment
+- `wordForIterate_correct`: Iterating the IET corresponds to applying accumulated words
+- `IET_orbit_subset_group_orbit`: IET orbit points lie in the group orbit
+- `IET_orbit_infinite_implies_group_orbit_infinite`: Infinite IET orbit implies infinite group orbit
+
+## References
+
+* [arXiv:2302.12950v1](https://arxiv.org/abs/2302.12950)
+-/
 
 namespace TDCSG.CompoundSymmetry.GG5
 

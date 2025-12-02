@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2024 Eric Vergo. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Eric Vergo
+-/
 import TDCSG.Definitions.Core
 import TDCSG.MainTheorem
 import Mathlib.Analysis.SpecialFunctions.Exp
@@ -7,6 +12,24 @@ import Mathlib.RingTheory.RootsOfUnity.Complex
 import Mathlib.Analysis.Normed.Module.Convex
 import Mathlib.Analysis.Complex.Circle
 import Mathlib.Analysis.Complex.Isometry
+
+/-!
+# Properties of the Fifth Root of Unity
+
+This file establishes algebraic and trigonometric properties of ζ₅, the primitive fifth root of
+unity, including its relationship to the golden ratio and cosine values at multiples of π/5.
+
+## Main results
+
+- `zeta5_isPrimitiveRoot`: ζ₅ is a primitive fifth root of unity
+- `zeta5_eq`: ζ₅ equals cos(2π/5) + i·sin(2π/5)
+- `cos_two_pi_fifth`: cos(2π/5) equals (φ - 1)/2 where φ is the golden ratio
+- `cyclotomic5_sum`: The sum 1 + ζ₅ + ζ₅² + ζ₅³ + ζ₅⁴ equals zero
+
+## References
+
+* [arXiv:2302.12950v1](https://arxiv.org/abs/2302.12950)
+-/
 
 namespace TDCSG.CompoundSymmetry.GG5
 

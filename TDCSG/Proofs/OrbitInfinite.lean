@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2024 Eric Vergo. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Eric Vergo
+-/
 import TDCSG.Definitions.RealDynamics
 import TDCSG.Definitions.IET
 import TDCSG.Proofs.Orbit
@@ -6,6 +11,25 @@ import TDCSG.Proofs.Zeta5
 import Mathlib.NumberTheory.Real.GoldenRatio
 import Mathlib.NumberTheory.Real.Irrational
 import Mathlib.Data.Set.Function
+
+/-!
+# Orbit Infiniteness for GG5 IET
+
+This file proves that the GG5-induced interval exchange transformation has an infinite orbit,
+establishing that iterates are injective by showing displacements cannot sum to zero due to
+irrationality properties of the golden ratio.
+
+## Main results
+
+- `displacement_sum_ne_zero`: Nontrivial combinations of IET displacements are nonzero
+- `GG5_IET_maps_to_self`: The IET preserves the unit interval [0,1)
+- `GG5_IET_iterates_injective`: IET iterates are injective on a chosen point
+- `GG5_IET_has_infinite_orbit`: The GG5 IET has an infinite orbit
+
+## References
+
+* [arXiv:2302.12950v1](https://arxiv.org/abs/2302.12950)
+-/
 
 namespace TDCSG.CompoundSymmetry.GG5
 

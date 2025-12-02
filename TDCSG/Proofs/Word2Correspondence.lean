@@ -1,7 +1,27 @@
+/-
+Copyright (c) 2024 Eric Vergo. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Eric Vergo
+-/
 import TDCSG.Proofs.AlgebraicIdentities
 import TDCSG.Proofs.RotationFormulas
 import TDCSG.Proofs.SegmentGeometry
 import TDCSG.Proofs.CrossDiskWord2DiskBounds
+
+/-!
+# Word 2 Correspondence
+
+This file proves that applying word2 to points in the second IET interval produces the correct
+displacement, establishing the correspondence between the IET and group action for interval 1.
+
+## Main results
+
+- `word2_produces_displacement1`: Word2 produces displacement1 for interval 1 points
+
+## References
+
+* [arXiv:2302.12950v1](https://arxiv.org/abs/2302.12950)
+-/
 
 namespace TDCSG.CompoundSymmetry.GG5
 

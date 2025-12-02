@@ -1,4 +1,28 @@
+/-
+Copyright (c) 2024 Eric Vergo. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Eric Vergo
+-/
 import TDCSG.Proofs.CrossDiskWord3Helpers
+
+/-!
+# Cross-Disk Bounds for Word 3
+
+This file proves norm bounds for intermediate computation steps during word3 applications,
+establishing that points remain within critical radius for the parameter range [2-√5, 1].
+
+## Main results
+
+- `cross_disk_w3_z1_bound`: Norm bound for first step in word3 computation
+- `cross_disk_w3_z2_bound`: Norm bound for second step in word3 computation
+- `cross_disk_w3_z3_bound`: Norm bound for third step in word3 computation
+- `cross_disk_w3_z4_bound`: Norm bound for fourth step in word3 computation
+- `cross_disk_w3_z5_bound`: Norm bound for fifth step in word3 computation
+
+## References
+
+* [arXiv:2302.12950v1](https://arxiv.org/abs/2302.12950)
+-/
 
 namespace TDCSG.CompoundSymmetry.GG5
 

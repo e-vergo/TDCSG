@@ -1,4 +1,27 @@
+/-
+Copyright (c) 2024 Eric Vergo. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Eric Vergo
+-/
 import TDCSG.Proofs.CrossDiskBasic
+
+/-!
+# Cross-Disk Bounds for Restricted Intervals
+
+This file proves norm bounds for intermediate computation steps in the restricted parameter
+range [-1, (1-√5)/2], establishing that points remain within critical radius during word1
+applications.
+
+## Main results
+
+- `cross_disk_z2_bound_restricted`: Norm bound for the second computation step in word1
+- `cross_disk_z3_bound_restricted`: Norm bound for the third computation step in word1
+- `cross_disk_z4_bound_restricted`: Norm bound for the fourth computation step in word1
+
+## References
+
+* [arXiv:2302.12950v1](https://arxiv.org/abs/2302.12950)
+-/
 
 namespace TDCSG.CompoundSymmetry.GG5
 

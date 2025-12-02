@@ -1,8 +1,32 @@
+/-
+Copyright (c) 2024 Eric Vergo. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Eric Vergo
+-/
 import TDCSG.Proofs.SegmentGeometry
 import TDCSG.Definitions.Core
 import TDCSG.Definitions.Points
 import TDCSG.Proofs.Zeta5
 import TDCSG.Proofs.IET
+
+/-!
+# Rotation Formulas for Group Generators
+
+This file derives explicit formulas for the generators A and B and their inverses in terms of
+roots of unity, and establishes the relationship between segment points and the vector E.
+
+## Main results
+
+- `genA_rotation_formula`: Generator A rotates by ζ₅⁴ about the left disk center
+- `genB_rotation_formula`: Generator B rotates by ζ₅⁴ about the right disk center
+- `applyGen_Ainv_formula'`: A⁻¹ rotates by ζ₅ about the left disk center
+- `applyGen_Binv_formula'`: B⁻¹ rotates by ζ₅ about the right disk center
+- `segmentPoint_eq_smul_E`: Segment points are multiples of E
+
+## References
+
+* [arXiv:2302.12950v1](https://arxiv.org/abs/2302.12950)
+-/
 
 open Complex Real
 open TDCSG.Definitions

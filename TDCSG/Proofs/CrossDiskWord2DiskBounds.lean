@@ -1,5 +1,27 @@
+/-
+Copyright (c) 2024 Eric Vergo. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Eric Vergo
+-/
 import TDCSG.Proofs.CrossDiskWord3Helpers
 import TDCSG.Proofs.RotationFormulas
+
+/-!
+# Cross-Disk Bounds for Word 2
+
+This file proves norm bounds for intermediate computation steps during word2 applications,
+establishing that points remain within critical radius for the parameter range [(1-√5)/2, 2-√5].
+
+## Main results
+
+- `cross_disk_w2_z1_bound`: Norm bound for first step in word2 computation
+- `cross_disk_w2_z2_bound`: Norm bound for second step in word2 computation
+- `cross_disk_w2_z3_bound`: Norm bound for third step in word2 computation
+
+## References
+
+* [arXiv:2302.12950v1](https://arxiv.org/abs/2302.12950)
+-/
 
 set_option maxHeartbeats 400000
 

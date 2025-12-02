@@ -1,5 +1,29 @@
+/-
+Copyright (c) 2024 Eric Vergo. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Eric Vergo
+-/
 import TDCSG.Definitions.Points
 import TDCSG.Proofs.Zeta5
+
+/-!
+# Geometric Points for the GG5 Construction
+
+This file proves properties of the key geometric points E, E', F, and G used in the GG5
+construction, including their positions relative to the disk boundaries and their algebraic
+relationships.
+
+## Main results
+
+- `E_on_left_disk_boundary`: Point E lies on the boundary of the left disk
+- `E_in_right_disk`: Point E lies inside the right disk
+- `F_eq_psi_times_E`: Point F is a scaling of E by the golden ratio conjugate
+- `F_on_segment_E'E`: Point F lies on the segment between E' and E
+
+## References
+
+* [arXiv:2302.12950v1](https://arxiv.org/abs/2302.12950)
+-/
 
 namespace TDCSG.CompoundSymmetry.GG5
 

@@ -1,5 +1,28 @@
+/-
+Copyright (c) 2024 Eric Vergo. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Eric Vergo
+-/
 import TDCSG.Definitions.RealDynamics
 import TDCSG.Proofs.IET
+
+/-!
+# Orbit Theory for Real Dynamical Systems
+
+This file develops the theory of orbits for discrete real dynamical systems, proving that
+finite orbits imply periodic points and that absence of periodic points implies infinite orbits.
+
+## Main results
+
+- `finite_orbit_has_collision`: Finite orbits contain repeated iterates
+- `finite_orbit_implies_periodic`: Finite orbits contain periodic points
+- `no_orbit_point_periodic_implies_infinite`: Orbits without periodic points are infinite
+- `hasInfiniteOrbit_iff_orbitSet_infinite`: Characterization of infinite orbits
+
+## References
+
+* [arXiv:2302.12950v1](https://arxiv.org/abs/2302.12950)
+-/
 
 namespace RealDynamics
 
