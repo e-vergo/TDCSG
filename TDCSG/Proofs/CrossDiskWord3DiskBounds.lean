@@ -62,18 +62,8 @@ lemma cross_disk_w3_z1_bound (c : ℝ) (hc_lo : 2 - √5 ≤ c) (hc_hi : c ≤ 1
   have h_vertex_in := w3_z1_vertex_in_interval
 
   have h_normSq_expand : ∀ t : ℝ, Complex.normSq (A + (t : ℂ) * B) =
-      Complex.normSq A + 2 * t * (A * starRingEnd ℂ B).re + t^2 * Complex.normSq B := by
-    intro t
-    rw [Complex.normSq_add]
-    have h_conj_t : starRingEnd ℂ (t : ℂ) = (t : ℂ) := Complex.conj_ofReal t
-    have h_normSq_t : Complex.normSq (t : ℂ) = t^2 := by rw [Complex.normSq_ofReal]; ring
-    rw [Complex.normSq_mul, h_normSq_t]
-    simp only [map_mul, h_conj_t]
-    have h_re_scale : (A * ((t : ℂ) * starRingEnd ℂ B)).re = t * (A * starRingEnd ℂ B).re := by
-      have h_assoc : A * ((t : ℂ) * starRingEnd ℂ B) = (t : ℂ) * (A * starRingEnd ℂ B) := by ring
-      rw [h_assoc, Complex.re_ofReal_mul]
-    rw [h_re_scale]
-    ring
+      Complex.normSq A + 2 * t * (A * starRingEnd ℂ B).re + t^2 * Complex.normSq B :=
+    fun t => normSq_add_ofReal_mul A B t
 
   have h_normSq_B_pos : 0 < Complex.normSq B := by
     rw [hB_def, h_normSq_B]
@@ -203,18 +193,8 @@ lemma cross_disk_w3_z2_bound (c : ℝ) (hc_lo : 2 - √5 ≤ c) (hc_hi : c ≤ 1
   have h_vertex := w3_z2_vertex_above_interval
 
   have h_normSq_expand : ∀ t : ℝ, Complex.normSq (A + (t : ℂ) * B) =
-      Complex.normSq A + 2 * t * (A * starRingEnd ℂ B).re + t^2 * Complex.normSq B := by
-    intro t
-    rw [Complex.normSq_add]
-    have h_conj_t : starRingEnd ℂ (t : ℂ) = (t : ℂ) := Complex.conj_ofReal t
-    have h_normSq_t : Complex.normSq (t : ℂ) = t^2 := by rw [Complex.normSq_ofReal]; ring
-    rw [Complex.normSq_mul, h_normSq_t]
-    simp only [map_mul, h_conj_t]
-    have h_re_scale : (A * ((t : ℂ) * starRingEnd ℂ B)).re = t * (A * starRingEnd ℂ B).re := by
-      have h_assoc : A * ((t : ℂ) * starRingEnd ℂ B) = (t : ℂ) * (A * starRingEnd ℂ B) := by ring
-      rw [h_assoc, Complex.re_ofReal_mul]
-    rw [h_re_scale]
-    ring
+      Complex.normSq A + 2 * t * (A * starRingEnd ℂ B).re + t^2 * Complex.normSq B :=
+    fun t => normSq_add_ofReal_mul A B t
 
   have h_normSq_B_pos : 0 < Complex.normSq B := by
     rw [hB_def, h_normSq_B]
@@ -313,18 +293,8 @@ lemma cross_disk_w3_z3_bound (c : ℝ) (hc_lo : 2 - √5 ≤ c) (hc_hi : c ≤ 1
   have h_vertex := w3_z3_vertex_below_interval
 
   have h_normSq_expand : ∀ t : ℝ, Complex.normSq (A + (t : ℂ) * B) =
-      Complex.normSq A + 2 * t * (A * starRingEnd ℂ B).re + t^2 * Complex.normSq B := by
-    intro t
-    rw [Complex.normSq_add]
-    have h_conj_t : starRingEnd ℂ (t : ℂ) = (t : ℂ) := Complex.conj_ofReal t
-    have h_normSq_t : Complex.normSq (t : ℂ) = t^2 := by rw [Complex.normSq_ofReal]; ring
-    rw [Complex.normSq_mul, h_normSq_t]
-    simp only [map_mul, h_conj_t]
-    have h_re_scale : (A * ((t : ℂ) * starRingEnd ℂ B)).re = t * (A * starRingEnd ℂ B).re := by
-      have h_assoc : A * ((t : ℂ) * starRingEnd ℂ B) = (t : ℂ) * (A * starRingEnd ℂ B) := by ring
-      rw [h_assoc, Complex.re_ofReal_mul]
-    rw [h_re_scale]
-    ring
+      Complex.normSq A + 2 * t * (A * starRingEnd ℂ B).re + t^2 * Complex.normSq B :=
+    fun t => normSq_add_ofReal_mul A B t
 
   have h_normSq_B_pos : 0 < Complex.normSq B := by
     rw [hB_def, h_normSq_B]
@@ -389,18 +359,8 @@ lemma cross_disk_w3_z4_bound (c : ℝ) (hc_lo : 2 - √5 ≤ c) (hc_hi : c ≤ 1
   have h_re_AB := re_A_w3_z4_mul_conj_B
 
   have h_normSq_expand : ∀ t : ℝ, Complex.normSq (A + (t : ℂ) * B) =
-      Complex.normSq A + 2 * t * (A * starRingEnd ℂ B).re + t^2 * Complex.normSq B := by
-    intro t
-    rw [Complex.normSq_add]
-    have h_conj_t : starRingEnd ℂ (t : ℂ) = (t : ℂ) := Complex.conj_ofReal t
-    have h_normSq_t : Complex.normSq (t : ℂ) = t^2 := by rw [Complex.normSq_ofReal]; ring
-    rw [Complex.normSq_mul, h_normSq_t]
-    simp only [map_mul, h_conj_t]
-    have h_re_scale : (A * ((t : ℂ) * starRingEnd ℂ B)).re = t * (A * starRingEnd ℂ B).re := by
-      have h_assoc : A * ((t : ℂ) * starRingEnd ℂ B) = (t : ℂ) * (A * starRingEnd ℂ B) := by ring
-      rw [h_assoc, Complex.re_ofReal_mul]
-    rw [h_re_scale]
-    ring
+      Complex.normSq A + 2 * t * (A * starRingEnd ℂ B).re + t^2 * Complex.normSq B :=
+    fun t => normSq_add_ofReal_mul A B t
 
   rw [hA_def, hB_def]
   rw [← Complex.normSq_eq_norm_sq]
@@ -452,18 +412,8 @@ lemma cross_disk_w3_z5_bound (c : ℝ) (hc_lo : 2 - √5 ≤ c) (hc_hi : c ≤ 1
   have h_vertex := w3_z5_vertex_above_interval
 
   have h_normSq_expand : ∀ t : ℝ, Complex.normSq (A + (t : ℂ) * B) =
-      Complex.normSq A + 2 * t * (A * starRingEnd ℂ B).re + t^2 * Complex.normSq B := by
-    intro t
-    rw [Complex.normSq_add]
-    have h_conj_t : starRingEnd ℂ (t : ℂ) = (t : ℂ) := Complex.conj_ofReal t
-    have h_normSq_t : Complex.normSq (t : ℂ) = t^2 := by rw [Complex.normSq_ofReal]; ring
-    rw [Complex.normSq_mul, h_normSq_t]
-    simp only [map_mul, h_conj_t]
-    have h_re_scale : (A * ((t : ℂ) * starRingEnd ℂ B)).re = t * (A * starRingEnd ℂ B).re := by
-      have h_assoc : A * ((t : ℂ) * starRingEnd ℂ B) = (t : ℂ) * (A * starRingEnd ℂ B) := by ring
-      rw [h_assoc, Complex.re_ofReal_mul]
-    rw [h_re_scale]
-    ring
+      Complex.normSq A + 2 * t * (A * starRingEnd ℂ B).re + t^2 * Complex.normSq B :=
+    fun t => normSq_add_ofReal_mul A B t
 
   have h_normSq_B_pos : 0 < Complex.normSq B := by
     rw [hB_def, h_normSq_B]

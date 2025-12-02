@@ -135,18 +135,8 @@ lemma cross_disk_w2_z1_bound (c : ℝ) (hc_lo : (1 - √5) / 2 ≤ c) (hc_hi : c
   have h_vertex_above : (3 - √5) / 4 > 2 - √5 := by nlinarith [sqrt5_sq, h_sqrt5_gt_2]
 
   have h_normSq_expand : ∀ t : ℝ, Complex.normSq (A + (t : ℂ) * B) =
-      Complex.normSq A + 2 * t * (A * starRingEnd ℂ B).re + t^2 * Complex.normSq B := by
-    intro t
-    rw [Complex.normSq_add]
-    have h_conj_t : starRingEnd ℂ (t : ℂ) = (t : ℂ) := Complex.conj_ofReal t
-    have h_normSq_t : Complex.normSq (t : ℂ) = t^2 := by rw [Complex.normSq_ofReal]; ring
-    rw [Complex.normSq_mul, h_normSq_t]
-    simp only [map_mul, h_conj_t]
-    have h_re_scale : (A * ((t : ℂ) * starRingEnd ℂ B)).re = t * (A * starRingEnd ℂ B).re := by
-      have h_assoc : A * ((t : ℂ) * starRingEnd ℂ B) = (t : ℂ) * (A * starRingEnd ℂ B) := by ring
-      rw [h_assoc, Complex.re_ofReal_mul]
-    rw [h_re_scale]
-    ring
+      Complex.normSq A + 2 * t * (A * starRingEnd ℂ B).re + t^2 * Complex.normSq B :=
+    fun t => normSq_add_ofReal_mul A B t
 
   have h_mono : ∀ c₁ c₂ : ℝ, (1 - √5) / 2 ≤ c₁ → c₁ ≤ c₂ → c₂ ≤ 2 - √5 →
       Complex.normSq (A + (c₂ : ℂ) * B) ≤ Complex.normSq (A + (c₁ : ℂ) * B) := by

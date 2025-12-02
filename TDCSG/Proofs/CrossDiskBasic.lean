@@ -182,6 +182,21 @@ lemma vertex_lt_neg1 : -(3 * √5 / 2) / ((5 - √5) / 2) < -1 := by
   rw [one_lt_div h_5_minus_sqrt5_pos]
   linarith
 
+/-- The norm square of A + t*B expands as a quadratic in t. -/
+lemma normSq_add_ofReal_mul (A B : ℂ) (t : ℝ) :
+    Complex.normSq (A + (t : ℂ) * B) =
+    Complex.normSq A + 2 * t * (A * starRingEnd ℂ B).re + t^2 * Complex.normSq B := by
+  rw [Complex.normSq_add]
+  have h_conj_t : starRingEnd ℂ (t : ℂ) = (t : ℂ) := Complex.conj_ofReal t
+  have h_normSq_t : Complex.normSq (t : ℂ) = t^2 := by rw [Complex.normSq_ofReal]; ring
+  rw [Complex.normSq_mul, h_normSq_t]
+  simp only [map_mul, h_conj_t]
+  have h_re_scale : (A * ((t : ℂ) * starRingEnd ℂ B)).re = t * (A * starRingEnd ℂ B).re := by
+    have h_assoc : A * ((t : ℂ) * starRingEnd ℂ B) = (t : ℂ) * (A * starRingEnd ℂ B) := by ring
+    rw [h_assoc, Complex.re_ofReal_mul]
+  rw [h_re_scale]
+  ring
+
 lemma normSq_at_upper_endpoint :
     Complex.normSq ((-2 : ℂ) + ζ₅^2 + (((1 - √5)/2 : ℝ) : ℂ) * (ζ₅^3 - ζ₅^4)) = 3 + φ := by
   have h_sin_sq := sin_sq_pi_div_5
