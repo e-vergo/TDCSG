@@ -1,15 +1,50 @@
+/-
+Copyright (c) 2024 Eric Vergo. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Eric Vergo
+-/
 import TDCSG.Definitions.Core
 import TDCSG.Definitions.Geometry
+
+/-!
+# Group Action Definitions
+
+This file defines the 5-fold specialized generators and proves their bijectivity,
+establishing them as valid group elements.
+
+## Main definitions
+
+- `genA r`: The 5-fold generator A at radius r (specialization of `genA_n` with n=5)
+- `genB r`: The 5-fold generator B at radius r (specialization of `genB_n` with n=5)
+- `applyGen r z g`: Apply generator g to point z at radius r
+- `applyWord r w z`: Apply word w to point z at radius r
+- `orbit r z`: The orbit of point z under the group action at radius r
+
+## Main statements
+
+- `genA_n_bijective`: The n-fold generator A is bijective for all n ≥ 1
+- `genB_n_bijective`: The n-fold generator B is bijective for all n ≥ 1
+- `genA_n_pow_n`: The n-fold generator A has order n (A^n = id)
+- `genB_n_pow_n`: The n-fold generator B has order n (B^n = id)
+
+## References
+
+* [arXiv:2302.12950v1](https://arxiv.org/abs/2302.12950)
+-/
 
 namespace TDCSG.Definitions
 
 open Real Complex
 open scoped Circle
 
+/-- The 5-fold generator A at radius r: rotates by -2π/5 inside the left disk,
+acts as identity outside. -/
 noncomputable def genA (r : ℝ) (z : ℂ) : ℂ := by
   classical
   exact if z ∈ leftDisk r then rotateAboutC leftCenter (-2 * π / 5) z else z
 
+/-- The 5-fold generator B at radius r: rotates by -2π/5 inside the right disk,
+acts as identity outside. -/
 noncomputable def genB (r : ℝ) (z : ℂ) : ℂ := by
   classical
   exact if z ∈ rightDisk r then rotateAboutC rightCenter (-2 * π / 5) z else z

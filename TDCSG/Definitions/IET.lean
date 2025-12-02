@@ -1,12 +1,46 @@
+/-
+Copyright (c) 2024 Eric Vergo. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Eric Vergo
+-/
 import Mathlib.Data.Real.Basic
 import Mathlib.Algebra.BigOperators.Fin
 import Mathlib.NumberTheory.Real.GoldenRatio
 import TDCSG.Definitions.WordCorrespondence
 
+/-!
+# Interval Exchange Transformation
+
+This file defines interval exchange transformations (IETs) and specializes to the
+3-interval IET induced by the GG5 group action at the critical radius.
+
+## Main definitions
+
+- `IntervalExchangeTransformation n`: A transformation partitioning [0,1] into n intervals
+  and permuting them via translation
+- `GG5_induced_IET`: The 3-interval IET induced by GG5 at r_crit
+- `length1`, `length2`, `length3`: The three interval lengths (in ratio 1 : φ : φ²)
+- `displacement0`, `displacement1`, `displacement2`: Translation displacements
+- `IET_word x`: The word corresponding to applying the IET to point x
+- `wordForIterate x k`: The word for the k-th iterate of the IET at x
+
+## Implementation notes
+
+The IET structure encodes:
+- `n` intervals with positive lengths summing to 1
+- A permutation determining how intervals are rearranged
+- The transformation function `toFun` that applies the rearrangement
+
+## References
+
+* [arXiv:2302.12950v1](https://arxiv.org/abs/2302.12950)
+-/
+
 universe u
 
 open Set
 
+/-- An interval exchange transformation on n intervals of [0,1]. -/
 structure IntervalExchangeTransformation (n : ℕ) where
 
   n_pos : 0 < n

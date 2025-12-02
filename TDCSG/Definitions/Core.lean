@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2024 Eric Vergo. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Eric Vergo
+-/
 import Mathlib.Analysis.InnerProductSpace.PiL2
 import Mathlib.NumberTheory.Real.GoldenRatio
 import Mathlib.Analysis.SpecialFunctions.Exp
@@ -5,10 +10,37 @@ import Mathlib.Analysis.SpecialFunctions.Trigonometric.Complex
 import Mathlib.RingTheory.RootsOfUnity.Complex
 import Mathlib.Analysis.Complex.Circle
 
+/-!
+# Core Definitions
+
+This file contains the fundamental mathematical constants and algebraic structures
+for the two-disk compound symmetry groups.
+
+## Main definitions
+
+- `Generator`: The four generators A, A⁻¹, B, B⁻¹ of the group
+- `Word`: A word is a list of generators
+- `φ`: The golden ratio $(1 + \sqrt{5})/2$
+- `r_crit`: The critical radius $\sqrt{3 + φ}$ at which GG(5,5) becomes infinite
+- `ζ₅`: The primitive 5th root of unity $e^{2πi/5}$
+- `zeta5Circle`: ζ₅ as an element of the unit circle
+
+## Notation
+
+- `A⁻¹` for `Generator.Ainv`
+- `B⁻¹` for `Generator.Binv`
+- `ζ₅` for `zeta5`
+
+## References
+
+* [arXiv:2302.12950v1](https://arxiv.org/abs/2302.12950)
+-/
+
 namespace TDCSG.Definitions
 
 open Real
 
+/-- The four generators A, A⁻¹, B, B⁻¹ of the two-disk compound symmetry group. -/
 inductive Generator where
   | A | Ainv | B | Binv
   deriving DecidableEq, Repr
@@ -16,17 +48,22 @@ inductive Generator where
 notation "A⁻¹" => Generator.Ainv
 notation "B⁻¹" => Generator.Binv
 
+/-- A word is a finite sequence of generators. -/
 abbrev Word := List Generator
 
+/-- The golden ratio φ = (1 + √5)/2. -/
 noncomputable def φ : ℝ := Real.goldenRatio
 
+/-- The critical radius r_crit = √(3 + φ) at which GG(5,5) is infinite. -/
 noncomputable def r_crit : ℝ := Real.sqrt (3 + φ)
 
 open scoped Complex
 open Complex
 
+/-- The primitive 5th root of unity ζ₅ = e^(2πi/5). -/
 noncomputable def zeta5 : Complex := exp (2 * Real.pi * Complex.I / 5)
 
+/-- Notation for the primitive 5th root of unity. -/
 noncomputable abbrev ζ₅ : Complex := zeta5
 
 @[simp] lemma zeta5_abs : ‖ζ₅‖ = 1 := by

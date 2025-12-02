@@ -1,6 +1,36 @@
+/-
+Copyright (c) 2024 Eric Vergo. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Eric Vergo
+-/
 import TDCSG.MainTheorem
 import TDCSG.Definitions.GroupAction
 import Mathlib.GroupTheory.GroupAction.Basic
+
+/-!
+# Group Theory Specialization
+
+This file specializes the n-fold group theory to the 5-fold case (GG5)
+and establishes connections between the general and specialized versions.
+
+## Main definitions
+
+- `genA_perm r`: The 5-fold generator A as a permutation
+- `genB_perm r`: The 5-fold generator B as a permutation
+- `groupOrbit n hn r z`: The group orbit of z under GG(n,n) at radius r
+- `GG5_orbit z`: The orbit of z under GG5 at the critical radius
+
+## Main statements
+
+- `genA_bijective`: The 5-fold generator A is bijective
+- `genB_bijective`: The 5-fold generator B is bijective
+- `genA_eq_genA_n_5`: Equivalence between 5-fold and n-fold versions
+- `TwoDiskCompoundSymmetryGroup_5_eq`: Group equality for n=5 specialization
+
+## References
+
+* [arXiv:2302.12950v1](https://arxiv.org/abs/2302.12950)
+-/
 
 namespace TDCSG.Definitions
 
