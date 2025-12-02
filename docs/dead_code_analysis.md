@@ -1,53 +1,194 @@
-# Dead Code Analysis - Findings
+# Dead Code Analysis Report
 
-## Summary
+**Generated**: 584302531
+**Total declarations**: 423
+**Reachable from main theorem**: 309 (73%)
+**Unreachable (dead code)**: 120 (28%)
 
-Static dependency analysis identified 460 "dead" declarations (59% of 767 total), but empirical testing via build-based verification revealed that **approximately 87-95% of these are false positives**.
+## ⚠️ IMPORTANT WARNINGS
 
-## Methodology
+1. **@[simp] lemmas**: Cannot reliably detect `@[simp]` attributes automatically
+   - Manually check each lemma for `@[simp]` before deleting
+   - `@[simp]` lemmas are used implicitly by tactics and MUST NOT be deleted
 
-1. **Static Analysis**: BFS traversal from main theorem using `Expr.foldConsts`
-2. **Empirical Testing**: Delete declarations → `lake build` → Identify what breaks → Restore needed declarations
+2. **Supporting lemmas**: Some unreachable lemmas may be:
+   - Alternative proof approaches kept for reference
+   - Exploratory work that may be useful later
+   - General-purpose utilities not yet needed
 
-## Results
+3. **Before deleting**: Always run `lake build` after deletions to verify
 
-### Breakdown of "Dead" Declarations
-- **316 auto-generated** (68.7%): `._proof_*`, `._simp_*`, `._nativeDecide_*` - genuinely unused auxiliary definitions
-- **137 user-written with locations** (29.8%): High false positive rate due to tactical usage
-- **7 user-written without locations** (1.5%): Cannot locate for deletion
+## Unreachable Declarations by File
 
-### Deletion Attempts
-| Attempt | Deleted | Kept | Result |
-|---------|---------|------|--------|
-| 1 | 137 | 0 | 43 build errors |
-| 2 | 102 | 40 | Field notation errors |
-| 3 | 61 | 79 | File corruption |
+### TDCSG/Proofs/Zeta5.lean (17 declarations)
 
-### False Positives Verified
-Declarations marked "dead" but actually used:
-- `F`: Used 46× in tactic proofs (e.g., `rw [F_eq_psi_times_E]`)
-- `genA_bijective`, `genB_bijective`: Required by genA_perm, genB_perm
-- `zeta5_eq`, `zeta5_re_eq_phi`: Provide type information for field notation
-- `E_re`, `E_im`: Used via `rw [E_re]` in SegmentGeometry.lean
-- `psi_pos`, `t_F_lt_one`: Used in `linarith` tactic proofs
+- `TDCSG.CompoundSymmetry.GG5.one_plus_phi_ne_zero` (theorem) - Line 51 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.phi_ne_zero` (theorem) - Line 51 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.zeta5_pow_zero` (theorem) - Line 58 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.zeta5_pow_zero_re` (theorem) - Line 60 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.zeta5_pow_zero_im` (theorem) - Line 62 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.zeta5_abs_pow4` (theorem) - Line 102 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.zeta5_pow_add_five_mul` (theorem) - Line 169 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.zeta5_inv_mul` (theorem) - Line 172 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.zeta5_inv_as_pow4` (theorem) - Line 175 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.zeta5_pow_mul_inv` (theorem) - Line 177 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.zeta5_pow_seventeen` (theorem) - Line 253 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.zeta5_pow_ten_C` (theorem) - Line 289 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.zeta5_pow_fifteen_C` (theorem) - Line 290 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.zeta5_eq` (theorem) - Line 305 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.zeta5_re_eq_phi` (theorem) - Line 325 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.zeta5_cubed_im_neg` (theorem) - Line 404 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.normSq_zeta5_cubed_sub_pow4` (theorem) - Line 447 ⚠️ Check for @[simp]
 
-## Root Cause
+### TDCSG/Proofs/Points.lean (16 declarations)
 
-**Tactical usage is invisible to static dependency analysis**:
-- `rw [lemma]` - Rewrite tactic doesn't create AST dependency
-- `simp [lemma]` - Simplification doesn't appear in constant graph
-- `linarith [lemma]` - Arithmetic tactic usage not tracked
-- Field notation - Lemmas provide type information implicitly
+- `TDCSG.CompoundSymmetry.GG5.E_re` (theorem) - Line 34 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.E_im` (theorem) - Line 53 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.sqrt5_gt_one` (theorem) - Line 297 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.sqrt5_lt_three` (theorem) - Line 305 ⚠️ Check for @[simp]
+- `TDCSG.Definitions.psi` (def) - Line 313
+- `TDCSG.CompoundSymmetry.GG5.psi_eq` (theorem) - Line 313 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.psi_pos` (theorem) - Line 317 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.psi_ne_zero` (theorem) - Line 319 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.psi_lt_one` (theorem) - Line 321 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.psi_le_one` (theorem) - Line 326 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.psi_lt_t_F` (theorem) - Line 328 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.t_F_lt_one` (theorem) - Line 338 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.zeta5_plus_zeta5_fourth` (theorem) - Line 345 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.F_eq_psi_times_E` (theorem) - Line 425 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.F_on_segment_E'E` (theorem) - Line 447 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.G_eq_coeff_times_E` (theorem) - Line 478 ⚠️ Check for @[simp]
 
-## Recommendation
+### TDCSG/Proofs/GroupTheory.lean (16 declarations)
 
-**Do not delete the 137 user-written declarations**. They are overwhelmingly used, just not visible to static analysis.
+- `TDCSG.CompoundSymmetry.GG5.Circle_exp_neg_two_pi_over_5_pow_5` (theorem) - Line 36 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.genA_outside` (theorem) - Line 42 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.genA_inside` (theorem) - Line 46 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.genA_pow_five` (theorem) - Line 52 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.genA_bijective_proof` (theorem) - Line 84 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.genB_outside` (theorem) - Line 102 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.genB_inside` (theorem) - Line 106 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.genB_pow_five` (theorem) - Line 112 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.genB_bijective_proof` (theorem) - Line 172 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.genA_perm_pow_five` (theorem) - Line 190 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.genB_perm_pow_five` (theorem) - Line 196 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.genA_n_bijective_proof` (theorem) - Line 202 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.genB_n_bijective_proof` (theorem) - Line 232 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.CompoundSymmetryGroup_infinite_of_infinite_orbit` (theorem) - Line 439 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.GG5_infinite_of_infinite_orbit` (theorem) - Line 443 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.GG5_has_infinite_group_orbit` (theorem) - Line 447 ⚠️ Check for @[simp]
 
-The 316 auto-generated declarations can be safely ignored as they are compiler artifacts not present in source files.
+### TDCSG/Definitions/GroupTheory.lean (10 declarations)
 
-## Implications
+- `TDCSG.Definitions.genA_eq_genA_n_5` (theorem) - Line 41 ⚠️ Check for @[simp]
+- `TDCSG.Definitions.genB_eq_genB_n_5` (theorem) - Line 45 ⚠️ Check for @[simp]
+- `TDCSG.Definitions.genA_bijective` (theorem) - Line 49 ⚠️ Check for @[simp]
+- `TDCSG.Definitions.genB_bijective` (theorem) - Line 54 ⚠️ Check for @[simp]
+- `TDCSG.Definitions.genA_perm` (def) - Line 59
+- `TDCSG.Definitions.genB_perm` (def) - Line 62
+- `TDCSG.Definitions.genA_perm_apply` (theorem) - Line 66 ⚠️ Check for @[simp]
+- `TDCSG.Definitions.genB_perm_apply` (theorem) - Line 69 ⚠️ Check for @[simp]
+- `TDCSG.Definitions.GG5_orbit` (def) - Line 74
+- `TDCSG.Definitions.TwoDiskCompoundSymmetryGroup_5_eq` (theorem) - Line 87 ⚠️ Check for @[simp]
 
-For Lean 4 codebases with tactic-heavy proofs:
-- Static dependency tracing has ~85-95% false positive rate
-- Build-based verification is the only reliable method
-- Manual review required for safe deletion
+### TDCSG/Definitions/Points.lean (6 declarations)
+
+- `TDCSG.Definitions.F` (def) - Line 42
+- `TDCSG.Definitions.G` (def) - Line 45
+- `TDCSG.Definitions.t_F` (def) - Line 51
+- `TDCSG.Definitions.translation_length_1` (def) - Line 60
+- `TDCSG.Definitions.translation_length_2` (def) - Line 63
+- `TDCSG.Definitions.segment_length` (def) - Line 66
+
+### TDCSG/Definitions/Core.lean (5 declarations)
+
+- `TDCSG.Definitions.zeta5Circle` (def) - Line 72
+- `TDCSG.Definitions.zeta5Circle_coe` (theorem) - Line 76 ⚠️ Check for @[simp]
+- `TDCSG.Definitions.zeta5CirclePow` (def) - Line 78
+- `TDCSG.Definitions.zeta5CircleInv` (def) - Line 80
+- `TDCSG.Definitions.zeta5CircleInv_coe` (theorem) - Line 83 ⚠️ Check for @[simp]
+
+### TDCSG/Proofs/CrossDiskRestricted.lean (5 declarations)
+
+- `TDCSG.CompoundSymmetry.GG5.B4_re` (theorem) - Line 352 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.B4_im` (theorem) - Line 357 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.A4_re` (theorem) - Line 362 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.A4_im` (theorem) - Line 370 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.normSq_A4` (theorem) - Line 419 ⚠️ Check for @[simp]
+
+### TDCSG/Proofs/CrossDiskWord3Helpers.lean (4 declarations)
+
+- `TDCSG.CompoundSymmetry.GG5.A_w3_z1_at_c_lower` (theorem) - Line 78 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.A_w3_z1_at_c_one` (theorem) - Line 84 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.w3_z4_at_one_re` (theorem) - Line 455 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.w3_z4_at_one_im` (theorem) - Line 463 ⚠️ Check for @[simp]
+
+### TDCSG/Definitions/GroupAction.lean (4 declarations)
+
+- `TDCSG.Definitions.genA_in_disk_eq_rotateAboutCircle` (theorem) - Line 52 ⚠️ Check for @[simp]
+- `TDCSG.Definitions.genB_in_disk_eq_rotateAboutCircle` (theorem) - Line 56 ⚠️ Check for @[simp]
+- `TDCSG.Definitions.genA_preserves_leftDisk` (theorem) - Line 60 ⚠️ Check for @[simp]
+- `TDCSG.Definitions.genB_preserves_rightDisk` (theorem) - Line 68 ⚠️ Check for @[simp]
+
+### TDCSG/Proofs/SegmentGeometry.lean (3 declarations)
+
+- `TDCSG.CompoundSymmetry.GG5.F_ne_zero` (theorem) - Line 60 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.E_re_pos` (theorem) - Line 121 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.E'_re_neg` (theorem) - Line 126 ⚠️ Check for @[simp]
+
+### TDCSG/Proofs/OrbitInfinite.lean (2 declarations)
+
+- `TDCSG.CompoundSymmetry.GG5.GG5_IET_orbit_finite_subset` (theorem) - Line 39 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.GG5_IET_has_orbit_structure` (theorem) - Line 65 ⚠️ Check for @[simp]
+
+### TDCSG/Proofs/CrossDiskWord2DiskBounds.lean (1 declarations)
+
+- `TDCSG.CompoundSymmetry.GG5.c_lower_word2_eq` (theorem) - Line 40 ⚠️ Check for @[simp]
+
+## Summary by Module
+
+- `TDCSG.CompoundSymmetry.GG5`: 63 declarations
+- `TDCSG.Definitions.Generator`: 17 declarations
+- `TDCSG.Definitions.applyGen`: 4 declarations
+- `TDCSG.Definitions.wordForIterate`: 2 declarations
+- `TDCSG.Definitions.rotateAboutCircle`: 1 declarations
+- `TDCSG.Definitions.zeta5CirclePow`: 1 declarations
+- `TDCSG.Definitions.genB_eq_genB_n_5`: 1 declarations
+- `TDCSG.Definitions.genA_bijective`: 1 declarations
+- `TDCSG.Definitions.genA_eq_genA_n_5`: 1 declarations
+- `TDCSG.Definitions.t_G`: 1 declarations
+- `TDCSG.Definitions.zeta5Circle`: 1 declarations
+- `TDCSG.Definitions.segment_length`: 1 declarations
+- `TDCSG.Definitions.zeta5Circle_coe`: 1 declarations
+- `TDCSG.Definitions.E`: 1 declarations
+- `TDCSG.Definitions.translation_length_1`: 1 declarations
+- `TDCSG.Definitions.genB`: 1 declarations
+- `TDCSG.Definitions.genB_bijective`: 1 declarations
+- `TDCSG.Definitions.genA_in_disk_eq_rotateAboutCircle`: 1 declarations
+- `TDCSG.Definitions.genB_perm`: 1 declarations
+- `TDCSG.Definitions.φ`: 1 declarations
+- `TDCSG.Definitions.genB_in_disk_eq_rotateAboutCircle`: 1 declarations
+- `TDCSG.Definitions.rotateAboutC`: 1 declarations
+- `TDCSG.Definitions.psi`: 1 declarations
+- `TDCSG.Definitions.t_F`: 1 declarations
+- `TDCSG.Definitions.translation_length_2`: 1 declarations
+- `TDCSG.Definitions.genB_perm_apply`: 1 declarations
+- `TDCSG.Definitions.GG5_orbit`: 1 declarations
+- `TDCSG.Definitions.TwoDiskCompoundSymmetryGroup_5_eq`: 1 declarations
+- `TDCSG.Definitions.G`: 1 declarations
+- `TDCSG.Definitions.zeta5CircleInv_coe`: 1 declarations
+- `TDCSG.Definitions.genA_preserves_leftDisk`: 1 declarations
+- `TDCSG.Definitions.GG5_induced_IET`: 1 declarations
+- `TDCSG.Definitions.zeta5CircleInv`: 1 declarations
+- `TDCSG.Definitions.genB_preserves_rightDisk`: 1 declarations
+- `TDCSG.Definitions.genA_perm_apply`: 1 declarations
+- `TDCSG.Definitions.genA_perm`: 1 declarations
+- `TDCSG.Definitions.F`: 1 declarations
+- `TDCSG.Definitions.genA`: 1 declarations
+
+## Recommendations
+
+1. **Manual review required**: Check each file above for @[simp] attributes
+2. **Safe to delete**: `def` declarations without special attributes
+3. **Risky to delete**: Theorems/lemmas (check for @[simp] first)
+4. **After deletion**: Run `lake build && lake env lean --run KMVerify/Main.lean`

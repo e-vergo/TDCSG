@@ -1,4 +1,4 @@
-Total: 431 | Reachable: 309 | Dead: 128
+Total: 423 | Reachable: 309 | Dead: 120
 
 === ALL UNREACHABLE DECLARATIONS ===
 TDCSG.CompoundSymmetry.GG5.A4_im (theorem) (TDCSG/Proofs/CrossDiskRestricted.lean:370)
@@ -105,10 +105,6 @@ TDCSG.Definitions.genB_in_disk_eq_rotateAboutCircle (theorem) (TDCSG/Definitions
 TDCSG.Definitions.genB_perm (def) (TDCSG/Definitions/GroupTheory.lean:62)
 TDCSG.Definitions.genB_perm_apply (theorem) (TDCSG/Definitions/GroupTheory.lean:69)
 TDCSG.Definitions.genB_preserves_rightDisk (theorem) (TDCSG/Definitions/GroupAction.lean:68)
-TDCSG.Definitions.instDecidableEqGenerator (def)
-TDCSG.Definitions.instReprGenerator (def)
-TDCSG.Definitions.instReprGenerator.repr (def)
-TDCSG.Definitions.instReprGenerator.repr.match_1 (def)
 TDCSG.Definitions.psi (def) (TDCSG/Proofs/Points.lean:313)
 TDCSG.Definitions.rotateAboutC.eq_1 (theorem)
 TDCSG.Definitions.rotateAboutCircle.eq_1 (theorem)
@@ -124,8 +120,4 @@ TDCSG.Definitions.zeta5CircleInv (def) (TDCSG/Definitions/Core.lean:80)
 TDCSG.Definitions.zeta5CircleInv_coe (theorem) (TDCSG/Definitions/Core.lean:83)
 TDCSG.Definitions.zeta5CirclePow (def) (TDCSG/Definitions/Core.lean:78)
 TDCSG.Definitions.zeta5Circle_coe (theorem) (TDCSG/Definitions/Core.lean:76)
-TDCSG.Definitions.«_aux_TDCSG_Definitions_Core___macroRules_TDCSG_Definitions_termA⁻¹_1» (def)
-TDCSG.Definitions.«_aux_TDCSG_Definitions_Core___macroRules_TDCSG_Definitions_termB⁻¹_1» (def)
-TDCSG.Definitions.«termA⁻¹» (def)
-TDCSG.Definitions.«termB⁻¹» (def)
 TDCSG.Definitions.φ.eq_1 (theorem)

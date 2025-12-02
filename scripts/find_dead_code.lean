@@ -16,7 +16,38 @@ def isTDCSGDecl (name : Name) : Bool :=
 /-- Check if a name is a compiler-generated auxiliary declaration -/
 def isAuxDecl (name : Name) : Bool :=
   let nameStr := name.toString
-  (nameStr.splitOn "._").length > 1
+  -- Compiler-generated proof obligations: ._proof, ._simp, etc.
+  (nameStr.splitOn "._").length > 1 ||
+  -- Derived instances: instDecidableEq, instRepr, etc.
+  (nameStr.splitOn "inst").length > 1 && (
+    (nameStr.splitOn "Decidable").length > 1 ||
+    (nameStr.splitOn "Repr").length > 1 ||
+    (nameStr.splitOn "Inhabited").length > 1 ||
+    (nameStr.splitOn "BEq").length > 1
+  ) ||
+  -- Macro expansions
+  (nameStr.splitOn "_aux_").length > 1 ||
+  (nameStr.splitOn "macroRules").length > 1 ||
+  (nameStr.splitOn "«").length > 1  -- Escaped identifiers from macros
+
+/-- Get the declaration kind as a string -/
+def getDeclKindStr (info : ConstantInfo) : String :=
+  match info with
+  | .defnInfo _ => "def"
+  | .thmInfo _ => "theorem"
+  | .axiomInfo _ => "axiom"
+  | .inductInfo _ => "inductive"
+  | .ctorInfo _ => "constructor"
+  | .recInfo _ => "recursor"
+  | .quotInfo _ => "quot"
+  | .opaqueInfo _ => "opaque"
+
+/-- Check if a declaration name suggests it might have attributes -/
+def likelyHasAttributes (declName : String) : Bool :=
+  -- Heuristic: declarations ending in certain patterns are likely attributed
+  declName.endsWith "_simp" || declName.endsWith "_ext" ||
+  (declName.splitOn "_instance").length > 1 ||
+  (declName.splitOn "inst").length > 1
 
 /-- Get direct dependencies of a declaration -/
 def getDirectDeps (env : Environment) (name : Name) : Array Name :=
@@ -191,31 +222,93 @@ def main : IO Unit := do
   if moduleList.length > 20 then
     IO.println s!"  ... and {moduleList.length - 20} more modules"
 
-  -- Save full list to file
-  let h ← IO.FS.Handle.mk "docs/dead_code.txt" IO.FS.Mode.write
-  h.putStrLn s!"Total: {allDecls.size} | Reachable: {reachable.size} | Dead: {deadCode.size}"
+  -- Group by file for human-readable report
+  let mut byFile : Std.HashMap String (Array (Name × String × Nat)) := {}
+  for name in deadCode do
+    let declName := name.components.getLast!.toString
+    match ← findDeclarationInFiles declName with
+    | some (file, line) =>
+      let kind := match env.find? name with
+        | some info => getDeclKindStr info
+        | none => "unknown"
+      let current := byFile.getD file #[]
+      byFile := byFile.insert file (current.push (name, kind, line))
+    | none => pure ()
+
+  -- Save detailed report
+  let h ← IO.FS.Handle.mk "docs/dead_code_analysis.md" IO.FS.Mode.write
+  h.putStrLn "# Dead Code Analysis Report"
   h.putStrLn ""
-  h.putStrLn "=== ALL UNREACHABLE DECLARATIONS ==="
+  h.putStrLn s!"**Generated**: {← IO.monoMsNow}"
+  h.putStrLn s!"**Total declarations**: {allDecls.size}"
+  h.putStrLn s!"**Reachable from main theorem**: {reachable.size} ({(reachable.size * 100) / allDecls.size}%)"
+  h.putStrLn s!"**Unreachable (dead code)**: {deadCode.size} ({(deadCode.size * 100) / allDecls.size}%)"
+  h.putStrLn ""
+  h.putStrLn "## ⚠️ IMPORTANT WARNINGS"
+  h.putStrLn ""
+  h.putStrLn "1. **@[simp] lemmas**: Cannot reliably detect `@[simp]` attributes automatically"
+  h.putStrLn "   - Manually check each lemma for `@[simp]` before deleting"
+  h.putStrLn "   - `@[simp]` lemmas are used implicitly by tactics and MUST NOT be deleted"
+  h.putStrLn ""
+  h.putStrLn "2. **Supporting lemmas**: Some unreachable lemmas may be:"
+  h.putStrLn "   - Alternative proof approaches kept for reference"
+  h.putStrLn "   - Exploratory work that may be useful later"
+  h.putStrLn "   - General-purpose utilities not yet needed"
+  h.putStrLn ""
+  h.putStrLn "3. **Before deleting**: Always run `lake build` after deletions to verify"
+  h.putStrLn ""
+  h.putStrLn "## Unreachable Declarations by File"
+  h.putStrLn ""
+
+  let fileList := byFile.toList.insertionSort (fun a b => a.2.size > b.2.size)
+  for (file, decls) in fileList do
+    let sortedDecls := decls.qsort (fun a b => a.2.2 < b.2.2)  -- Sort by line number
+    h.putStrLn s!"### {file} ({sortedDecls.size} declarations)"
+    h.putStrLn ""
+    for (name, kind, line) in sortedDecls do
+      let shortName := name.components.getLast!.toString
+      let safety := if likelyHasAttributes shortName then
+        " **⚠️ UNSAFE - May have @[simp] or other attributes**"
+      else if kind == "theorem" || kind == "lemma" then
+        " ⚠️ Check for @[simp]"
+      else
+        ""
+      h.putStrLn s!"- `{name}` ({kind}) - Line {line}{safety}"
+    h.putStrLn ""
+
+  h.putStrLn "## Summary by Module"
+  h.putStrLn ""
+  for (module, count) in moduleList do
+    h.putStrLn s!"- `{module}`: {count} declarations"
+  h.putStrLn ""
+
+  h.putStrLn "## Recommendations"
+  h.putStrLn ""
+  h.putStrLn "1. **Manual review required**: Check each file above for @[simp] attributes"
+  h.putStrLn "2. **Safe to delete**: `def` declarations without special attributes"
+  h.putStrLn "3. **Risky to delete**: Theorems/lemmas (check for @[simp] first)"
+  h.putStrLn "4. **After deletion**: Run `lake build && lake env lean --run KMVerify/Main.lean`"
+  h.flush
+
+  -- Also save simple list format
+  let hSimple ← IO.FS.Handle.mk "docs/dead_code.txt" IO.FS.Mode.write
+  hSimple.putStrLn s!"Total: {allDecls.size} | Reachable: {reachable.size} | Dead: {deadCode.size}"
+  hSimple.putStrLn ""
+  hSimple.putStrLn "=== ALL UNREACHABLE DECLARATIONS ==="
   for name in deadCode do
     match env.find? name with
     | some info =>
-      let kind := match info with
-        | .defnInfo _ => "def"
-        | .thmInfo _ => "theorem"
-        | .axiomInfo _ => "axiom"
-        | .inductInfo _ => "inductive"
-        | .ctorInfo _ => "constructor"
-        | .recInfo _ => "recursor"
-        | .quotInfo _ => "quot"
-        | .opaqueInfo _ => "opaque"
+      let kind := getDeclKindStr info
       let declName := name.components.getLast!.toString
       let locationOpt ← findDeclarationInFiles declName
       let locationInfo := match locationOpt with
         | some (file, line) => s!" ({file}:{line})"
         | none => ""
-      h.putStrLn s!"{name} ({kind}){locationInfo}"
-    | none => h.putStrLn s!"{name}"
-  h.flush
+      hSimple.putStrLn s!"{name} ({kind}){locationInfo}"
+    | none => hSimple.putStrLn s!"{name}"
+  hSimple.flush
 
   IO.println ""
-  IO.println s!"Full list saved to docs/dead_code.txt"
+  IO.println "Reports saved:"
+  IO.println "  docs/dead_code_analysis.md (human-readable with safety warnings)"
+  IO.println "  docs/dead_code.txt (simple list format)"
