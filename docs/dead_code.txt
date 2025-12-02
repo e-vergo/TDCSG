@@ -3,8 +3,7 @@ Total: 767 | Reachable: 313 | Dead: 460
 === ALL UNREACHABLE DECLARATIONS ===
 TDCSG.CompoundSymmetry.GG5.A4_im (theorem) (TDCSG/Proofs/CrossDiskRestricted.lean:363)
 TDCSG.CompoundSymmetry.GG5.A4_re (theorem) (TDCSG/Proofs/CrossDiskRestricted.lean:355)
-TDCSG.CompoundSymmetry.GG5.A_w3_z1_at_c_lower (theorem) (TDCSG/Proofs/CrossDiskWord3Helpers.lean:65)
-TDCSG.Compound=== DEAD CODE ANALYSIS ===
+TDCSG.CompoundSymmetry.GG5.A_w3_z1_at_c_lower (theorem) (TDCSG/=== DEAD CODE ANALYSIS ===
 
 Total declarations: 767
 Reachable from main theorem: 313 (40%)
@@ -34,7 +33,8 @@ Dead code: 460 (59%)
   ... and 31 more modules
 
 Full list saved to docs/dead_code.txt
-ompoundSymmetry.GG5.GG5_IET_iterates_injective._simp_1_2 (theorem)
+_IET_iterates_injective._proof_1_1 (theorem)
+TDCSG.CompoundSymmetry.GG5.GG5_IET_iterates_injective._simp_1_2 (theorem)
 TDCSG.CompoundSymmetry.GG5.GG5_IET_iterates_injective._simp_1_3 (theorem)
 TDCSG.CompoundSymmetry.GG5.GG5_IET_iterates_injective._simp_1_4 (theorem)
 TDCSG.CompoundSymmetry.GG5.GG5_IET_iterates_injective._simp_1_5 (theorem)

@@ -1,5 +1,5 @@
 # String-Based Dead Code Analysis
-# Generated: 2025-12-02 12:09:56
+# Generated: 2025-12-02 12:18:35
 #
 # Instructions:
 # - Edit KEEP/DELETE actions as needed
@@ -42,7 +42,6 @@ DELETE  c_lower_lt_upper_word2         count=  0    files=[]
 KEEP    c_lower_word2_eq               count=  2    files=[CrossDiskWord2DiskBounds.lean]
 DELETE  c_lower_word2_gt_neg1          count=  0    files=[]
 DELETE  c_upper_word2_eq_c_lower_word3 count=  0    files=[]
-DELETE  A_w3_z1_at_c_lower             count=  0    files=[]
 DELETE  c_lower_word3_gt_c_upper_restricted count=  0    files=[]
 DELETE  c_lower_word3_gt_neg1          count=  0    files=[]
 DELETE  normSq_w3_z4_at_one            count=  0    files=[]
