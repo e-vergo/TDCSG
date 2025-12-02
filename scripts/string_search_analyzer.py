@@ -242,8 +242,18 @@ def generate_report(dead_code_path: Path, search_dir: Path, output_path: Path):
         f.write("# After editing, run: python scripts/string_search_analyzer.py --execute-deletions\n")
         f.write("\n")
 
-        # Results
-        for result in results:
+        # Sort results by file, then by line number
+        results_sorted = sorted(results, key=lambda r: (r['def_file'], r['def_line']))
+
+        # Group by file and write with file headers
+        current_file = None
+        for result in results_sorted:
+            # Write file header when we encounter a new file
+            if result['def_file'] != current_file:
+                if current_file is not None:
+                    f.write("\n")  # Blank line between files
+                current_file = result['def_file']
+                f.write(f"# === {current_file} ===\n")
             action = result['action']
             name = result['name']
             count = result['count']
