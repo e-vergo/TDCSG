@@ -85,31 +85,61 @@ def findDeclarationInFiles (declName : String) : IO (Option (String × Nat)) := 
 def main : IO Unit := do
   initSearchPath (← findSysroot)
 
-  let env ← importModules #[{module := `TDCSG.ProofOfMainTheorem}] {} 0
+  let env ← importModules #[{module := `TDCSG.MainTheorem}, {module := `TDCSG.ProofOfMainTheorem}] {} 0
 
   -- Get all TDCSG declarations
   let allDecls := getAllTDCSGDecls env
   IO.eprintln s!"Total TDCSG declarations: {allDecls.size}"
 
-  -- Find the main theorem
-  let mut mainTheoremOpt : Option Name := none
+  -- Find the proof theorem
+  let mut proofTheoremOpt : Option Name := none
   let candidates := #[
     `GG5_infinite_at_critical_radius,
     `TDCSG.ProofOfMainTheorem.GG5_infinite_at_critical_radius,
-    `TDCSG.GG5_infinite_at_critical_radius,
-    `TDCSG.CompoundSymmetry.GG5.GG5_is_infinite
+    `TDCSG.GG5_infinite_at_critical_radius
   ]
 
   for candidate in candidates do
     if env.find? candidate |>.isSome then
-      mainTheoremOpt := some candidate
+      proofTheoremOpt := some candidate
       break
 
-  let mainTheoremName := mainTheoremOpt.getD `GG5_infinite_at_critical_radius
-  IO.eprintln s!"Main theorem: {mainTheoremName}"
+  -- MainTheorem.lean declarations (at root level, no namespace)
+  let mainTheoremNames := #[
+    `StatementOfTheorem,
+    `GG5_At_Critical_radius,
+    `TwoDiskCompoundSymmetryGroup,
+    `genA_n_perm,
+    `genB_n_perm
+  ]
 
-  let reachable ← getTransitiveDeps env mainTheoremName
-  IO.eprintln s!"Reachable from main theorem: {reachable.size}"
+  -- Start reachability analysis from both proof and MainTheorem declarations
+  let mut reachable : Std.HashSet Name := {}
+
+  -- Trace from proof theorem
+  match proofTheoremOpt with
+  | some proofTheorem =>
+    IO.eprintln s!"Proof theorem: {proofTheorem}"
+    reachable := reachable.insert proofTheorem
+    let proofReachable ← getTransitiveDeps env proofTheorem
+    for name in proofReachable.toArray do
+      reachable := reachable.insert name
+  | none =>
+    IO.eprintln "Warning: Proof theorem not found"
+
+  -- Trace from MainTheorem declarations
+  IO.eprintln "Tracing MainTheorem declarations..."
+  for name in mainTheoremNames do
+    if env.find? name |>.isSome then
+      IO.eprintln s!"  Found: {name}"
+      reachable := reachable.insert name
+      let deps ← getTransitiveDeps env name
+      for dep in deps.toArray do
+        reachable := reachable.insert dep
+    else
+      IO.eprintln s!"  Not found: {name}"
+
+  IO.eprintln s!"Total reachable from MainTheorem + Proof: {reachable.size}"
 
   -- Find dead code (declarations not reachable from main theorem)
   let mut deadCodeList : Array Name := #[]

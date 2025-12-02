@@ -53,10 +53,10 @@ The formalization uses a group-theoretic approach:
 
 This project follows the [Kim Morrison standard](https://leanprover.zulipchat.com/#narrow/channel/219941-Machine-Learning-for-Theorem-Proving/topic/Discussion.3A.20AI-written.20mathematical.proofs/with/558843568) for AI-assisted formal mathematics:
 
-- **MainTheorem.lean** contains only definitions and the theorem statement (114 lines)
-- **ProofOfMainTheorem.lean** provides the proof
-- **Definitions/** contains all definitions and supporting lemmas (human-reviewable, ~1300 lines)
-- **Proofs/** contains only lemmas and theorems (machine-verified, ~8400 lines)
+- **MainTheorem.lean** contains only definitions and the theorem statement (94 lines)
+- **ProofOfMainTheorem.lean** provides the proof (122 lines)
+- **Definitions/** contains all definitions and supporting lemmas (human-reviewable, 1298 lines)
+- **Proofs/** contains only lemmas and theorems (machine-verified, 8412 lines)
 - Uses only standard axioms
 
 **Key architectural decision**: MainTheorem.lean contains only definitions (φ, r_crit, genA_n_perm, genB_n_perm, TwoDiskCompoundSymmetryGroup, GG5_At_Critical_radius, StatementOfTheorem). All proof machinery, including bijectivity proofs for the generators, lives in Definitions/GroupAction.lean. This makes MainTheorem.lean maximally readable while keeping the review burden low.
@@ -80,11 +80,11 @@ TRUST TIER SUMMARY
   MathlibExtensions/          [NOT PRESENT]
   Definitions/                8 files     1298 lines
   Proofs/                     19 files    8412 lines
-  MainTheorem.lean                        114 lines
+  MainTheorem.lean                        94 lines
   ProofOfMainTheorem.lean                 122 lines
 --------------------------------------------------------------------------------
-  REVIEW BURDEN: 1412 lines (Definitions + MainTheorem)
-  TOTAL: 9946 lines (14% requires review)
+  REVIEW BURDEN: 1392 lines (Definitions + MainTheorem)
+  TOTAL: 9926 lines (14% requires review)
 
 CHECKS
 --------------------------------------------------------------------------------
@@ -109,11 +109,11 @@ RESULT: PROJECT VERIFIED
 
 ```text
 TDCSG/
-  MainTheorem.lean            # Core definitions + theorem statement (114 lines)
-                              # Contains: φ, r_crit (re-exported from Core.lean),
-                              #           genA_n_perm, genB_n_perm,
+  MainTheorem.lean            # Core definitions + theorem statement (94 lines)
+                              # Contains: genA_n_perm, genB_n_perm,
                               #           TwoDiskCompoundSymmetryGroup, GG5_At_Critical_radius,
                               #           StatementOfTheorem
+                              # Imports φ, r_crit, genA_n, genB_n from Definitions/
   ProofOfMainTheorem.lean     # Complete proof of main theorem (122 lines)
 
   Definitions/                # All definitions (8 files, 1298 lines)
