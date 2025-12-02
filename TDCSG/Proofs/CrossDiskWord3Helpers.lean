@@ -1,4 +1,27 @@
+/-
+Copyright (c) 2025 Raven Cyarm, Eric Easley. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Raven Cyarm, Eric Easley
+-/
 import TDCSG.Proofs.CrossDiskRestricted
+
+/-!
+# Helper lemmas for cross-disk bounds for word3 parameter range
+
+This file contains helper lemmas for establishing cross-disk bounds for the word3
+parameter range c ∈ [2-√5, 1].
+
+The main bound theorems are in `TDCSG.Proofs.CrossDiskWord3DiskBounds`.
+
+## Helper lemmas by intermediate point
+
+For each intermediate point z1-z5, we prove:
+- Real and imaginary parts of the constant term A
+- ||A||²
+- Re(A * conj(B)) where B is the coefficient of c
+- Vertex location of the quadratic f(c) = ||A + cB||²
+- Values at endpoints c = 2-√5 and c = 1
+-/
 
 namespace TDCSG.CompoundSymmetry.GG5
 
@@ -6,31 +29,40 @@ open scoped Complex
 open Complex Real
 open TDCSG.Definitions (segment_length translation_length_1 translation_length_2 segmentPoint psi t_F E E' F G ζ₅ zeta5 zeta5Circle zeta5CirclePow zeta5CircleInv φ r_crit)
 
+/-- The lower bound for c in interval 2 (word3): 2 - √5 -/
 private noncomputable abbrev c_lower_word3 : ℝ := 2 - √5
 
+/-- 2 - √5 > -1 since √5 < 3 -/
 lemma c_lower_word3_gt_neg1 : c_lower_word3 > -1 := by
   unfold c_lower_word3
   have h_sqrt5_lt_3 : √5 < 3 := by nlinarith [sqrt5_sq]
   linarith
 
+/-- 2 - √5 < (1 - √5)/2 since 2 - √5 < 1/2 - √5/2 iff 4 - 2√5 < 1 - √5 iff 3 < √5, false.
+    Actually 2 - √5 > (1 - √5)/2 since 4 - 2√5 > 1 - √5 iff 3 > √5, true. -/
 lemma c_lower_word3_gt_c_upper_restricted : c_lower_word3 > (1 - √5) / 2 := by
   unfold c_lower_word3
-
+  -- 2 - √5 > (1 - √5)/2 iff 4 - 2√5 > 1 - √5 iff 3 > √5 iff 9 > 5
   have h_sqrt5_lt_3 : √5 < 3 := by nlinarith [sqrt5_sq]
   linarith
 
+/-! ### z1 helper lemmas -/
+
+/-- Re(ζ₅⁴ - 2) = (√5 - 9)/4 -/
 lemma A_w3_z1_re : (ζ₅^4 - 2 : ℂ).re = (√5 - 9) / 4 := by
   simp only [Complex.sub_re]
   have h2re : (2 : ℂ).re = 2 := by rfl
   rw [h2re, zeta5_pow4_re]
   ring
 
+/-- Im(ζ₅⁴ - 2) = -sin(2π/5) -/
 lemma A_w3_z1_im : (ζ₅^4 - 2 : ℂ).im = -Real.sin (2 * π / 5) := by
   simp only [Complex.sub_im]
   have h2im : (2 : ℂ).im = 0 := by rfl
   rw [h2im, zeta5_pow4_im']
   ring
 
+/-- ||ζ₅⁴ - 2||² = ((√5-9)/4)² + sin²(2π/5) = (86 - 18√5)/16 + (5+√5)/8 = (96 - 16√5)/16 = 6 - √5 -/
 lemma normSq_A_w3_z1 : Complex.normSq (ζ₅^4 - 2) = 6 - √5 := by
   rw [Complex.normSq_apply, A_w3_z1_re, A_w3_z1_im]
   have h_sin_sq : Real.sin (2 * π / 5)^2 = (5 + √5) / 8 := sin_sq_two_pi_div_5
@@ -39,6 +71,7 @@ lemma normSq_A_w3_z1 : Complex.normSq (ζ₅^4 - 2) = 6 - √5 := by
   have h_neg_sq : (-Real.sin (2 * π / 5))^2 = Real.sin (2 * π / 5)^2 := by ring
   grind
 
+/-- Re((ζ₅⁴ - 2) * conj(1 - ζ₅)) = (2√5 - 5) / 2 -/
 lemma re_A_w3_z1_mul_conj_B :
     ((ζ₅^4 - 2 : ℂ) * starRingEnd ℂ (1 - ζ₅)).re = (2*√5 - 5) / 2 := by
   rw [conj_B4]
@@ -54,32 +87,45 @@ lemma re_A_w3_z1_mul_conj_B :
   rw [zeta5_pow4_re, zeta5_cubed_re]
   ring
 
+/-- The vertex of f(c) = ||A + cB||² where A = ζ₅⁴ - 2, B = 1 - ζ₅.
+    vertex = -Re(A*conj(B))/||B||² = -((2√5-5)/2) / ((5-√5)/2) = (5-2√5)/(5-√5)
+           = (5-2√5)(5+√5)/((5-√5)(5+√5)) = (25+5√5-10√5-10)/20 = (15-5√5)/20 = (3-√5)/4 -/
 lemma w3_z1_vertex : -(((2*√5 - 5) / 2) / ((5 - √5) / 2)) = (3 - √5) / 4 := by
   have h_5_minus_sqrt5_ne : 5 - √5 ≠ 0 := by nlinarith [Real.sqrt_nonneg 5, sqrt5_sq]
   field_simp
   nlinarith [sqrt5_sq]
 
+/-- The vertex (3-√5)/4 ≈ 0.19 is in the interior of [2-√5, 1] = [-0.236, 1],
+    so the parabola achieves max at one of the endpoints -/
 lemma w3_z1_vertex_in_interval : (2 - √5) < (3 - √5) / 4 ∧ (3 - √5) / 4 < 1 := by
   constructor <;> nlinarith [Real.sqrt_nonneg 5, sqrt5_sq]
 
+/-- At c = 2 - √5:
+    A + cB = (ζ₅⁴ - 2) + (2-√5)(1 - ζ₅)
+           = ζ₅⁴ - 2 + (2-√5) - (2-√5)ζ₅
+           = ζ₅⁴ - √5 - (2-√5)ζ₅ -/
 lemma A_w3_z1_at_c_lower : (ζ₅^4 - 2 : ℂ) + (c_lower_word3 : ℂ) * (1 - ζ₅) =
     ζ₅^4 - (2 - √5)*ζ₅ - √5 := by
   unfold c_lower_word3
   push_cast
   ring
 
+/-- At c = 1: A + B = (ζ₅⁴ - 2) + (1 - ζ₅) = ζ₅⁴ - ζ₅ - 1 -/
 lemma A_w3_z1_at_c_one : (ζ₅^4 - 2 : ℂ) + (1 : ℂ) * (1 - ζ₅) = ζ₅^4 - ζ₅ - 1 := by ring
 
+/-- Re(ζ₅⁴ - ζ₅ - 1) = (√5-1)/4 - (√5-1)/4 - 1 = -1 -/
 lemma w3_z1_at_one_re : (ζ₅^4 - ζ₅ - 1 : ℂ).re = -1 := by
   simp only [Complex.sub_re, Complex.one_re]
   rw [zeta5_pow4_re, zeta5_re]
   ring
 
+/-- Im(ζ₅⁴ - ζ₅ - 1) = -sin(2π/5) - sin(2π/5) = -2sin(2π/5) -/
 lemma w3_z1_at_one_im : (ζ₅^4 - ζ₅ - 1 : ℂ).im = -2 * Real.sin (2 * π / 5) := by
   simp only [Complex.sub_im, Complex.one_im]
   rw [zeta5_pow4_im', zeta5_im_eq_sin]
   ring
 
+/-- |ζ₅⁴ - ζ₅ - 1|² = 1 + 4sin²(2π/5) = (7+√5)/2 = 3 + φ -/
 lemma normSq_w3_z1_at_one : Complex.normSq (ζ₅^4 - ζ₅ - 1) = 3 + φ := by
   rw [Complex.normSq_apply, w3_z1_at_one_re, w3_z1_at_one_im]
   have h_sin_sq : Real.sin (2 * π / 5)^2 = (5 + √5) / 8 := sin_sq_two_pi_div_5
@@ -92,6 +138,7 @@ lemma normSq_w3_z1_at_one : Complex.normSq (ζ₅^4 - ζ₅ - 1) = 3 + φ := by
     _ = 3 + (1 + √5) / 2 := by ring
     _ = 3 + φ := by unfold φ Real.goldenRatio; ring
 
+/-- Re(ζ₅⁴ - (2-√5)ζ₅ - √5) = (√5-1)/4 - (2-√5)(√5-1)/4 - √5 = 3(1-√5)/2 -/
 lemma w3_z1_at_lower_re : (ζ₅^4 - (2 - √5)*ζ₅ - √5 : ℂ).re = 3 * (1 - √5) / 2 := by
   have h_expr : (ζ₅^4 - (2 - √5)*ζ₅ - √5 : ℂ) = ζ₅^4 - ((2 - √5 : ℝ) : ℂ) * ζ₅ - (√5 : ℂ) := by
     push_cast; ring
@@ -100,6 +147,7 @@ lemma w3_z1_at_lower_re : (ζ₅^4 - (2 - √5)*ζ₅ - √5 : ℂ).re = 3 * (1 
   rw [zeta5_pow4_re, zeta5_re]
   nlinarith [sqrt5_sq]
 
+/-- Im(ζ₅⁴ - (2-√5)ζ₅ - √5) = -sin(2π/5) - (2-√5)sin(2π/5) = -(3-√5)sin(2π/5) -/
 lemma w3_z1_at_lower_im : (ζ₅^4 - (2 - √5)*ζ₅ - √5 : ℂ).im = -(3 - √5) * Real.sin (2 * π / 5) := by
   have h_expr : (ζ₅^4 - (2 - √5)*ζ₅ - √5 : ℂ) = ζ₅^4 - ((2 - √5 : ℝ) : ℂ) * ζ₅ - (√5 : ℂ) := by
     push_cast; ring
@@ -108,6 +156,7 @@ lemma w3_z1_at_lower_im : (ζ₅^4 - (2 - √5)*ζ₅ - √5 : ℂ).im = -(3 - �
   rw [zeta5_pow4_im', zeta5_im_eq_sin]
   ring
 
+/-- |ζ₅⁴ - (2-√5)ζ₅ - √5|² = (37 - 13√5)/2 < 3 + φ -/
 lemma normSq_w3_z1_at_lower : Complex.normSq (ζ₅^4 - (2 - √5)*ζ₅ - √5) ≤ 3 + φ := by
   rw [Complex.normSq_apply, w3_z1_at_lower_re, w3_z1_at_lower_im]
   have h_sin_sq : Real.sin (2 * π / 5)^2 = (5 + √5) / 8 := sin_sq_two_pi_div_5
@@ -115,6 +164,9 @@ lemma normSq_w3_z1_at_lower : Complex.normSq (ζ₅^4 - (2 - √5)*ζ₅ - √5)
   unfold φ Real.goldenRatio
   nlinarith [sqrt5_sq, Real.sqrt_nonneg 5, h_sin_sq, sq_nonneg (Real.sin (2 * π / 5))]
 
+/-! ### z2 helper lemmas -/
+
+/-- Re(2 + ζ₅³ - 2ζ₅⁴) = (9 - 3√5)/4 -/
 lemma A_w3_z2_re : ((2 : ℂ) + ζ₅^3 - 2*ζ₅^4).re = (9 - 3*√5) / 4 := by
   have h2re : (2 : ℂ).re = 2 := rfl
   simp only [Complex.add_re, Complex.sub_re, Complex.mul_re, h2re]
@@ -123,6 +175,7 @@ lemma A_w3_z2_re : ((2 : ℂ) + ζ₅^3 - 2*ζ₅^4).re = (9 - 3*√5) / 4 := by
   rw [zeta5_cubed_re, zeta5_pow4_re]
   ring
 
+/-- Im(2 + ζ₅³ - 2ζ₅⁴) = 2*sin(2π/5) - sin(π/5) -/
 lemma A_w3_z2_im : ((2 : ℂ) + ζ₅^3 - 2*ζ₅^4).im = 2 * Real.sin (2 * π / 5) - Real.sin (π / 5) := by
   have h2im : (2 : ℂ).im = 0 := rfl
   have h2re : (2 : ℂ).re = 2 := rfl
@@ -130,6 +183,7 @@ lemma A_w3_z2_im : ((2 : ℂ) + ζ₅^3 - 2*ζ₅^4).im = 2 * Real.sin (2 * π /
   rw [zeta5_cubed_im_eq, zeta5_pow4_im]
   ring
 
+/-- |2 + ζ₅³ - 2ζ₅⁴|² = 11 - 4√5 -/
 lemma normSq_A_w3_z2 : Complex.normSq ((2 : ℂ) + ζ₅^3 - 2*ζ₅^4) = 11 - 4*√5 := by
   rw [Complex.normSq_apply, A_w3_z2_re, A_w3_z2_im]
   have h_sin_double : Real.sin (2 * π / 5) = Real.sin (π / 5) * (1 + √5) / 2 := by
@@ -144,12 +198,14 @@ lemma normSq_A_w3_z2 : Complex.normSq ((2 : ℂ) + ζ₅^3 - 2*ζ₅^4) = 11 - 4
   have h_im_sq : (Real.sin (π / 5) * √5)^2 = Real.sin (π / 5)^2 * 5 := by grind
   grind
 
+/-- conj(ζ₅⁴ - 1) = ζ₅ - 1 -/
 lemma conj_B3 : starRingEnd ℂ (ζ₅^4 - 1) = ζ₅ - 1 := by
   simp only [map_sub, map_one, map_pow, zeta5_conj]
   calc (ζ₅^4)^4 - 1 = ζ₅^16 - 1 := by ring
     _ = ζ₅^(16 % 5) - 1 := by rw [zeta5_pow_reduce 16]
     _ = ζ₅ - 1 := by norm_num
 
+/-- Re((2 + ζ₅³ - 2ζ₅⁴) * conj(ζ₅⁴ - 1)) = (3√5 - 10)/2 -/
 lemma re_A_w3_z2_mul_conj_B :
     (((2 : ℂ) + ζ₅^3 - 2*ζ₅^4) * starRingEnd ℂ (ζ₅^4 - 1)).re = (3*√5 - 10) / 2 := by
   rw [conj_B3]
@@ -169,27 +225,35 @@ lemma re_A_w3_z2_mul_conj_B :
   rw [zeta5_re, zeta5_pow4_re, zeta5_cubed_re]
   ring
 
+/-- The vertex of f(c) = |A + cB|² where A = 2 + ζ₅³ - 2ζ₅⁴, B = ζ₅⁴ - 1.
+    vertex = -Re(A*conj(B))/|B|² = -((3√5-10)/2) / ((5-√5)/2) = (10-3√5)/(5-√5)
+           = (10-3√5)(5+√5)/20 = (50+10√5-15√5-15)/20 = (35-5√5)/20 = (7-√5)/4 -/
 lemma w3_z2_vertex : -(((3*√5 - 10) / 2) / ((5 - √5) / 2)) = (7 - √5) / 4 := by
   have h_5_minus_sqrt5_ne : 5 - √5 ≠ 0 := by nlinarith [Real.sqrt_nonneg 5, sqrt5_sq]
   have h_denom_ne : (5 - √5) / 2 ≠ 0 := by grind
   grind
 
+/-- The vertex (7-√5)/4 ≈ 1.19 > 1, so it is above the interval [2-√5, 1] -/
 lemma w3_z2_vertex_above_interval : (7 - √5) / 4 > 1 := by
   nlinarith [sqrt5_sq]
 
+/-- At c = 1: A + B = (2 + ζ₅³ - 2ζ₅⁴) + (ζ₅⁴ - 1) = 1 + ζ₅³ - ζ₅⁴ -/
 lemma w3_z2_at_one_expr : ((2 : ℂ) + ζ₅^3 - 2*ζ₅^4) + (1 : ℂ) * (ζ₅^4 - 1) = 1 + ζ₅^3 - ζ₅^4 := by
   ring
 
+/-- Re(1 + ζ₅³ - ζ₅⁴) = 1 + (-(√5+1)/4) - (√5-1)/4 = 1 - √5/2 = (2-√5)/2 -/
 lemma w3_z2_at_one_re : ((1 : ℂ) + ζ₅^3 - ζ₅^4).re = (2 - √5) / 2 := by
   simp only [Complex.add_re, Complex.sub_re, Complex.one_re]
   rw [zeta5_cubed_re, zeta5_pow4_re]
   ring
 
+/-- Im(1 + ζ₅³ - ζ₅⁴) = -sin(π/5) + sin(2π/5) -/
 lemma w3_z2_at_one_im : ((1 : ℂ) + ζ₅^3 - ζ₅^4).im = Real.sin (2 * π / 5) - Real.sin (π / 5) := by
   simp only [Complex.add_im, Complex.sub_im, Complex.one_im]
   rw [zeta5_cubed_im_eq, zeta5_pow4_im]
   ring
 
+/-- |1 + ζ₅³ - ζ₅⁴|² ≤ 3 + φ -/
 lemma normSq_w3_z2_at_one : Complex.normSq ((1 : ℂ) + ζ₅^3 - ζ₅^4) ≤ 3 + φ := by
   rw [Complex.normSq_apply, w3_z2_at_one_re, w3_z2_at_one_im]
   have h_sin_double : Real.sin (2 * π / 5) = Real.sin (π / 5) * (1 + √5) / 2 := by
@@ -204,22 +268,26 @@ lemma normSq_w3_z2_at_one : Complex.normSq ((1 : ℂ) + ζ₅^3 - ζ₅^4) ≤ 3
   unfold φ Real.goldenRatio
   nlinarith [sqrt5_sq, Real.sqrt_nonneg 5, h_sin_sq, sq_nonneg (Real.sin (π / 5))]
 
+/-- At c = 2-√5: A + (2-√5)B = √5 + ζ₅³ - √5*ζ₅⁴ -/
 lemma w3_z2_at_lower_expr : ((2 : ℂ) + ζ₅^3 - 2*ζ₅^4) + ((2 - √5 : ℝ) : ℂ) * (ζ₅^4 - 1) =
     (√5 : ℂ) + ζ₅^3 - (√5 : ℂ) * ζ₅^4 := by
   push_cast
   ring
 
+/-- Re(√5 + ζ₅³ - √5*ζ₅⁴) = (2√5 - 3)/2 -/
 lemma w3_z2_at_lower_re : ((√5 : ℂ) + ζ₅^3 - (√5 : ℂ) * ζ₅^4).re = (2*√5 - 3) / 2 := by
   simp only [Complex.add_re, Complex.sub_re, Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im]
   rw [zeta5_cubed_re, zeta5_pow4_re]
   nlinarith [sqrt5_sq]
 
+/-- Im(√5 + ζ₅³ - √5*ζ₅⁴) = √5*sin(2π/5) - sin(π/5) -/
 lemma w3_z2_at_lower_im : ((√5 : ℂ) + ζ₅^3 - (√5 : ℂ) * ζ₅^4).im =
     √5 * Real.sin (2 * π / 5) - Real.sin (π / 5) := by
   simp only [Complex.add_im, Complex.sub_im, Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im]
   rw [zeta5_cubed_im_eq, zeta5_pow4_im]
   ring
 
+/-- |√5 + ζ₅³ - √5*ζ₅⁴|² ≤ 3 + φ -/
 lemma normSq_w3_z2_at_lower : Complex.normSq ((√5 : ℂ) + ζ₅^3 - (√5 : ℂ) * ζ₅^4) ≤ 3 + φ := by
   rw [Complex.normSq_apply, w3_z2_at_lower_re, w3_z2_at_lower_im]
   have h_sin_double : Real.sin (2 * π / 5) = Real.sin (π / 5) * (1 + √5) / 2 := by
@@ -237,6 +305,9 @@ lemma normSq_w3_z2_at_lower : Complex.normSq ((√5 : ℂ) + ζ₅^3 - (√5 : �
   unfold φ Real.goldenRatio
   nlinarith [sqrt5_sq, Real.sqrt_nonneg 5, h_sin_sq, sq_nonneg (Real.sin (π / 5))]
 
+/-! ### z3 helper lemmas -/
+
+/-- Re(-2 + ζ₅² - 2*ζ₅³ + 2*ζ₅⁴) = (3√5 - 9)/4 -/
 lemma A_w3_z3_re : ((-2 : ℂ) + ζ₅^2 - 2*ζ₅^3 + 2*ζ₅^4).re = (3*√5 - 9) / 4 := by
   have h2re : (2 : ℂ).re = 2 := rfl
   have h2im : (2 : ℂ).im = 0 := rfl
@@ -245,6 +316,7 @@ lemma A_w3_z3_re : ((-2 : ℂ) + ζ₅^2 - 2*ζ₅^3 + 2*ζ₅^4).re = (3*√5 -
   rw [zeta5_sq_re, zeta5_cubed_re, zeta5_pow4_re]
   ring
 
+/-- Im(-2 + ζ₅² - 2*ζ₅³ + 2*ζ₅⁴) = 3*sin(π/5) - 2*sin(2π/5) -/
 lemma A_w3_z3_im : ((-2 : ℂ) + ζ₅^2 - 2*ζ₅^3 + 2*ζ₅^4).im =
     3 * Real.sin (π / 5) - 2 * Real.sin (2 * π / 5) := by
   have h2re : (2 : ℂ).re = 2 := rfl
@@ -254,6 +326,7 @@ lemma A_w3_z3_im : ((-2 : ℂ) + ζ₅^2 - 2*ζ₅^3 + 2*ζ₅^4).im =
   rw [zeta5_sq_im', zeta5_cubed_im', zeta5_pow4_im']
   ring
 
+/-- |A|² for A = -2 + ζ₅² - 2*ζ₅³ + 2*ζ₅⁴ = 16 - 7√5 -/
 lemma normSq_A_w3_z3 : Complex.normSq ((-2 : ℂ) + ζ₅^2 - 2*ζ₅^3 + 2*ζ₅^4) = 16 - 7*√5 := by
   rw [Complex.normSq_apply, A_w3_z3_re, A_w3_z3_im]
   have h_sin_double : Real.sin (2 * π / 5) = Real.sin (π / 5) * (1 + √5) / 2 := by
@@ -269,6 +342,7 @@ lemma normSq_A_w3_z3 : Complex.normSq ((-2 : ℂ) + ζ₅^2 - 2*ζ₅^3 + 2*ζ�
   rw [h_im_simp]
   nlinarith [sqrt5_sq, Real.sqrt_nonneg 5, h_sin_sq, sq_nonneg (Real.sin (π / 5))]
 
+/-- conj(ζ₅³ - ζ₅⁴) = ζ₅² - ζ₅ -/
 lemma conj_B_z3 : starRingEnd ℂ (ζ₅^3 - ζ₅^4) = ζ₅^2 - ζ₅ := by
   rw [map_sub]
   have h3 : starRingEnd ℂ (ζ₅^3) = ζ₅^2 := by
@@ -281,6 +355,7 @@ lemma conj_B_z3 : starRingEnd ℂ (ζ₅^3 - ζ₅^4) = ζ₅^2 - ζ₅ := by
       _ = ζ₅ := zeta5_pow_sixteen
   rw [h3, h4]
 
+/-- Re(A * conj(B)) = (5√5 - 10)/2 for A = -2 + ζ₅² - 2*ζ₅³ + 2*ζ₅⁴, B = ζ₅³ - ζ₅⁴ -/
 lemma re_A_w3_z3_mul_conj_B :
     (((-2 : ℂ) + ζ₅^2 - 2*ζ₅^3 + 2*ζ₅^4) * starRingEnd ℂ (ζ₅^3 - ζ₅^4)).re = (5*√5 - 10) / 2 := by
   rw [conj_B_z3]
@@ -302,23 +377,28 @@ lemma re_A_w3_z3_mul_conj_B :
   rw [zeta5_re, zeta5_sq_re, zeta5_cubed_re, zeta5_pow4_re]
   ring
 
+/-- Vertex of quadratic f(c) = |A + cB|² is at (5 - 3√5)/4 -/
 lemma w3_z3_vertex : -(((5*√5 - 10) / 2) / ((5 - √5) / 2)) = (5 - 3*√5) / 4 := by
   have h_denom_ne : 5 - √5 ≠ 0 := by grind
   field_simp
   nlinarith [sqrt5_sq, Real.sqrt_nonneg 5]
 
+/-- The vertex (5 - 3√5)/4 ≈ -0.427 is below the interval [2-√5, 1], since 2-√5 ≈ -0.236 -/
 lemma w3_z3_vertex_below_interval : (5 - 3*√5) / 4 < 2 - √5 := by
   nlinarith [sqrt5_sq]
 
+/-- Expression at c = 1: A + B = -2 + ζ₅² - 2ζ₅³ + 2ζ₅⁴ + ζ₅³ - ζ₅⁴ = -2 + ζ₅² - ζ₅³ + ζ₅⁴ -/
 lemma w3_z3_at_one_expr : ((-2 : ℂ) + ζ₅^2 - 2*ζ₅^3 + 2*ζ₅^4) + (1 : ℂ) * (ζ₅^3 - ζ₅^4) =
     -2 + ζ₅^2 - ζ₅^3 + ζ₅^4 := by ring
 
+/-- Re(-2 + ζ₅² - ζ₅³ + ζ₅⁴) = (√5 - 9)/4 -/
 lemma w3_z3_at_one_re : ((-2 : ℂ) + ζ₅^2 - ζ₅^3 + ζ₅^4).re = (√5 - 9) / 4 := by
   simp only [Complex.add_re, Complex.sub_re, Complex.neg_re]
   have h2re : (2 : ℂ).re = 2 := rfl
   rw [h2re, zeta5_sq_re, zeta5_cubed_re, zeta5_pow4_re]
   ring
 
+/-- Im(-2 + ζ₅² - ζ₅³ + ζ₅⁴) = 2*sin(π/5) - sin(2π/5) -/
 lemma w3_z3_at_one_im : ((-2 : ℂ) + ζ₅^2 - ζ₅^3 + ζ₅^4).im =
     2 * Real.sin (π / 5) - Real.sin (2 * π / 5) := by
   simp only [Complex.add_im, Complex.sub_im, Complex.neg_im]
@@ -326,6 +406,7 @@ lemma w3_z3_at_one_im : ((-2 : ℂ) + ζ₅^2 - ζ₅^3 + ζ₅^4).im =
   rw [h2im, zeta5_sq_im', zeta5_cubed_im', zeta5_pow4_im']
   ring
 
+/-- |A + B|² at c=1 ≤ 3+φ -/
 lemma normSq_w3_z3_at_one : Complex.normSq ((-2 : ℂ) + ζ₅^2 - ζ₅^3 + ζ₅^4) ≤ 3 + φ := by
   rw [Complex.normSq_apply, w3_z3_at_one_re, w3_z3_at_one_im]
   have h_sin_double : Real.sin (2 * π / 5) = Real.sin (π / 5) * (1 + √5) / 2 := by
@@ -347,12 +428,14 @@ lemma normSq_w3_z3_at_one : Complex.normSq ((-2 : ℂ) + ζ₅^2 - ζ₅^3 + ζ�
   unfold φ
   nlinarith [sqrt5_sq, Real.sqrt_nonneg 5, Real.goldenRatio_pos]
 
+/-- Expression at c = 2-√5 -/
 lemma w3_z3_at_lower_expr :
     ((-2 : ℂ) + ζ₅^2 - 2*ζ₅^3 + 2*ζ₅^4) + ((2 - √5 : ℝ) : ℂ) * (ζ₅^3 - ζ₅^4) =
     (-2 : ℂ) + ζ₅^2 - (√5 : ℂ) * ζ₅^3 + (√5 : ℂ) * ζ₅^4 := by
   push_cast
   ring
 
+/-- Re at c = 2-√5: (1 - √5)/4 -/
 lemma w3_z3_at_lower_re :
     ((-2 : ℂ) + ζ₅^2 - (√5 : ℂ) * ζ₅^3 + (√5 : ℂ) * ζ₅^4).re = (1 - √5) / 4 := by
   simp only [Complex.add_re, Complex.sub_re, Complex.neg_re, Complex.mul_re,
@@ -361,6 +444,7 @@ lemma w3_z3_at_lower_re :
   rw [h2re, zeta5_sq_re, zeta5_cubed_re, zeta5_pow4_re]
   nlinarith [sqrt5_sq]
 
+/-- Im at c = 2-√5 -/
 lemma w3_z3_at_lower_im :
     ((-2 : ℂ) + ζ₅^2 - (√5 : ℂ) * ζ₅^3 + (√5 : ℂ) * ζ₅^4).im =
     Real.sin (π / 5) * (√5 - 3) / 2 := by
@@ -384,6 +468,7 @@ lemma w3_z3_at_lower_im :
       _ = s * (√5 - 3) / 2 := by ring
   convert h_factor using 1; ring
 
+/-- |A + (2-√5)*B|² ≤ 3+φ -/
 lemma normSq_w3_z3_at_lower :
     Complex.normSq ((-2 : ℂ) + ζ₅^2 - (√5 : ℂ) * ζ₅^3 + (√5 : ℂ) * ζ₅^4) ≤ 3 + φ := by
   rw [Complex.normSq_apply, w3_z3_at_lower_re, w3_z3_at_lower_im]
@@ -397,6 +482,9 @@ lemma normSq_w3_z3_at_lower :
   unfold φ
   nlinarith [sqrt5_sq, Real.sqrt_nonneg 5, Real.goldenRatio_pos]
 
+/-! ### z4 helper lemmas -/
+
+/-- Re(4 - 2*ζ₅ + ζ₅³ - 2*ζ₅⁴) = (19 - 5√5)/4 -/
 lemma A_w3_z4_re : ((4 : ℂ) - 2*ζ₅ + ζ₅^3 - 2*ζ₅^4).re = (19 - 5*√5) / 4 := by
   have h4re : (4 : ℂ).re = 4 := rfl
   have h4im : (4 : ℂ).im = 0 := rfl
@@ -406,6 +494,7 @@ lemma A_w3_z4_re : ((4 : ℂ) - 2*ζ₅ + ζ₅^3 - 2*ζ₅^4).re = (19 - 5*√5
   rw [zeta5_re, zeta5_cubed_re, zeta5_pow4_re]
   ring
 
+/-- Im(4 - 2*ζ₅ + ζ₅³ - 2*ζ₅⁴) = -sin(π/5) -/
 lemma A_w3_z4_im : ((4 : ℂ) - 2*ζ₅ + ζ₅^3 - 2*ζ₅^4).im = -Real.sin (π / 5) := by
   have h4im : (4 : ℂ).im = 0 := Complex.ofReal_im 4
   have h2re : (2 : ℂ).re = 2 := Complex.ofReal_re 2
@@ -418,6 +507,7 @@ lemma A_w3_z4_im : ((4 : ℂ) - 2*ζ₅ + ζ₅^3 - 2*ζ₅^4).im = -Real.sin (�
   rw [h_sin6]
   ring
 
+/-- ||A_w3_z4||² = 31 - 12√5 -/
 lemma normSq_A_w3_z4 : Complex.normSq ((4 : ℂ) - 2*ζ₅ + ζ₅^3 - 2*ζ₅^4) = 31 - 12*√5 := by
   rw [Complex.normSq_apply, A_w3_z4_re, A_w3_z4_im]
   have h_sin_sq : Real.sin (π / 5)^2 = (5 - √5) / 8 := sin_sq_pi_div_5
@@ -425,6 +515,7 @@ lemma normSq_A_w3_z4 : Complex.normSq ((4 : ℂ) - 2*ζ₅ + ζ₅^3 - 2*ζ₅^4
   rw [neg_sq, h_sin_sq]
   nlinarith [sqrt5_sq]
 
+/-- Re((4 - 2*ζ₅ + ζ₅³ - 2*ζ₅⁴) * conj(ζ₅⁴ - 1)) = (6√5 - 15)/2 -/
 lemma re_A_w3_z4_mul_conj_B : (((4 : ℂ) - 2*ζ₅ + ζ₅^3 - 2*ζ₅^4) * starRingEnd ℂ (ζ₅^4 - 1)).re =
     (6*√5 - 15) / 2 := by
   rw [conj_B3]
@@ -444,14 +535,17 @@ lemma re_A_w3_z4_mul_conj_B : (((4 : ℂ) - 2*ζ₅ + ζ₅^3 - 2*ζ₅^4) * sta
   rw [h_expand, h_sin_sq]
   nlinarith [sqrt5_sq]
 
+/-- Vertex of z4 quadratic is at c_v = (15 - 6√5)/(5 - √5) ≈ 0.57 -/
 lemma w3_z4_vertex : -(((6*√5 - 15) / 2) / ((5 - √5) / 2)) = (15 - 6*√5) / (5 - √5) := by
   have h_denom_ne : (5 - √5) / 2 ≠ 0 := by grind
   field_simp
   ring
 
+/-- At c=1: A + B = (4 - 2*ζ₅ + ζ₅³ - 2*ζ₅⁴) + (ζ₅⁴ - 1) = 3 - 2*ζ₅ + ζ₅³ - ζ₅⁴ -/
 lemma w3_z4_at_one_expr : ((4 : ℂ) - 2*ζ₅ + ζ₅^3 - 2*ζ₅^4) + (1 : ℂ) * (ζ₅^4 - 1) =
     3 - 2*ζ₅ + ζ₅^3 - ζ₅^4 := by ring
 
+/-- Re(3 - 2*ζ₅ + ζ₅³ - ζ₅⁴) = 7/2 - √5 -/
 lemma w3_z4_at_one_re : ((3 : ℂ) - 2*ζ₅ + ζ₅^3 - ζ₅^4).re = 7/2 - √5 := by
   have h3re : (3 : ℂ).re = 3 := by norm_num
   have h2re : (2 : ℂ).re = 2 := by norm_num
@@ -460,6 +554,7 @@ lemma w3_z4_at_one_re : ((3 : ℂ) - 2*ζ₅ + ζ₅^3 - ζ₅^4).re = 7/2 - √
     zeta5_cubed_re, zeta5_pow4_re]
   ring
 
+/-- Im(3 - 2*ζ₅ + ζ₅³ - ζ₅⁴) = -sin(2π/5) - sin(π/5) -/
 lemma w3_z4_at_one_im : ((3 : ℂ) - 2*ζ₅ + ζ₅^3 - ζ₅^4).im =
     -Real.sin (2 * π / 5) - Real.sin (π / 5) := by
   have h3im : (3 : ℂ).im = 0 := by norm_num
@@ -472,6 +567,7 @@ lemma w3_z4_at_one_im : ((3 : ℂ) - 2*ζ₅ + ζ₅^3 - ζ₅^4).im =
   rw [h_sin6]
   ring
 
+/-- ||3 - 2*ζ₅ + ζ₅³ - ζ₅⁴||² ≤ 3 + φ -/
 lemma normSq_w3_z4_at_one : Complex.normSq ((3 : ℂ) - 2*ζ₅ + ζ₅^3 - ζ₅^4) ≤ 3 + φ := by
   rw [Complex.normSq_apply, w3_z4_at_one_re, w3_z4_at_one_im]
   have h_sin_double : Real.sin (2 * π / 5) = Real.sin (π / 5) * (1 + √5) / 2 := by
@@ -490,6 +586,9 @@ lemma normSq_w3_z4_at_one : Complex.normSq ((3 : ℂ) - 2*ζ₅ + ζ₅^3 - ζ�
   unfold φ Real.goldenRatio
   nlinarith [sqrt5_sq, Real.sqrt_nonneg 5, sq_nonneg (7*√5 - 15)]
 
+/-! ### z5 helper lemmas -/
+
+/-- Re(-4 + 4*ζ₅ - 2*ζ₅² + ζ₅⁴) = (7√5 - 19)/4 -/
 lemma A_w3_z5_re : ((-4 : ℂ) + 4*ζ₅ - 2*ζ₅^2 + ζ₅^4).re = (7*√5 - 19) / 4 := by
   have h4re : (4 : ℂ).re = 4 := by rfl
   have h4im : (4 : ℂ).im = 0 := by rfl
@@ -500,6 +599,7 @@ lemma A_w3_z5_re : ((-4 : ℂ) + 4*ζ₅ - 2*ζ₅^2 + ζ₅^4).re = (7*√5 - 1
   rw [zeta5_re, zeta5_sq_re, zeta5_pow4_re]
   ring
 
+/-- Im(-4 + 4*ζ₅ - 2*ζ₅² + ζ₅⁴) = 3*sin(2π/5) - 2*sin(π/5) -/
 lemma A_w3_z5_im : ((-4 : ℂ) + 4*ζ₅ - 2*ζ₅^2 + ζ₅^4).im =
     3 * Real.sin (2 * π / 5) - 2 * Real.sin (π / 5) := by
   have h4im : (4 : ℂ).im = 0 := Complex.ofReal_im 4
@@ -511,6 +611,7 @@ lemma A_w3_z5_im : ((-4 : ℂ) + 4*ζ₅ - 2*ζ₅^2 + ζ₅^4).im =
              zeta5_im_eq_sin, zeta5_sq_im_eq, zeta5_pow4_im]
   ring
 
+/-- ||A_w3_z5||² = 46 - 19√5 -/
 lemma normSq_A_w3_z5 : Complex.normSq ((-4 : ℂ) + 4*ζ₅ - 2*ζ₅^2 + ζ₅^4) = 46 - 19*√5 := by
   rw [Complex.normSq_apply, A_w3_z5_re, A_w3_z5_im]
   have h_sin_double : Real.sin (2 * π / 5) = Real.sin (π / 5) * (1 + √5) / 2 := by
@@ -531,6 +632,7 @@ lemma normSq_A_w3_z5 : Complex.normSq ((-4 : ℂ) + 4*ζ₅ - 2*ζ₅^2 + ζ₅^
   rw [h_re_sq, h_im_sq, h_sin_sq, h_factor]
   nlinarith [sqrt5_sq, Real.sqrt_nonneg 5]
 
+/-- Re(A_w3_z5 * conj(B)) = (7√5 - 20)/2 -/
 lemma re_A_w3_z5_mul_conj_B :
     (((-4 : ℂ) + 4*ζ₅ - 2*ζ₅^2 + ζ₅^4) * starRingEnd ℂ (1 - ζ₅)).re = (7*√5 - 20) / 2 := by
   rw [conj_B4]
@@ -555,6 +657,7 @@ lemma re_A_w3_z5_mul_conj_B :
   rw [zeta5_re, zeta5_sq_re, zeta5_cubed_re, zeta5_pow4_re]
   ring
 
+/-- The vertex is at (95 - 37√5)/20 -/
 lemma w3_z5_vertex : -(((14*√5 - 33) / 2) / ((5 - √5) / 2)) = (95 - 37*√5) / 20 := by
   have h_5_minus_sqrt5_ne : 5 - √5 ≠ 0 := by nlinarith [Real.sqrt_nonneg 5, sqrt5_sq]
   have h_denom_ne : (5 - √5) / 2 ≠ 0 := by
@@ -564,12 +667,15 @@ lemma w3_z5_vertex : -(((14*√5 - 33) / 2) / ((5 - √5) / 2)) = (95 - 37*√5)
   field_simp
   nlinarith [sqrt5_sq]
 
+/-- The correct vertex is (65 - 15√5)/20 ≈ 1.575 > 1 -/
 lemma w3_z5_vertex_above_interval : (65 - 15*√5) / 20 > 1 := by
   nlinarith [sqrt5_sq]
 
+/-- At c = 1: A + B = (-4 + 4ζ₅ - 2ζ₅² + ζ₅⁴) + (1 - ζ₅) = -3 + 3ζ₅ - 2ζ₅² + ζ₅⁴ -/
 lemma w3_z5_at_one_expr : ((-4 : ℂ) + 4*ζ₅ - 2*ζ₅^2 + ζ₅^4) + (1 : ℂ) * (1 - ζ₅) =
     -3 + 3*ζ₅ - 2*ζ₅^2 + ζ₅^4 := by ring
 
+/-- Re(-3 + 3ζ₅ - 2ζ₅² + ζ₅⁴) = (6√5 - 14)/4 -/
 lemma w3_z5_at_one_re : ((-3 : ℂ) + 3*ζ₅ - 2*ζ₅^2 + ζ₅^4).re = (6*√5 - 14) / 4 := by
   have h1 : ζ₅.re = (√5 - 1) / 4 := zeta5_re
   have h2 : (ζ₅^2).re = -(√5 + 1) / 4 := zeta5_sq_re
@@ -580,6 +686,7 @@ lemma w3_z5_at_one_re : ((-3 : ℂ) + 3*ζ₅ - 2*ζ₅^2 + ζ₅^4).re = (6*√
   norm_num
   ring
 
+/-- Im(-3 + 3ζ₅ - 2ζ₅² + ζ₅⁴) = 2*sin(2π/5) - 2*sin(π/5) -/
 lemma w3_z5_at_one_im : ((-3 : ℂ) + 3*ζ₅ - 2*ζ₅^2 + ζ₅^4).im =
     2 * Real.sin (2 * π / 5) - 2 * Real.sin (π / 5) := by
   have h1 : ζ₅.re = (√5 - 1) / 4 := zeta5_re
@@ -591,6 +698,7 @@ lemma w3_z5_at_one_im : ((-3 : ℂ) + 3*ζ₅ - 2*ζ₅^2 + ζ₅^4).im =
   norm_num
   ring
 
+/-- ||-3 + 3ζ₅ - 2ζ₅² + ζ₅⁴||² ≤ 3+φ -/
 lemma normSq_w3_z5_at_one : Complex.normSq ((-3 : ℂ) + 3*ζ₅ - 2*ζ₅^2 + ζ₅^4) ≤ 3 + φ := by
   rw [Complex.normSq_apply, w3_z5_at_one_re, w3_z5_at_one_im]
   have h_sin_double : Real.sin (2 * π / 5) = Real.sin (π / 5) * (1 + √5) / 2 := by
@@ -611,11 +719,13 @@ lemma normSq_w3_z5_at_one : Complex.normSq ((-3 : ℂ) + 3*ζ₅ - 2*ζ₅^2 + �
   unfold φ Real.goldenRatio
   nlinarith [sqrt5_sq, Real.sqrt_nonneg 5]
 
+/-- At c = 2-√5: A + (2-√5)B = (-2-√5) + (2+√5)ζ₅ - 2ζ₅² + ζ₅⁴ -/
 lemma w3_z5_at_lower_expr : ((-4 : ℂ) + 4*ζ₅ - 2*ζ₅^2 + ζ₅^4) + ((2 - √5 : ℝ) : ℂ) * (1 - ζ₅) =
     (-2 - √5 : ℂ) + (2 + √5 : ℂ) * ζ₅ - 2*ζ₅^2 + ζ₅^4 := by
   push_cast
   ring
 
+/-- Re((-2-√5) + (2+√5)ζ₅ - 2ζ₅² + ζ₅⁴) = -1 -/
 lemma w3_z5_at_lower_re : ((-2 - √5 : ℂ) + (2 + √5 : ℂ) * ζ₅ - 2*ζ₅^2 + ζ₅^4).re = -1 := by
   have h : ((-2 - √5 : ℂ) + (2 + √5 : ℂ) * ζ₅ - 2*ζ₅^2 + ζ₅^4).re =
       (-2 - √5) + (2 + √5) * ζ₅.re - 2 * (ζ₅^2).re + (ζ₅^4).re := by
@@ -629,6 +739,7 @@ lemma w3_z5_at_lower_re : ((-2 - √5 : ℂ) + (2 + √5 : ℂ) * ζ₅ - 2*ζ�
   rw [h, zeta5_re, zeta5_sq_re, zeta5_pow4_re]
   nlinarith [sqrt5_sq]
 
+/-- Im((-2-√5) + (2+√5)ζ₅ - 2ζ₅² + ζ₅⁴) = sin(π/5)*(1+√5) -/
 lemma w3_z5_at_lower_im : ((-2 - √5 : ℂ) + (2 + √5 : ℂ) * ζ₅ - 2*ζ₅^2 + ζ₅^4).im =
     Real.sin (π / 5) * (1 + √5) := by
   have h : ((-2 - √5 : ℂ) + (2 + √5 : ℂ) * ζ₅ - 2*ζ₅^2 + ζ₅^4).im =
@@ -649,6 +760,7 @@ lemma w3_z5_at_lower_im : ((-2 - √5 : ℂ) + (2 + √5 : ℂ) * ζ₅ - 2*ζ�
   have h_sin_pos : 0 < Real.sin (π / 5) := Real.sin_pos_of_pos_of_lt_pi (by linarith [Real.pi_pos]) (by linarith [Real.pi_pos])
   nlinarith [sqrt5_sq, h_1_plus_sqrt5_sq, h_sin_pos, sq_nonneg (1 + √5)]
 
+/-- |(-2-√5) + (2+√5)ζ₅ - 2ζ₅² + ζ₅⁴|² = 3+φ (equality!) -/
 lemma normSq_w3_z5_at_lower : Complex.normSq ((-2 - √5 : ℂ) + (2 + √5 : ℂ) * ζ₅ - 2*ζ₅^2 + ζ₅^4) ≤ 3 + φ := by
   rw [Complex.normSq_apply, w3_z5_at_lower_re, w3_z5_at_lower_im]
   have h_sin_sq : Real.sin (π / 5)^2 = (5 - √5) / 8 := sin_sq_pi_div_5

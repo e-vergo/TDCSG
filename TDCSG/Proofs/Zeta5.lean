@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2025-10-18 Eric Hearn. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Eric Hearn
+-/
 import TDCSG.Definitions.Core
 import TDCSG.MainTheorem
 import Mathlib.Analysis.SpecialFunctions.Exp
@@ -8,39 +13,80 @@ import Mathlib.Analysis.Normed.Module.Convex
 import Mathlib.Analysis.Complex.Circle
 import Mathlib.Analysis.Complex.Isometry
 
+/-!
+# Fifth Roots of Unity
+
+This file provides all algebraic identities for ζ₅ needed for the GG5 proof.
+
+The core definition `zeta5` and `ζ₅` are in TDCSG.Definitions.Core.
+Here we provide all the lemmas about the 5th root of unity.
+
+The critical constants φ and r_crit are imported from TDCSG.MainTheorem.
+
+## Main Definitions
+
+* `ζ₅`: Unicode alias for `zeta5`, the primitive 5th root of unity e^(2πi/5)
+* `zeta5Circle`: ζ₅ as an element of Mathlib's `Circle` type (unit complex numbers)
+
+## Main Results
+
+* `zeta5_pow_five`: ζ₅^5 = 1
+* `zeta5_isPrimitiveRoot`: ζ₅ is a primitive 5th root of unity
+* `cyclotomic5_sum`: 1 + ζ₅ + ζ₅² + ζ₅³ + ζ₅⁴ = 0
+* `zeta5_abs`: |ζ₅| = 1
+* `circle_exp_two_pi_fifth`: Circle.exp (2π/5) = zeta5Circle
+-/
+
 namespace TDCSG.CompoundSymmetry.GG5
 
 open scoped Complex
 open Complex Real
 open TDCSG.Definitions (ζ₅ zeta5 zeta5Circle zeta5CirclePow zeta5CircleInv φ r_crit)
 
+-- ζ₅ is imported from TDCSG.Definitions.Core via the open statement above
+
+/-! ### Real Number Helpers -/
+
+/-- √5² = 5, tagged for simp to eliminate redundant hypotheses. -/
 @[simp] lemma sqrt5_sq : Real.sqrt 5 ^ 2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
 
+/-- 3 + φ is positive (used for r_crit² positivity). -/
 lemma three_plus_phi_pos : 0 < 3 + φ := by
   unfold φ
   have := Real.goldenRatio_pos
   linarith
 
+/-- 1 + φ is positive. -/
 lemma one_plus_phi_pos : 0 < 1 + φ := by
   unfold φ
   linarith [Real.goldenRatio_pos]
 
+/-- 1 + φ ≠ 0. -/
 lemma one_plus_phi_ne_zero : 1 + φ ≠ 0 := ne_of_gt one_plus_phi_pos
 
+/-- φ ≠ 0. -/
 lemma phi_ne_zero : φ ≠ 0 := ne_of_gt (by unfold φ; exact Real.goldenRatio_pos)
 
+
+/-! ### 5th Roots of Unity -/
+
+/-- ζ₅ is a 5th root of unity. -/
 @[simp] lemma zeta5_pow_five : ζ₅ ^ 5 = 1 := by
   unfold ζ₅ zeta5
   rw [← Complex.exp_nat_mul]
   convert Complex.exp_two_pi_mul_I using 2
   ring
 
+/-- ζ₅^0 = 1 (trivial, but useful for simp completeness). -/
 @[simp] lemma zeta5_pow_zero : ζ₅ ^ 0 = 1 := pow_zero ζ₅
 
+/-- (ζ₅^0).re = 1 -/
 @[simp] lemma zeta5_pow_zero_re : (ζ₅ ^ 0).re = 1 := by simp
 
+/-- (ζ₅^0).im = 0 -/
 @[simp] lemma zeta5_pow_zero_im : (ζ₅ ^ 0).im = 0 := by simp
 
+/-- ζ₅ is not equal to 1. -/
 lemma zeta5_ne_one : ζ₅ ≠ 1 := by
   unfold ζ₅ zeta5
   have : (2 : ℝ) * π / 5 ≠ 0 := by
@@ -76,6 +122,7 @@ lemma zeta5_ne_one : ζ₅ ≠ 1 := by
   have : (1 : ℤ) % 5 = 0 := by rw [← h_int]; simp
   norm_num at this
 
+/-- |ζ₅| = 1 -/
 @[simp] lemma zeta5_abs : ‖ζ₅‖ = 1 := by
   unfold ζ₅ zeta5
   rw [show (2 : ℂ) * π * I / 5 = (2 * π / 5 : ℝ) * I by
@@ -83,22 +130,32 @@ lemma zeta5_ne_one : ζ₅ ≠ 1 := by
     ring]
   exact Complex.norm_exp_ofReal_mul_I (2 * π / 5)
 
+/-- |ζ₅^n| = 1 for any n. Used for showing rotation preserves disk membership. -/
 @[simp] lemma zeta5_abs_pow (n : ℕ) : ‖ζ₅^n‖ = 1 := by
   rw [Complex.norm_pow, zeta5_abs, one_pow]
 
+/-- |ζ₅^4| = 1. Convenience lemma for the common case. -/
 lemma zeta5_abs_pow4 : ‖ζ₅^4‖ = 1 := zeta5_abs_pow 4
 
+/-! ### Primitive Root Infrastructure -/
+
+/-- ζ₅ is a primitive 5th root of unity. -/
 lemma zeta5_isPrimitiveRoot : IsPrimitiveRoot ζ₅ 5 := by
   unfold ζ₅ zeta5
   rw [show (2 : ℂ) * π * I / 5 = 2 * π * I / (5 : ℂ) by norm_cast]
   exact Complex.isPrimitiveRoot_exp 5 (by norm_num)
 
+/-- Powers of ζ₅ less than 5 are not equal to 1. -/
 lemma zeta5_pow_ne_one {k : ℕ} (hk : k ≠ 0) (hk5 : k < 5) : ζ₅ ^ k ≠ 1 :=
   zeta5_isPrimitiveRoot.pow_ne_one_of_pos_of_lt hk hk5
 
+/-- ζ₅^k = 1 if and only if 5 divides k. -/
 lemma zeta5_pow_eq_one_iff {k : ℕ} : ζ₅ ^ k = 1 ↔ 5 ∣ k := by
   exact zeta5_isPrimitiveRoot.pow_eq_one_iff_dvd k
 
+/-! ### Trigonometric Identities -/
+
+/-- The identity cos(2π/5) = (φ - 1)/2. -/
 lemma cos_two_pi_fifth :
     Real.cos (2 * π / 5) = (Real.goldenRatio - 1) / 2 := by
   rw [show (2 * π / 5 : ℝ) = 2 * (π / 5) by ring]
@@ -124,6 +181,7 @@ lemma cos_two_pi_fifth :
       (Real.sqrt 5 - 1) / 4 by
     field_simp; ring]
 
+/-- The conjugate of ζ₅ equals ζ₅⁴. -/
 @[simp] lemma zeta5_conj : starRingEnd ℂ ζ₅ = ζ₅^4 := by
   have h5 : ζ₅ ^ 5 = 1 := zeta5_pow_five
   unfold ζ₅ zeta5
@@ -141,6 +199,7 @@ lemma cos_two_pi_fifth :
   convert h5.symm using 2
   ring
 
+/-- The inverse of ζ₅ equals ζ₅⁴. -/
 @[simp] lemma zeta5_inv_eq_pow4 : ζ₅⁻¹ = ζ₅^4 := by
   have h1 : ζ₅^5 = 1 := zeta5_pow_five
   have h2 : ζ₅ ≠ 0 := by
@@ -150,52 +209,86 @@ lemma cos_two_pi_fifth :
   field_simp [h2]
   rw [← h1]
 
+/-! ### Fifth root of unity computation helpers
+
+These lemmas help simplify expressions involving compositions of rotations.
+The key insight is that ζ₅⁵ = 1, so all powers reduce to ζ₅^(n mod 5).
+
+Usage pattern for endpoint calculations:
+1. Use `zeta5_inv_as_pow4` to convert ζ₅⁻¹ → ζ₅⁴
+2. Use `pow_add` to combine powers: ζ₅ⁿ * ζ₅ᵐ = ζ₅ⁿ⁺ᵐ
+3. Use `zeta5_pow_reduce` to normalize: ζ₅ⁿ = ζ₅^(n mod 5)
+4. Specific helpers like `zeta5_sq_mul_inv` shortcut common patterns
+
+Example: Simplify (z + 1) * ζ₅² * ζ₅⁻¹
+  Step 1: Rewrite ζ₅⁻¹ as ζ₅⁴ using `zeta5_inv_as_pow4`
+          → (z + 1) * ζ₅² * ζ₅⁴
+  Step 2: Combine powers using `pow_add`
+          → (z + 1) * ζ₅⁶
+  Step 3: Reduce using `zeta5_pow_reduce`
+          → (z + 1) * ζ₅  (since 6 mod 5 = 1)
+  Or use the direct helper `zeta5_sq_mul_inv` in one step.
+-/
+
+/-- ζ₅ is not zero. -/
 lemma zeta5_ne_zero : ζ₅ ≠ 0 := by
   intro h
   have h1 : ζ₅^5 = 1 := zeta5_pow_five
   rw [h] at h1
   norm_num at h1
 
+/-- Reduce powers of ζ₅ using ζ₅⁵ = 1 -/
 lemma zeta5_pow_reduce (n : ℕ) : ζ₅ ^ n = ζ₅ ^ (n % 5) := by
   conv_lhs => rw [← Nat.div_add_mod n 5]
   rw [pow_add, pow_mul]
   simp [zeta5_pow_five]
 
+/-- Simp lemma for reducing ζ₅ powers: ζ₅^(n + 5*k) = ζ₅^n.
+    This allows simp to automatically normalize ζ₅ powers mod 5. -/
 @[simp] lemma zeta5_pow_add_five_mul (n k : ℕ) : ζ₅ ^ (n + 5 * k) = ζ₅ ^ n := by
   rw [pow_add, pow_mul, zeta5_pow_five, one_pow, mul_one]
 
+/-- Simplify ζ₅⁻¹ * ζ₅ -/
 lemma zeta5_inv_mul : ζ₅⁻¹ * ζ₅ = 1 := by
   field_simp [zeta5_ne_zero]
 
+/-- Simplify ζ₅ * ζ₅⁻¹ -/
 lemma zeta5_mul_inv : ζ₅ * ζ₅⁻¹ = 1 := by
   field_simp [zeta5_ne_zero]
 
+/-- Express ζ₅⁻¹ as ζ₅⁴ for easier computation -/
 lemma zeta5_inv_as_pow4 : ζ₅⁻¹ = ζ₅^4 := zeta5_inv_eq_pow4
 
+/-- Product of positive and negative powers: ζ₅ⁿ * ζ₅⁻¹ = ζ₅ⁿ⁻¹ -/
 lemma zeta5_pow_mul_inv (n : ℕ) : ζ₅^n * ζ₅⁻¹ = ζ₅^((n + 4) % 5) := by
   rw [zeta5_inv_as_pow4]
   rw [← pow_add]
   exact zeta5_pow_reduce (n + 4)
 
+/-- Product of negative and positive powers: ζ₅⁻¹ * ζ₅ⁿ = ζ₅ⁿ⁻¹ -/
 lemma zeta5_inv_mul_pow (n : ℕ) : ζ₅⁻¹ * ζ₅^n = ζ₅^((n + 4) % 5) := by
   rw [mul_comm]
   exact zeta5_pow_mul_inv n
 
+/-- Useful for ζ₅² * ζ₅⁻¹ = ζ₅ -/
 lemma zeta5_sq_mul_inv : ζ₅^2 * ζ₅⁻¹ = ζ₅ := by
   rw [zeta5_inv_eq_pow4, ← pow_add]
   norm_num [zeta5_pow_reduce 6]
 
+/-- Useful for ζ₅⁴ * ζ₅² = ζ₅ -/
 lemma zeta5_pow4_mul_sq : ζ₅^4 * ζ₅^2 = ζ₅ := by
   rw [← pow_add]
   have : ζ₅^6 = ζ₅^(6 % 5) := zeta5_pow_reduce 6
   norm_num at this
   exact this
 
+/-- The 5th cyclotomic polynomial relation: 1 + ζ₅ + ζ₅² + ζ₅³ + ζ₅⁴ = 0.
+    Since ζ₅^5 = 1 and ζ₅ ≠ 1, we have (ζ₅ - 1)(ζ₅⁴ + ζ₅³ + ζ₅² + ζ₅ + 1) = 0 -/
 lemma cyclotomic5_sum : 1 + ζ₅ + ζ₅^2 + ζ₅^3 + ζ₅^4 = 0 := by
   have h1 : ζ₅^5 = 1 := zeta5_pow_five
   have h2 : ζ₅ ≠ 1 := zeta5_ne_one
   have h3 : ζ₅ - 1 ≠ 0 := sub_ne_zero_of_ne h2
-
+  -- Use the factorization: ζ₅^5 - 1 = (ζ₅ - 1)(ζ₅⁴ + ζ₅³ + ζ₅² + ζ₅ + 1)
   have h_factor : ζ₅^5 - 1 = (ζ₅ - 1) * (ζ₅^4 + ζ₅^3 + ζ₅^2 + ζ₅ + 1) := by ring
   rw [h1] at h_factor
   have h_zero : (ζ₅ - 1) * (ζ₅^4 + ζ₅^3 + ζ₅^2 + ζ₅ + 1) = 0 := by
@@ -212,9 +305,10 @@ lemma cyclotomic5_sum : 1 + ζ₅ + ζ₅^2 + ζ₅^3 + ζ₅^4 = 0 := by
       = ζ₅^4 + ζ₅^3 + ζ₅^2 + ζ₅ + 1 := by ring
     _ = 0 := this
 
+/-- Express ζ₅⁴ in terms of lower powers using the cyclotomic polynomial -/
 lemma zeta5_pow4_eq : ζ₅^4 = -1 - ζ₅ - ζ₅^2 - ζ₅^3 := by
   have h := cyclotomic5_sum
-
+  -- From 1 + ζ₅ + ζ₅² + ζ₅³ + ζ₅⁴ = 0, we get ζ₅⁴ = -(1 + ζ₅ + ζ₅² + ζ₅³)
   have h2 : ζ₅^4 + (1 + ζ₅ + ζ₅^2 + ζ₅^3) = 0 := by
     calc ζ₅^4 + (1 + ζ₅ + ζ₅^2 + ζ₅^3)
         = 1 + ζ₅ + ζ₅^2 + ζ₅^3 + ζ₅^4 := by ring
@@ -224,6 +318,7 @@ lemma zeta5_pow4_eq : ζ₅^4 = -1 - ζ₅ - ζ₅^2 - ζ₅^3 := by
     _ = -(1 + ζ₅ + ζ₅^2 + ζ₅^3) := by ring
     _ = -1 - ζ₅ - ζ₅^2 - ζ₅^3 := by ring
 
+/-- Helper lemmas for reducing higher powers of ζ₅ -/
 @[simp] lemma zeta5_pow_six : ζ₅^6 = ζ₅ := by
   have : ζ₅^6 = ζ₅^(6 % 5) := zeta5_pow_reduce 6
   norm_num at this
@@ -309,29 +404,34 @@ lemma zeta5_pow4_eq : ζ₅^4 = -1 - ζ₅ - ζ₅^2 - ζ₅^3 := by
   norm_num at this
   exact this
 
+-- Explicit (1 : ℂ) variants for type inference in proof contexts
 @[simp] lemma zeta5_pow_five_C : ζ₅^5 = (1 : ℂ) := zeta5_pow_five
 @[simp] lemma zeta5_pow_ten_C : ζ₅^10 = (1 : ℂ) := zeta5_pow_ten
 @[simp] lemma zeta5_pow_fifteen_C : ζ₅^15 = (1 : ℂ) := zeta5_pow_fifteen
 @[simp] lemma zeta5_pow_twenty_C : ζ₅^20 = (1 : ℂ) := zeta5_pow_twenty
 
+/-- ζ₅.re = cos(2π/5). -/
 lemma zeta5_re_eq_cos : ζ₅.re = Real.cos (2 * π / 5) := by
   unfold ζ₅ zeta5
   rw [show (2 : ℂ) * π * I / 5 = (2 * π / 5 : ℝ) * I by
     simp [div_eq_mul_inv]; ring]
   exact Complex.exp_ofReal_mul_I_re (2 * π / 5)
 
+/-- ζ₅.im = sin(2π/5). -/
 @[simp] lemma zeta5_im_eq_sin : ζ₅.im = Real.sin (2 * π / 5) := by
   unfold ζ₅ zeta5
   rw [show (2 : ℂ) * π * I / 5 = (2 * π / 5 : ℝ) * I by
     simp [div_eq_mul_inv]; ring]
   exact Complex.exp_ofReal_mul_I_im (2 * π / 5)
 
+/-- Helper: express ζ₅ in terms of cos and sin -/
 lemma zeta5_eq : ζ₅ = ↑(Real.cos (2 * π / 5)) + I * ↑(Real.sin (2 * π / 5)) := by
   unfold ζ₅ zeta5
   rw [show (2 : ℂ) * π * I / 5 = (2 * π / 5 : ℝ) * I by push_cast; field_simp]
   rw [Complex.exp_mul_I,  Complex.ofReal_cos, Complex.ofReal_sin]
   ring
 
+/-- Helper: express ζ₅² in terms of cos and sin -/
 lemma zeta5_sq_eq : ζ₅^2 = ↑(Real.cos (4 * π / 5)) + I * ↑(Real.sin (4 * π / 5)) := by
   unfold ζ₅ zeta5
   rw [sq, show (exp (2 * ↑π * I / 5) : ℂ) * exp (2 * ↑π * I / 5) =
@@ -341,27 +441,41 @@ lemma zeta5_sq_eq : ζ₅^2 = ↑(Real.cos (4 * π / 5)) + I * ↑(Real.sin (4 *
   rw [Complex.exp_mul_I, Complex.ofReal_cos, Complex.ofReal_sin]
   ring
 
+/-! ### Explicit ζ₅ values in terms of golden ratio
+
+These give exact algebraic values for the real and imaginary parts of ζ₅ powers.
+Key identities:
+- cos(2π/5) = (√5 - 1)/4 = (φ - 1)/2
+- cos(4π/5) = -(√5 + 1)/4 = -φ/2
+-/
+
+/-- ζ₅.re = (√5 - 1)/4 = (φ - 1)/2 -/
 @[simp] lemma zeta5_re : ζ₅.re = (Real.sqrt 5 - 1) / 4 := by
   rw [zeta5_re_eq_cos, cos_two_pi_fifth]
   unfold Real.goldenRatio
   ring
 
+/-- ζ₅.re in terms of φ -/
 lemma zeta5_re_eq_phi : ζ₅.re = (Real.goldenRatio - 1) / 2 := by
   rw [zeta5_re_eq_cos, cos_two_pi_fifth]
 
+/-- ζ₅.im > 0 -/
 lemma zeta5_im_pos : 0 < ζ₅.im := by
   rw [zeta5_im_eq_sin]
   apply Real.sin_pos_of_pos_of_lt_pi
   · linarith [Real.pi_pos]
   · linarith [Real.pi_pos]
 
+/-- cos(4π/5) = -cos(π/5) (supplementary angle identity) -/
 lemma cos_four_pi_fifth : Real.cos (4 * π / 5) = -Real.cos (π / 5) := by
   rw [show (4 * π / 5 : ℝ) = π - π / 5 by ring, Real.cos_pi_sub]
 
+/-- cos(4π/5) = -(√5 + 1)/4 = -φ/2 (explicit value) -/
 lemma cos_four_pi_fifth_val : Real.cos (4 * π / 5) = -(Real.sqrt 5 + 1) / 4 := by
   rw [cos_four_pi_fifth, Real.cos_pi_div_five]
   ring
 
+/-- (ζ₅²).re = -(√5 + 1)/4 = -φ/2 -/
 @[simp] lemma zeta5_sq_re : (ζ₅^2).re = -(Real.sqrt 5 + 1) / 4 := by
   rw [zeta5_sq_eq]
   simp only [Complex.add_re, Complex.ofReal_re, Complex.mul_re,
@@ -369,11 +483,13 @@ lemma cos_four_pi_fifth_val : Real.cos (4 * π / 5) = -(Real.sqrt 5 + 1) / 4 := 
   rw [cos_four_pi_fifth_val]
   ring
 
+/-- (ζ₅²).re in terms of φ -/
 lemma zeta5_sq_re_eq_phi : (ζ₅^2).re = -Real.goldenRatio / 2 := by
   rw [zeta5_sq_re]
   unfold Real.goldenRatio
   ring
 
+/-- ζ₅³ = exp(6πi/5) -/
 lemma zeta5_cubed_eq : ζ₅^3 = Complex.exp ((6 * π / 5 : ℝ) * I) := by
   unfold ζ₅ zeta5
   rw [← Complex.exp_nat_mul]
@@ -381,11 +497,13 @@ lemma zeta5_cubed_eq : ζ₅^3 = Complex.exp ((6 * π / 5 : ℝ) * I) := by
   push_cast
   ring
 
+/-- cos(6π/5) = cos(π + π/5) = -cos(π/5) -/
 lemma cos_six_pi_fifth : Real.cos (6 * π / 5) = -(Real.sqrt 5 + 1) / 4 := by
   rw [show (6 * π / 5 : ℝ) = π / 5 + π by ring]
   rw [Real.cos_add_pi, Real.cos_pi_div_five]
   ring
 
+/-- (ζ₅³).re = -(√5 + 1)/4 -/
 @[simp] lemma zeta5_cubed_re : (ζ₅^3).re = -(Real.sqrt 5 + 1) / 4 := by
   rw [zeta5_cubed_eq]
   rw [Complex.exp_mul_I]
@@ -395,51 +513,69 @@ lemma cos_six_pi_fifth : Real.cos (6 * π / 5) = -(Real.sqrt 5 + 1) / 4 := by
   simp only [sub_zero, add_zero]
   exact cos_six_pi_fifth
 
+/-- (ζ₅⁴).re = ζ₅.re (by conjugate symmetry: ζ₅⁴ = conj(ζ₅)) -/
 @[simp] lemma zeta5_pow4_re : (ζ₅^4).re = (Real.sqrt 5 - 1) / 4 := by
   have h : (ζ₅^4).re = (starRingEnd ℂ ζ₅).re := by
     rw [← zeta5_conj]
   rw [h, Complex.conj_re, zeta5_re]
 
+/-- (ζ₅⁴).im = -ζ₅.im (by conjugate symmetry) -/
 lemma zeta5_pow4_im_neg : (ζ₅^4).im = -ζ₅.im := by
   have h : ζ₅^4 = starRingEnd ℂ ζ₅ := by rw [← zeta5_conj]
   rw [h, Complex.conj_im]
 
+/-! ### Sine value lemmas for 5th roots angles -/
+
+/-- sin(4π/5) = sin(π/5) (supplementary angle identity) -/
 lemma sin_four_pi_fifth : Real.sin (4 * π / 5) = Real.sin (π / 5) := by
   rw [show (4 * π / 5 : ℝ) = π - π / 5 by ring, Real.sin_pi_sub]
 
+/-- sin(6π/5) = -sin(π/5) (since 6π/5 = π + π/5) -/
 lemma sin_six_pi_fifth : Real.sin (6 * π / 5) = -Real.sin (π / 5) := by
   rw [show (6 * π / 5 : ℝ) = π / 5 + π by ring, Real.sin_add_pi]
 
+/-- sin(8π/5) = -sin(2π/5) (since 8π/5 = 2π - 2π/5) -/
 lemma sin_eight_pi_fifth : Real.sin (8 * π / 5) = -Real.sin (2 * π / 5) := by
   rw [show (8 * π / 5 : ℝ) = 2 * π - 2 * π / 5 by ring]
   rw [Real.sin_two_pi_sub]
 
+/-! ### Imaginary parts of ζ₅ powers -/
+
+/-- (ζ₅²).im = sin(4π/5) -/
 lemma zeta5_sq_im : (ζ₅^2).im = Real.sin (4 * π / 5) := by
   rw [zeta5_sq_eq]
   simp only [Complex.add_im, Complex.ofReal_im, Complex.mul_im,
              Complex.I_re, Complex.I_im, Complex.ofReal_re]
   ring
 
+/-- Helper: express ζ₅³ in terms of cos and sin -/
 lemma zeta5_cubed_eq_trig : ζ₅^3 = ↑(Real.cos (6 * π / 5)) + I * ↑(Real.sin (6 * π / 5)) := by
   rw [zeta5_cubed_eq]
   rw [Complex.exp_mul_I, Complex.ofReal_cos, Complex.ofReal_sin]
   ring
 
+/-- (ζ₅³).im = sin(6π/5) (which is negative) -/
 lemma zeta5_cubed_im : (ζ₅^3).im = Real.sin (6 * π / 5) := by
   rw [zeta5_cubed_eq_trig]
   simp only [Complex.add_im, Complex.ofReal_im, Complex.mul_im,
              Complex.I_re, Complex.I_im, Complex.ofReal_re]
   ring
 
+/-- (ζ₅⁴).im = -sin(2π/5) (by conjugate symmetry: ζ₅⁴ = conj(ζ₅)) -/
 @[simp] lemma zeta5_pow4_im : (ζ₅^4).im = -Real.sin (2 * π / 5) := by
   rw [zeta5_pow4_im_neg, zeta5_im_eq_sin]
 
+/-! ### Alternative forms connecting to sin(π/5) -/
+
+/-- (ζ₅²).im = sin(π/5) -/
 @[simp] lemma zeta5_sq_im_eq : (ζ₅^2).im = Real.sin (π / 5) := by
   rw [zeta5_sq_im, sin_four_pi_fifth]
 
+/-- (ζ₅³).im = -sin(π/5) -/
 @[simp] lemma zeta5_cubed_im_eq : (ζ₅^3).im = -Real.sin (π / 5) := by
   rw [zeta5_cubed_im, sin_six_pi_fifth]
 
+/-- (ζ₅³).im is negative -/
 lemma zeta5_cubed_im_neg : (ζ₅^3).im < 0 := by
   rw [zeta5_cubed_im_eq]
   apply neg_neg_of_pos
@@ -447,6 +583,7 @@ lemma zeta5_cubed_im_neg : (ζ₅^3).im < 0 := by
   · linarith [Real.pi_pos]
   · linarith [Real.pi_pos]
 
+/-- (ζ₅⁴).im is negative -/
 lemma zeta5_pow4_im_neg' : (ζ₅^4).im < 0 := by
   rw [zeta5_pow4_im]
   apply neg_neg_of_pos
@@ -454,26 +591,42 @@ lemma zeta5_pow4_im_neg' : (ζ₅^4).im < 0 := by
   · linarith [Real.pi_pos]
   · linarith [Real.pi_pos]
 
+/-- (ζ₅²).im is positive -/
 lemma zeta5_sq_im_pos : 0 < (ζ₅^2).im := by
   rw [zeta5_sq_im_eq]
   apply Real.sin_pos_of_pos_of_lt_pi
   · linarith [Real.pi_pos]
   · linarith [Real.pi_pos]
 
+/-! ### Useful algebraic identities for rotation compositions -/
+
+/-- Key identity: 1 + ζ₅⁴ real part -/
 lemma one_add_zeta5_pow4_re : (1 + ζ₅^4).re = 1 + (Real.sqrt 5 - 1) / 4 := by
   simp only [Complex.add_re, Complex.one_re, zeta5_pow4_re]
 
+/-- 1 - ζ₅⁴ real part -/
 lemma one_sub_zeta5_pow4_re : (1 - ζ₅^4).re = 1 - (Real.sqrt 5 - 1) / 4 := by
   simp only [Complex.sub_re, Complex.one_re, zeta5_pow4_re]
 
+/-- Sum of all ζ₅ power real parts is -1 (from cyclotomic sum) -/
 lemma zeta5_powers_re_sum : ζ₅.re + (ζ₅^2).re + (ζ₅^3).re + (ζ₅^4).re = -1 := by
   have h := cyclotomic5_sum
   have h_re := congr_arg Complex.re h
   simp only [Complex.add_re, Complex.one_re, Complex.zero_re] at h_re
   linarith
 
+/-! ### Circle Infrastructure
+
+The `Circle` type from Mathlib represents unit complex numbers with group structure.
+Using `Circle` instead of raw angles gives us certified linear isometries via `rotation`.
+
+The definitions `zeta5Circle`, `zeta5CirclePow`, `zeta5CircleInv` are in Definitions/Core.lean.
+-/
+
+-- Re-export Circle definitions from Definitions/Core.lean
 export TDCSG.Definitions (zeta5Circle zeta5Circle_coe zeta5CirclePow zeta5CircleInv zeta5CircleInv_coe)
 
+/-- The coercion of zeta5Circle^n is ζ₅^n. -/
 lemma zeta5CirclePow_coe (n : ℕ) : (zeta5CirclePow n : ℂ) = ζ₅ ^ n := by
   induction n with
   | zero => simp [zeta5CirclePow]
@@ -481,12 +634,15 @@ lemma zeta5CirclePow_coe (n : ℕ) : (zeta5CirclePow n : ℂ) = ζ₅ ^ n := by
     simp only [zeta5CirclePow, pow_succ, Circle.coe_mul]
     rw [← zeta5CirclePow, ih, zeta5Circle_coe]
 
+/-- ζ₅⁴ = ζ₅⁻¹ in Circle (since ζ₅⁵ = 1). -/
 lemma zeta5CirclePow4_eq_inv : zeta5CirclePow 4 = zeta5CircleInv := by
   apply Circle.ext
   simp only [zeta5CirclePow, zeta5CircleInv, Circle.coe_inv, zeta5Circle_coe]
   show (zeta5Circle ^ 4 : ℂ) = ζ₅⁻¹
   simp only [pow_succ, pow_zero, zeta5Circle_coe, zeta5_inv_as_pow4]
 
+/-- Circle.exp (2π/5) equals zeta5Circle.
+    This connects Mathlib's Circle.exp to our ζ₅ definition. -/
 lemma circle_exp_two_pi_fifth : Circle.exp (2 * π / 5) = zeta5Circle := by
   apply Circle.ext
   simp only [Circle.coe_exp, zeta5Circle_coe]

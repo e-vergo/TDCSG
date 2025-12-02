@@ -1,33 +1,63 @@
+/-
+Copyright (c) 2025 Eric Hearn. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Eric Hearn
+-/
 import TDCSG.Proofs.AlgebraicIdentities
 import TDCSG.Proofs.RotationFormulas
 import TDCSG.Proofs.SegmentGeometry
 import TDCSG.Proofs.CrossDiskWord2DiskBounds
+
+/-!
+# Word 2 Correspondence for GG(5,5)
+
+Proves that word2 produces the correct displacement on segment points.
+
+## Main Results
+
+- `word2_produces_displacement1`: word2 maps segment points by displacement1
+-/
 
 namespace TDCSG.CompoundSymmetry.GG5
 
 open Complex Real
 open TDCSG.Definitions
 
+/-- Word 2 action on segment points: translates by displacement1.
+
+word2 = A⁻¹B⁻¹A⁻¹B⁻¹B⁻¹ produces the correct IET translation for interval 1.
+Interval 1 corresponds to x ∈ [length1, length1 + length2), equivalently c ∈ [(1-√5)/2, 2-√5].
+
+The proof tracks each rotation through the 5 generators (clockwise convention: A⁻¹ = A⁴ uses ζ₅):
+- A⁻¹ uses ζ₅ rotation about -1 (net effect of A⁴, since A uses ζ₅⁴)
+- B⁻¹ uses ζ₅ rotation about 1 (net effect of B⁴, since B uses ζ₅⁴)
+
+word2 = [Generator.Ainv, Generator.Binv, Generator.Ainv, Generator.Binv, Generator.Binv]
+     = [A⁻¹, B⁻¹, A⁻¹, B⁻¹, B⁻¹] applied left-to-right -/
 lemma word2_produces_displacement1 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     (hx_lo : length1 ≤ x) (hx_hi : x < length1 + length2) :
     applyWord r_crit word2 (segmentPoint x) =
     segmentPoint (x + displacement1) := by
-
+  -- Rewrite the RHS using the translation property
   rw [segmentPoint_add_displacement]
 
+  -- Set up parameter c = 2x - 1
   set c := 2 * x - 1 with hc_def
   have hc_lo : -1 ≤ c := by simp only [hc_def]; linarith [hx.1]
   have hc_hi_le : c ≤ 1 := by simp only [hc_def]; linarith [hx.2]
   have h_c_mem : c ∈ Set.Icc (-1 : ℝ) 1 := ⟨hc_lo, hc_hi_le⟩
 
+  -- Bounds on c for interval 1: c ∈ [(1-√5)/2, 2-√5]
   have hc_interval_lo : (1 - √5) / 2 ≤ c := interval1_c_lower_bound x hx_lo
   have hc_interval_hi : c < 2 - √5 := interval1_c_upper_bound x hx_hi
   have hc_interval_hi_le : c ≤ 2 - √5 := le_of_lt hc_interval_hi
 
+  -- Express segmentPoint x in terms of c
   have h_z0_eq : segmentPoint x = (c : ℂ) • E := by
     rw [segmentPoint_eq_smul_E, hc_def]
     simp only [Complex.real_smul, smul_eq_mul]
 
+  -- Get disk membership for the starting point
   have h_in_disks := segment_in_disk_intersection x ⟨hx.1, le_of_lt hx.2⟩
   have hz0_left : segmentPoint x ∈ leftDisk r_crit := by
     unfold leftDisk closedDiskC
@@ -41,14 +71,18 @@ lemma word2_produces_displacement1 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     unfold segmentPoint
     exact h_in_disks.2
 
+  -- The algebraic identity tells us the result of the 5 rotations
   have h_alg := word2_algebraic_identity c h_c_mem
   simp only at h_alg
 
+  -- Unfold applyWord and word2
   unfold applyWord word2
   simp only [List.foldl_cons, List.foldl_nil]
 
+  -- Rewrite using h_z0_eq to convert segmentPoint x to c • E
   rw [h_z0_eq]
 
+  -- Define the intermediate algebraic points (from word2_algebraic_identity)
   let z0 : ℂ := (c : ℂ) • E
   let z1 := (-1 : ℂ) + ζ₅ * (z0 + 1)
   let z2 := (1 : ℂ) + ζ₅ * (z1 - 1)
@@ -56,10 +90,12 @@ lemma word2_produces_displacement1 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
   let z4 := (1 : ℂ) + ζ₅ * (z3 - 1)
   let z5 := (1 : ℂ) + ζ₅ * (z4 - 1)
 
+  -- The algebraic identity tells us z5 = z0 + (2 * displacement1) • E
   have h_z5_eq : z5 = z0 + (2 * displacement1) • E := by
     simp only [z5, z4, z3, z2, z1, z0]
     convert h_alg using 1
 
+  -- Disk membership for z0
   have hz0_left' : z0 ∈ leftDisk r_crit := by
     simp only [z0]
     rw [show (c : ℂ) • E = segmentPoint x by rw [h_z0_eq]]
@@ -77,6 +113,7 @@ lemma word2_produces_displacement1 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
       .Binv = z5 by
     rw [h, h_z5_eq]
 
+  -- z1 is in leftDisk by rotation preservation (z1 + 1 = ζ₅ * (z0 + 1))
   have hz1_left : z1 ∈ leftDisk r_crit := by
     unfold leftDisk closedDiskC at hz0_left' ⊢
     simp only [Set.mem_setOf_eq] at hz0_left' ⊢
@@ -86,10 +123,12 @@ lemma word2_produces_displacement1 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     convert hz0_left' using 2
     ring
 
+  -- z1 in rightDisk by cross_disk_w2_z1_bound
   have hz1_right : z1 ∈ rightDisk r_crit := by
     unfold rightDisk closedDiskC
     simp only [Set.mem_setOf_eq]
-
+    -- z1 - 1 = (-1 + ζ₅ * (z0 + 1)) - 1 = -2 + ζ₅ * (z0 + 1)
+    -- With z0 = c • E, expand and take conjugate
     have h_z1_minus_1 : z1 - 1 = starRingEnd ℂ ((ζ₅^4 - 2 : ℂ) + (c : ℂ) * (1 - ζ₅)) := by
       simp only [z1, z0, E]
       rw [smul_eq_mul]
@@ -101,6 +140,7 @@ lemma word2_produces_displacement1 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     rw [h_z1_minus_1, Complex.norm_conj]
     exact cross_disk_w2_z1_bound c hc_interval_lo hc_interval_hi_le
 
+  -- z2 in rightDisk by rotation preservation
   have hz2_right : z2 ∈ rightDisk r_crit := by
     unfold rightDisk closedDiskC at hz1_right ⊢
     simp only [Set.mem_setOf_eq] at hz1_right ⊢
@@ -109,6 +149,7 @@ lemma word2_produces_displacement1 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     rw [Complex.norm_mul, zeta5_abs, one_mul]
     exact hz1_right
 
+  -- z2 in leftDisk by cross_disk_w2_z2_bound
   have hz2_left : z2 ∈ leftDisk r_crit := by
     unfold leftDisk closedDiskC
     simp only [Set.mem_setOf_eq]
@@ -123,6 +164,7 @@ lemma word2_produces_displacement1 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     rw [show z2 - (-1 : ℂ) = z2 + 1 by ring, h_z2_plus_1, Complex.norm_conj]
     exact cross_disk_w2_z2_bound c hc_interval_lo hc_interval_hi_le
 
+  -- z3 in leftDisk by rotation preservation
   have hz3_left : z3 ∈ leftDisk r_crit := by
     unfold leftDisk closedDiskC at hz2_left ⊢
     simp only [Set.mem_setOf_eq] at hz2_left ⊢
@@ -131,6 +173,7 @@ lemma word2_produces_displacement1 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     rw [Complex.norm_mul, zeta5_abs, one_mul]
     convert hz2_left using 2; ring
 
+  -- z3 in rightDisk by cross_disk_w2_z3_bound
   have hz3_right : z3 ∈ rightDisk r_crit := by
     unfold rightDisk closedDiskC
     simp only [Set.mem_setOf_eq]
@@ -146,6 +189,7 @@ lemma word2_produces_displacement1 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     rw [h_z3_minus_1, Complex.norm_conj]
     exact cross_disk_w2_z3_bound c hc_interval_lo hc_interval_hi_le
 
+  -- z4 in rightDisk by rotation preservation
   have hz4_right : z4 ∈ rightDisk r_crit := by
     unfold rightDisk closedDiskC at hz3_right ⊢
     simp only [Set.mem_setOf_eq] at hz3_right ⊢
@@ -154,12 +198,14 @@ lemma word2_produces_displacement1 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     rw [Complex.norm_mul, zeta5_abs, one_mul]
     exact hz3_right
 
+  -- Now chain through the 5 steps using simplified formulas
   have h_step1 : applyGen r_crit z0 .Ainv = z1 := applyGen_Ainv_formula' z0 hz0_left'
   have h_step2 : applyGen r_crit z1 .Binv = z2 := applyGen_Binv_formula' z1 hz1_right
   have h_step3 : applyGen r_crit z2 .Ainv = z3 := applyGen_Ainv_formula' z2 hz2_left
   have h_step4 : applyGen r_crit z3 .Binv = z4 := applyGen_Binv_formula' z3 hz3_right
   have h_step5 : applyGen r_crit z4 .Binv = z5 := applyGen_Binv_formula' z4 hz4_right
 
+  -- Chain all steps together
   calc applyGen r_crit (applyGen r_crit (applyGen r_crit (applyGen r_crit (applyGen r_crit z0 .Ainv) .Binv) .Ainv) .Binv) .Binv
       = applyGen r_crit (applyGen r_crit (applyGen r_crit (applyGen r_crit z1 .Binv) .Ainv) .Binv) .Binv := by rw [h_step1]
     _ = applyGen r_crit (applyGen r_crit (applyGen r_crit z2 .Ainv) .Binv) .Binv := by rw [h_step2]

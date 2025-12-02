@@ -1,8 +1,36 @@
+/-
+Copyright (c) 2025-10-18 Eric Moffat. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Eric Moffat
+-/
 import TDCSG.Definitions.IET
 import TDCSG.Proofs.Zeta5
 import Mathlib.NumberTheory.Real.GoldenRatio
 import Mathlib.Data.Real.Basic
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
+
+/-!
+# Interval Exchange Transformation Proofs
+
+This file contains proofs about interval exchange transformations (IETs)
+and the specific GG5-induced IET.
+
+## Main results
+
+### General IET properties
+- `intervals_cover`: The union of all intervals is [0, 1)
+- `intervals_disjoint`: Intervals are pairwise disjoint
+- `interval_injective`: The interval function is injective
+- `domainLeft_strictMono`: Left endpoints are strictly monotone
+- `domainRight_le_domainLeft_of_lt`: Contiguity of intervals
+
+### GG5 IET
+- `GG5_induced_IET`: 3-interval exchange transformation induced by GG(5,5) dynamics
+- Golden ratio displacement formulas
+
+-/
+
+/-! ### General IET properties -/
 
 namespace IntervalExchangeTransformation
 
@@ -10,6 +38,7 @@ variable {n : ℕ} (iet : IntervalExchangeTransformation n)
 
 open Set
 
+/-- Basic property: domain intervals are nonempty. -/
 theorem interval_nonempty (i : Fin n) : (iet.interval i).Nonempty := by
   use iet.domainLeft i
   simp only [interval, mem_Ico]
@@ -18,21 +47,22 @@ theorem interval_nonempty (i : Fin n) : (iet.interval i).Nonempty := by
   · simp only [domainRight]
     linarith [iet.lengths_pos i]
 
+/-- The union of all intervals is [0, 1). -/
 theorem intervals_cover : ⋃ i, iet.interval i = Ico 0 1 := by
   ext x
   simp only [Set.mem_iUnion, interval, mem_Ico]
   constructor
-  ·
+  · -- If x is in some interval, then 0 <= x < 1
     intro ⟨i, hx⟩
     constructor
-    ·
+    · -- x >= 0: follows from domainLeft i >= 0
       calc x ≥ iet.domainLeft i := hx.1
         _ ≥ 0 := by
           unfold domainLeft
           apply Finset.sum_nonneg
           intro j _
           exact le_of_lt (iet.lengths_pos _)
-    ·
+    · -- x < 1: follows from domainRight i <= 1 and sum of all lengths = 1
       have h_right_le : iet.domainRight i ≤ 1 := by
         calc iet.domainRight i
           _ = iet.domainLeft i + iet.lengths i := rfl
@@ -60,7 +90,7 @@ theorem intervals_cover : ⋃ i, iet.interval i = Ico 0 1 := by
           _ = 1 := iet.lengths_sum
       calc x < iet.domainRight i := hx.2
         _ ≤ 1 := h_right_le
-  ·
+  · -- If 0 <= x < 1, then x is in some interval
     intro ⟨hx0, hx1⟩
     have h_left_0 : iet.domainLeft ⟨0, iet.n_pos⟩ = 0 := by
       unfold domainLeft
@@ -178,6 +208,7 @@ theorem intervals_cover : ⋃ i, iet.interval i = Ico 0 1 := by
 
     use i
 
+/-- domainLeft is strictly monotone increasing. -/
 lemma domainLeft_strictMono {i j : Fin n} (hij : i < j) : iet.domainLeft i < iet.domainLeft j := by
   unfold domainLeft
   have h_i_lt_n : i.val < n := i.isLt
@@ -208,6 +239,7 @@ lemma domainLeft_strictMono {i j : Fin n} (hij : i < j) : iet.domainLeft i < iet
                     intro k _ _
                     exact le_of_lt (iet.lengths_pos ⟨k, Nat.lt_trans k.isLt h_j_lt_n⟩)
 
+/-- domainLeft is monotone increasing. -/
 lemma domainLeft_mono {i j : Fin n} (hij : i ≤ j) : iet.domainLeft i ≤ iet.domainLeft j := by
   unfold domainLeft
   by_cases h_eq : i = j
@@ -229,12 +261,14 @@ lemma domainLeft_mono {i j : Fin n} (hij : i ≤ j) : iet.domainLeft i ≤ iet.d
           intro k _ _
           exact le_of_lt (iet.lengths_pos ⟨k, Nat.lt_trans k.isLt j.isLt⟩)
 
+/-- Intervals are contiguous: the right endpoint of interval i equals the left endpoint of interval i+1. -/
 lemma domainRight_eq_domainLeft_succ (i : Fin n) (hi : i.val + 1 < n) :
     iet.domainRight i = iet.domainLeft ⟨i.val + 1, hi⟩ := by
   unfold domainRight domainLeft
   rw [Fin.sum_univ_castSucc]
   congr 1
 
+/-- Helper lemma: domainRight i <= domainLeft j when i < j. -/
 lemma domainRight_le_domainLeft_of_lt {i j : Fin n} (hij : i < j) :
     iet.domainRight i ≤ iet.domainLeft j := by
   unfold domainRight domainLeft
@@ -257,6 +291,7 @@ lemma domainRight_le_domainLeft_of_lt {i j : Fin n} (hij : i < j) :
         = iet.domainLeft ⟨i.val + 1, h_cons⟩ := iet.domainRight_eq_domainLeft_succ i h_cons
       _ ≤ iet.domainLeft j := iet.domainLeft_mono h_le
 
+/-- The intervals are pairwise disjoint. -/
 theorem intervals_disjoint : (Set.range iet.interval).PairwiseDisjoint (fun x => x) := by
   intro s hs t ht hst
   obtain ⟨i, rfl⟩ := hs
@@ -281,6 +316,7 @@ theorem intervals_disjoint : (Set.range iet.interval).PairwiseDisjoint (fun x =>
       rw [heq] at hst
       exact absurd rfl hst
 
+/-- The interval function is injective. -/
 lemma interval_injective : Function.Injective (interval iet) := by
   intro i j h_eq
   unfold interval at h_eq
@@ -335,42 +371,58 @@ lemma interval_injective : Function.Injective (interval iet) := by
 
 end IntervalExchangeTransformation
 
+/-! ### GG5 IET Proofs -/
+
 namespace TDCSG.CompoundSymmetry.GG5
 
 open Real
 open TDCSG.Definitions
 
+-- Re-export definitions from TDCSG.Definitions for backward compatibility
+-- These are now defined in Definitions/IET.lean
 export TDCSG.Definitions (cyclicPerm3 GG5_induced_IET
   length1_pos length2_pos length3_pos lengths_sum_to_one)
 
+-- Re-export helper lemmas from Zeta5
 open TDCSG.CompoundSymmetry.GG5 (one_plus_phi_pos)
 
+/-- length1 < 1 -/
 lemma length1_lt_one : length1 < 1 := by
   have h := lengths_sum_to_one
   linarith [length2_pos, length3_pos]
 
+/-- length1 + length2 < 1 -/
 lemma length12_lt_one : length1 + length2 < 1 := by
   have h := lengths_sum_to_one
   linarith [length3_pos]
 
+/-- The interval lengths satisfy: length1 = length2 (equal short segments). -/
 theorem length1_eq_length2 : length1 = length2 := rfl
 
+/-- length3 = 1/φ = ψ (the golden conjugate, positive version). -/
 theorem length3_eq_one_over_phi : length3 = 1 / goldenRatio := rfl
 
+/-- length1 + length2 = ψ² = 1 - ψ (using ψ + ψ² = 1). -/
 lemma length12_sum : length1 + length2 = 1 / (1 + goldenRatio) := by
   unfold length1 length2
   have h_pos : 0 < 1 + goldenRatio := one_plus_phi_pos
   have h_ne : 2 * (1 + goldenRatio) ≠ 0 := by linarith
   field_simp; norm_num
 
+/-! ### Displacement formulas in terms of golden ratio -/
+
+/-- Displacement 0 formula: d₀ = length3 = 1/φ = ψ ≈ 0.618. -/
 lemma displacement0_formula : displacement0 = 1 / goldenRatio := by
   unfold displacement0 length3
   rfl
 
+/-- Displacement 1 formula: d₁ = length3 = 1/φ = ψ ≈ 0.618.
+    Same as displacement0 since both intervals shift by the same amount. -/
 lemma displacement1_formula : displacement1 = 1 / goldenRatio := by
   unfold displacement1 length3
   rfl
 
+/-- Displacement 2 formula: d₂ = -(length1 + length2) = -1/(1+φ) = -ψ² ≈ -0.382. -/
 lemma displacement2_formula : displacement2 = -1 / (1 + goldenRatio) := by
   unfold displacement2 length1 length2
   have h_pos : 0 < 1 + goldenRatio := one_plus_phi_pos
@@ -381,9 +433,11 @@ lemma displacement2_formula : displacement2 = -1 / (1 + goldenRatio) := by
     _ = -(1 / (1 + goldenRatio)) := by field_simp
     _ = -1 / (1 + goldenRatio) := by ring
 
+/-- displacement0 = displacement1 (both equal ψ). -/
 lemma displacement0_eq_displacement1 : displacement0 = displacement1 := by
   rw [displacement0_formula, displacement1_formula]
 
+/-- displacement2 = -(length1 + length2) = -ψ². -/
 lemma displacement2_eq_neg_length12 : displacement2 = -(length1 + length2) := rfl
 
 end TDCSG.CompoundSymmetry.GG5

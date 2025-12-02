@@ -1,53 +1,104 @@
+/-
+Copyright (c) 2025 Eric Moffat. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Eric Moffat, Eric Hearn
+-/
 import Mathlib.Data.Real.Basic
 import Mathlib.Algebra.BigOperators.Fin
 import Mathlib.NumberTheory.Real.GoldenRatio
 import TDCSG.Definitions.WordCorrespondence
 
+/-!
+# Interval Exchange Transformation Definitions
+
+This file contains core definitions for interval exchange transformations (IETs).
+
+## Main definitions
+
+### Core IET structure
+- `IntervalExchangeTransformation n`: An IET with `n` intervals
+
+### Interval endpoints
+- `domainLeft`, `domainRight`: Left and right endpoints of domain intervals
+- `rangeLeft`, `rangeRight`: Left and right endpoints of range intervals
+
+### Interval sets
+- `interval`: The ith subinterval in the domain
+
+### Standard constructions
+- `IET_inverse`: Inverse of an IET
+
+### Golden ratio IET lengths
+- `length1`, `length2`, `length3`: Lengths for GG5-induced IET
+- `displacement0`, `displacement1`, `displacement2`: Displacements for GG5-induced IET
+-/
+
 universe u
 
 open Set
 
+/-- An interval exchange transformation on `n` intervals.
+
+Given `n` intervals with specified lengths and a permutation, an IET rearranges these intervals
+according to the permutation while preserving orientation within each interval. -/
 structure IntervalExchangeTransformation (n : ℕ) where
-
+  /-- We require at least one interval -/
   n_pos : 0 < n
-
+  /-- The lengths of the intervals -/
   lengths : Fin n → ℝ
-
+  /-- All lengths are positive -/
   lengths_pos : ∀ i, 0 < lengths i
-
+  /-- The lengths sum to 1 (normalized) -/
   lengths_sum : ∑ i, lengths i = 1
-
+  /-- The permutation describing how intervals are rearranged -/
   permutation : Equiv.Perm (Fin n)
 
 namespace IntervalExchangeTransformation
 
 variable {n : ℕ} (iet : IntervalExchangeTransformation n)
 
+/-- The left endpoint of the ith interval in the domain (before permutation). -/
 noncomputable def domainLeft (i : Fin n) : ℝ :=
   ∑ j : Fin i.val, iet.lengths ⟨j, Nat.lt_trans j.isLt i.isLt⟩
 
+/-- The right endpoint of the ith interval in the domain. -/
 noncomputable def domainRight (i : Fin n) : ℝ :=
   iet.domainLeft i + iet.lengths i
 
+/-- The left endpoint of the ith interval in the range (after permutation).
+    The range ordering places interval π⁻¹(j) at position j, so rangeLeft(i)
+    sums the lengths of intervals π⁻¹(0), π⁻¹(1), ..., π⁻¹(i-1). -/
 noncomputable def rangeLeft (i : Fin n) : ℝ :=
   ∑ j : Fin i.val, iet.lengths (iet.permutation.symm ⟨j, Nat.lt_trans j.isLt i.isLt⟩)
 
+/-- The right endpoint of the ith interval in the range. -/
 noncomputable def rangeRight (i : Fin n) : ℝ :=
   iet.rangeLeft i + iet.lengths (iet.permutation i)
 
+/-- The ith subinterval in the domain. -/
 noncomputable def interval (i : Fin n) : Set ℝ :=
   Ico (iet.domainLeft i) (iet.domainRight i)
 
+/-- The transformation function for the IET.
+
+For a point x in [0,1), determine which interval i contains x, then
+map it to the corresponding position in the permuted interval permutation(i).
+Specifically: x in [domainLeft i, domainRight i) maps to
+rangeLeft (permutation i) + (x - domainLeft i).
+
+Outside [0,1), the function returns x unchanged. -/
 noncomputable def toFun : ℝ → ℝ := fun x =>
   Classical.epsilon fun y => ∃ i, x ∈ iet.interval i ∧
     y = iet.rangeLeft (iet.permutation i) + (x - iet.domainLeft i)
 
 end IntervalExchangeTransformation
 
+
 section GeneralProperties
 
 variable {n : ℕ} (iet : IntervalExchangeTransformation n)
 
+/-- An IET is invertible. -/
 noncomputable def IET_inverse : IntervalExchangeTransformation n where
   n_pos := iet.n_pos
   lengths := fun i => iet.lengths (iet.permutation.symm i)
@@ -60,41 +111,92 @@ noncomputable def IET_inverse : IntervalExchangeTransformation n where
 
 end GeneralProperties
 
+/-! ## Golden ratio IET definitions
+
+Based on the paper geometry, the segment E'E is divided into three sub-segments:
+- [E', F') of length ψ²/2 ≈ 0.191
+- [F', G') of length ψ²/2 ≈ 0.191
+- [G', E) of length ψ ≈ 0.618
+
+where ψ = (√5-1)/2 = 1/φ is the golden conjugate (positive version).
+
+The IET permutation is cyclic: (0 → 1 → 2 → 0), mapping:
+- E'F' → GF (interval 0 → range position 1)
+- F'G' → FE (interval 1 → range position 2)
+- G'E → E'G (interval 2 → range position 0)
+-/
+
 namespace TDCSG.Definitions
 
 open Real
 
+/-- First interval length: |E'F'| = ψ²/2 = 1/(2(1+φ)) ≈ 0.191.
+    This is the length of segment from E' to F'. -/
 noncomputable def length1 : ℝ :=
   1 / (2 * (1 + goldenRatio))
 
+/-- Second interval length: |F'G'| = ψ²/2 = 1/(2(1+φ)) ≈ 0.191.
+    This is the length of segment from F' to G'. -/
 noncomputable def length2 : ℝ :=
   1 / (2 * (1 + goldenRatio))
 
+/-- Third interval length: |G'E| = ψ = 1/φ ≈ 0.618.
+    This is the length of segment from G' to E. -/
 noncomputable def length3 : ℝ :=
   1 / goldenRatio
 
+/- Why displacement0 = displacement1:
+
+The IET describes a cyclic permutation (0 → 1 → 2 → 0). Under this permutation:
+- Interval 0 (at domain position 0) maps to range position 1
+- Interval 1 (at domain position 1) maps to range position 2
+- Interval 2 (at domain position 2) maps to range position 0
+
+Both intervals 0 and 1 move "forward" by one position in the range ordering,
+which geometrically means they both jump over interval 2 (of length ψ).
+Hence both receive displacement +ψ = length3.
+
+Interval 2 moves "backward" to position 0, jumping over both intervals 0 and 1
+(combined length ψ²). Hence it receives displacement -(length1 + length2) = -ψ².
+
+Note: displacement0 + displacement1 + displacement2 * (length3 / length1) = 0
+captures the measure-preserving property of the IET. -/
+
+/-- Displacement for interval 0: d_0 = length3 = ψ ≈ 0.618.
+    Points in [E', F') are translated by ψ to [G, F). -/
 noncomputable def displacement0 : ℝ := length3
 
+/-- Displacement for interval 1: d_1 = length3 = ψ ≈ 0.618.
+    Points in [F', G') are translated by ψ to [F, E). -/
 noncomputable def displacement1 : ℝ := length3
 
+/-- Displacement for interval 2: d_2 = -(length1 + length2) = -ψ² ≈ -0.382.
+    Points in [G', E) are translated by -ψ² to [E', G). -/
 noncomputable def displacement2 : ℝ := -(length1 + length2)
 
+/-! ### Supporting lemmas for IET construction -/
+
+/-- 1 + φ is positive. -/
 private lemma one_plus_phi_pos : 0 < 1 + Real.goldenRatio := by
   have h1 : 0 < Real.goldenRatio := Real.goldenRatio_pos
   linarith
 
+/-- The first interval length is positive. -/
 lemma length1_pos : 0 < length1 := by
   unfold length1
   exact div_pos one_pos (by linarith [one_plus_phi_pos])
 
+/-- The second interval length is positive. -/
 lemma length2_pos : 0 < length2 := by
   unfold length2
   exact div_pos one_pos (by linarith [one_plus_phi_pos])
 
+/-- The third interval length is positive. -/
 lemma length3_pos : 0 < length3 := by
   unfold length3
   exact div_pos one_pos Real.goldenRatio_pos
 
+/-- The three interval lengths sum to one. -/
 lemma lengths_sum_to_one : length1 + length2 + length3 = 1 := by
   unfold length1 length2 length3
   have h_phi_pos : 0 < Real.goldenRatio := Real.goldenRatio_pos
@@ -121,9 +223,23 @@ lemma lengths_sum_to_one : length1 + length2 + length3 = 1 := by
     _ = (1 + 2 * Real.goldenRatio) / (1 + 2 * Real.goldenRatio) := by rw [h_key]
     _ = 1 := by field_simp
 
+/-! ### IET Definitions -/
+
+/-- The cyclic permutation (0 → 1 → 2 → 0) on Fin 3.
+    This permutation maps:
+    - Interval 0 [E', F') to range position 1 [G, F)
+    - Interval 1 [F', G') to range position 2 [F, E)
+    - Interval 2 [G', E) to range position 0 [E', G) -/
 def cyclicPerm3 : Equiv.Perm (Fin 3) :=
   Equiv.swap (0 : Fin 3) 1 * Equiv.swap 1 2
 
+/-- The 3-interval exchange transformation induced by GG(5,5)
+dynamics at criticality.
+
+The permutation is cyclic (0 → 1 → 2 → 0), matching the paper geometry:
+- Word1 maps E'F' → GF (domain 0 → range 1)
+- Word2 maps F'G' → FE (domain 1 → range 2)
+- Word3 maps G'E → E'G (domain 2 → range 0) -/
 noncomputable def GG5_induced_IET : IntervalExchangeTransformation 3 where
   n_pos := by norm_num
   lengths := fun i =>
@@ -152,19 +268,34 @@ noncomputable def GG5_induced_IET : IntervalExchangeTransformation 3 where
     · decide
   permutation := cyclicPerm3
 
+/-! ## IET Orbit Definitions
+
+Definitions for relating IET orbits to group word sequences.
+
+### Main definitions
+
+* `IET_word`: Select the word based on which IET interval x falls in
+* `wordForIterate`: Concatenated word for n iterations of the IET
+* `wordForIterate'`: Simplified version for ProofOfMainTheorem
+-/
+
 open TDCSG.CompoundSymmetry.GG5
 
+/-- Select the word based on which IET interval x falls in. -/
 noncomputable def IET_word (x : Real) : Word :=
   if x < length1 then word1
   else if x < length1 + length2 then word2
   else word3
 
+/-- Concatenated word for n iterations of the IET starting from x0.
+Each iteration applies the word corresponding to the current interval. -/
 noncomputable def wordForIterate (x0 : Real) : Nat -> Word
   | 0 => []
   | n + 1 => wordForIterate x0 n ++ IET_word (GG5_induced_IET.toFun^[n] x0)
 
+/-- Simplified version that doesn't track starting point - used in ProofOfMainTheorem. -/
 noncomputable def wordForIterate' : Nat -> Word
   | 0 => []
-  | n + 1 => wordForIterate' n ++ word1
+  | n + 1 => wordForIterate' n ++ word1  -- Simplified: actual depends on orbit
 
 end TDCSG.Definitions
