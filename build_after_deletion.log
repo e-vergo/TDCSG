@@ -1,0 +1,167 @@
+✔ [2374/2404] Built TDCSG.Definitions.Core (7.8s)
+✔ [2375/2404] Built TDCSG.Definitions.WordCorrespondence (2.3s)
+✔ [2376/2404] Built TDCSG.Definitions.Geometry (2.4s)
+✖ [2377/2404] Building TDCSG.Definitions.Points (2.5s)
+trace: .> LEAN_PATH=/Users/eric/Documents/GitHub/TDCSG/.lake/packages/batteries/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/Qq/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/aesop/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/proofwidgets/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/importGraph/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/plausible/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/MD4Lean/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/BibtexQuery/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/UnicodeBasic/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/Cli/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/mathlib/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/doc-gen4/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/build/lib/lean /Users/eric/.elan/toolchains/leanprover--lean4---v4.26.0-rc2/bin/lean /Users/eric/Documents/GitHub/TDCSG/TDCSG/Definitions/Points.lean -o /Users/eric/Documents/GitHub/TDCSG/.lake/build/lib/lean/TDCSG/Definitions/Points.olean -i /Users/eric/Documents/GitHub/TDCSG/.lake/build/lib/lean/TDCSG/Definitions/Points.ilean -c /Users/eric/Documents/GitHub/TDCSG/.lake/build/ir/TDCSG/Definitions/Points.c --setup /Users/eric/Documents/GitHub/TDCSG/.lake/build/ir/TDCSG/Definitions/Points.setup.json --json
+error: TDCSG/Definitions/Points.lean:46:32: Unknown identifier `psi`
+error: Lean exited with code 1
+✔ [2378/2404] Built TDCSG.Definitions.GroupAction (2.7s)
+✔ [2379/2404] Built TDCSG.Definitions.IET (2.8s)
+✔ [2380/2404] Built TDCSG.MainTheorem (2.3s)
+✔ [2381/2404] Built TDCSG.Definitions.RealDynamics (2.3s)
+✖ [2382/2404] Building TDCSG.Definitions.GroupTheory (2.4s)
+trace: .> LEAN_PATH=/Users/eric/Documents/GitHub/TDCSG/.lake/packages/batteries/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/Qq/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/aesop/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/proofwidgets/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/importGraph/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/plausible/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/MD4Lean/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/BibtexQuery/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/UnicodeBasic/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/Cli/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/mathlib/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/doc-gen4/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/build/lib/lean /Users/eric/.elan/toolchains/leanprover--lean4---v4.26.0-rc2/bin/lean /Users/eric/Documents/GitHub/TDCSG/TDCSG/Definitions/GroupTheory.lean -o /Users/eric/Documents/GitHub/TDCSG/.lake/build/lib/lean/TDCSG/Definitions/GroupTheory.olean -i /Users/eric/Documents/GitHub/TDCSG/.lake/build/lib/lean/TDCSG/Definitions/GroupTheory.ilean -c /Users/eric/Documents/GitHub/TDCSG/.lake/build/ir/TDCSG/Definitions/GroupTheory.c --setup /Users/eric/Documents/GitHub/TDCSG/.lake/build/ir/TDCSG/Definitions/GroupTheory.setup.json --json
+error: TDCSG/Definitions/GroupTheory.lean:33:21: Unknown identifier `genB`
+error: TDCSG/Definitions/GroupTheory.lean:33:30: Unknown identifier `genB_bijective`
+error: Lean exited with code 1
+✖ [2383/2404] Building TDCSG.Proofs.Zeta5 (2.5s)
+trace: .> LEAN_PATH=/Users/eric/Documents/GitHub/TDCSG/.lake/packages/batteries/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/Qq/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/aesop/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/proofwidgets/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/importGraph/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/plausible/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/MD4Lean/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/BibtexQuery/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/UnicodeBasic/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/Cli/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/mathlib/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/packages/doc-gen4/.lake/build/lib/lean:/Users/eric/Documents/GitHub/TDCSG/.lake/build/lib/lean /Users/eric/.elan/toolchains/leanprover--lean4---v4.26.0-rc2/bin/lean /Users/eric/Documents/GitHub/TDCSG/TDCSG/Proofs/Zeta5.lean -o /Users/eric/Documents/GitHub/TDCSG/.lake/build/lib/lean/TDCSG/Proofs/Zeta5.olean -i /Users/eric/Documents/GitHub/TDCSG/.lake/build/lib/lean/TDCSG/Proofs/Zeta5.ilean -c /Users/eric/Documents/GitHub/TDCSG/.lake/build/ir/TDCSG/Proofs/Zeta5.c --setup /Users/eric/Documents/GitHub/TDCSG/.lake/build/ir/TDCSG/Proofs/Zeta5.setup.json --json
+error: TDCSG/Proofs/Zeta5.lean:44:33: Unknown constant `TDCSG.Definitions.zeta5Circle`
+error: TDCSG/Proofs/Zeta5.lean:55:9: Tactic `unfold` failed: Local variable `φ` has no definition
+error: TDCSG/Proofs/Zeta5.lean:61:9: Tactic `unfold` failed: Local variable `φ` has no definition
+error: TDCSG/Proofs/Zeta5.lean:67:9: Tactic `unfold` failed: Local variable `ζ₅` has no definition
+error: TDCSG/Proofs/Zeta5.lean:72:4: unexpected identifier; expected command
+error: TDCSG/Proofs/Zeta5.lean:97:26: typeclass instance problem is stuck
+  Norm ?m.1
+
+Note: Lean will not try to resolve this typeclass instance problem because the type argument to `Norm` is a metavariable. This argument must be fully determined before Lean will try to resolve the typeclass.
+
+Hint: Adding type annotations and supplying implicit arguments to functions can give Lean more information for typeclass resolution. For example, if you have a variable `x` that you intend to be a `Nat`, but Lean reports it as having an unresolved type like `?m`, replacing `x` with `(x : Nat)` can get typeclass resolution un-stuck.
+error: TDCSG/Proofs/Zeta5.lean:105:39: typeclass instance problem is stuck
+  HPow ?m.8 ℕ ?m.2
+
+Note: Lean will not try to resolve this typeclass instance problem because the first type argument to `HPow` is a metavariable. This argument must be fully determined before Lean will try to resolve the typeclass.
+
+Hint: Adding type annotations and supplying implicit arguments to functions can give Lean more information for typeclass resolution. For example, if you have a variable `x` that you intend to be a `Nat`, but Lean reports it as having an unresolved type like `?m`, replacing `x` with `(x : Nat)` can get typeclass resolution un-stuck.
+error: TDCSG/Proofs/Zeta5.lean:109:24: typeclass instance problem is stuck
+  HPow ?m.10 ℕ ?m.2
+
+Note: Lean will not try to resolve this typeclass instance problem because the first type argument to `HPow` is a metavariable. This argument must be fully determined before Lean will try to resolve the typeclass.
+
+Hint: Adding type annotations and supplying implicit arguments to functions can give Lean more information for typeclass resolution. For example, if you have a variable `x` that you intend to be a `Nat`, but Lean reports it as having an unresolved type like `?m`, replacing `x` with `(x : Nat)` can get typeclass resolution un-stuck.
+error: TDCSG/Proofs/Zeta5.lean:114:30: typeclass instance problem is stuck
+  CommMonoid ?m.1
+
+Note: Lean will not try to resolve this typeclass instance problem because the type argument to `CommMonoid` is a metavariable. This argument must be fully determined before Lean will try to resolve the typeclass.
+
+Hint: Adding type annotations and supplying implicit arguments to functions can give Lean more information for typeclass resolution. For example, if you have a variable `x` that you intend to be a `Nat`, but Lean reports it as having an unresolved type like `?m`, replacing `x` with `(x : Nat)` can get typeclass resolution un-stuck.
+error: TDCSG/Proofs/Zeta5.lean:121:2: Unknown identifier `zeta5_isPrimitiveRoot.pow_ne_one_of_pos_of_lt`
+error: TDCSG/Proofs/Zeta5.lean:150:26: Type mismatch
+  zeta5_pow_five
+has type
+  ?m.32 ^ 5 = 1
+but is expected to have type
+  ζ₅ ^ 5 = 1
+error: TDCSG/Proofs/Zeta5.lean:167:41: typeclass instance problem is stuck
+  HPow ?m.12 ℕ ?m.12
+
+Note: Lean will not try to resolve this typeclass instance problem because the first type argument to `HPow` is a metavariable. This argument must be fully determined before Lean will try to resolve the typeclass.
+
+Hint: Adding type annotations and supplying implicit arguments to functions can give Lean more information for typeclass resolution. For example, if you have a variable `x` that you intend to be a `Nat`, but Lean reports it as having an unresolved type like `?m`, replacing `x` with `(x : Nat)` can get typeclass resolution un-stuck.
+error: TDCSG/Proofs/Zeta5.lean:205:33: typeclass instance problem is stuck
+  HPow ?m.17 ℕ ?m.18
+
+Note: Lean will not try to resolve this typeclass instance problem because the first type argument to `HPow` is a metavariable. This argument must be fully determined before Lean will try to resolve the typeclass.
+
+Hint: Adding type annotations and supplying implicit arguments to functions can give Lean more information for typeclass resolution. For example, if you have a variable `x` that you intend to be a `Nat`, but Lean reports it as having an unresolved type like `?m`, replacing `x` with `(x : Nat)` can get typeclass resolution un-stuck.
+error: TDCSG/Proofs/Zeta5.lean:225:9: Tactic `unfold` failed: Local variable `ζ₅` has no definition
+error: TDCSG/Proofs/Zeta5.lean:238:31: Invalid field notation: Type of
+  ζ₅ ^ 3
+is not known; cannot resolve field `re`
+error: TDCSG/Proofs/Zeta5.lean:248:30: Invalid field notation: Type of
+  ζ₅ ^ 4
+is not known; cannot resolve field `re`
+error: TDCSG/Proofs/Zeta5.lean:249:11: Invalid field notation: Type is not of the form `C ...` where C is a constant
+  ζ₅ ^ 4
+has type
+  x✝
+error: TDCSG/Proofs/Zeta5.lean:249:38: Application type mismatch: The argument
+  ζ₅
+has type
+  x✝
+of sort `Type u_1` but is expected to have type
+  ℂ
+of sort `Type` in the application
+  (starRingEnd ℂ) ζ₅
+error: TDCSG/Proofs/Zeta5.lean:249:12: failed to synthesize
+  HPow x✝ ℕ x✝
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+error: TDCSG/Proofs/Zeta5.lean:251:26: Unknown identifier `zeta5_re`
+error: TDCSG/Proofs/Zeta5.lean:248:67: unsolved goals
+x✝ : Type u_1
+ζ₅ : x✝
+h : sorry = ((starRingEnd ℂ) sorry).re
+⊢ sorry.re = (√5 - 1) / 4
+error: TDCSG/Proofs/Zeta5.lean:254:26: Invalid field notation: Type of
+  ζ₅ ^ 4
+is not known; cannot resolve field `im`
+error: TDCSG/Proofs/Zeta5.lean:254:39: Invalid field notation: Type of
+  ζ₅
+is not known; cannot resolve field `im`
+error: TDCSG/Proofs/Zeta5.lean:255:32: Application type mismatch: The argument
+  ζ₅
+has type
+  x✝
+of sort `Type u_1` but is expected to have type
+  ℂ
+of sort `Type` in the application
+  (starRingEnd ℂ) ζ₅
+error: TDCSG/Proofs/Zeta5.lean:255:11: failed to synthesize
+  HPow x✝ ℕ ℂ
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+error: TDCSG/Proofs/Zeta5.lean:256:6: Unknown identifier `h`
+error: TDCSG/Proofs/Zeta5.lean:254:48: unsolved goals
+case refine_1
+x✝ : Type u_1
+ζ₅ : x✝
+⊢ HPow x✝ ℕ ℂ
+
+case refine_2
+x✝ : Type u_1
+ζ₅ : x✝
+h : ζ₅ ^ 4 = (starRingEnd ℂ) sorry
+⊢ sorry = -sorry
+error: TDCSG/Proofs/Zeta5.lean:268:20: Invalid field notation: Type of
+  ζ₅ ^ 2
+is not known; cannot resolve field `im`
+error: TDCSG/Proofs/Zeta5.lean:269:6: Unknown identifier `zeta5_sq_eq`
+error: TDCSG/Proofs/Zeta5.lean:268:56: unsolved goals
+x✝ : Type u_1
+ζ₅ : x✝
+⊢ sorry = Real.sin (4 * π / 5)
+error: TDCSG/Proofs/Zeta5.lean:281:23: Invalid field notation: Type of
+  ζ₅ ^ 3
+is not known; cannot resolve field `im`
+error: TDCSG/Proofs/Zeta5.lean:288:30: Invalid field notation: Type of
+  ζ₅ ^ 4
+is not known; cannot resolve field `im`
+error: TDCSG/Proofs/Zeta5.lean:294:31: Invalid field notation: Type of
+  ζ₅ ^ 2
+is not known; cannot resolve field `im`
+error: TDCSG/Proofs/Zeta5.lean:294:63: unsolved goals
+x✝ : Type u_1
+ζ₅ : x✝
+⊢ Type ?u.21028
+
+x✝ : Type u_1
+ζ₅ : x✝
+⊢ ?m.20
+error: TDCSG/Proofs/Zeta5.lean:298:34: Invalid field notation: Type of
+  ζ₅ ^ 3
+is not known; cannot resolve field `im`
+error: TDCSG/Proofs/Zeta5.lean:298:67: unsolved goals
+x✝ : Type u_1
+ζ₅ : x✝
+⊢ Type ?u.22466
+
+x✝ : Type u_1
+ζ₅ : x✝
+⊢ ?m.22
+error: Lean exited with code 1
+Some required targets logged failures:
+- TDCSG.Definitions.Points
+- TDCSG.Definitions.GroupTheory
+- TDCSG.Proofs.Zeta5
+error: build failed

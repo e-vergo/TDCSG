@@ -1,5 +1,18 @@
 Total: 767 | Reachable: 313 | Dead: 460
 
+⚠️  WARNING: ~85-95% FALSE POSITIVE RATE FOR TACTIC-HEAVY PROOFS ⚠️
+
+Static dependency analysis cannot see tactical usage: rw [lemma], simp [lemma], linarith [lemma].
+Empirical testing (4 deletion attempts) showed 79 of 137 user declarations are actually needed.
+
+Breakdown:
+- 316 auto-generated (._proof_*, ._simp_*) - genuinely unused compiler artifacts
+- 137 user-written with locations - MOSTLY FALSE POSITIVES (used in tactics)
+- 7 user-written without locations - cannot verify
+
+See docs/dead_code_analysis.md for detailed empirical verification results.
+DO NOT DELETE without build-based verification.
+
 === ALL UNREACHABLE DECLARATIONS ===
 TDCSG.CompoundSymmetry.GG5.A4_im (theorem) (TDCSG/Proofs/CrossDiskRestricted.lean:475)
 TDCSG.CompoundSymmetry.GG5.A4_re (theorem) (TDCSG/Proofs/CrossDiskRestricted.lean:464)

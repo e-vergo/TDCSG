@@ -1,0 +1,1034 @@
+{
+  "timestamp": "2025-12-02T11:07:44.537002",
+  "total_files": 15,
+  "total_declarations": 137,
+  "files_modified": [
+    {
+      "path": "TDCSG/Definitions/Core.lean",
+      "declarations": [
+        {
+          "name": "zeta5CircleInv_coe",
+          "line": 89,
+          "start_line": 89,
+          "end_line": 90,
+          "commented": true
+        },
+        {
+          "name": "zeta5CircleInv",
+          "line": 85,
+          "start_line": 85,
+          "end_line": 91,
+          "commented": true
+        },
+        {
+          "name": "zeta5CirclePow",
+          "line": 82,
+          "start_line": 82,
+          "end_line": 92,
+          "commented": true
+        },
+        {
+          "name": "zeta5Circle_coe",
+          "line": 79,
+          "start_line": 79,
+          "end_line": 93,
+          "commented": true
+        },
+        {
+          "name": "zeta5Circle",
+          "line": 74,
+          "start_line": 74,
+          "end_line": 94,
+          "commented": true
+        },
+        {
+          "name": "zeta5_abs",
+          "line": 63,
+          "start_line": 63,
+          "end_line": 95,
+          "commented": true
+        }
+      ]
+    },
+    {
+      "path": "TDCSG/Definitions/Geometry.lean",
+      "declarations": [
+        {
+          "name": "rotateAboutCircle_inv",
+          "line": 75,
+          "start_line": 75,
+          "end_line": 82,
+          "commented": true
+        }
+      ]
+    },
+    {
+      "path": "TDCSG/Definitions/GroupTheory.lean",
+      "declarations": [
+        {
+          "name": "groupOrbit_5_eq",
+          "line": 132,
+          "start_line": 132,
+          "end_line": 137,
+          "commented": true
+        },
+        {
+          "name": "TwoDiskCompoundSymmetryGroup_5_eq",
+          "line": 125,
+          "start_line": 125,
+          "end_line": 138,
+          "commented": true
+        },
+        {
+          "name": "GG5_orbit",
+          "line": 106,
+          "start_line": 106,
+          "end_line": 139,
+          "commented": true
+        },
+        {
+          "name": "genB_perm_apply",
+          "line": 94,
+          "start_line": 94,
+          "end_line": 101,
+          "commented": true
+        },
+        {
+          "name": "genA_perm_apply",
+          "line": 90,
+          "start_line": 90,
+          "end_line": 102,
+          "commented": true
+        },
+        {
+          "name": "genB_bijective",
+          "line": 73,
+          "start_line": 73,
+          "end_line": 80,
+          "commented": true
+        },
+        {
+          "name": "genA_bijective",
+          "line": 67,
+          "start_line": 67,
+          "end_line": 81,
+          "commented": true
+        },
+        {
+          "name": "genB_eq_genB_n_5",
+          "line": 57,
+          "start_line": 57,
+          "end_line": 82,
+          "commented": true
+        },
+        {
+          "name": "genA_eq_genA_n_5",
+          "line": 52,
+          "start_line": 52,
+          "end_line": 83,
+          "commented": true
+        },
+        {
+          "name": "genA_perm",
+          "line": 25,
+          "start_line": 25,
+          "end_line": 34,
+          "commented": true
+        }
+      ]
+    },
+    {
+      "path": "TDCSG/Definitions/IET.lean",
+      "declarations": [
+        {
+          "name": "wordForIterate'",
+          "line": 297,
+          "start_line": 297,
+          "end_line": 300,
+          "commented": true
+        }
+      ]
+    },
+    {
+      "path": "TDCSG/Definitions/Points.lean",
+      "declarations": [
+        {
+          "name": "segment_length",
+          "line": 84,
+          "start_line": 84,
+          "end_line": 85,
+          "commented": true
+        },
+        {
+          "name": "translation_length_2",
+          "line": 81,
+          "start_line": 81,
+          "end_line": 86,
+          "commented": true
+        },
+        {
+          "name": "translation_length_1",
+          "line": 77,
+          "start_line": 77,
+          "end_line": 87,
+          "commented": true
+        },
+        {
+          "name": "t_F",
+          "line": 60,
+          "start_line": 60,
+          "end_line": 63,
+          "commented": true
+        },
+        {
+          "name": "G",
+          "line": 51,
+          "start_line": 51,
+          "end_line": 56,
+          "commented": true
+        },
+        {
+          "name": "F",
+          "line": 48,
+          "start_line": 48,
+          "end_line": 57,
+          "commented": true
+        }
+      ]
+    },
+    {
+      "path": "TDCSG/Proofs/CrossDiskRestricted.lean",
+      "declarations": [
+        {
+          "name": "seven_minus_3sqrt5_le_three_plus_phi",
+          "line": 590,
+          "start_line": 590,
+          "end_line": 597,
+          "commented": true
+        },
+        {
+          "name": "z4_vertex_gt_c_upper",
+          "line": 551,
+          "start_line": 551,
+          "end_line": 562,
+          "commented": true
+        },
+        {
+          "name": "normSq_A4",
+          "line": 543,
+          "start_line": 543,
+          "end_line": 563,
+          "commented": true
+        },
+        {
+          "name": "A4_im",
+          "line": 475,
+          "start_line": 475,
+          "end_line": 483,
+          "commented": true
+        },
+        {
+          "name": "A4_re",
+          "line": 464,
+          "start_line": 464,
+          "end_line": 484,
+          "commented": true
+        }
+      ]
+    },
+    {
+      "path": "TDCSG/Proofs/CrossDiskWord2DiskBounds.lean",
+      "declarations": [
+        {
+          "name": "c_lower_lt_upper_word2",
+          "line": 58,
+          "start_line": 58,
+          "end_line": 64,
+          "commented": true
+        },
+        {
+          "name": "c_upper_word2_eq_c_lower_word3",
+          "line": 55,
+          "start_line": 55,
+          "end_line": 65,
+          "commented": true
+        },
+        {
+          "name": "c_lower_word2_gt_neg1",
+          "line": 49,
+          "start_line": 49,
+          "end_line": 66,
+          "commented": true
+        },
+        {
+          "name": "c_lower_word2_eq",
+          "line": 45,
+          "start_line": 45,
+          "end_line": 67,
+          "commented": true
+        }
+      ]
+    },
+    {
+      "path": "TDCSG/Proofs/CrossDiskWord3Helpers.lean",
+      "declarations": [
+        {
+          "name": "w3_z5_at_one_expr",
+          "line": 675,
+          "start_line": 675,
+          "end_line": 678,
+          "commented": true
+        },
+        {
+          "name": "w3_z5_vertex",
+          "line": 661,
+          "start_line": 661,
+          "end_line": 670,
+          "commented": true
+        },
+        {
+          "name": "normSq_w3_z4_at_one",
+          "line": 571,
+          "start_line": 571,
+          "end_line": 591,
+          "commented": true
+        },
+        {
+          "name": "w3_z4_at_one_im",
+          "line": 558,
+          "start_line": 558,
+          "end_line": 592,
+          "commented": true
+        },
+        {
+          "name": "w3_z4_at_one_re",
+          "line": 549,
+          "start_line": 549,
+          "end_line": 593,
+          "commented": true
+        },
+        {
+          "name": "w3_z4_at_one_expr",
+          "line": 545,
+          "start_line": 545,
+          "end_line": 594,
+          "commented": true
+        },
+        {
+          "name": "w3_z4_vertex",
+          "line": 539,
+          "start_line": 539,
+          "end_line": 595,
+          "commented": true
+        },
+        {
+          "name": "w3_z3_vertex",
+          "line": 381,
+          "start_line": 381,
+          "end_line": 386,
+          "commented": true
+        },
+        {
+          "name": "A_w3_z1_at_c_one",
+          "line": 114,
+          "start_line": 114,
+          "end_line": 116,
+          "commented": true
+        },
+        {
+          "name": "A_w3_z1_at_c_lower",
+          "line": 107,
+          "start_line": 107,
+          "end_line": 117,
+          "commented": true
+        },
+        {
+          "name": "c_lower_word3_gt_c_upper_restricted",
+          "line": 43,
+          "start_line": 43,
+          "end_line": 51,
+          "commented": true
+        },
+        {
+          "name": "c_lower_word3_gt_neg1",
+          "line": 36,
+          "start_line": 36,
+          "end_line": 52,
+          "commented": true
+        }
+      ]
+    },
+    {
+      "path": "TDCSG/Proofs/GroupTheory.lean",
+      "declarations": [
+        {
+          "name": "GG5_is_infinite",
+          "line": 553,
+          "start_line": 553,
+          "end_line": 556,
+          "commented": true
+        },
+        {
+          "name": "GG5_has_infinite_group_orbit",
+          "line": 536,
+          "start_line": 536,
+          "end_line": 557,
+          "commented": true
+        },
+        {
+          "name": "GG5_infinite_of_infinite_orbit",
+          "line": 528,
+          "start_line": 528,
+          "end_line": 558,
+          "commented": true
+        },
+        {
+          "name": "CompoundSymmetryGroup_infinite_of_infinite_orbit",
+          "line": 523,
+          "start_line": 523,
+          "end_line": 559,
+          "commented": true
+        },
+        {
+          "name": "word_orbit_infinite_iff_group_orbit_infinite",
+          "line": 507,
+          "start_line": 507,
+          "end_line": 514,
+          "commented": true
+        },
+        {
+          "name": "genB_n_bijective_proof",
+          "line": 279,
+          "start_line": 279,
+          "end_line": 387,
+          "commented": true
+        },
+        {
+          "name": "genA_n_bijective_proof",
+          "line": 248,
+          "start_line": 248,
+          "end_line": 388,
+          "commented": true
+        },
+        {
+          "name": "genB_perm_pow_five",
+          "line": 234,
+          "start_line": 234,
+          "end_line": 389,
+          "commented": true
+        },
+        {
+          "name": "genA_perm_pow_five",
+          "line": 227,
+          "start_line": 227,
+          "end_line": 390,
+          "commented": true
+        },
+        {
+          "name": "genB_bijective_proof",
+          "line": 206,
+          "start_line": 206,
+          "end_line": 391,
+          "commented": true
+        },
+        {
+          "name": "genB_pow_five",
+          "line": 143,
+          "start_line": 143,
+          "end_line": 392,
+          "commented": true
+        },
+        {
+          "name": "genB_inside",
+          "line": 136,
+          "start_line": 136,
+          "end_line": 393,
+          "commented": true
+        },
+        {
+          "name": "genB_outside",
+          "line": 131,
+          "start_line": 131,
+          "end_line": 394,
+          "commented": true
+        },
+        {
+          "name": "genA_bijective_proof",
+          "line": 110,
+          "start_line": 110,
+          "end_line": 395,
+          "commented": true
+        },
+        {
+          "name": "genA_pow_five",
+          "line": 77,
+          "start_line": 77,
+          "end_line": 396,
+          "commented": true
+        },
+        {
+          "name": "genA_inside",
+          "line": 70,
+          "start_line": 70,
+          "end_line": 397,
+          "commented": true
+        },
+        {
+          "name": "genA_outside",
+          "line": 65,
+          "start_line": 65,
+          "end_line": 398,
+          "commented": true
+        },
+        {
+          "name": "Circle_exp_neg_two_pi_over_5_pow_5",
+          "line": 56,
+          "start_line": 56,
+          "end_line": 399,
+          "commented": true
+        }
+      ]
+    },
+    {
+      "path": "TDCSG/Proofs/IET.lean",
+      "declarations": [
+        {
+          "name": "displacement2_eq_neg_length12",
+          "line": 441,
+          "start_line": 441,
+          "end_line": 442,
+          "commented": true
+        },
+        {
+          "name": "length3_eq_one_over_phi",
+          "line": 403,
+          "start_line": 403,
+          "end_line": 405,
+          "commented": true
+        },
+        {
+          "name": "length1_eq_length2",
+          "line": 400,
+          "start_line": 400,
+          "end_line": 406,
+          "commented": true
+        }
+      ]
+    },
+    {
+      "path": "TDCSG/Proofs/OrbitInfinite.lean",
+      "declarations": [
+        {
+          "name": "GG5_induced_IET_is_order3",
+          "line": 552,
+          "start_line": 552,
+          "end_line": 567,
+          "commented": true
+        },
+        {
+          "name": "length1_lt_half",
+          "line": 543,
+          "start_line": 543,
+          "end_line": 568,
+          "commented": true
+        },
+        {
+          "name": "length3_gt_length1",
+          "line": 533,
+          "start_line": 533,
+          "end_line": 569,
+          "commented": true
+        },
+        {
+          "name": "interval2_image_bound",
+          "line": 525,
+          "start_line": 525,
+          "end_line": 570,
+          "commented": true
+        },
+        {
+          "name": "length1_alt",
+          "line": 521,
+          "start_line": 521,
+          "end_line": 571,
+          "commented": true
+        },
+        {
+          "name": "denom_pos",
+          "line": 515,
+          "start_line": 515,
+          "end_line": 572,
+          "commented": true
+        },
+        {
+          "name": "GG5_IET_has_orbit_structure",
+          "line": 178,
+          "start_line": 178,
+          "end_line": 210,
+          "commented": true
+        },
+        {
+          "name": "GG5_IET_orbit_finite_subset",
+          "line": 135,
+          "start_line": 135,
+          "end_line": 211,
+          "commented": true
+        },
+        {
+          "name": "GG5_IET_orbit_nonempty",
+          "line": 129,
+          "start_line": 129,
+          "end_line": 212,
+          "commented": true
+        },
+        {
+          "name": "GG5_IET_rotation_irrational",
+          "line": 79,
+          "start_line": 79,
+          "end_line": 213,
+          "commented": true
+        },
+        {
+          "name": "goldenRatio_mul_rat_irrational",
+          "line": 68,
+          "start_line": 68,
+          "end_line": 214,
+          "commented": true
+        }
+      ]
+    },
+    {
+      "path": "TDCSG/Proofs/Points.lean",
+      "declarations": [
+        {
+          "name": "segment_ordering",
+          "line": 570,
+          "start_line": 570,
+          "end_line": 608,
+          "commented": true
+        },
+        {
+          "name": "G_on_segment_E'E",
+          "line": 546,
+          "start_line": 546,
+          "end_line": 609,
+          "commented": true
+        },
+        {
+          "name": "G_eq_coeff_times_E",
+          "line": 523,
+          "start_line": 523,
+          "end_line": 610,
+          "commented": true
+        },
+        {
+          "name": "F_on_segment_E'E",
+          "line": 491,
+          "start_line": 491,
+          "end_line": 611,
+          "commented": true
+        },
+        {
+          "name": "F_eq_psi_times_E",
+          "line": 468,
+          "start_line": 468,
+          "end_line": 612,
+          "commented": true
+        },
+        {
+          "name": "zeta5_plus_zeta5_fourth",
+          "line": 375,
+          "start_line": 375,
+          "end_line": 613,
+          "commented": true
+        },
+        {
+          "name": "t_F_lt_one",
+          "line": 367,
+          "start_line": 367,
+          "end_line": 614,
+          "commented": true
+        },
+        {
+          "name": "t_G_lt_t_F",
+          "line": 364,
+          "start_line": 364,
+          "end_line": 615,
+          "commented": true
+        },
+        {
+          "name": "psi_lt_t_F",
+          "line": 353,
+          "start_line": 353,
+          "end_line": 616,
+          "commented": true
+        },
+        {
+          "name": "t_G_pos",
+          "line": 350,
+          "start_line": 350,
+          "end_line": 617,
+          "commented": true
+        },
+        {
+          "name": "t_G",
+          "line": 350,
+          "start_line": 350,
+          "end_line": 618,
+          "commented": true
+        },
+        {
+          "name": "psi_le_one",
+          "line": 347,
+          "start_line": 347,
+          "end_line": 619,
+          "commented": true
+        },
+        {
+          "name": "psi_lt_one",
+          "line": 341,
+          "start_line": 341,
+          "end_line": 620,
+          "commented": true
+        },
+        {
+          "name": "psi_ne_zero",
+          "line": 338,
+          "start_line": 338,
+          "end_line": 621,
+          "commented": true
+        },
+        {
+          "name": "psi_pos",
+          "line": 335,
+          "start_line": 335,
+          "end_line": 622,
+          "commented": true
+        },
+        {
+          "name": "psi_eq",
+          "line": 330,
+          "start_line": 330,
+          "end_line": 623,
+          "commented": true
+        },
+        {
+          "name": "psi",
+          "line": 330,
+          "start_line": 330,
+          "end_line": 624,
+          "commented": true
+        },
+        {
+          "name": "sqrt5_lt_three",
+          "line": 320,
+          "start_line": 320,
+          "end_line": 625,
+          "commented": true
+        },
+        {
+          "name": "sqrt5_gt_one",
+          "line": 311,
+          "start_line": 311,
+          "end_line": 626,
+          "commented": true
+        },
+        {
+          "name": "E_im",
+          "line": 52,
+          "start_line": 52,
+          "end_line": 133,
+          "commented": true
+        },
+        {
+          "name": "E_re",
+          "line": 30,
+          "start_line": 30,
+          "end_line": 134,
+          "commented": true
+        }
+      ]
+    },
+    {
+      "path": "TDCSG/Proofs/RotationFormulas.lean",
+      "declarations": [
+        {
+          "name": "exp_two_pi_fifth",
+          "line": 53,
+          "start_line": 53,
+          "end_line": 62,
+          "commented": true
+        }
+      ]
+    },
+    {
+      "path": "TDCSG/Proofs/SegmentGeometry.lean",
+      "declarations": [
+        {
+          "name": "E'_re_neg",
+          "line": 314,
+          "start_line": 314,
+          "end_line": 318,
+          "commented": true
+        },
+        {
+          "name": "E_re_pos",
+          "line": 308,
+          "start_line": 308,
+          "end_line": 319,
+          "commented": true
+        },
+        {
+          "name": "translations_irrational",
+          "line": 154,
+          "start_line": 154,
+          "end_line": 264,
+          "commented": true
+        },
+        {
+          "name": "segment_ratio_is_golden",
+          "line": 80,
+          "start_line": 80,
+          "end_line": 265,
+          "commented": true
+        },
+        {
+          "name": "F_ne_zero",
+          "line": 56,
+          "start_line": 56,
+          "end_line": 266,
+          "commented": true
+        }
+      ]
+    },
+    {
+      "path": "TDCSG/Proofs/Zeta5.lean",
+      "declarations": [
+        {
+          "name": "circle_exp_two_pi_fifth",
+          "line": 646,
+          "start_line": 646,
+          "end_line": 653,
+          "commented": true
+        },
+        {
+          "name": "zeta5CirclePow4_eq_inv",
+          "line": 638,
+          "start_line": 638,
+          "end_line": 654,
+          "commented": true
+        },
+        {
+          "name": "zeta5CirclePow_coe",
+          "line": 630,
+          "start_line": 630,
+          "end_line": 655,
+          "commented": true
+        },
+        {
+          "name": "zeta5_powers_re_sum",
+          "line": 612,
+          "start_line": 612,
+          "end_line": 656,
+          "commented": true
+        },
+        {
+          "name": "one_sub_zeta5_pow4_re",
+          "line": 608,
+          "start_line": 608,
+          "end_line": 657,
+          "commented": true
+        },
+        {
+          "name": "one_add_zeta5_pow4_re",
+          "line": 604,
+          "start_line": 604,
+          "end_line": 658,
+          "commented": true
+        },
+        {
+          "name": "zeta5_sq_im_pos",
+          "line": 595,
+          "start_line": 595,
+          "end_line": 659,
+          "commented": true
+        },
+        {
+          "name": "zeta5_pow4_im_neg'",
+          "line": 587,
+          "start_line": 587,
+          "end_line": 660,
+          "commented": true
+        },
+        {
+          "name": "zeta5_cubed_im_neg",
+          "line": 579,
+          "start_line": 579,
+          "end_line": 661,
+          "commented": true
+        },
+        {
+          "name": "sin_eight_pi_fifth",
+          "line": 538,
+          "start_line": 538,
+          "end_line": 544,
+          "commented": true
+        },
+        {
+          "name": "zeta5_sq_re_eq_phi",
+          "line": 487,
+          "start_line": 487,
+          "end_line": 492,
+          "commented": true
+        },
+        {
+          "name": "zeta5_im_pos",
+          "line": 463,
+          "start_line": 463,
+          "end_line": 469,
+          "commented": true
+        },
+        {
+          "name": "zeta5_re_eq_phi",
+          "line": 459,
+          "start_line": 459,
+          "end_line": 470,
+          "commented": true
+        },
+        {
+          "name": "zeta5_eq",
+          "line": 428,
+          "start_line": 428,
+          "end_line": 434,
+          "commented": true
+        },
+        {
+          "name": "zeta5_pow_fifteen_C",
+          "line": 410,
+          "start_line": 410,
+          "end_line": 413,
+          "commented": true
+        },
+        {
+          "name": "zeta5_pow_ten_C",
+          "line": 409,
+          "start_line": 409,
+          "end_line": 414,
+          "commented": true
+        },
+        {
+          "name": "zeta5_pow_seventeen",
+          "line": 372,
+          "start_line": 372,
+          "end_line": 415,
+          "commented": true
+        },
+        {
+          "name": "zeta5_pow4_eq",
+          "line": 309,
+          "start_line": 309,
+          "end_line": 416,
+          "commented": true
+        },
+        {
+          "name": "zeta5_pow4_mul_sq",
+          "line": 279,
+          "start_line": 279,
+          "end_line": 286,
+          "commented": true
+        },
+        {
+          "name": "zeta5_sq_mul_inv",
+          "line": 274,
+          "start_line": 274,
+          "end_line": 287,
+          "commented": true
+        },
+        {
+          "name": "zeta5_inv_mul_pow",
+          "line": 269,
+          "start_line": 269,
+          "end_line": 288,
+          "commented": true
+        },
+        {
+          "name": "zeta5_pow_mul_inv",
+          "line": 263,
+          "start_line": 263,
+          "end_line": 289,
+          "commented": true
+        },
+        {
+          "name": "zeta5_inv_as_pow4",
+          "line": 260,
+          "start_line": 260,
+          "end_line": 290,
+          "commented": true
+        },
+        {
+          "name": "zeta5_mul_inv",
+          "line": 256,
+          "start_line": 256,
+          "end_line": 291,
+          "commented": true
+        },
+        {
+          "name": "zeta5_inv_mul",
+          "line": 252,
+          "start_line": 252,
+          "end_line": 292,
+          "commented": true
+        },
+        {
+          "name": "zeta5_pow_add_five_mul",
+          "line": 248,
+          "start_line": 248,
+          "end_line": 293,
+          "commented": true
+        },
+        {
+          "name": "zeta5_pow_eq_one_iff",
+          "line": 153,
+          "start_line": 153,
+          "end_line": 158,
+          "commented": true
+        },
+        {
+          "name": "zeta5_pow_zero_im",
+          "line": 87,
+          "start_line": 87,
+          "end_line": 89,
+          "commented": true
+        },
+        {
+          "name": "zeta5_pow_zero_re",
+          "line": 84,
+          "start_line": 84,
+          "end_line": 90,
+          "commented": true
+        },
+        {
+          "name": "zeta5_pow_zero",
+          "line": 81,
+          "start_line": 81,
+          "end_line": 91,
+          "commented": true
+        },
+        {
+          "name": "one_plus_phi_ne_zero",
+          "line": 65,
+          "start_line": 65,
+          "end_line": 67,
+          "commented": true
+        },
+        {
+          "name": "phi_ne_zero",
+          "line": 65,
+          "start_line": 65,
+          "end_line": 68,
+          "commented": true
+        }
+      ]
+    }
+  ]
+}
