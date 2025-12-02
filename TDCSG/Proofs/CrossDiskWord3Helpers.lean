@@ -54,7 +54,7 @@ lemma normSq_A_w3_z1 : Complex.normSq (ζ₅^4 - 2) = 6 - √5 := by
 
 lemma re_A_w3_z1_mul_conj_B :
     ((ζ₅^4 - 2 : ℂ) * starRingEnd ℂ (1 - ζ₅)).re = (2*√5 - 5) / 2 := by
-  rw [conj_B4]
+  rw [conj_one_sub_zeta5]
   have h_expand : (ζ₅^4 - 2 : ℂ) * (1 - ζ₅^4) = 3*ζ₅^4 - ζ₅^3 - 2 := by
     calc (ζ₅^4 - 2) * (1 - ζ₅^4) = ζ₅^4 - ζ₅^8 - 2 + 2*ζ₅^4 := by ring
       _ = 3*ζ₅^4 - ζ₅^3 - 2 := by rw [zeta5_pow_eight]; ring
@@ -515,7 +515,7 @@ lemma normSq_A_w3_z5 : Complex.normSq ((-4 : ℂ) + 4*ζ₅ - 2*ζ₅^2 + ζ₅^
 
 lemma re_A_w3_z5_mul_conj_B :
     (((-4 : ℂ) + 4*ζ₅ - 2*ζ₅^2 + ζ₅^4) * starRingEnd ℂ (1 - ζ₅)).re = (7*√5 - 20) / 2 := by
-  rw [conj_B4]
+  rw [conj_one_sub_zeta5]
   have h_expand : ((-4 : ℂ) + 4*ζ₅ - 2*ζ₅^2 + ζ₅^4) * (1 - ζ₅^4) =
       -4 + 4*ζ₅^4 + 4*ζ₅ - 4*ζ₅^5 - 2*ζ₅^2 + 2*ζ₅^6 + ζ₅^4 - ζ₅^8 := by ring
   have h_simple : ((-4 : ℂ) + 4*ζ₅ - 2*ζ₅^2 + ζ₅^4) * (1 - ζ₅^4) = -8 + 6*ζ₅ - 2*ζ₅^2 - ζ₅^3 + 5*ζ₅^4 := by

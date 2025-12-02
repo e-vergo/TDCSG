@@ -56,7 +56,7 @@ lemma cross_disk_w3_z1_bound (c : ℝ) (hc_lo : 2 - √5 ≤ c) (hc_hi : c ≤ 1
     exact normSq_w3_z1_at_lower
 
   have h_re_AB := re_A_w3_z1_mul_conj_B
-  have h_normSq_B := normSq_B4
+  have h_normSq_B := normSq_one_sub_zeta5
   have h_normSq_A := normSq_A_w3_z1
   have h_vertex := w3_z1_vertex
   have h_vertex_in := w3_z1_vertex_in_interval
@@ -73,7 +73,7 @@ lemma cross_disk_w3_z1_bound (c : ℝ) (hc_lo : 2 - √5 ≤ c) (hc_hi : c ≤ 1
   rw [hA_def, hB_def]
   rw [← Complex.normSq_eq_norm_sq]
 
-  have h_coeff_a : Complex.normSq (1 - ζ₅) = (5 - √5) / 2 := normSq_B4
+  have h_coeff_a : Complex.normSq (1 - ζ₅) = (5 - √5) / 2 := normSq_one_sub_zeta5
   have h_coeff_b : ((ζ₅^4 - 2 : ℂ) * starRingEnd ℂ (1 - ζ₅)).re = (2*√5 - 5) / 2 := re_A_w3_z1_mul_conj_B
   have h_coeff_c : Complex.normSq (ζ₅^4 - 2) = 6 - √5 := normSq_A_w3_z1
 
@@ -406,7 +406,7 @@ lemma cross_disk_w3_z5_bound (c : ℝ) (hc_lo : 2 - √5 ≤ c) (hc_hi : c ≤ 1
     rw [w3_z5_at_lower_expr]
     exact normSq_w3_z5_at_lower
 
-  have h_normSq_B := normSq_B4
+  have h_normSq_B := normSq_one_sub_zeta5
   have h_normSq_A := normSq_A_w3_z5
   have h_re_AB := re_A_w3_z5_mul_conj_B
   have h_vertex := w3_z5_vertex_above_interval
@@ -423,7 +423,7 @@ lemma cross_disk_w3_z5_bound (c : ℝ) (hc_lo : 2 - √5 ≤ c) (hc_hi : c ≤ 1
   rw [hA_def, hB_def]
   rw [← Complex.normSq_eq_norm_sq]
 
-  have h_coeff_a : Complex.normSq (1 - ζ₅) = (5 - √5) / 2 := normSq_B4
+  have h_coeff_a : Complex.normSq (1 - ζ₅) = (5 - √5) / 2 := normSq_one_sub_zeta5
   have h_coeff_b : (((-4 : ℂ) + 4*ζ₅ - 2*ζ₅^2 + ζ₅^4) * starRingEnd ℂ (1 - ζ₅)).re = (7*√5 - 20) / 2 := re_A_w3_z5_mul_conj_B
   have h_coeff_c : Complex.normSq ((-4 : ℂ) + 4*ζ₅ - 2*ζ₅^2 + ζ₅^4) = 46 - 19*√5 := normSq_A_w3_z5
 

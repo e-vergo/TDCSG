@@ -123,7 +123,7 @@ lemma cross_disk_w2_z1_bound (c : ℝ) (hc_lo : (1 - √5) / 2 ≤ c) (hc_hi : c
       _ = 3 + φ := by simp only [φ, Real.goldenRatio]
       _ ≤ 3 + φ := le_refl _
 
-  have h_coeff_a : Complex.normSq B = (5 - √5) / 2 := by rw [hB_def]; exact normSq_B4
+  have h_coeff_a : Complex.normSq B = (5 - √5) / 2 := by rw [hB_def]; exact normSq_one_sub_zeta5
   have h_coeff_b : (A * starRingEnd ℂ B).re = (2*√5 - 5) / 2 := by
     rw [hA_def, hB_def]; exact re_A_w3_z1_mul_conj_B
   have h_a_pos : (5 - √5) / 2 > 0 := by nlinarith [sqrt5_sq]

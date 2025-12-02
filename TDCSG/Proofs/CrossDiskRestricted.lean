@@ -167,15 +167,6 @@ lemma normSq_B3 : Complex.normSq (ζ₅^4 - 1) = (5 - √5) / 2 := by
     grind
   grind
 
-lemma sin_sq_two_pi_div_5 : Real.sin (2 * π / 5)^2 = (5 + √5) / 8 := by
-  have h_cos : Real.cos (2 * π / 5) = (√5 - 1) / 4 := by
-    rw [cos_two_pi_fifth]
-    unfold Real.goldenRatio
-    ring
-  have h := Real.sin_sq_add_cos_sq (2 * π / 5)
-  have h1 : Real.sin (2 * π / 5)^2 = 1 - Real.cos (2 * π / 5)^2 := by linarith
-  grind
-
 lemma z3_normSq_at_c_upper :
     Complex.normSq ((2 : ℂ) - 2*ζ₅ + ζ₅^3 + (((1 - √5)/2 : ℝ) : ℂ) * (ζ₅^4 - 1)) = (7 + √5) / 2 := by
   rw [Complex.normSq_apply]
@@ -368,13 +359,6 @@ lemma B4_im : (1 - ζ₅ : ℂ).im = -Real.sin (2 * π / 5) := by
   rw [zeta5_im_eq_sin]
   ring
 
-lemma normSq_B4 : Complex.normSq (1 - ζ₅) = (5 - √5) / 2 := by
-  rw [Complex.normSq_apply]
-  simp only [← sq]
-  rw [B4_re, B4_im]
-  have h_sin_sq : Real.sin (2 * π / 5)^2 = (5 + √5) / 8 := sin_sq_two_pi_div_5
-  grind
-
 lemma A4_re : ((-2 : ℂ) + 2*ζ₅ - 2*ζ₅^2 + ζ₅^4).re = (-9 + 5*√5) / 4 := by
   simp only [Complex.add_re, Complex.sub_re, Complex.mul_re, Complex.neg_re]
   have h2re : (2 : ℂ).re = 2 := by rfl
@@ -391,12 +375,9 @@ lemma A4_im : ((-2 : ℂ) + 2*ζ₅ - 2*ζ₅^2 + ζ₅^4).im = Real.sin (2 * π
   rw [zeta5_im_eq_sin, zeta5_sq_im', zeta5_pow4_im']
   ring
 
-lemma conj_B4 : starRingEnd ℂ (1 - ζ₅) = 1 - ζ₅^4 := by
-  rw [map_sub, map_one, zeta5_conj]
-
 lemma re_A4_mul_conj_B4 :
     (((-2 : ℂ) + 2*ζ₅ - 2*ζ₅^2 + ζ₅^4) * starRingEnd ℂ (1 - ζ₅)).re = (5*√5 - 10) / 2 := by
-  rw [conj_B4]
+  rw [conj_one_sub_zeta5]
   have h_expand : ((-2 : ℂ) + 2*ζ₅ - 2*ζ₅^2 + ζ₅^4) * (1 - ζ₅^4) =
       -2 + 2*ζ₅^4 + 2*ζ₅ - 2*ζ₅^5 - 2*ζ₅^2 + 2*ζ₅^6 + ζ₅^4 - ζ₅^8 := by ring
   rw [h_expand]
@@ -535,7 +516,7 @@ lemma cross_disk_z4_bound_restricted (c : ℝ) (hc_lo : -1 ≤ c) (hc_hi : c ≤
       ring
 
     have h_re_AB := re_A4_mul_conj_B4
-    have h_normSq_B := normSq_B4
+    have h_normSq_B := normSq_one_sub_zeta5
 
     rw [h_normSq_expand c, h_normSq_expand (-1)]
     rw [h_re_AB, h_normSq_B]

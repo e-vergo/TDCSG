@@ -423,4 +423,59 @@ lemma zeta5_cubed_im_neg : (ζ₅^3).im < 0 := by
   · linarith [Real.pi_pos]
   · linarith [Real.pi_pos]
 
+/-- sin²(π/5) = (5 - √5)/8 -/
+@[simp] lemma sin_sq_pi_div_5 : Real.sin (π / 5)^2 = (5 - √5) / 8 := by
+  have h_cos : Real.cos (π / 5) = (1 + √5) / 4 := Real.cos_pi_div_five
+  have h := Real.sin_sq_add_cos_sq (π / 5)
+  have h1 : Real.sin (π / 5)^2 = 1 - Real.cos (π / 5)^2 := by linarith
+  grind
+
+/-- sin²(2π/5) = (5 + √5)/8 -/
+@[simp] lemma sin_sq_two_pi_div_5 : Real.sin (2 * π / 5)^2 = (5 + √5) / 8 := by
+  have h_sin_double : Real.sin (2 * π / 5) = 2 * Real.sin (π / 5) * Real.cos (π / 5) := by
+    rw [show (2 * π / 5 : ℝ) = 2 * (π / 5) by ring, Real.sin_two_mul]
+  have h_cos : Real.cos (π / 5) = (1 + √5) / 4 := Real.cos_pi_div_five
+  have h_sin_sq : Real.sin (π / 5)^2 = (5 - √5) / 8 := sin_sq_pi_div_5
+  rw [h_sin_double, h_cos]
+  calc (2 * Real.sin (π / 5) * ((1 + √5) / 4))^2
+      = 4 * Real.sin (π / 5)^2 * ((1 + √5) / 4)^2 := by ring
+    _ = 4 * ((5 - √5) / 8) * ((1 + √5)^2 / 16) := by rw [h_sin_sq]; ring
+    _ = (5 + √5) / 8 := by nlinarith [sqrt5_sq]
+
+/-- ‖1 - ζ₅‖² = (5 - √5)/2 -/
+@[simp] lemma normSq_one_sub_zeta5 : Complex.normSq (1 - ζ₅) = (5 - √5) / 2 := by
+  rw [Complex.normSq_sub, Complex.normSq_one, Complex.normSq_apply, zeta5_re, zeta5_im_eq_sin]
+  have h1 : (√5 - 1) / 4 * ((√5 - 1) / 4) + Real.sin (2 * π / 5) * Real.sin (2 * π / 5) = 1 := by
+    have : Real.sin (2 * π / 5) * Real.sin (2 * π / 5) = (5 + √5) / 8 := by
+      rw [← sq, sin_sq_two_pi_div_5]
+    rw [this]
+    nlinarith [sqrt5_sq]
+  have h_re : ((1 : ℂ) * starRingEnd ℂ ζ₅).re = ζ₅.re := by simp
+  rw [h1, h_re, zeta5_re]
+  ring
+
+/-- conj(1 - ζ₅) = 1 - ζ₅⁴ -/
+@[simp] lemma conj_one_sub_zeta5 : starRingEnd ℂ (1 - ζ₅) = 1 - ζ₅^4 := by
+  rw [map_sub, map_one, zeta5_conj]
+
+/-- ‖ζ₅³ - ζ₅⁴‖² = (5 - √5)/2 -/
+@[simp] lemma normSq_zeta5_cubed_sub_pow4 : Complex.normSq (ζ₅^3 - ζ₅^4) = (5 - √5) / 2 := by
+  rw [Complex.normSq_sub, Complex.normSq_apply, Complex.normSq_apply]
+  simp only [zeta5_cubed_re, zeta5_cubed_im_eq, zeta5_pow4_re, zeta5_pow4_im]
+  have h_conj_pow4 : starRingEnd ℂ (ζ₅^4) = ζ₅ := by
+    rw [map_pow, zeta5_conj]
+    calc (ζ₅^4)^4 = ζ₅^16 := by ring
+      _ = ζ₅ := zeta5_pow_sixteen
+  have h_re : ((ζ₅^3) * starRingEnd ℂ (ζ₅^4)).re = ((ζ₅^3) * ζ₅).re := by
+    rw [h_conj_pow4]
+  have h_prod : (ζ₅^3) * ζ₅ = ζ₅^4 := by ring
+  rw [h_re, h_prod]
+  simp only [zeta5_pow4_re]
+  have h_sin_pi5 : Real.sin (π / 5)^2 = (5 - √5) / 8 := sin_sq_pi_div_5
+  have h_sin_2pi5 : Real.sin (2 * π / 5)^2 = (5 + √5) / 8 := sin_sq_two_pi_div_5
+  nlinarith [sqrt5_sq]
+
+/-- (√5 - 1)² = 6 - 2√5 -/
+lemma sqrt5_minus_one_sq : (√5 - 1)^2 = 6 - 2*√5 := by grind
+
 end TDCSG.CompoundSymmetry.GG5
