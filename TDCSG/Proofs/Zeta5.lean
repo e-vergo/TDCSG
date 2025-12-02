@@ -48,10 +48,6 @@ lemma one_plus_phi_pos : 0 < 1 + φ := by
   unfold φ
   linarith [Real.goldenRatio_pos]
 
-lemma one_plus_phi_ne_zero : 1 + φ ≠ 0 := ne_of_gt one_plus_phi_pos
-
-lemma phi_ne_zero : φ ≠ 0 := ne_of_gt (by unfold φ; exact Real.goldenRatio_pos)
-
 @[simp] lemma zeta5_pow_five : ζ₅ ^ 5 = 1 :=
   (zeta5_isPrimitiveRoot).pow_eq_one
 
@@ -171,13 +167,6 @@ lemma zeta5_pow_reduce (n : ℕ) : ζ₅ ^ n = ζ₅ ^ (n % 5) := by
 
 lemma zeta5_inv_mul : ζ₅⁻¹ * ζ₅ = 1 := by
   field_simp [zeta5_ne_zero]
-
-lemma zeta5_inv_as_pow4 : ζ₅⁻¹ = ζ₅^4 := zeta5_inv_eq_pow4
-
-lemma zeta5_pow_mul_inv (n : ℕ) : ζ₅^n * ζ₅⁻¹ = ζ₅^((n + 4) % 5) := by
-  rw [zeta5_inv_as_pow4]
-  rw [← pow_add]
-  exact zeta5_pow_reduce (n + 4)
 
 lemma cyclotomic5_sum : 1 + ζ₅ + ζ₅^2 + ζ₅^3 + ζ₅^4 = 0 := by
   have h1 : ζ₅^5 = 1 := zeta5_pow_five
@@ -301,12 +290,6 @@ lemma zeta5_re_eq_cos : ζ₅.re = Real.cos (2 * π / 5) := by
   rw [show (2 : ℂ) * π * I / 5 = (2 * π / 5 : ℝ) * I by
     simp [div_eq_mul_inv]; ring]
   exact Complex.exp_ofReal_mul_I_im (2 * π / 5)
-
-lemma zeta5_eq : ζ₅ = ↑(Real.cos (2 * π / 5)) + I * ↑(Real.sin (2 * π / 5)) := by
-  unfold ζ₅
-  rw [show (2 : ℂ) * π * I / 5 = (2 * π / 5 : ℝ) * I by push_cast; field_simp]
-  rw [Complex.exp_mul_I,  Complex.ofReal_cos, Complex.ofReal_sin]
-  ring
 
 lemma zeta5_sq_eq : ζ₅^2 = ↑(Real.cos (4 * π / 5)) + I * ↑(Real.sin (4 * π / 5)) := by
   unfold ζ₅
