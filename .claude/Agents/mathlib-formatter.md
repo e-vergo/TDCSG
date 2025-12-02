@@ -23,7 +23,7 @@ For each file you process:
 1. **Read the entire file** to understand its structure and content
 2. **Run Mathlib linters** if available (`lake exe runLinter` or check diagnostics)
 3. **Apply fixes** in this order:
-   - Copyright header
+   - Copyright header (Attribution: Eric Vergo, Claude Code)
    - Import organization
    - Module docstring
    - Declaration naming

@@ -23,3 +23,15 @@ lean_lib «KMVerify» where
 lean_exe «km_verify» where
   root := `KMVerify.Main
   supportInterpreter := true
+
+lean_exe «extract_proof_deps» where
+  root := `scripts.extract_proof_deps
+  supportInterpreter := true
+
+lean_exe «extract_dep_graph» where
+  root := `scripts.extract_dep_graph
+  supportInterpreter := true
+
+lean_exe «find_dead_code» where
+  root := `scripts.find_dead_code
+  supportInterpreter := true

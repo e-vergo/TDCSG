@@ -158,6 +158,33 @@ KMVerify/                     # Kim Morrison standard verification tool
     Duplicates.lean           # Duplicate check (updated to allow MainTheorem re-exports)
 ```
 
+## Dependency Graph
+
+An interactive visualization of all 767 TDCSG declarations and their dependencies:
+
+```bash
+./scripts/build_dep_graph.sh  # Generate graph
+open docs/dep_graph.html      # View interactive version
+open docs/deps_static.svg     # View static version (faster for large graphs)
+```
+
+**Features:**
+- **Interactive**: Zoom (scroll), pan (drag), and search by declaration name
+- **Loading indicator**: Shows progress for large graph rendering
+- **Static fallback**: Pre-rendered SVG available if interactive version is slow
+- **Color-coded**: Green shades indicate formalized declarations (all 767 are complete)
+  - Light green: Definitions
+  - Lawn green: CompoundSymmetry proofs
+  - Pale green: Supporting proofs
+- **Node shapes**: Ellipse (theorem/lemma), Box (definition), Diamond (inductive/structure)
+- **Direct dependencies**: Edges show immediate "uses" relationships
+- **Portable**: Also generates `docs/deps.dot` (Graphviz DOT format)
+
+**Alternative renderers** (requires graphviz):
+```bash
+dot -Tpdf docs/deps.dot -o deps.pdf
+```
+
 ## Proof Architecture
 
 The proof establishes that GG5 is infinite via orbit analysis:
