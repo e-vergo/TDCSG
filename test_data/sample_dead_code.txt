@@ -1,0 +1,5 @@
+Total: 5 | Reachable: 3 | Dead: 2
+
+=== ALL UNREACHABLE DECLARATIONS ===
+Test.addTwo (def) (test_data/sample_with_comments.lean:16)
+Test.unusedLemma (theorem) (test_data/sample_with_comments.lean:23)

@@ -1,0 +1,12 @@
+# String-Based Dead Code Analysis
+# Generated: 2025-12-02
+#
+# Instructions:
+# - Edit KEEP/DELETE actions as needed
+# - Lines starting with # are comments (ignored)
+# - Format: ACTION    name    count=N    files=[...]
+#
+# After editing, run: python scripts/string_search_analyzer.py --execute-deletions
+
+KEEP    addTwo           count=5    files=[sample_with_comments.lean]
+DELETE  unusedLemma      count=0    files=[]
