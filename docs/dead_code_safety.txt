@@ -1,8 +1,8 @@
-DANGEROUS (@[simp]): 19
+DANGEROUS (@[simp]): 17
 CAUTION (other attrs): 0
-POTENTIALLY SAFE: 53
+POTENTIALLY SAFE: 3
 
-DO NOT DELETE these 19 @[simp] declarations:
+DO NOT DELETE these 17 @[simp] declarations:
   TDCSG.CompoundSymmetry.GG5.normSq_zeta5_cubed_sub_pow4
   TDCSG.CompoundSymmetry.GG5.zeta5_abs_pow4
   TDCSG.CompoundSymmetry.GG5.zeta5_cubed_im_neg
@@ -15,8 +15,6 @@ DO NOT DELETE these 19 @[simp] declarations:
   TDCSG.CompoundSymmetry.GG5.zeta5_pow_zero_im
   TDCSG.CompoundSymmetry.GG5.zeta5_pow_zero_re
   TDCSG.CompoundSymmetry.GG5.zeta5_re_eq_phi
-  TDCSG.Definitions.genA_perm_apply
-  TDCSG.Definitions.genB_perm_apply
   TDCSG.Definitions.zeta5Circle
   TDCSG.Definitions.zeta5CircleInv
   TDCSG.Definitions.zeta5CircleInv_coe

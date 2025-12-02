@@ -3,7 +3,7 @@ Copyright (c) 2024 Eric Vergo. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Vergo
 -/
-import TDCSG.Definitions.GroupTheory
+import TDCSG.Definitions.GroupAction
 import TDCSG.Proofs.IETOrbit
 import Mathlib.GroupTheory.GroupAction.Basic
 import Mathlib.Data.Finite.Defs
@@ -17,11 +17,8 @@ word orbits and group orbits.
 
 ## Main results
 
-- `genA_bijective_proof`: The generator A (rotation about left disk) is bijective
-- `genB_bijective_proof`: The generator B (rotation about right disk) is bijective
-- `orbit_eq_groupOrbit`: Word orbits coincide with group-theoretic orbits
-- `GG5_infinite_of_infinite_orbit`: An infinite orbit implies the group is infinite
-- `GG5_has_infinite_group_orbit`: The GG5 group at critical radius has an infinite orbit
+- `orbit_eq_MulAction_orbit`: Word orbits coincide with group-theoretic orbits
+- `infinite_orbit_implies_infinite_group`: An infinite orbit implies the group is infinite
 
 ## References
 
@@ -32,6 +29,14 @@ namespace TDCSG.CompoundSymmetry.GG5
 
 open TDCSG.Definitions
 open scoped Complex
+
+private lemma genA_eq_genA_n_5 (r : Real) (z : Complex) : genA r z = genA_n 5 r z := by
+  unfold genA genA_n
+  simp only [Nat.cast_ofNat]
+
+private lemma genB_eq_genB_n_5 (r : Real) (z : Complex) : genB r z = genB_n 5 r z := by
+  unfold genB genB_n
+  simp only [Nat.cast_ofNat]
 
 private noncomputable def genToPerm (r : Real) : Generator -> TwoDiskCompoundSymmetryGroup 5 (by norm_num) r
   | .A => { val := genA_n_perm 5 (by norm_num) r, property := Subgroup.subset_closure (Set.mem_insert _ _) }
@@ -103,10 +108,9 @@ private lemma wordToPerm_action (r : Real) (w : Word) (p : Complex) :
     rfl
 
 lemma word_orbit_subset_group_orbit (r : Real) (z : Complex) :
-    orbit r z ⊆ groupOrbit 5 (by norm_num) r z := by
+    orbit r z ⊆ MulAction.orbit (TwoDiskCompoundSymmetryGroup 5 (by norm_num) r) z := by
   intro w hw
   obtain ⟨word, hw_eq⟩ := hw
-  unfold groupOrbit
   rw [MulAction.mem_orbit_iff]
   use wordToPerm r word
   rw [<- hw_eq]
@@ -182,9 +186,8 @@ private lemma closure_element_has_word (r : Real) (g : TwoDiskCompoundSymmetryGr
     rw [<- h_rev_inv w]
 
 lemma group_orbit_subset_word_orbit (r : Real) (z : Complex) :
-    groupOrbit 5 (by norm_num) r z ⊆ orbit r z := by
+    MulAction.orbit (TwoDiskCompoundSymmetryGroup 5 (by norm_num) r) z ⊆ orbit r z := by
   intro w hw
-  unfold groupOrbit at hw
   rw [MulAction.mem_orbit_iff] at hw
   obtain ⟨g, hgw⟩ := hw
 
@@ -199,8 +202,8 @@ lemma group_orbit_subset_word_orbit (r : Real) (z : Complex) :
     _ = g.val z := by rw [<- hword]
     _ = g • z := rfl
 
-theorem orbit_eq_groupOrbit (r : Real) (z : Complex) :
-    orbit r z = groupOrbit 5 (by norm_num) r z := by
+theorem orbit_eq_MulAction_orbit (r : Real) (z : Complex) :
+    orbit r z = MulAction.orbit (TwoDiskCompoundSymmetryGroup 5 (by norm_num) r) z := by
   apply Set.eq_of_subset_of_subset
   . exact word_orbit_subset_group_orbit r z
   . exact group_orbit_subset_word_orbit r z
