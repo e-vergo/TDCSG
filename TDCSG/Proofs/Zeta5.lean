@@ -35,7 +35,7 @@ namespace TDCSG.CompoundSymmetry.GG5
 
 open scoped Complex
 open Complex Real
-open TDCSG.Definitions (ζ₅ zeta5Circle zeta5CirclePow zeta5CircleInv φ r_crit zeta5_isPrimitiveRoot)
+open TDCSG.Definitions (ζ₅ zeta5Circle zeta5CirclePow zeta5CircleInv φ r_crit zeta5_isPrimitiveRoot zeta5_abs)
 
 @[simp] lemma sqrt5_sq : Real.sqrt 5 ^ 2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
 
@@ -96,22 +96,10 @@ lemma zeta5_ne_one : ζ₅ ≠ 1 := by
   have : (1 : ℤ) % 5 = 0 := by rw [← h_int]; simp
   norm_num at this
 
-@[simp] lemma zeta5_abs : ‖ζ₅‖ = 1 := by
-  unfold ζ₅
-  rw [show (2 : ℂ) * π * I / 5 = (2 * π / 5 : ℝ) * I by
-    simp [div_eq_mul_inv]
-    ring]
-  exact Complex.norm_exp_ofReal_mul_I (2 * π / 5)
-
 @[simp] lemma zeta5_abs_pow (n : ℕ) : ‖ζ₅^n‖ = 1 := by
   rw [Complex.norm_pow, zeta5_abs, one_pow]
 
 lemma zeta5_abs_pow4 : ‖ζ₅^4‖ = 1 := zeta5_abs_pow 4
-
-lemma zeta5_isPrimitiveRoot : IsPrimitiveRoot ζ₅ 5 := by
-  unfold ζ₅
-  rw [show (2 : ℂ) * π * I / 5 = 2 * π * I / (5 : ℂ) by norm_cast]
-  exact Complex.isPrimitiveRoot_exp 5 (by norm_num)
 
 lemma zeta5_pow_ne_one {k : ℕ} (hk : k ≠ 0) (hk5 : k < 5) : ζ₅ ^ k ≠ 1 :=
   zeta5_isPrimitiveRoot.pow_ne_one_of_pos_of_lt hk hk5
