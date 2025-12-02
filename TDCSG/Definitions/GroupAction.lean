@@ -49,30 +49,6 @@ noncomputable def genB (r : ℝ) (z : ℂ) : ℂ := by
   classical
   exact if z ∈ rightDisk r then rotateAboutC rightCenter (-2 * π / 5) z else z
 
-lemma genA_in_disk_eq_rotateAboutCircle (r : ℝ) (z : ℂ) (hz : z ∈ leftDisk r) :
-    genA r z = rotateAboutCircle leftCenter (Circle.exp (-2 * π / 5)) z := by
-  simp only [genA, hz, ↓reduceIte, rotateAboutCircle_eq_rotateAboutC]
-
-lemma genB_in_disk_eq_rotateAboutCircle (r : ℝ) (z : ℂ) (hz : z ∈ rightDisk r) :
-    genB r z = rotateAboutCircle rightCenter (Circle.exp (-2 * π / 5)) z := by
-  simp only [genB, hz, ↓reduceIte, rotateAboutCircle_eq_rotateAboutC]
-
-lemma genA_preserves_leftDisk (r : ℝ) (z : ℂ) (hz : z ∈ leftDisk r) :
-    genA r z ∈ leftDisk r := by
-  rw [genA_in_disk_eq_rotateAboutCircle r z hz]
-  unfold leftDisk
-  have h_center : leftCenter = (-1 : ℂ) := by unfold leftCenter; simp
-  rw [h_center]
-  exact rotateAboutCircle_preserves_disk (-1) _ r z hz
-
-lemma genB_preserves_rightDisk (r : ℝ) (z : ℂ) (hz : z ∈ rightDisk r) :
-    genB r z ∈ rightDisk r := by
-  rw [genB_in_disk_eq_rotateAboutCircle r z hz]
-  unfold rightDisk
-  have h_center : rightCenter = (1 : ℂ) := by unfold rightCenter; simp
-  rw [h_center]
-  exact rotateAboutCircle_preserves_disk 1 _ r z hz
-
 lemma Circle_exp_pow (theta : ℝ) (n : ℕ) : Circle.exp theta ^ n = Circle.exp (n * theta) := by
   induction n with
   | zero => simp [Circle.exp_zero]
