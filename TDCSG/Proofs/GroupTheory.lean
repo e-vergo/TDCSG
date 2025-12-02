@@ -33,64 +33,6 @@ namespace TDCSG.CompoundSymmetry.GG5
 open TDCSG.Definitions
 open scoped Complex
 
-theorem genA_n_bijective_proof (n : Nat) (hn : n >= 1) (r : Real) :
-    Function.Bijective (genA_n n r) := by
-
-  have h_period : forall z, (genA_n n r)^[n] z = z := fun z => genA_n_pow_n n hn r z
-  constructor
-  .
-    intro x y hxy
-
-    have h_apply : forall k, (genA_n n r)^[k] (genA_n n r x) = (genA_n n r)^[k] (genA_n n r y) := by
-      intro k
-      induction k with
-      | zero => simp [hxy]
-      | succ k ih =>
-        simp only [Function.iterate_succ', Function.comp_apply]
-        exact congrArg (genA_n n r) ih
-    have h_eq : (genA_n n r)^[n] x = (genA_n n r)^[n] y := by
-      calc (genA_n n r)^[n] x
-          = (genA_n n r)^[n - 1] (genA_n n r x) := iterate_split (genA_n n r) n hn x
-        _ = (genA_n n r)^[n - 1] (genA_n n r y) := h_apply (n - 1)
-        _ = (genA_n n r)^[n] y := (iterate_split (genA_n n r) n hn y).symm
-    calc x = (genA_n n r)^[n] x := (h_period x).symm
-      _ = (genA_n n r)^[n] y := h_eq
-      _ = y := h_period y
-  .
-    intro y
-    use (genA_n n r)^[n - 1] y
-    calc genA_n n r ((genA_n n r)^[n - 1] y)
-        = (genA_n n r)^[n] y := iterate_unsplit (genA_n n r) n hn y
-      _ = y := h_period y
-
-theorem genB_n_bijective_proof (n : Nat) (hn : n >= 1) (r : Real) :
-    Function.Bijective (genB_n n r) := by
-  have h_period : forall z, (genB_n n r)^[n] z = z := fun z => genB_n_pow_n n hn r z
-  constructor
-  .
-    intro x y hxy
-    have h_apply : forall k, (genB_n n r)^[k] (genB_n n r x) = (genB_n n r)^[k] (genB_n n r y) := by
-      intro k
-      induction k with
-      | zero => simp [hxy]
-      | succ k ih =>
-        simp only [Function.iterate_succ', Function.comp_apply]
-        exact congrArg (genB_n n r) ih
-    have h_eq : (genB_n n r)^[n] x = (genB_n n r)^[n] y := by
-      calc (genB_n n r)^[n] x
-          = (genB_n n r)^[n - 1] (genB_n n r x) := iterate_split (genB_n n r) n hn x
-        _ = (genB_n n r)^[n - 1] (genB_n n r y) := h_apply (n - 1)
-        _ = (genB_n n r)^[n] y := (iterate_split (genB_n n r) n hn y).symm
-    calc x = (genB_n n r)^[n] x := (h_period x).symm
-      _ = (genB_n n r)^[n] y := h_eq
-      _ = y := h_period y
-  .
-    intro y
-    use (genB_n n r)^[n - 1] y
-    calc genB_n n r ((genB_n n r)^[n - 1] y)
-        = (genB_n n r)^[n] y := iterate_unsplit (genB_n n r) n hn y
-      _ = y := h_period y
-
 private noncomputable def genToPerm (r : Real) : Generator -> TwoDiskCompoundSymmetryGroup 5 (by norm_num) r
   | .A => { val := genA_n_perm 5 (by norm_num) r, property := Subgroup.subset_closure (Set.mem_insert _ _) }
   | .Ainv => { val := (genA_n_perm 5 (by norm_num) r)⁻¹, property := Subgroup.inv_mem _ (Subgroup.subset_closure (Set.mem_insert _ _)) }
@@ -269,27 +211,5 @@ lemma infinite_orbit_implies_infinite_group {G : Type*} [Group G] [MulAction G C
   push_neg at hfin
   haveI : Finite G := hfin
   exact h (Finite.finite_mulAction_orbit z)
-
-theorem CompoundSymmetryGroup_infinite_of_infinite_orbit (r : Real) (z : Complex)
-    (h : (groupOrbit 5 (by norm_num) r z).Infinite) : Infinite (TwoDiskCompoundSymmetryGroup 5 (by norm_num) r) := by
-  exact infinite_orbit_implies_infinite_group z h
-
-theorem GG5_infinite_of_infinite_orbit (z : Complex)
-    (h : (GG5_orbit z).Infinite) : Infinite GG5_At_Critical_radius := by
-  exact CompoundSymmetryGroup_infinite_of_infinite_orbit r_crit z h
-
-theorem GG5_has_infinite_group_orbit :
-    exists z : Complex, (GG5_orbit z).Infinite := by
-  obtain ⟨x0, hx0_mem, hx0_inf⟩ := GG5_IET_has_infinite_orbit
-  use segmentPoint x0
-
-  show (MulAction.orbit GG5_At_Critical_radius (segmentPoint x0)).Infinite
-
-  have h_word_inf : (orbit r_crit (segmentPoint x0)).Infinite :=
-    IET_orbit_infinite_implies_group_orbit_infinite x0 hx0_mem hx0_inf
-
-  rw [orbit_eq_groupOrbit] at h_word_inf
-
-  exact h_word_inf
 
 end TDCSG.CompoundSymmetry.GG5

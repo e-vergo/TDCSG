@@ -1,9 +1,9 @@
 # Dead Code Analysis Report
 
-**Generated**: 587267793
-**Total declarations**: 423
-**Reachable from main theorem**: 309 (73%)
-**Unreachable (dead code)**: 120 (28%)
+**Generated**: 590918754
+**Total declarations**: 406
+**Reachable from main theorem**: 309 (76%)
+**Unreachable (dead code)**: 103 (25%)
 
 ## ⚠️ IMPORTANT WARNINGS
 
@@ -59,25 +59,6 @@
 - `TDCSG.CompoundSymmetry.GG5.F_on_segment_E'E` (theorem) - Line 447 ⚠️ Check for @[simp]
 - `TDCSG.CompoundSymmetry.GG5.G_eq_coeff_times_E` (theorem) - Line 478 ⚠️ Check for @[simp]
 
-### TDCSG/Proofs/GroupTheory.lean (16 declarations)
-
-- `TDCSG.CompoundSymmetry.GG5.Circle_exp_neg_two_pi_over_5_pow_5` (theorem) - Line 36 ⚠️ Check for @[simp]
-- `TDCSG.CompoundSymmetry.GG5.genA_outside` (theorem) - Line 42 ⚠️ Check for @[simp]
-- `TDCSG.CompoundSymmetry.GG5.genA_inside` (theorem) - Line 46 ⚠️ Check for @[simp]
-- `TDCSG.CompoundSymmetry.GG5.genA_pow_five` (theorem) - Line 52 ⚠️ Check for @[simp]
-- `TDCSG.CompoundSymmetry.GG5.genA_bijective_proof` (theorem) - Line 84 ⚠️ Check for @[simp]
-- `TDCSG.CompoundSymmetry.GG5.genB_outside` (theorem) - Line 102 ⚠️ Check for @[simp]
-- `TDCSG.CompoundSymmetry.GG5.genB_inside` (theorem) - Line 106 ⚠️ Check for @[simp]
-- `TDCSG.CompoundSymmetry.GG5.genB_pow_five` (theorem) - Line 112 ⚠️ Check for @[simp]
-- `TDCSG.CompoundSymmetry.GG5.genB_bijective_proof` (theorem) - Line 172 ⚠️ Check for @[simp]
-- `TDCSG.CompoundSymmetry.GG5.genA_perm_pow_five` (theorem) - Line 190 ⚠️ Check for @[simp]
-- `TDCSG.CompoundSymmetry.GG5.genB_perm_pow_five` (theorem) - Line 196 ⚠️ Check for @[simp]
-- `TDCSG.CompoundSymmetry.GG5.genA_n_bijective_proof` (theorem) - Line 202 ⚠️ Check for @[simp]
-- `TDCSG.CompoundSymmetry.GG5.genB_n_bijective_proof` (theorem) - Line 232 ⚠️ Check for @[simp]
-- `TDCSG.CompoundSymmetry.GG5.CompoundSymmetryGroup_infinite_of_infinite_orbit` (theorem) - Line 439 ⚠️ Check for @[simp]
-- `TDCSG.CompoundSymmetry.GG5.GG5_infinite_of_infinite_orbit` (theorem) - Line 443 ⚠️ Check for @[simp]
-- `TDCSG.CompoundSymmetry.GG5.GG5_has_infinite_group_orbit` (theorem) - Line 447 ⚠️ Check for @[simp]
-
 ### TDCSG/Definitions/GroupTheory.lean (10 declarations)
 
 - `TDCSG.Definitions.genA_eq_genA_n_5` (theorem) - Line 41 ⚠️ Check for @[simp]
@@ -93,12 +74,12 @@
 
 ### TDCSG/Definitions/Points.lean (6 declarations)
 
-- `TDCSG.Definitions.F` (def) - Line 38
-- `TDCSG.Definitions.G` (def) - Line 41
-- `TDCSG.Definitions.t_F` (def) - Line 47
-- `TDCSG.Definitions.translation_length_1` (def) - Line 56
-- `TDCSG.Definitions.translation_length_2` (def) - Line 59
-- `TDCSG.Definitions.segment_length` (def) - Line 62
+- `TDCSG.Definitions.F` (def) - Line 42
+- `TDCSG.Definitions.G` (def) - Line 45
+- `TDCSG.Definitions.t_F` (def) - Line 51
+- `TDCSG.Definitions.translation_length_1` (def) - Line 60
+- `TDCSG.Definitions.translation_length_2` (def) - Line 63
+- `TDCSG.Definitions.segment_length` (def) - Line 66
 
 ### TDCSG/Definitions/Core.lean (5 declarations)
 
@@ -116,19 +97,20 @@
 - `TDCSG.CompoundSymmetry.GG5.A4_im` (theorem) - Line 370 ⚠️ Check for @[simp]
 - `TDCSG.CompoundSymmetry.GG5.normSq_A4` (theorem) - Line 419 ⚠️ Check for @[simp]
 
+### TDCSG/Proofs/GroupTheory.lean (5 declarations)
+
+- `TDCSG.CompoundSymmetry.GG5.genA_n_bijective_proof` (theorem) - Line 36 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.genB_n_bijective_proof` (theorem) - Line 66 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.CompoundSymmetryGroup_infinite_of_infinite_orbit` (theorem) - Line 273 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.GG5_infinite_of_infinite_orbit` (theorem) - Line 277 ⚠️ Check for @[simp]
+- `TDCSG.CompoundSymmetry.GG5.GG5_has_infinite_group_orbit` (theorem) - Line 281 ⚠️ Check for @[simp]
+
 ### TDCSG/Proofs/CrossDiskWord3Helpers.lean (4 declarations)
 
 - `TDCSG.CompoundSymmetry.GG5.A_w3_z1_at_c_lower` (theorem) - Line 78 ⚠️ Check for @[simp]
 - `TDCSG.CompoundSymmetry.GG5.A_w3_z1_at_c_one` (theorem) - Line 84 ⚠️ Check for @[simp]
 - `TDCSG.CompoundSymmetry.GG5.w3_z4_at_one_re` (theorem) - Line 455 ⚠️ Check for @[simp]
 - `TDCSG.CompoundSymmetry.GG5.w3_z4_at_one_im` (theorem) - Line 463 ⚠️ Check for @[simp]
-
-### TDCSG/Definitions/GroupAction.lean (4 declarations)
-
-- `TDCSG.Definitions.genA_in_disk_eq_rotateAboutCircle` (theorem) - Line 52 ⚠️ Check for @[simp]
-- `TDCSG.Definitions.genB_in_disk_eq_rotateAboutCircle` (theorem) - Line 56 ⚠️ Check for @[simp]
-- `TDCSG.Definitions.genA_preserves_leftDisk` (theorem) - Line 60 ⚠️ Check for @[simp]
-- `TDCSG.Definitions.genB_preserves_rightDisk` (theorem) - Line 68 ⚠️ Check for @[simp]
 
 ### TDCSG/Proofs/SegmentGeometry.lean (3 declarations)
 
@@ -147,44 +129,38 @@
 
 ## Summary by Module
 
-- `TDCSG.CompoundSymmetry.GG5`: 63 declarations
+- `TDCSG.CompoundSymmetry.GG5`: 52 declarations
 - `TDCSG.Definitions.Generator`: 17 declarations
 - `TDCSG.Definitions.applyGen`: 4 declarations
 - `TDCSG.Definitions.wordForIterate`: 2 declarations
 - `TDCSG.Definitions.rotateAboutCircle`: 1 declarations
 - `TDCSG.Definitions.zeta5CirclePow`: 1 declarations
+- `TDCSG.Definitions.t_G`: 1 declarations
 - `TDCSG.Definitions.genB_eq_genB_n_5`: 1 declarations
 - `TDCSG.Definitions.genA_bijective`: 1 declarations
 - `TDCSG.Definitions.genA_eq_genA_n_5`: 1 declarations
-- `TDCSG.Definitions.t_G`: 1 declarations
 - `TDCSG.Definitions.zeta5Circle`: 1 declarations
 - `TDCSG.Definitions.segment_length`: 1 declarations
 - `TDCSG.Definitions.zeta5Circle_coe`: 1 declarations
 - `TDCSG.Definitions.E`: 1 declarations
 - `TDCSG.Definitions.translation_length_1`: 1 declarations
-- `TDCSG.Definitions.genB`: 1 declarations
 - `TDCSG.Definitions.genB_bijective`: 1 declarations
-- `TDCSG.Definitions.genA_in_disk_eq_rotateAboutCircle`: 1 declarations
 - `TDCSG.Definitions.genB_perm`: 1 declarations
 - `TDCSG.Definitions.φ`: 1 declarations
-- `TDCSG.Definitions.genB_in_disk_eq_rotateAboutCircle`: 1 declarations
+- `TDCSG.Definitions.translation_length_2`: 1 declarations
+- `TDCSG.Definitions.t_F`: 1 declarations
 - `TDCSG.Definitions.rotateAboutC`: 1 declarations
 - `TDCSG.Definitions.psi`: 1 declarations
-- `TDCSG.Definitions.t_F`: 1 declarations
-- `TDCSG.Definitions.translation_length_2`: 1 declarations
 - `TDCSG.Definitions.genB_perm_apply`: 1 declarations
 - `TDCSG.Definitions.GG5_orbit`: 1 declarations
 - `TDCSG.Definitions.TwoDiskCompoundSymmetryGroup_5_eq`: 1 declarations
 - `TDCSG.Definitions.G`: 1 declarations
 - `TDCSG.Definitions.zeta5CircleInv_coe`: 1 declarations
-- `TDCSG.Definitions.genA_preserves_leftDisk`: 1 declarations
 - `TDCSG.Definitions.GG5_induced_IET`: 1 declarations
 - `TDCSG.Definitions.zeta5CircleInv`: 1 declarations
-- `TDCSG.Definitions.genB_preserves_rightDisk`: 1 declarations
 - `TDCSG.Definitions.genA_perm_apply`: 1 declarations
-- `TDCSG.Definitions.genA_perm`: 1 declarations
 - `TDCSG.Definitions.F`: 1 declarations
-- `TDCSG.Definitions.genA`: 1 declarations
+- `TDCSG.Definitions.genA_perm`: 1 declarations
 
 ## Recommendations
 
