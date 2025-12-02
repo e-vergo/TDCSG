@@ -137,58 +137,54 @@ theorem GG5_actual_displacement_interval2 :
 
   unfold displacement2; ring
 
+/-- Helper lemma: The IET toFun at a point in interval i equals the expected translation. -/
+lemma IET_toFun_at_interval (i : Fin 3) (x : ℝ) (h_in_i : x ∈ GG5_induced_IET.interval i) :
+    GG5_induced_IET.toFun x =
+    GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation i) + (x - GG5_induced_IET.domainLeft i) := by
+  unfold IntervalExchangeTransformation.toFun
+
+  have h_ex : ∃ y, ∃ j, x ∈ GG5_induced_IET.interval j ∧
+      y = GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation j) + (x - GG5_induced_IET.domainLeft j) := by
+    use GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation i) + (x - GG5_induced_IET.domainLeft i), i
+
+  have h_unique : ∀ y, (∃ j, x ∈ GG5_induced_IET.interval j ∧
+      y = GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation j) + (x - GG5_induced_IET.domainLeft j)) →
+      y = GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation i) + (x - GG5_induced_IET.domainLeft i) := by
+    intro y ⟨j, hj_mem, hj_eq⟩
+    have : j = i := by
+      by_contra h_ne
+      have h_disj := GG5_induced_IET.intervals_disjoint (Set.mem_range_self i) (Set.mem_range_self j)
+                       (by intro heq; exact h_ne (GG5_induced_IET.interval_injective heq.symm))
+      have : x ∈ GG5_induced_IET.interval i ∩ GG5_induced_IET.interval j := ⟨h_in_i, hj_mem⟩
+      exact Set.disjoint_iff_inter_eq_empty.mp h_disj |>.subset this
+    rw [this] at hj_eq
+    exact hj_eq
+
+  have h_eps : Classical.epsilon (fun y => ∃ j, x ∈ GG5_induced_IET.interval j ∧
+      y = GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation j) + (x - GG5_induced_IET.domainLeft j)) =
+      GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation i) + (x - GG5_induced_IET.domainLeft i) := by
+    have h_spec := Classical.epsilon_spec h_ex
+    exact h_unique _ h_spec
+
+  exact h_eps
+
 theorem GG5_displacement_eq_toFun_sub (x : ℝ) (hx : x ∈ Set.Ico 0 1) :
     GG5_displacement x = GG5_induced_IET.toFun x - x := by
   unfold GG5_displacement
 
   by_cases h0 : x < length1
-  ·
-    simp only [h0, if_true]
-
-    unfold IntervalExchangeTransformation.toFun
+  · simp only [h0, if_true]
     have h_in_0 : x ∈ GG5_induced_IET.interval 0 := by
       unfold IntervalExchangeTransformation.interval IntervalExchangeTransformation.domainRight
       rw [GG5_domainLeft_0]
       simp only [GG5_induced_IET, Set.mem_Ico]
-      constructor
-      · exact hx.1
-      · simp; exact h0
-
-    have h_ex : ∃ y, ∃ i, x ∈ GG5_induced_IET.interval i ∧
-        y = GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation i) + (x - GG5_induced_IET.domainLeft i) := by
-      use GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation 0) + (x - GG5_induced_IET.domainLeft 0), 0
-
-    have h_unique : ∀ y, (∃ i, x ∈ GG5_induced_IET.interval i ∧
-        y = GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation i) + (x - GG5_induced_IET.domainLeft i)) →
-        y = GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation 0) + (x - GG5_induced_IET.domainLeft 0) := by
-      intro y ⟨i, hi_mem, hi_eq⟩
-      have : i = 0 := by
-        by_contra h_ne
-        have h_disj := GG5_induced_IET.intervals_disjoint (Set.mem_range_self 0) (Set.mem_range_self i)
-                         (by intro heq; exact h_ne (GG5_induced_IET.interval_injective heq).symm)
-        have : x ∈ GG5_induced_IET.interval 0 ∩ GG5_induced_IET.interval i := ⟨h_in_0, hi_mem⟩
-        exact Set.disjoint_iff_inter_eq_empty.mp h_disj |>.subset this
-      rw [this] at hi_eq
-      exact hi_eq
-
-    have h_eps : Classical.epsilon (fun y => ∃ i, x ∈ GG5_induced_IET.interval i ∧
-        y = GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation i) + (x - GG5_induced_IET.domainLeft i)) =
-        GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation 0) + (x - GG5_induced_IET.domainLeft 0) := by
-      have h_spec := Classical.epsilon_spec h_ex
-      exact h_unique _ h_spec
-    rw [h_eps, GG5_domainLeft_0]
-
-    have h_simp : GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation 0) + (x - 0) - x =
-                  GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation 0) := by ring
-    rw [h_simp]
-
+      exact ⟨hx.1, by simp; exact h0⟩
+    rw [IET_toFun_at_interval 0 x h_in_0, GG5_domainLeft_0]
     have h := GG5_actual_displacement_interval0
     simp only [GG5_domainLeft_0, sub_zero] at h
-    exact h.symm
+    rw [← h]; ring
   · by_cases h1 : x < length1 + length2
-    ·
-      simp only [h0, h1, if_false, if_true]
-      unfold IntervalExchangeTransformation.toFun
+    · simp only [h0, h1, if_false, if_true]
       have h_in_1 : x ∈ GG5_induced_IET.interval 1 := by
         unfold IntervalExchangeTransformation.interval IntervalExchangeTransformation.domainRight
         rw [GG5_domainLeft_1]
@@ -196,33 +192,10 @@ theorem GG5_displacement_eq_toFun_sub (x : ℝ) (hx : x ∈ Set.Ico 0 1) :
         constructor
         · push_neg at h0; exact h0
         · simp; exact h1
-      have h_ex : ∃ y, ∃ i, x ∈ GG5_induced_IET.interval i ∧
-          y = GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation i) + (x - GG5_induced_IET.domainLeft i) := by
-        use GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation 1) + (x - GG5_induced_IET.domainLeft 1), 1
-
-      have h_unique : ∀ y, (∃ i, x ∈ GG5_induced_IET.interval i ∧
-          y = GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation i) + (x - GG5_induced_IET.domainLeft i)) →
-          y = GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation 1) + (x - GG5_induced_IET.domainLeft 1) := by
-        intro y ⟨i, hi_mem, hi_eq⟩
-        have : i = 1 := by
-          by_contra h_ne
-          have h_disj := GG5_induced_IET.intervals_disjoint (Set.mem_range_self 1) (Set.mem_range_self i)
-                           (by intro heq; exact h_ne (GG5_induced_IET.interval_injective heq).symm)
-          have : x ∈ GG5_induced_IET.interval 1 ∩ GG5_induced_IET.interval i := ⟨h_in_1, hi_mem⟩
-          exact Set.disjoint_iff_inter_eq_empty.mp h_disj |>.subset this
-        rw [this] at hi_eq
-        exact hi_eq
-      have h_eps : Classical.epsilon (fun y => ∃ i, x ∈ GG5_induced_IET.interval i ∧
-          y = GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation i) + (x - GG5_induced_IET.domainLeft i)) =
-          GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation 1) + (x - GG5_induced_IET.domainLeft 1) := by
-        have h_spec := Classical.epsilon_spec h_ex
-        exact h_unique _ h_spec
-      rw [h_eps, GG5_domainLeft_1]
+      rw [IET_toFun_at_interval 1 x h_in_1, GG5_domainLeft_1]
       rw [← GG5_actual_displacement_interval1, GG5_domainLeft_1]
       ring
-    ·
-      simp only [h0, h1, if_false]
-      unfold IntervalExchangeTransformation.toFun
+    · simp only [h0, h1, if_false]
       have h_in_2 : x ∈ GG5_induced_IET.interval 2 := by
         unfold IntervalExchangeTransformation.interval IntervalExchangeTransformation.domainRight
         rw [GG5_domainLeft_2]
@@ -230,29 +203,8 @@ theorem GG5_displacement_eq_toFun_sub (x : ℝ) (hx : x ∈ Set.Ico 0 1) :
         constructor
         · push_neg at h1; exact h1
         · have h_sum := lengths_sum_to_one
-          simp
-          linarith [hx.2]
-      have h_ex : ∃ y, ∃ i, x ∈ GG5_induced_IET.interval i ∧
-          y = GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation i) + (x - GG5_induced_IET.domainLeft i) := by
-        use GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation 2) + (x - GG5_induced_IET.domainLeft 2), 2
-      have h_unique : ∀ y, (∃ i, x ∈ GG5_induced_IET.interval i ∧
-          y = GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation i) + (x - GG5_induced_IET.domainLeft i)) →
-          y = GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation 2) + (x - GG5_induced_IET.domainLeft 2) := by
-        intro y ⟨i, hi_mem, hi_eq⟩
-        have : i = 2 := by
-          by_contra h_ne
-          have h_disj := GG5_induced_IET.intervals_disjoint (Set.mem_range_self 2) (Set.mem_range_self i)
-                           (by intro heq; exact h_ne (GG5_induced_IET.interval_injective heq).symm)
-          have : x ∈ GG5_induced_IET.interval 2 ∩ GG5_induced_IET.interval i := ⟨h_in_2, hi_mem⟩
-          exact Set.disjoint_iff_inter_eq_empty.mp h_disj |>.subset this
-        rw [this] at hi_eq
-        exact hi_eq
-      have h_eps : Classical.epsilon (fun y => ∃ i, x ∈ GG5_induced_IET.interval i ∧
-          y = GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation i) + (x - GG5_induced_IET.domainLeft i)) =
-          GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation 2) + (x - GG5_induced_IET.domainLeft 2) := by
-        have h_spec := Classical.epsilon_spec h_ex
-        exact h_unique _ h_spec
-      rw [h_eps, GG5_domainLeft_2]
+          simp; linarith [hx.2]
+      rw [IET_toFun_at_interval 2 x h_in_2, GG5_domainLeft_2]
       rw [← GG5_actual_displacement_interval2, GG5_domainLeft_2]
       ring
 
