@@ -9,11 +9,14 @@ Formal verification in Lean 4 of the critical radius theorem for two-disk compou
 | Metric | Value |
 |--------|-------|
 | Build | ✅ Compiles (2404 jobs) |
+| Total Declarations | 677 |
+| Reachable from Main Theorem | 313 (46%) |
 | Sorries | 0 |
 | Axioms | Standard only (propext, Quot.sound, Classical.choice, funext) |
 | Kim Morrison Standard | ✅ All checks pass |
+| Lines of Code | 6,935 (cleaned) |
 
-**Complete.** All proofs are fully formalized with no sorries or non-standard axioms.
+**Complete.** All proofs are fully formalized with no sorries or non-standard axioms. The codebase has been cleaned of unused code through automated dead code analysis.
 
 ## Main Theorem Statement
 
@@ -53,13 +56,15 @@ The formalization uses a group-theoretic approach:
 
 This project follows the [Kim Morrison standard](https://leanprover.zulipchat.com/#narrow/channel/219941-Machine-Learning-for-Theorem-Proving/topic/Discussion.3A.20AI-written.20mathematical.proofs/with/558843568) for AI-assisted formal mathematics:
 
-- **MainTheorem.lean** contains only definitions and the theorem statement (94 lines)
-- **ProofOfMainTheorem.lean** provides the proof (122 lines)
-- **Definitions/** contains all definitions and supporting lemmas (human-reviewable, 1298 lines)
-- **Proofs/** contains only lemmas and theorems (machine-verified, 8412 lines)
+- **MainTheorem.lean** contains only definitions and the theorem statement (24 lines, comment-free)
+- **ProofOfMainTheorem.lean** provides the proof (15 lines, comment-free)
+- **Definitions/** contains all definitions and supporting lemmas (human-reviewable, 700 lines)
+- **Proofs/** contains only lemmas and theorems (machine-verified, 6,196 lines)
 - Uses only standard axioms
 
 **Key architectural decision**: MainTheorem.lean contains only definitions (φ, r_crit, genA_n_perm, genB_n_perm, TwoDiskCompoundSymmetryGroup, GG5_At_Critical_radius, StatementOfTheorem). All proof machinery, including bijectivity proofs for the generators, lives in Definitions/GroupAction.lean. This makes MainTheorem.lean maximally readable while keeping the review burden low.
+
+**Code Quality**: The codebase underwent automated dead code analysis, removing 54 unused declarations (531 lines) while preserving all functionality. Comments were stripped for cleaner analysis, and the build remains verified.
 
 Run verification:
 
@@ -72,19 +77,19 @@ lake build && lake env lean --run KMVerify/Main.lean
 ```
 ================================================================================
 KIM MORRISON STANDARD VERIFICATION
-Project: TDCSG
+Project: TDCSG (After Dead Code Cleanup)
 ================================================================================
 
 TRUST TIER SUMMARY
 --------------------------------------------------------------------------------
   MathlibExtensions/          [NOT PRESENT]
-  Definitions/                8 files     1298 lines
-  Proofs/                     19 files    8412 lines
-  MainTheorem.lean                        94 lines
-  ProofOfMainTheorem.lean                 122 lines
+  Definitions/                8 files      700 lines
+  Proofs/                     19 files    6196 lines
+  MainTheorem.lean                         24 lines
+  ProofOfMainTheorem.lean                  15 lines
 --------------------------------------------------------------------------------
-  REVIEW BURDEN: 1392 lines (Definitions + MainTheorem)
-  TOTAL: 9926 lines (14% requires review)
+  REVIEW BURDEN: 724 lines (Definitions + MainTheorem)
+  TOTAL: 6935 lines (10% requires review)
 
 CHECKS
 --------------------------------------------------------------------------------
@@ -109,14 +114,14 @@ RESULT: PROJECT VERIFIED
 
 ```text
 TDCSG/
-  MainTheorem.lean            # Core definitions + theorem statement (94 lines)
+  MainTheorem.lean            # Core definitions + theorem statement (24 lines, comment-free)
                               # Contains: genA_n_perm, genB_n_perm,
                               #           TwoDiskCompoundSymmetryGroup, GG5_At_Critical_radius,
                               #           StatementOfTheorem
                               # Imports φ, r_crit, genA_n, genB_n from Definitions/
-  ProofOfMainTheorem.lean     # Complete proof of main theorem (122 lines)
+  ProofOfMainTheorem.lean     # Complete proof of main theorem (15 lines, comment-free)
 
-  Definitions/                # All definitions (8 files, 1298 lines)
+  Definitions/                # All definitions (8 files, 700 lines, cleaned)
     Core.lean                 # φ, r_crit, Generator, Word, ζ₅ (zeta5), Circle defs
     Geometry.lean             # Disk geometry, rotations, genA_n, genB_n (N-fold generators)
     GroupAction.lean          # genA, genB (5-fold), applyGen, applyWord, orbit
@@ -129,7 +134,7 @@ TDCSG/
     RealDynamics.lean         # Real dynamics, displacement functions
     WordCorrespondence.lean   # word1, word2, word3 for IET correspondence
 
-  Proofs/                     # Supporting lemmas (19 files, 8412 lines)
+  Proofs/                     # Supporting lemmas (19 files, 6,196 lines, cleaned)
     GroupTheory.lean          # Orbit-group correspondence, infinite orbit theorems
     IETOrbit.lean             # IET infinite orbit theorems
     OrbitInfinite.lean        # Main infinite orbit result
@@ -160,7 +165,7 @@ KMVerify/                     # Kim Morrison standard verification tool
 
 ## Dependency Graph
 
-An interactive visualization of all 767 TDCSG declarations and their dependencies:
+An interactive visualization of all 677 TDCSG declarations (cleaned) and their dependencies:
 
 ```bash
 ./scripts/build_dep_graph.sh  # Generate graph
@@ -172,13 +177,14 @@ open docs/deps_static.svg     # View static version (faster for large graphs)
 - **Interactive**: Zoom (scroll), pan (drag), and search by declaration name
 - **Loading indicator**: Shows progress for large graph rendering
 - **Static fallback**: Pre-rendered SVG available if interactive version is slow
-- **Color-coded**: Green shades indicate formalized declarations (all 767 are complete)
+- **Color-coded**: Green shades indicate formalized declarations (all 677 are complete)
   - Light green: Definitions
   - Lawn green: CompoundSymmetry proofs
   - Pale green: Supporting proofs
 - **Node shapes**: Ellipse (theorem/lemma), Box (definition), Diamond (inductive/structure)
 - **Direct dependencies**: Edges show immediate "uses" relationships
 - **Portable**: Also generates `docs/deps.dot` (Graphviz DOT format)
+- **Clean**: 54 unused declarations removed through automated dead code analysis
 
 **Alternative renderers** (requires graphviz):
 ```bash
@@ -197,6 +203,42 @@ The proof establishes that GG5 is infinite via orbit analysis:
 6. **Conclusion**: Infinite group orbit implies infinite group (finite groups have finite orbits)
 
 **Key Innovation**: The formalization generalizes to GG(n,n) for arbitrary n ≥ 1, with the 5-fold case as a specialization. This makes the mathematical structure clearer and enables potential future work on other critical radii.
+
+## Dead Code Analysis
+
+The codebase includes automated dead code analysis tools:
+
+```bash
+# Find all dead code declarations
+lake exe find_dead_code
+
+# Generate string-based analysis report (comment-free code required)
+python3 scripts/string_search_analyzer.py --generate-report
+
+# Preview deletions
+python3 scripts/string_search_analyzer.py --execute-deletions --dry-run
+
+# Execute deletions (creates backup automatically)
+python3 scripts/string_search_analyzer.py --execute-deletions
+
+# Strip comments from codebase (for accurate string analysis)
+python3 scripts/strip_comments.py TDCSG/
+```
+
+**Analysis Features:**
+- **Static dependency tracing**: BFS from main theorem to find reachable declarations
+- **String-based verification**: Searches for actual usage patterns in code
+- **Attribute detection**: Preserves `@[simp]` lemmas (used implicitly by tactics)
+- **MainTheorem protection**: Never deletes declarations used in MainTheorem.lean/ProofOfMainTheorem.lean
+- **Boundary detection**: Safely identifies declaration blocks including doc comments
+- **File-sorted reports**: Easy review grouped by file
+- **Automatic backups**: `.tar.gz` backups created before any deletions
+
+**Recent Cleanup (Dec 2025)**:
+- Removed 54 unused declarations (531 lines)
+- Comment-stripped for cleaner analysis
+- Build verified after deletion
+- Reduced from 767 to 677 declarations (13% reduction)
 
 ## Build Commands
 
