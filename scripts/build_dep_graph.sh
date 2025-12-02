@@ -1,7 +1,10 @@
 #!/bin/bash
 set -e
 
-cd /Users/eric/Documents/GitHub/TDCSG
+# Get script directory and project root
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+cd "$PROJECT_ROOT"
 
 echo "=== Building TDCSG Dependency Graph ==="
 mkdir -p docs
@@ -24,6 +27,9 @@ echo "Step 3/4: Generating HTML..."
 
 # Read and escape DOT content
 DOT_CONTENT=$(cat docs/deps.dot | sed 's/\\/\\\\/g' | sed 's/`/\\`/g' | sed 's/\$/\\$/g')
+
+# Count declarations (nodes) dynamically
+DECL_COUNT=$(grep -c '\[shape=' docs/deps.dot || echo "0")
 
 # Generate complete HTML file with embedded DOT
 cat > docs/dep_graph.html << END_OF_HTML
@@ -64,7 +70,7 @@ cat > docs/dep_graph.html << END_OF_HTML
 <body>
   <div id="loading">
     <div class="spinner"></div>
-    <div id="loading-text">Loading graph (767 declarations)...</div>
+    <div id="loading-text">Loading graph (${DECL_COUNT} declarations)...</div>
     <div id="fallback-hint" style="display: none; margin-top: 15px; font-size: 12px; color: #666;">
       Taking a while? Try the <a href="deps_static.svg" target="_blank" style="color: #4CAF50;">static SVG version</a>
     </div>

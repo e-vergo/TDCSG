@@ -13,6 +13,11 @@ partial def collectConstants (e : Expr) : Array Name :=
 def isTDCSGDecl (name : Name) : Bool :=
   !name.components.isEmpty && name.components.head! == `TDCSG
 
+/-- Check if a name is a compiler-generated auxiliary declaration -/
+def isAuxDecl (name : Name) : Bool :=
+  let nameStr := name.toString
+  (nameStr.splitOn "._").length > 1
+
 /-- Get direct dependencies of a declaration -/
 def getDirectDeps (env : Environment) (name : Name) : Array Name :=
   match env.find? name with
@@ -23,7 +28,7 @@ def getDirectDeps (env : Environment) (name : Name) : Array Name :=
       | .defnInfo val => collectConstants val.value
       | .thmInfo val => collectConstants val.value
       | _ => #[]
-    (typeConsts ++ valueConsts).filter isTDCSGDecl
+    (typeConsts ++ valueConsts).filter (fun n => isTDCSGDecl n && !isAuxDecl n)
 
 /-- Get all transitive dependencies starting from a root declaration -/
 def getTransitiveDeps (env : Environment) (root : Name) : IO (Std.HashSet Name) := do
@@ -48,10 +53,10 @@ def getTransitiveDeps (env : Environment) (root : Name) : IO (Std.HashSet Name) 
 
   return visited
 
-/-- Get all TDCSG declarations from environment -/
+/-- Get all TDCSG declarations from environment (excluding auxiliary) -/
 def getAllTDCSGDecls (env : Environment) : Array Name :=
   env.constants.map₁.toArray.filterMap fun (name, _) =>
-    if isTDCSGDecl name then some name else none
+    if isTDCSGDecl name && !isAuxDecl name then some name else none
 
 /-- Search all TDCSG .lean files for a declaration -/
 def findDeclarationInFiles (declName : String) : IO (Option (String × Nat)) := do

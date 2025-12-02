@@ -12,6 +12,11 @@ partial def collectConstants (e : Expr) : Array Name :=
 def isTDCSGDecl (name : Name) : Bool :=
   !name.components.isEmpty && name.components.head! == `TDCSG
 
+/-- Check if a name is a compiler-generated auxiliary declaration -/
+def isAuxDecl (name : Name) : Bool :=
+  let nameStr := name.toString
+  (nameStr.splitOn "._").length > 1
+
 /-- Get the declaration kind as a string -/
 def getDeclKind (info : ConstantInfo) : String :=
   match info with
@@ -64,8 +69,8 @@ def getDirectDeps (name : Name) : CoreM (Array Name) := do
       | .thmInfo val => collectConstants val.value
       | _ => #[]
 
-    -- Filter to TDCSG declarations only
-    return (typeConsts ++ valueConsts).filter isTDCSGDecl
+    -- Filter to TDCSG declarations only (excluding auxiliary)
+    return (typeConsts ++ valueConsts).filter (fun n => isTDCSGDecl n && !isAuxDecl n)
 
 /-- Escape a string for DOT format -/
 def escapeDOT (s : String) : String :=
@@ -89,10 +94,10 @@ def main : IO Unit := do
 
   let env ← importModules #[{module := `TDCSG.ProofOfMainTheorem}] {} 0
 
-  -- Get all TDCSG declarations directly from the environment
+  -- Get all TDCSG declarations directly from the environment (excluding auxiliary)
   let mut allDecls : Array Name := #[]
   for (name, _) in env.constants.map₁.toArray do
-    if isTDCSGDecl name then
+    if isTDCSGDecl name && !isAuxDecl name then
       allDecls := allDecls.push name
 
   let tdcsgDecls := allDecls.qsort (·.toString < ·.toString)
