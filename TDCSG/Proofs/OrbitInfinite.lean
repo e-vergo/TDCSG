@@ -36,39 +36,6 @@ namespace TDCSG.CompoundSymmetry.GG5
 open Real Function Set RealDynamics
 open TDCSG.Definitions
 
-theorem GG5_IET_orbit_finite_subset (n : ℕ) :
-    ∃ (x : ℝ), x ∈ Ico 0 1 ∧
-      ∃ (pts : Finset ℝ), pts.Nonempty ∧
-        (∀ y ∈ pts, y ∈ RealDynamics.orbitSet GG5_induced_IET.toFun x) := by
-  use length1 / 2
-  constructor
-  · constructor
-    · have : 0 < length1 := length1_pos
-      linarith
-    · calc length1 / 2 < length1 := by linarith [length1_pos]
-        _ < 1 := by
-          have : length1 + length2 + length3 = 1 := lengths_sum_to_one
-          linarith [length2_pos, length3_pos]
-  ·
-    use Finset.image (fun k : Fin (n+1) => (GG5_induced_IET.toFun^[k.val]) (length1 / 2)) Finset.univ
-    constructor
-    ·
-      use (GG5_induced_IET.toFun^[0]) (length1 / 2)
-      simp [Finset.mem_image]
-      use ⟨0, by omega⟩
-      simp
-    · intro y hy
-      obtain ⟨k, _, hk⟩ := Finset.mem_image.mp hy
-      rw [← hk]
-      exact RealDynamics.orbitSet_iterate _ _ _
-
-theorem GG5_IET_has_orbit_structure :
-    ∀ (_ : ℕ), ∃ (x : ℝ) (_ : x ∈ Ico 0 1) (pts : Finset ℝ),
-      pts.Nonempty ∧ (∀ y ∈ pts, y ∈ RealDynamics.orbitSet GG5_induced_IET.toFun x) := by
-  intro n
-  obtain ⟨x, hx, pts, h_ne, h_in⟩ := GG5_IET_orbit_finite_subset n
-  exact ⟨x, hx, pts, h_ne, h_in⟩
-
 theorem GG5_domainLeft_0 : GG5_induced_IET.domainLeft 0 = 0 := by
   unfold IntervalExchangeTransformation.domainLeft
   simp

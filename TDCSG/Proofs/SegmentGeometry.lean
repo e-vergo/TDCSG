@@ -57,29 +57,6 @@ lemma E_ne_zero : E ≠ 0 := by
     exact h5.symm
   exact zeta5_ne_one this
 
-lemma F_ne_zero : F ≠ 0 := by
-
-  intro h
-  have h_psi := F_eq_psi_times_E
-  rw [h] at h_psi
-
-  have psi_ne_zero' : psi ≠ 0 := psi_ne_zero
-  have : E = 0 := by
-    rw [show (0 : ℂ) = psi • 0 by simp] at h_psi
-    have eq : psi • (0 : ℂ) = psi • E := by rw [h_psi]
-    have h_sub : psi • ((0 : ℂ) - E) = 0 := by
-      calc psi • ((0 : ℂ) - E)
-          = psi • (0 : ℂ) - psi • E := by rw [← smul_sub]
-        _ = psi • E - psi • E := by rw [eq]
-        _ = 0 := by ring
-    rw [smul_eq_zero] at h_sub
-    cases h_sub with
-    | inl h => exact absurd h psi_ne_zero'
-    | inr h =>
-      simp only [sub_eq_zero] at h
-      exact h.symm
-  exact E_ne_zero this
-
 theorem segmentPoint_injective : Function.Injective segmentPoint := by
   intro t₁ t₂ h
   unfold segmentPoint at h
@@ -117,15 +94,6 @@ lemma E'_in_left_disk : ‖E' - (-1)‖ ≤ r_crit := by
   rw [show ((-E : ℂ) - (-1 : ℂ)) = -(E - 1) by ring]
   rw [norm_neg]
   exact E_in_right_disk
-
-lemma E_re_pos : 0 < E.re := by
-  rw [E_re]
-  have sqrt5_pos : 0 < Real.sqrt 5 := Real.sqrt_pos.mpr (by norm_num : (0 : ℝ) < 5)
-  linarith
-
-lemma E'_re_neg : E'.re < 0 := by
-  unfold E'
-  simp [E_re_pos]
 
 lemma segment_in_disk_intersection (t : ℝ)
     (ht : 0 ≤ t ∧ t ≤ 1) :
