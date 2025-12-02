@@ -17,16 +17,27 @@ orbit implies an infinite group.
 
 ## Main Results
 
-- `genA_order_five` : A⁵ = 1 (generator A has order 5)
-- `genB_order_five` : B⁵ = 1 (generator B has order 5)
+- `genA_pow_five` : A^5 = id (generator A has order 5)
+- `genB_pow_five` : B^5 = id (generator B has order 5)
+- `genA_bijective_proof` : Proof that genA is bijective
+- `genB_bijective_proof` : Proof that genB is bijective
 - `orbit_eq_groupOrbit` : The word-based orbit equals the MulAction orbit
-- `infinite_orbit_implies_infinite_group` : ∃ p, (orbit r p).Infinite → (CompoundSymmetryGroup r).Infinite
+- `infinite_orbit_implies_infinite_group` : Infinite orbit implies infinite group
+
+## N-fold Generalization
+
+- `Circle_exp_pow_general` : Circle.exp theta ^ n = Circle.exp (n * theta)
+- `Circle_exp_neg_two_pi_over_n_pow_n` : (Circle.exp (-2pi/n))^n = 1 for n >= 1
+- `genA_n_pow_n` : (genA_n n)^n = id for n >= 1
+- `genB_n_pow_n` : (genB_n n)^n = id for n >= 1
+- `genA_n_bijective_proof` : genA_n is bijective for n >= 1
+- `genB_n_bijective_proof` : genB_n is bijective for n >= 1
 
 ## Proof Strategy
 
 1. Prove generators have order 5, hence are bijections
 2. Show word-based orbit equals MulAction.orbit for the subgroup
-3. Use contrapositive of `Finite.finite_mulAction_orbit`: infinite orbit ⟹ infinite group
+3. Use contrapositive of `Finite.finite_mulAction_orbit`: infinite orbit implies infinite group
 -/
 
 namespace TDCSG.CompoundSymmetry.GG5
@@ -34,58 +45,68 @@ namespace TDCSG.CompoundSymmetry.GG5
 open TDCSG.Definitions
 open scoped Complex
 
-/-! ### Generator Order -/
+/-! ### Circle Exponential Lemmas -/
 
-/-- Circle.exp θ ^ n = Circle.exp (n * θ). -/
-private lemma Circle_exp_pow (θ : ℝ) (n : ℕ) : Circle.exp θ ^ n = Circle.exp (n * θ) := by
+/-- Circle.exp theta ^ n = Circle.exp (n * theta). -/
+lemma Circle_exp_pow (theta : Real) (n : Nat) : Circle.exp theta ^ n = Circle.exp (n * theta) := by
   induction n with
   | zero => simp [Circle.exp_zero]
   | succ n ih =>
-    rw [pow_succ, ih, ← Circle.exp_add]
+    rw [pow_succ, ih, <- Circle.exp_add]
     congr 1
     push_cast
     ring
 
-/-- Circle.exp (-2π) = 1, the fundamental periodicity. -/
-private lemma circle_exp_neg_two_pi : Circle.exp (-2 * Real.pi) = 1 := by
+/-- Circle.exp (-2pi) = 1, the fundamental periodicity. -/
+lemma circle_exp_neg_two_pi : Circle.exp (-2 * Real.pi) = 1 := by
   apply Subtype.ext
   simp only [Circle.coe_exp, Circle.coe_one]
   push_cast
-  have h : (-2 : ℂ) * ↑Real.pi * Complex.I = -(2 * ↑Real.pi * Complex.I) := by ring
+  have h : (-2 : Complex) * Real.pi * Complex.I = -(2 * Real.pi * Complex.I) := by ring
   rw [h, Complex.exp_neg, Complex.exp_two_pi_mul_I, inv_one]
 
-/-- 5 rotations by -2π/5 = identity (key for order 5). -/
-private lemma Circle_exp_neg_two_pi_over_5_pow_5 : Circle.exp (-2 * Real.pi / 5) ^ 5 = 1 := by
+/-- 5 rotations by -2pi/5 = identity (key for order 5). -/
+lemma Circle_exp_neg_two_pi_over_5_pow_5 : Circle.exp (-2 * Real.pi / 5) ^ 5 = 1 := by
   rw [Circle_exp_pow]
-  have h : (5 : ℕ) * (-2 * Real.pi / 5) = -2 * Real.pi := by ring
+  have h : (5 : Nat) * (-2 * Real.pi / 5) = -2 * Real.pi := by ring
   rw [h]
   exact circle_exp_neg_two_pi
 
+/-- n rotations by -2pi/n = identity for n >= 1 (general order-n property). -/
+lemma Circle_exp_neg_two_pi_over_n_pow_n (n : Nat) (hn : n >= 1) :
+    Circle.exp (-2 * Real.pi / n) ^ n = 1 := by
+  rw [Circle_exp_pow]
+  have h : (n : Real) * (-2 * Real.pi / n) = -2 * Real.pi := by field_simp
+  rw [h]
+  exact circle_exp_neg_two_pi
+
+/-! ### Generator A Properties -/
+
 /-- genA acts as identity outside the left disk. -/
-private lemma genA_outside (r : ℝ) (z : ℂ) (hz : z ∉ leftDisk r) : genA r z = z := by
+lemma genA_outside (r : Real) (z : Complex) (hz : z ∉ leftDisk r) : genA r z = z := by
   unfold genA
-  simp only [hz, ↓reduceIte]
+  simp only [hz, if_false]
 
 /-- genA acts as rotation inside the left disk. -/
-private lemma genA_inside (r : ℝ) (z : ℂ) (hz : z ∈ leftDisk r) :
+lemma genA_inside (r : Real) (z : Complex) (hz : z ∈ leftDisk r) :
     genA r z = rotateAboutCircle leftCenter (Circle.exp (-2 * Real.pi / 5)) z := by
   unfold genA
-  simp only [hz, ↓reduceIte]
+  simp only [hz, if_true]
   rw [rotateAboutCircle_eq_rotateAboutC]
 
 /-- Rotation about leftCenter preserves leftDisk membership. -/
-private lemma rotateAboutCircle_leftCenter_preserves_leftDisk (a : Circle) (r : ℝ) (z : ℂ)
+lemma rotateAboutCircle_leftCenter_preserves_leftDisk (a : Circle) (r : Real) (z : Complex)
     (hz : z ∈ leftDisk r) : rotateAboutCircle leftCenter a z ∈ leftDisk r := by
   unfold leftDisk
-  have h_center : leftCenter = (-1 : ℂ) := by unfold leftCenter; simp
+  have h_center : leftCenter = (-1 : Complex) := by unfold leftCenter; simp
   rw [h_center]
   exact rotateAboutCircle_preserves_disk (-1) a r z hz
 
 /-- Generator A has order 5: applying it 5 times gives the identity. -/
-lemma genA_pow_five (r : ℝ) (z : ℂ) :
+lemma genA_pow_five (r : Real) (z : Complex) :
     genA r (genA r (genA r (genA r (genA r z)))) = z := by
   by_cases hz : z ∈ leftDisk r
-  · -- Inside case: 5 rotations = identity
+  . -- Inside case: 5 rotations = identity
     set a := Circle.exp (-2 * Real.pi / 5) with ha
     set rot := rotateAboutCircle leftCenter a with hrot
     -- Each genA application preserves disk membership and equals rotation
@@ -106,20 +127,61 @@ lemma genA_pow_five (r : ℝ) (z : ℂ) :
       _ = genA r (rot (rot (rot (rot z)))) := by rw [step4]
       _ = rot (rot (rot (rot (rot z)))) := by rw [step5]
       _ = rotateAboutCircle leftCenter (a * (a * (a * (a * a)))) z := by
-          simp only [hrot, ← rotateAboutCircle_mul]
+          simp only [hrot, <- rotateAboutCircle_mul]
       _ = rotateAboutCircle leftCenter (a ^ 5) z := by
           congr 1; simp only [pow_succ, pow_zero, one_mul, mul_assoc]
       _ = rotateAboutCircle leftCenter 1 z := by rw [ha, Circle_exp_neg_two_pi_over_5_pow_5]
       _ = z := rotateAboutCircle_one leftCenter z
-  · -- Outside case: genA is identity
+  . -- Outside case: genA is identity
     simp only [genA_outside r z hz]
 
+/-- Generator A is a bijection: it has order 5 (A^5 = id). -/
+theorem genA_bijective_proof (r : Real) : Function.Bijective (genA r) := by
+  constructor
+  . -- Injective: if genA x = genA y, apply genA^4 to both sides
+    intro x y hxy
+    have hx : genA r (genA r (genA r (genA r (genA r x)))) = x := genA_pow_five r x
+    have hy : genA r (genA r (genA r (genA r (genA r y)))) = y := genA_pow_five r y
+    -- Apply genA r four times to both sides of hxy
+    have h1 : genA r (genA r x) = genA r (genA r y) := congrArg (genA r) hxy
+    have h2 : genA r (genA r (genA r x)) = genA r (genA r (genA r y)) := congrArg (genA r) h1
+    have h3 : genA r (genA r (genA r (genA r x))) = genA r (genA r (genA r (genA r y))) := congrArg (genA r) h2
+    have h4 : genA r (genA r (genA r (genA r (genA r x)))) = genA r (genA r (genA r (genA r (genA r y)))) := congrArg (genA r) h3
+    rw [hx, hy] at h4
+    exact h4
+  . -- Surjective: preimage of y is genA^4 y
+    intro y
+    use genA r (genA r (genA r (genA r y)))
+    exact genA_pow_five r y
+
+/-! ### Generator B Properties -/
+
+/-- genB acts as identity outside the right disk. -/
+lemma genB_outside (r : Real) (z : Complex) (hz : z ∉ rightDisk r) : genB r z = z := by
+  unfold genB
+  simp only [hz, if_false]
+
+/-- genB acts as rotation inside the right disk. -/
+lemma genB_inside (r : Real) (z : Complex) (hz : z ∈ rightDisk r) :
+    genB r z = rotateAboutCircle rightCenter (Circle.exp (-2 * Real.pi / 5)) z := by
+  unfold genB
+  simp only [hz, if_true]
+  rw [rotateAboutCircle_eq_rotateAboutC]
+
+/-- Rotation about rightCenter preserves rightDisk membership. -/
+lemma rotateAboutCircle_rightCenter_preserves_rightDisk (a : Circle) (r : Real) (z : Complex)
+    (hz : z ∈ rightDisk r) : rotateAboutCircle rightCenter a z ∈ rightDisk r := by
+  unfold rightDisk
+  have h_center : rightCenter = (1 : Complex) := by unfold rightCenter; simp
+  rw [h_center]
+  exact rotateAboutCircle_preserves_disk 1 a r z hz
+
 /-- Generator B has order 5: applying it 5 times gives the identity. -/
-lemma genB_pow_five (r : ℝ) (z : ℂ) :
+lemma genB_pow_five (r : Real) (z : Complex) :
     genB r (genB r (genB r (genB r (genB r z)))) = z := by
   -- Case split on whether z is in the right disk
   by_cases hz : z ∈ rightDisk r
-  · -- Inside disk: 5 rotations by -2π/5 = rotation by -2π = identity
+  . -- Inside disk: 5 rotations by -2pi/5 = rotation by -2pi = identity
     -- First show that genB preserves membership in rightDisk
     have h1 : genB r z ∈ rightDisk r := genB_preserves_rightDisk r z hz
     have h2 : genB r (genB r z) ∈ rightDisk r := genB_preserves_rightDisk r (genB r z) h1
@@ -128,113 +190,343 @@ lemma genB_pow_five (r : ℝ) (z : ℂ) :
     have h4 : genB r (genB r (genB r (genB r z))) ∈ rightDisk r :=
       genB_preserves_rightDisk r (genB r (genB r (genB r z))) h3
     -- Define the rotation element
-    set ω := Circle.exp (-2 * Real.pi / 5) with hω_def
+    set omega := Circle.exp (-2 * Real.pi / 5) with homega_def
     -- Rewrite the goal step by step, from outermost to innermost
     -- First, use the fact that genB on rightDisk = rotation
     calc genB r (genB r (genB r (genB r (genB r z))))
-        = rotateAboutCircle rightCenter ω (genB r (genB r (genB r (genB r z)))) :=
+        = rotateAboutCircle rightCenter omega (genB r (genB r (genB r (genB r z)))) :=
           genB_in_disk_eq_rotateAboutCircle r _ h4
-      _ = rotateAboutCircle rightCenter ω (rotateAboutCircle rightCenter ω (genB r (genB r (genB r z)))) := by
+      _ = rotateAboutCircle rightCenter omega (rotateAboutCircle rightCenter omega (genB r (genB r (genB r z)))) := by
           rw [genB_in_disk_eq_rotateAboutCircle r _ h3]
-      _ = rotateAboutCircle rightCenter ω (rotateAboutCircle rightCenter ω
-            (rotateAboutCircle rightCenter ω (genB r (genB r z)))) := by
+      _ = rotateAboutCircle rightCenter omega (rotateAboutCircle rightCenter omega
+            (rotateAboutCircle rightCenter omega (genB r (genB r z)))) := by
           rw [genB_in_disk_eq_rotateAboutCircle r _ h2]
-      _ = rotateAboutCircle rightCenter ω (rotateAboutCircle rightCenter ω
-            (rotateAboutCircle rightCenter ω (rotateAboutCircle rightCenter ω (genB r z)))) := by
+      _ = rotateAboutCircle rightCenter omega (rotateAboutCircle rightCenter omega
+            (rotateAboutCircle rightCenter omega (rotateAboutCircle rightCenter omega (genB r z)))) := by
           rw [genB_in_disk_eq_rotateAboutCircle r _ h1]
-      _ = rotateAboutCircle rightCenter ω (rotateAboutCircle rightCenter ω
-            (rotateAboutCircle rightCenter ω (rotateAboutCircle rightCenter ω
-              (rotateAboutCircle rightCenter ω z)))) := by
+      _ = rotateAboutCircle rightCenter omega (rotateAboutCircle rightCenter omega
+            (rotateAboutCircle rightCenter omega (rotateAboutCircle rightCenter omega
+              (rotateAboutCircle rightCenter omega z)))) := by
           rw [genB_in_disk_eq_rotateAboutCircle r z hz]
-      _ = rotateAboutCircle rightCenter (ω ^ 5) z := by
+      _ = rotateAboutCircle rightCenter (omega ^ 5) z := by
           -- Use rotateAboutCircle_pow to collapse 5 nested rotations
-          have h_iter : (rotateAboutCircle rightCenter ω)^[5] z =
-              rotateAboutCircle rightCenter (ω ^ 5) z := rotateAboutCircle_pow rightCenter ω 5 z
+          have h_iter : (rotateAboutCircle rightCenter omega)^[5] z =
+              rotateAboutCircle rightCenter (omega ^ 5) z := rotateAboutCircle_pow rightCenter omega 5 z
           simp only [Function.iterate_succ, Function.iterate_zero, Function.comp_apply] at h_iter
           exact h_iter
       _ = rotateAboutCircle rightCenter 1 z := by
-          -- Show ω^5 = 1
-          have omega_pow_five : ω ^ 5 = 1 := by
-            rw [hω_def]
+          -- Show omega^5 = 1
+          have omega_pow_five : omega ^ 5 = 1 := by
+            rw [homega_def]
             ext
             rw [SubmonoidClass.coe_pow, Circle.coe_exp, Circle.coe_one]
-            rw [← Complex.exp_nat_mul]
-            -- The goal is: cexp (↑5 * (↑(-2 * Real.pi / 5) * Complex.I)) = 1
-            -- Need to show 5 * (↑(-2 * Real.pi / 5) * I) = -1 * (2π * I)
-            have h_eq : (5 : ℕ) * (((-2 * Real.pi / 5 : ℝ) : ℂ) * Complex.I) =
-                (-1 : ℤ) * (2 * Real.pi * Complex.I) := by
+            rw [<- Complex.exp_nat_mul]
+            -- The goal is: cexp (5 * ((-2 * Real.pi / 5) * Complex.I)) = 1
+            -- Need to show 5 * ((-2 * Real.pi / 5) * I) = -1 * (2pi * I)
+            have h_eq : (5 : Nat) * (((-2 * Real.pi / 5 : Real) : Complex) * Complex.I) =
+                (-1 : Int) * (2 * Real.pi * Complex.I) := by
               push_cast
               ring
             rw [h_eq, Complex.exp_int_mul_two_pi_mul_I]
           rw [omega_pow_five]
       _ = z := rotateAboutCircle_one rightCenter z
-  · -- Outside disk: genB is the identity, so z stays z at each step
-    have hgenB_id : ∀ w, w ∉ rightDisk r → genB r w = w := fun w hw => by
+  . -- Outside disk: genB is the identity, so z stays z at each step
+    have hgenB_id : forall w, w ∉ rightDisk r -> genB r w = w := fun w hw => by
       unfold genB
-      simp only [hw, ↓reduceIte]
-    -- z ∉ rightDisk r, so genB r z = z
+      simp only [hw, if_false]
+    -- z not in rightDisk r, so genB r z = z
     rw [hgenB_id z hz]
-    -- Now z ∉ rightDisk r implies genB r z = z, so we just have z
+    -- Now z not in rightDisk r implies genB r z = z, so we just have z
     rw [hgenB_id z hz, hgenB_id z hz, hgenB_id z hz, hgenB_id z hz]
 
-/-- genA_perm has order 5 in the group Equiv.Perm ℂ. -/
-lemma genA_perm_pow_five (r : ℝ) : genA_perm r ^ 5 = 1 := by
+/-- Generator B is a bijection: it has order 5 (B^5 = id). -/
+theorem genB_bijective_proof (r : Real) : Function.Bijective (genB r) := by
+  constructor
+  . -- Injective: if genB x = genB y, apply genB^4 to both sides
+    intro x y hxy
+    have hx : genB r (genB r (genB r (genB r (genB r x)))) = x := genB_pow_five r x
+    have hy : genB r (genB r (genB r (genB r (genB r y)))) = y := genB_pow_five r y
+    -- Apply genB r four times to both sides of hxy
+    have h1 : genB r (genB r x) = genB r (genB r y) := congrArg (genB r) hxy
+    have h2 : genB r (genB r (genB r x)) = genB r (genB r (genB r y)) := congrArg (genB r) h1
+    have h3 : genB r (genB r (genB r (genB r x))) = genB r (genB r (genB r (genB r y))) := congrArg (genB r) h2
+    have h4 : genB r (genB r (genB r (genB r (genB r x)))) = genB r (genB r (genB r (genB r (genB r y)))) := congrArg (genB r) h3
+    rw [hx, hy] at h4
+    exact h4
+  . -- Surjective: preimage of y is genB^4 y
+    intro y
+    use genB r (genB r (genB r (genB r y)))
+    exact genB_pow_five r y
+
+/-! ### Permutation Order Properties -/
+
+/-- genA_perm has order 5 in the group Equiv.Perm Complex. -/
+lemma genA_perm_pow_five (r : Real) : genA_perm r ^ 5 = 1 := by
   ext z
   simp only [Equiv.Perm.coe_pow, Function.iterate_succ, Function.iterate_zero,
              Function.comp_apply, Equiv.Perm.coe_one, id_eq, genA_perm_apply]
   exact genA_pow_five r z
 
-/-- genB_perm has order 5 in the group Equiv.Perm ℂ. -/
-lemma genB_perm_pow_five (r : ℝ) : genB_perm r ^ 5 = 1 := by
+/-- genB_perm has order 5 in the group Equiv.Perm Complex. -/
+lemma genB_perm_pow_five (r : Real) : genB_perm r ^ 5 = 1 := by
   ext z
   simp only [Equiv.Perm.coe_pow, Function.iterate_succ, Function.iterate_zero,
              Function.comp_apply, Equiv.Perm.coe_one, id_eq, genB_perm_apply]
   exact genB_pow_five r z
 
+/-! ### N-fold Generalized Properties -/
+
+/-- genA_n acts as identity outside the left disk. -/
+lemma genA_n_outside (n : Nat) (r : Real) (z : Complex) (hz : z ∉ leftDisk r) :
+    genA_n n r z = z := by
+  unfold genA_n
+  simp only [hz, if_false]
+
+/-- genA_n acts as rotation inside the left disk. -/
+lemma genA_n_inside (n : Nat) (r : Real) (z : Complex) (hz : z ∈ leftDisk r) :
+    genA_n n r z = rotateAboutCircle leftCenter (Circle.exp (-2 * Real.pi / n)) z := by
+  unfold genA_n
+  simp only [hz, if_true]
+  rw [rotateAboutCircle_eq_rotateAboutC]
+
+/-- genB_n acts as identity outside the right disk. -/
+lemma genB_n_outside (n : Nat) (r : Real) (z : Complex) (hz : z ∉ rightDisk r) :
+    genB_n n r z = z := by
+  unfold genB_n
+  simp only [hz, if_false]
+
+/-- genB_n acts as rotation inside the right disk. -/
+lemma genB_n_inside (n : Nat) (r : Real) (z : Complex) (hz : z ∈ rightDisk r) :
+    genB_n n r z = rotateAboutCircle rightCenter (Circle.exp (-2 * Real.pi / n)) z := by
+  unfold genB_n
+  simp only [hz, if_true]
+  rw [rotateAboutCircle_eq_rotateAboutC]
+
+/-- Helper: rotation about leftCenter preserves leftDisk through iterations. -/
+lemma rotateAboutCircle_leftCenter_iterate_preserves_leftDisk (a : Circle) (r : Real) (k : Nat)
+    (w : Complex) (hw : w ∈ leftDisk r) :
+    (rotateAboutCircle leftCenter a)^[k] w ∈ leftDisk r := by
+  induction k with
+  | zero => simpa
+  | succ k ih =>
+    simp only [Function.iterate_succ', Function.comp_apply]
+    exact rotateAboutCircle_leftCenter_preserves_leftDisk a r _ ih
+
+/-- Generator A_n has order n: applying it n times gives the identity. -/
+lemma genA_n_pow_n (n : Nat) (hn : n >= 1) (r : Real) (z : Complex) :
+    (genA_n n r)^[n] z = z := by
+  by_cases hz : z ∈ leftDisk r
+  . -- Inside case: n rotations = identity
+    set a := Circle.exp (-2 * Real.pi / n) with ha
+    -- Show that iterating genA_n n times equals iterating rotation n times
+    have h_eq_rot : forall k : Nat, forall w : Complex, w ∈ leftDisk r ->
+        (genA_n n r)^[k] w = (rotateAboutCircle leftCenter a)^[k] w := by
+      intro k
+      induction k with
+      | zero => simp
+      | succ k ih =>
+        intro w hw
+        simp only [Function.iterate_succ', Function.comp_apply]
+        have hw' : (rotateAboutCircle leftCenter a)^[k] w ∈ leftDisk r :=
+          rotateAboutCircle_leftCenter_iterate_preserves_leftDisk a r k w hw
+        rw [ih w hw]
+        rw [genA_n_inside n r _ hw']
+    rw [h_eq_rot n z hz]
+    -- Now use rotateAboutCircle_pow and periodicity
+    rw [rotateAboutCircle_pow]
+    rw [ha, Circle_exp_neg_two_pi_over_n_pow_n n hn]
+    exact rotateAboutCircle_one leftCenter z
+  . -- Outside case: genA_n is identity
+    have h_id : forall k : Nat, (genA_n n r)^[k] z = z := by
+      intro k
+      induction k with
+      | zero => simp
+      | succ k ih =>
+        simp only [Function.iterate_succ', Function.comp_apply, ih]
+        exact genA_n_outside n r z hz
+    exact h_id n
+
+/-- Helper: rotation about rightCenter preserves rightDisk through iterations. -/
+lemma rotateAboutCircle_rightCenter_iterate_preserves_rightDisk (a : Circle) (r : Real) (k : Nat)
+    (w : Complex) (hw : w ∈ rightDisk r) :
+    (rotateAboutCircle rightCenter a)^[k] w ∈ rightDisk r := by
+  induction k with
+  | zero => simpa
+  | succ k ih =>
+    simp only [Function.iterate_succ', Function.comp_apply]
+    exact rotateAboutCircle_rightCenter_preserves_rightDisk a r _ ih
+
+/-- Generator B_n has order n: applying it n times gives the identity. -/
+lemma genB_n_pow_n (n : Nat) (hn : n >= 1) (r : Real) (z : Complex) :
+    (genB_n n r)^[n] z = z := by
+  by_cases hz : z ∈ rightDisk r
+  . -- Inside case: n rotations = identity
+    set a := Circle.exp (-2 * Real.pi / n) with ha
+    -- Show that iterating genB_n n times equals iterating rotation n times
+    have h_eq_rot : forall k : Nat, forall w : Complex, w ∈ rightDisk r ->
+        (genB_n n r)^[k] w = (rotateAboutCircle rightCenter a)^[k] w := by
+      intro k
+      induction k with
+      | zero => simp
+      | succ k ih =>
+        intro w hw
+        simp only [Function.iterate_succ', Function.comp_apply]
+        have hw' : (rotateAboutCircle rightCenter a)^[k] w ∈ rightDisk r :=
+          rotateAboutCircle_rightCenter_iterate_preserves_rightDisk a r k w hw
+        rw [ih w hw]
+        rw [genB_n_inside n r _ hw']
+    rw [h_eq_rot n z hz]
+    -- Now use rotateAboutCircle_pow and periodicity
+    rw [rotateAboutCircle_pow]
+    rw [ha, Circle_exp_neg_two_pi_over_n_pow_n n hn]
+    exact rotateAboutCircle_one rightCenter z
+  . -- Outside case: genB_n is identity
+    have h_id : forall k : Nat, (genB_n n r)^[k] z = z := by
+      intro k
+      induction k with
+      | zero => simp
+      | succ k ih =>
+        simp only [Function.iterate_succ', Function.comp_apply, ih]
+        exact genB_n_outside n r z hz
+    exact h_id n
+
+/-- Helper: f^[n] x = f^[n-1] (f x) when n >= 1. -/
+lemma iterate_split (f : Complex -> Complex) (n : Nat) (hn : n >= 1) (x : Complex) :
+    f^[n] x = f^[n - 1] (f x) := by
+  have h : n = (n - 1) + 1 := (Nat.sub_add_cancel hn).symm
+  conv_lhs => rw [h]
+  rw [Function.iterate_succ_apply']
+  exact (Function.Commute.iterate_self f (n - 1) x).symm
+
+/-- Helper: f (f^[n-1] x) = f^[n] x when n >= 1. -/
+lemma iterate_unsplit (f : Complex -> Complex) (n : Nat) (hn : n >= 1) (x : Complex) :
+    f (f^[n - 1] x) = f^[n] x := by
+  have h : n = (n - 1) + 1 := (Nat.sub_add_cancel hn).symm
+  conv_rhs => rw [h]
+  exact (Function.iterate_succ_apply' f (n - 1) x).symm
+
+/-- Generalized generator A_n is a bijection for n >= 1. -/
+theorem genA_n_bijective_proof (n : Nat) (hn : n >= 1) (r : Real) :
+    Function.Bijective (genA_n n r) := by
+  -- Key fact: genA_n^[n] = id
+  have h_period : forall z, (genA_n n r)^[n] z = z := fun z => genA_n_pow_n n hn r z
+  constructor
+  . -- Injective
+    intro x y hxy
+    -- Apply f^[n-1] to both sides of hxy to get f^[n] x = f^[n] y, hence x = y
+    have h_apply : forall k, (genA_n n r)^[k] (genA_n n r x) = (genA_n n r)^[k] (genA_n n r y) := by
+      intro k
+      induction k with
+      | zero => simp [hxy]
+      | succ k ih =>
+        simp only [Function.iterate_succ', Function.comp_apply]
+        exact congrArg (genA_n n r) ih
+    have h_eq : (genA_n n r)^[n] x = (genA_n n r)^[n] y := by
+      calc (genA_n n r)^[n] x
+          = (genA_n n r)^[n - 1] (genA_n n r x) := iterate_split (genA_n n r) n hn x
+        _ = (genA_n n r)^[n - 1] (genA_n n r y) := h_apply (n - 1)
+        _ = (genA_n n r)^[n] y := (iterate_split (genA_n n r) n hn y).symm
+    calc x = (genA_n n r)^[n] x := (h_period x).symm
+      _ = (genA_n n r)^[n] y := h_eq
+      _ = y := h_period y
+  . -- Surjective
+    intro y
+    use (genA_n n r)^[n - 1] y
+    calc genA_n n r ((genA_n n r)^[n - 1] y)
+        = (genA_n n r)^[n] y := iterate_unsplit (genA_n n r) n hn y
+      _ = y := h_period y
+
+/-- Generalized generator B_n is a bijection for n >= 1. -/
+theorem genB_n_bijective_proof (n : Nat) (hn : n >= 1) (r : Real) :
+    Function.Bijective (genB_n n r) := by
+  have h_period : forall z, (genB_n n r)^[n] z = z := fun z => genB_n_pow_n n hn r z
+  constructor
+  . -- Injective
+    intro x y hxy
+    have h_apply : forall k, (genB_n n r)^[k] (genB_n n r x) = (genB_n n r)^[k] (genB_n n r y) := by
+      intro k
+      induction k with
+      | zero => simp [hxy]
+      | succ k ih =>
+        simp only [Function.iterate_succ', Function.comp_apply]
+        exact congrArg (genB_n n r) ih
+    have h_eq : (genB_n n r)^[n] x = (genB_n n r)^[n] y := by
+      calc (genB_n n r)^[n] x
+          = (genB_n n r)^[n - 1] (genB_n n r x) := iterate_split (genB_n n r) n hn x
+        _ = (genB_n n r)^[n - 1] (genB_n n r y) := h_apply (n - 1)
+        _ = (genB_n n r)^[n] y := (iterate_split (genB_n n r) n hn y).symm
+    calc x = (genB_n n r)^[n] x := (h_period x).symm
+      _ = (genB_n n r)^[n] y := h_eq
+      _ = y := h_period y
+  . -- Surjective
+    intro y
+    use (genB_n n r)^[n - 1] y
+    calc genB_n n r ((genB_n n r)^[n - 1] y)
+        = (genB_n n r)^[n] y := iterate_unsplit (genB_n n r) n hn y
+      _ = y := h_period y
+
 /-! ### Orbit Equivalence -/
 
-/-- Convert a generator to the corresponding permutation in TwoDiskCompoundSymmetryGroup. -/
-private noncomputable def genToPerm (r : ℝ) : Generator → TwoDiskCompoundSymmetryGroup r
-  | .A => ⟨genA_perm r, Subgroup.subset_closure (Set.mem_insert _ _)⟩
-  | .Ainv => ⟨(genA_perm r)⁻¹, Subgroup.inv_mem _ (Subgroup.subset_closure (Set.mem_insert _ _))⟩
-  | .B => ⟨genB_perm r, Subgroup.subset_closure (Set.mem_insert_of_mem _ (Set.mem_singleton _))⟩
-  | .Binv => ⟨(genB_perm r)⁻¹, Subgroup.inv_mem _ (Subgroup.subset_closure (Set.mem_insert_of_mem _ (Set.mem_singleton _)))⟩
+/-- Convert a generator to the corresponding permutation in TwoDiskCompoundSymmetryGroup (5-fold). -/
+private noncomputable def genToPerm (r : Real) : Generator -> TwoDiskCompoundSymmetryGroup 5 (by norm_num) r
+  | .A => { val := genA_n_perm 5 (by norm_num) r, property := Subgroup.subset_closure (Set.mem_insert _ _) }
+  | .Ainv => { val := (genA_n_perm 5 (by norm_num) r)⁻¹, property := Subgroup.inv_mem _ (Subgroup.subset_closure (Set.mem_insert _ _)) }
+  | .B => { val := genB_n_perm 5 (by norm_num) r, property := Subgroup.subset_closure (Set.mem_insert_of_mem _ (Set.mem_singleton _)) }
+  | .Binv => { val := (genB_n_perm 5 (by norm_num) r)⁻¹, property := Subgroup.inv_mem _ (Subgroup.subset_closure (Set.mem_insert_of_mem _ (Set.mem_singleton _))) }
 
 /-- The action of genToPerm agrees with applyGen. -/
-private lemma genToPerm_action (r : ℝ) (g : Generator) (p : ℂ) :
+private lemma genToPerm_action (r : Real) (g : Generator) (p : Complex) :
     (genToPerm r g).val p = applyGen r p g := by
   cases g with
-  | A => simp [genToPerm, applyGen, genA_perm_apply]
+  | A =>
+    simp only [genToPerm, applyGen, Subgroup.coe_mk, genA_n_perm, Equiv.ofBijective_apply]
+    exact genA_eq_genA_n_5 r p
   | Ainv =>
-    simp only [genToPerm, applyGen]
-    have h : (genA_perm r)⁻¹ = (genA_perm r) ^ 4 := by
-      have h5 : (genA_perm r) ^ 5 = 1 := genA_perm_pow_five r
-      calc (genA_perm r)⁻¹ = (genA_perm r)⁻¹ * 1 := by simp
-        _ = (genA_perm r)⁻¹ * (genA_perm r) ^ 5 := by rw [h5]
-        _ = (genA_perm r) ^ 4 := by group
-    simp only [h, Equiv.Perm.coe_pow, Function.iterate_succ, Function.iterate_zero,
-               Function.comp_apply, genA_perm_apply]
+    simp only [genToPerm, applyGen, Subgroup.coe_mk]
+    have h : (genA_n_perm 5 (by norm_num) r)⁻¹ = (genA_n_perm 5 (by norm_num) r) ^ 4 := by
+      have h5 : (genA_n_perm 5 (by norm_num) r) ^ 5 = 1 := by
+        ext z
+        simp only [Equiv.Perm.coe_pow, Function.iterate_succ, Function.iterate_zero,
+                   Function.comp_apply, Equiv.Perm.coe_one, id_eq]
+        exact genA_n_pow_n 5 (by norm_num) r z
+      calc (genA_n_perm 5 (by norm_num) r)⁻¹
+          = (genA_n_perm 5 (by norm_num) r)⁻¹ * 1 := by simp
+        _ = (genA_n_perm 5 (by norm_num) r)⁻¹ * (genA_n_perm 5 (by norm_num) r) ^ 5 := by rw [h5]
+        _ = (genA_n_perm 5 (by norm_num) r) ^ 4 := by group
+    conv_lhs => rw [h]
+    simp only [Equiv.Perm.coe_pow, Function.iterate_succ, Function.iterate_zero,
+               Function.comp_apply, genA_n_perm, Equiv.ofBijective_apply]
+    rw [genA_eq_genA_n_5, genA_eq_genA_n_5, genA_eq_genA_n_5, genA_eq_genA_n_5]
     rfl
-  | B => simp [genToPerm, applyGen, genB_perm_apply]
+  | B =>
+    simp only [genToPerm, applyGen, Subgroup.coe_mk, genB_n_perm, Equiv.ofBijective_apply]
+    exact genB_eq_genB_n_5 r p
   | Binv =>
-    simp only [genToPerm, applyGen]
-    have h : (genB_perm r)⁻¹ = (genB_perm r) ^ 4 := by
-      have h5 : (genB_perm r) ^ 5 = 1 := genB_perm_pow_five r
-      calc (genB_perm r)⁻¹ = (genB_perm r)⁻¹ * 1 := by simp
-        _ = (genB_perm r)⁻¹ * (genB_perm r) ^ 5 := by rw [h5]
-        _ = (genB_perm r) ^ 4 := by group
-    simp only [h, Equiv.Perm.coe_pow, Function.iterate_succ, Function.iterate_zero,
-               Function.comp_apply, genB_perm_apply]
+    simp only [genToPerm, applyGen, Subgroup.coe_mk]
+    have h : (genB_n_perm 5 (by norm_num) r)⁻¹ = (genB_n_perm 5 (by norm_num) r) ^ 4 := by
+      have h5 : (genB_n_perm 5 (by norm_num) r) ^ 5 = 1 := by
+        ext z
+        simp only [Equiv.Perm.coe_pow, Function.iterate_succ, Function.iterate_zero,
+                   Function.comp_apply, Equiv.Perm.coe_one, id_eq]
+        exact genB_n_pow_n 5 (by norm_num) r z
+      calc (genB_n_perm 5 (by norm_num) r)⁻¹
+          = (genB_n_perm 5 (by norm_num) r)⁻¹ * 1 := by simp
+        _ = (genB_n_perm 5 (by norm_num) r)⁻¹ * (genB_n_perm 5 (by norm_num) r) ^ 5 := by rw [h5]
+        _ = (genB_n_perm 5 (by norm_num) r) ^ 4 := by group
+    conv_lhs => rw [h]
+    simp only [Equiv.Perm.coe_pow, Function.iterate_succ, Function.iterate_zero,
+               Function.comp_apply, genB_n_perm, Equiv.ofBijective_apply]
+    rw [genB_eq_genB_n_5, genB_eq_genB_n_5, genB_eq_genB_n_5, genB_eq_genB_n_5]
     rfl
 
 /-- Convert a word to a group element (product of generators from right to left).
     For word [g1, g2, g3], this produces genToPerm g3 * genToPerm g2 * genToPerm g1. -/
-private noncomputable def wordToPerm (r : ℝ) : Word → TwoDiskCompoundSymmetryGroup r
+private noncomputable def wordToPerm (r : Real) : Word -> TwoDiskCompoundSymmetryGroup 5 (by norm_num) r
   | [] => 1
   | g :: gs => wordToPerm r gs * genToPerm r g
 
 /-- Key lemma: wordToPerm applied to z equals applyWord. -/
-private lemma wordToPerm_action (r : ℝ) (w : Word) (p : ℂ) :
+private lemma wordToPerm_action (r : Real) (w : Word) (p : Complex) :
     (wordToPerm r w).val p = applyWord r w p := by
   induction w generalizing p with
   | nil =>
@@ -253,18 +545,19 @@ private lemma wordToPerm_action (r : ℝ) (w : Word) (p : ℂ) :
     rw [h1, genToPerm_action, ih]
     rfl
 
-/-- Every element reachable by a word is in the MulAction orbit of the subgroup. -/
-lemma word_orbit_subset_group_orbit (r : ℝ) (z : ℂ) :
-    orbit r z ⊆ groupOrbit r z := by
+/-- Every element reachable by a word is in the MulAction orbit of the subgroup (5-fold). -/
+lemma word_orbit_subset_group_orbit (r : Real) (z : Complex) :
+    orbit r z ⊆ groupOrbit 5 (by norm_num) r z := by
   intro w hw
   obtain ⟨word, hw_eq⟩ := hw
-  rw [groupOrbit, MulAction.mem_orbit_iff]
+  unfold groupOrbit
+  rw [MulAction.mem_orbit_iff]
   use wordToPerm r word
-  rw [← hw_eq]
+  rw [<- hw_eq]
   exact wordToPerm_action r word z
 
 /-- Helper lemma: wordToPerm distributes over append in reverse order. -/
-private lemma wordToPerm_append (r : ℝ) (u v : Word) :
+private lemma wordToPerm_append (r : Real) (u v : Word) :
     wordToPerm r (u ++ v) = wordToPerm r v * wordToPerm r u := by
   induction u with
   | nil => simp [wordToPerm]
@@ -274,13 +567,13 @@ private lemma wordToPerm_append (r : ℝ) (u v : Word) :
     group
 
 /-- Helper: every element of the closure has a corresponding word.
-    For any g in TwoDiskCompoundSymmetryGroup r, there exists a word w
+    For any g in TwoDiskCompoundSymmetryGroup 5 r, there exists a word w
     such that g.val = (wordToPerm r w).val as permutations. -/
-private lemma closure_element_has_word (r : ℝ) (g : TwoDiskCompoundSymmetryGroup r) :
-    ∃ w : Word, g.val = (wordToPerm r w).val := by
+private lemma closure_element_has_word (r : Real) (g : TwoDiskCompoundSymmetryGroup 5 (by norm_num) r) :
+    exists w : Word, g.val = (wordToPerm r w).val := by
   obtain ⟨g_perm, hg⟩ := g
-  -- Use closure induction with predicate: ∃ w, g_perm = (wordToPerm r w).val
-  refine Subgroup.closure_induction (p := fun g _ => ∃ w : Word, g = (wordToPerm r w).val)
+  -- Use closure induction with predicate: exists w, g_perm = (wordToPerm r w).val
+  refine Subgroup.closure_induction (p := fun g _ => exists w : Word, g = (wordToPerm r w).val)
     ?mem ?one ?mul ?inv hg
   case mem =>
     -- Generator case: genA_perm or genB_perm
@@ -302,29 +595,29 @@ private lemma closure_element_has_word (r : ℝ) (g : TwoDiskCompoundSymmetryGro
     use []
     simp only [wordToPerm, Subgroup.coe_one]
   case mul =>
-    -- If g corresponds to w₁ and h corresponds to w₂, then g * h corresponds to w₂ ++ w₁
-    intro g' h' _ _ ⟨w₁, hw₁⟩ ⟨w₂, hw₂⟩
-    use w₂ ++ w₁
-    rw [hw₁, hw₂, wordToPerm_append]
+    -- If g corresponds to w1 and h corresponds to w2, then g * h corresponds to w2 ++ w1
+    intro g' h' _ _ ⟨w1, hw1⟩ ⟨w2, hw2⟩
+    use w2 ++ w1
+    rw [hw1, hw2, wordToPerm_append]
     simp only [Subgroup.coe_mul]
   case inv =>
-    -- If g corresponds to w, then g⁻¹ corresponds to reversed word with inverted generators
+    -- If g corresponds to w, then g^-1 corresponds to reversed word with inverted generators
     intro g' _ ⟨w, hw⟩
     -- Define the inverse of a generator
-    let invGen : Generator → Generator
+    let invGen : Generator -> Generator
       | .A => .Ainv
       | .Ainv => .A
       | .B => .Binv
       | .Binv => .B
     use (w.reverse.map invGen)
     rw [hw]
-    -- Need: ((wordToPerm r w).val)⁻¹ = (wordToPerm r (w.reverse.map invGen)).val
+    -- Need: ((wordToPerm r w).val)^-1 = (wordToPerm r (w.reverse.map invGen)).val
     -- First show that invGen inverts generators at the permutation level
-    have h_invGen : ∀ gen, (genToPerm r (invGen gen)).val = ((genToPerm r gen).val)⁻¹ := by
+    have h_invGen : forall gen, (genToPerm r (invGen gen)).val = ((genToPerm r gen).val)⁻¹ := by
       intro gen
       cases gen <;> simp only [invGen, genToPerm, Subgroup.coe_mk, inv_inv]
     -- Prove the general lemma about word inversion
-    have h_rev_inv : ∀ (v : Word),
+    have h_rev_inv : forall (v : Word),
         (wordToPerm r (v.reverse.map invGen)).val = ((wordToPerm r v).val)⁻¹ := by
       intro v
       induction v with
@@ -335,84 +628,85 @@ private lemma closure_element_has_word (r : ℝ) (g : TwoDiskCompoundSymmetryGro
         rw [wordToPerm_append]
         simp only [wordToPerm, one_mul, Subgroup.coe_mul]
         rw [mul_inv_rev, ih, h_invGen]
-    rw [← h_rev_inv w]
+    rw [<- h_rev_inv w]
 
-/-- Every element in the MulAction orbit is reachable by some word. -/
-lemma group_orbit_subset_word_orbit (r : ℝ) (z : ℂ) :
-    groupOrbit r z ⊆ orbit r z := by
+/-- Every element in the MulAction orbit is reachable by some word (5-fold). -/
+lemma group_orbit_subset_word_orbit (r : Real) (z : Complex) :
+    groupOrbit 5 (by norm_num) r z ⊆ orbit r z := by
   intro w hw
-  rw [groupOrbit, MulAction.mem_orbit_iff] at hw
+  unfold groupOrbit at hw
+  rw [MulAction.mem_orbit_iff] at hw
   obtain ⟨g, hgw⟩ := hw
-  -- g is in TwoDiskCompoundSymmetryGroup r, so there exists word w such that g = wordToPerm r w
+  -- g is in TwoDiskCompoundSymmetryGroup 5 r, so there exists word w such that g = wordToPerm r w
   obtain ⟨word, hword⟩ := closure_element_has_word r g
-  -- w = g • z = g.val z = (wordToPerm r word).val z = applyWord r word z
+  -- w = g * z = g.val z = (wordToPerm r word).val z = applyWord r word z
   use word
-  rw [← hgw]
-  -- Goal: applyWord r word z = g • z
-  -- g • z = g.val z for subgroup elements acting on the type
+  rw [<- hgw]
+  -- Goal: applyWord r word z = g * z
+  -- g * z = g.val z for subgroup elements acting on the type
   -- g.val = (wordToPerm r word).val by hword
   -- (wordToPerm r word).val z = applyWord r word z by wordToPerm_action
   have h2 : (wordToPerm r word).val z = applyWord r word z := wordToPerm_action r word z
   calc applyWord r word z
       = (wordToPerm r word).val z := h2.symm
-    _ = g.val z := by rw [← hword]
+    _ = g.val z := by rw [<- hword]
     _ = g • z := rfl
 
-/-- The word-based orbit equals the group-theoretic MulAction orbit.
+/-- The word-based orbit equals the group-theoretic MulAction orbit (5-fold).
 
     This is the key bridge between the existing proof infrastructure
     (which uses words) and the proper group-theoretic formulation. -/
-theorem orbit_eq_groupOrbit (r : ℝ) (z : ℂ) :
-    orbit r z = groupOrbit r z := by
+theorem orbit_eq_groupOrbit (r : Real) (z : Complex) :
+    orbit r z = groupOrbit 5 (by norm_num) r z := by
   apply Set.eq_of_subset_of_subset
-  · exact word_orbit_subset_group_orbit r z
-  · exact group_orbit_subset_word_orbit r z
+  . exact word_orbit_subset_group_orbit r z
+  . exact group_orbit_subset_word_orbit r z
 
 /-! ### Infinite Orbit Implies Infinite Group -/
 
-/-- If the word-based orbit is infinite, the group orbit is infinite. -/
-lemma word_orbit_infinite_iff_group_orbit_infinite (r : ℝ) (z : ℂ) :
-    (orbit r z).Infinite ↔ (groupOrbit r z).Infinite := by
+/-- If the word-based orbit is infinite, the group orbit is infinite (5-fold). -/
+lemma word_orbit_infinite_iff_group_orbit_infinite (r : Real) (z : Complex) :
+    (orbit r z).Infinite <-> (groupOrbit 5 (by norm_num) r z).Infinite := by
   rw [orbit_eq_groupOrbit]
 
 /-- Key lemma: If a group action has an infinite orbit, the group is infinite.
 
     This is the contrapositive of Mathlib's `Finite.finite_mulAction_orbit`:
     if the group were finite, all orbits would be finite. -/
-lemma infinite_orbit_implies_infinite_group {G : Type*} [Group G] [MulAction G ℂ]
-    (z : ℂ) (h : (MulAction.orbit G z).Infinite) : Infinite G := by
+lemma infinite_orbit_implies_infinite_group {G : Type*} [Group G] [MulAction G Complex]
+    (z : Complex) (h : (MulAction.orbit G z).Infinite) : Infinite G := by
   by_contra hfin
   push_neg at hfin
   haveI : Finite G := hfin
   exact h (Finite.finite_mulAction_orbit z)
 
-/-- The compound symmetry group is infinite if it has a point with infinite orbit. -/
-theorem CompoundSymmetryGroup_infinite_of_infinite_orbit (r : ℝ) (z : ℂ)
-    (h : (groupOrbit r z).Infinite) : Infinite (TwoDiskCompoundSymmetryGroup r) := by
+/-- The compound symmetry group is infinite if it has a point with infinite orbit (5-fold). -/
+theorem CompoundSymmetryGroup_infinite_of_infinite_orbit (r : Real) (z : Complex)
+    (h : (groupOrbit 5 (by norm_num) r z).Infinite) : Infinite (TwoDiskCompoundSymmetryGroup 5 (by norm_num) r) := by
   exact infinite_orbit_implies_infinite_group z h
 
 /-- GG5 is infinite if it has a point with infinite orbit. -/
-theorem GG5_infinite_of_infinite_orbit (z : ℂ)
+theorem GG5_infinite_of_infinite_orbit (z : Complex)
     (h : (GG5_orbit z).Infinite) : Infinite GG5_At_Critical_radius := by
-  exact CompoundSymmetryGroup_infinite_of_infinite_orbit r_crit z h
+  exact CompoundSymmetryGroup_infinite_of_infinite_orbit _root_.r_crit z h
 
 /-! ### Bridge to Existing Infrastructure -/
 
 /-- The existing proof gives us a point with infinite word-orbit.
     This lifts to infinite group orbit. -/
 theorem GG5_has_infinite_group_orbit :
-    ∃ z : ℂ, (GG5_orbit z).Infinite := by
-  obtain ⟨x₀, hx₀_mem, hx₀_inf⟩ := GG5_IET_has_infinite_orbit
-  use segmentPoint x₀
+    exists z : Complex, (GG5_orbit z).Infinite := by
+  obtain ⟨x0, hx0_mem, hx0_inf⟩ := GG5_IET_has_infinite_orbit
+  use segmentPoint x0
   -- GG5_orbit = MulAction.orbit GG5
   -- Need to show this equals the word-based orbit
-  show (MulAction.orbit GG5_At_Critical_radius (segmentPoint x₀)).Infinite
+  show (MulAction.orbit GG5_At_Critical_radius (segmentPoint x0)).Infinite
   -- From IETOrbit.lean: IET infinite orbit implies word-based orbit is infinite
-  have h_word_inf : (orbit r_crit (segmentPoint x₀)).Infinite :=
-    IET_orbit_infinite_implies_group_orbit_infinite x₀ hx₀_mem hx₀_inf
+  have h_word_inf : (orbit _root_.r_crit (segmentPoint x0)).Infinite :=
+    IET_orbit_infinite_implies_group_orbit_infinite x0 hx0_mem hx0_inf
   -- From orbit_eq_groupOrbit: word-based orbit = group orbit (MulAction.orbit)
   rw [orbit_eq_groupOrbit] at h_word_inf
-  -- groupOrbit r_crit = MulAction.orbit (TwoDiskCompoundSymmetryGroup r_crit)
+  -- groupOrbit _root_.r_crit = MulAction.orbit (TwoDiskCompoundSymmetryGroup _root_.r_crit)
   --                   = MulAction.orbit GG5_At_Critical_radius = GG5_orbit
   exact h_word_inf
 
