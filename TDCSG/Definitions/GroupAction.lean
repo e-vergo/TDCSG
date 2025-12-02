@@ -5,6 +5,7 @@ Authors: Eric Vergo
 -/
 import TDCSG.Definitions.Core
 import TDCSG.Definitions.Geometry
+import Mathlib.Algebra.Group.Subgroup.Lattice
 
 /-!
 # Group Action Definitions

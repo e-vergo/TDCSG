@@ -30,8 +30,6 @@ open scoped Complex
 open Complex Real
 open TDCSG.Definitions (segmentPoint psi E E' ζ₅ zeta5Circle zeta5CirclePow zeta5CircleInv φ r_crit)
 
-private noncomputable abbrev c_lower_word3 : ℝ := 2 - √5
-
 lemma A_w3_z1_re : (ζ₅^4 - 2 : ℂ).re = (√5 - 9) / 4 := by
   simp only [Complex.sub_re]
   have h2re : (2 : ℂ).re = 2 := by rfl

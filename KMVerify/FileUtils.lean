@@ -135,7 +135,19 @@ private def extractDeclName (rest : String) : String :=
 /-- Parse a single line for a declaration -/
 private def parseDeclarationLine (line : String) (lineNum : Nat) : Option ParsedDecl :=
   -- Order matters: check longer patterns first
+  -- Include private variants of each pattern
   let patterns : List (String × DeclKind) := [
+    ("private noncomputable def ", .def_),
+    ("private noncomputable abbrev ", .abbrev_),
+    ("private theorem ", .theorem_),
+    ("private lemma ", .lemma_),
+    ("private structure ", .structure_),
+    ("private class ", .class_),
+    ("private instance ", .instance_),
+    ("private axiom ", .axiom_),
+    ("private opaque ", .opaque_),
+    ("private abbrev ", .abbrev_),
+    ("private def ", .def_),
     ("noncomputable def ", .def_),
     ("noncomputable abbrev ", .abbrev_),
     ("theorem ", .theorem_),

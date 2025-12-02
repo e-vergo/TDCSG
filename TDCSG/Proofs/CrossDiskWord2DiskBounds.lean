@@ -31,12 +31,6 @@ open scoped Complex
 open Complex Real
 open TDCSG.Definitions
 
-private noncomputable abbrev c_lower_word2 : ℝ := Real.goldenConj
-
-private noncomputable abbrev c_upper_word2 : ℝ := 2 - √5
-
-private noncomputable abbrev c_lower_word3 : ℝ := 2 - √5
-
 lemma interval1_c_lower_bound (x : ℝ) (hx : length1 ≤ x) :
     (1 - √5) / 2 ≤ 2 * x - 1 := by
   have h_length1 : length1 = 1 / (2 * (1 + goldenRatio)) := rfl
