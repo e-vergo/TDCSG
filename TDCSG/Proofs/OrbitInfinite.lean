@@ -7,6 +7,7 @@ import TDCSG.Definitions.RealDynamics
 import TDCSG.Definitions.IET
 import TDCSG.Proofs.Orbit
 import TDCSG.Proofs.IET
+import TDCSG.Proofs.Zeta5
 import Mathlib.NumberTheory.Real.GoldenRatio
 import Mathlib.NumberTheory.Real.Irrational
 import Mathlib.Data.Set.Function
@@ -78,9 +79,9 @@ theorem GG5_IET_rotation_irrational :
     Irrational (length3 / length1) := by
   unfold length3 length1
   have h_phi_pos : 0 < goldenRatio := goldenRatio_pos
-  have h_one_plus_phi_pos : 0 < 1 + goldenRatio := by linarith
-  have h_one_plus_phi_ne : 1 + goldenRatio ≠ 0 := ne_of_gt h_one_plus_phi_pos
-  have h_phi_ne : goldenRatio ≠ 0 := ne_of_gt h_phi_pos
+  have h_one_plus_phi_pos : 0 < 1 + goldenRatio := one_plus_phi_pos
+  have h_one_plus_phi_ne : 1 + goldenRatio ≠ 0 := one_plus_phi_ne_zero
+  have h_phi_ne : goldenRatio ≠ 0 := phi_ne_zero
   -- Simplify: (1/φ) / (1/(2(1+φ))) = 2(1+φ)/φ
   have h_ratio : (1 / goldenRatio) / (1 / (2 * (1 + goldenRatio))) =
                  2 * (1 + goldenRatio) / goldenRatio := by field_simp

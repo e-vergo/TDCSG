@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Moffat
 -/
 import TDCSG.Definitions.IET
+import TDCSG.Proofs.Zeta5
 import Mathlib.NumberTheory.Real.GoldenRatio
 import Mathlib.Data.Real.Basic
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
@@ -381,10 +382,8 @@ open Real TDCSG.Definitions
 export TDCSG.Definitions (cyclicPerm3 GG5_induced_IET
   length1_pos length2_pos length3_pos lengths_sum_to_one)
 
-/-- 1 + φ is positive. -/
-private lemma one_plus_phi_pos : 0 < 1 + goldenRatio := by
-  have h1 : 0 < goldenRatio := goldenRatio_pos
-  linarith
+-- Re-export helper lemmas from Zeta5
+open TDCSG.CompoundSymmetry.GG5 (one_plus_phi_pos)
 
 /-- length1 < 1 -/
 lemma length1_lt_one : length1 < 1 := by

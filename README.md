@@ -27,12 +27,12 @@ TRUST TIER SUMMARY
 --------------------------------------------------------------------------------
   MathlibExtensions/          [NOT PRESENT]
   Definitions/                7 files     847 lines
-  Proofs/                     18 files    7908 lines
+  Proofs/                     18 files    7834 lines
   MainTheorem.lean                        28 lines
   ProofOfMainTheorem.lean                 60 lines
 --------------------------------------------------------------------------------
   REVIEW BURDEN: 875 lines (Definitions + MainTheorem)
-  TOTAL: 8843 lines (9% requires review)
+  TOTAL: 8769 lines (9% requires review)
 
 CHECKS
 --------------------------------------------------------------------------------
@@ -106,7 +106,7 @@ TDCSG/
     Points.lean               # E, E', F, G, segmentPoint
     RealDynamics.lean         # Orbit definitions, GG5_displacement
     WordCorrespondence.lean   # word1, word2, word3 definitions
-  Proofs/                     # All supporting lemmas (18 files, 7908 lines)
+  Proofs/                     # All supporting lemmas (18 files, 7834 lines)
     Zeta5.lean                # zeta5 identities
     Points.lean               # Point properties, F/G scalar relations
     OrbitInfinite.lean        # GG5_IET_has_infinite_orbit

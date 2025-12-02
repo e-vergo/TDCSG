@@ -48,6 +48,23 @@ open Complex Real TDCSG.Definitions
 /-- √5² = 5, tagged for simp to eliminate redundant hypotheses. -/
 @[simp] lemma sqrt5_sq : Real.sqrt 5 ^ 2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
 
+/-- 3 + φ is positive (used for r_crit² positivity). -/
+lemma three_plus_phi_pos : 0 < 3 + φ := by
+  unfold φ
+  have := Real.goldenRatio_pos
+  linarith
+
+/-- 1 + φ is positive. -/
+lemma one_plus_phi_pos : 0 < 1 + φ := by
+  unfold φ
+  linarith [Real.goldenRatio_pos]
+
+/-- 1 + φ ≠ 0. -/
+lemma one_plus_phi_ne_zero : 1 + φ ≠ 0 := ne_of_gt one_plus_phi_pos
+
+/-- φ ≠ 0. -/
+lemma phi_ne_zero : φ ≠ 0 := ne_of_gt (by unfold φ; exact Real.goldenRatio_pos)
+
 
 /-! ### 5th Roots of Unity -/
 

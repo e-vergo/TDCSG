@@ -98,18 +98,7 @@ lemma normSq_at_neg1 : ‖(-2 : ℂ) + ζ₅^2 - ζ₅^3 + ζ₅^4‖^2 ≤ 3 + 
                  Real.sin (π / 5) ^ 2 * (3 - √5)^2 / 4 := by ring
   rw [h_im_sq, h_sin_sq]
   unfold φ Real.goldenRatio
-  have h1 : ((√5 - 9) / 4) ^ 2 = (√5^2 - 18 * √5 + 81) / 16 := by ring
-  have h2 : 1 - ((1 + √5) / 4) ^ 2 = (16 - (1 + √5)^2) / 16 := by ring
-  have h3 : (1 + √5)^2 = 1 + 2*√5 + √5^2 := by ring
-  have h4 : (3 - √5)^2 = 9 - 6*√5 + √5^2 := by ring
-  rw [h1, h2, h3, h4]
-  have h_sqrt5_bound : (5 / 3 : ℝ) < √5 := by
-    have h25_9 : (25 / 9 : ℝ) < 5 := by norm_num
-    have h53_pos : (0 : ℝ) ≤ 5 / 3 := by norm_num
-    calc 5 / 3 = √((5/3)^2) := by rw [Real.sqrt_sq h53_pos]
-         _ = √(25/9) := by ring_nf
-         _ < √5 := Real.sqrt_lt_sqrt (by norm_num) h25_9
-  nlinarith [h_sqrt5_bound, Real.sqrt_nonneg 5, sqrt5_sq]
+  nlinarith [Real.sqrt_nonneg 5, sqrt5_sq, sq_nonneg (Real.sin (π / 5)), sq_nonneg ((3 - √5) / 4), sq_nonneg ((√5 - 9) / 4)]
 
 /-! ### Main bound lemma for word1/word2
 

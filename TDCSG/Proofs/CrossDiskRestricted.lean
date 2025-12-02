@@ -48,7 +48,7 @@ lemma cross_disk_z2_bound_restricted (c : ℝ) (hc_lo : -1 ≤ c) (hc_hi : c ≤
   have hB_ne : B ≠ 0 := by rw [hB_def]; exact zeta5_cubed_minus_fourth_ne_zero
 
   rw [show r_crit = Real.sqrt (3 + φ) by unfold r_crit; rfl]
-  have h3φ_pos : 0 < 3 + φ := by unfold φ; linarith [goldenRatio_pos]
+  have h3φ_pos : 0 < 3 + φ := three_plus_phi_pos
   rw [Real.le_sqrt (norm_nonneg _) (le_of_lt h3φ_pos)]
 
   have h_at_neg1 : ‖A + ((-1 : ℝ) : ℂ) * B‖^2 ≤ 3 + φ := by
@@ -288,7 +288,7 @@ lemma cross_disk_z3_bound_restricted (c : ℝ) (hc_lo : -1 ≤ c) (hc_hi : c ≤
     exact h1 this
 
   rw [show r_crit = Real.sqrt (3 + φ) by unfold r_crit; rfl]
-  have h3φ_pos : 0 < 3 + φ := by unfold φ; linarith [goldenRatio_pos]
+  have h3φ_pos : 0 < 3 + φ := three_plus_phi_pos
   rw [Real.le_sqrt (norm_nonneg _) (le_of_lt h3φ_pos)]
 
   -- Vertex is at c_v = (1 - 3√5)/4 < -1
@@ -644,7 +644,7 @@ lemma cross_disk_z4_bound_restricted (c : ℝ) (hc_lo : -1 ≤ c) (hc_hi : c ≤
   set B : ℂ := 1 - ζ₅ with hB_def
 
   rw [show r_crit = Real.sqrt (3 + φ) by unfold r_crit; rfl]
-  have h3φ_pos : 0 < 3 + φ := by unfold φ; linarith [goldenRatio_pos]
+  have h3φ_pos : 0 < 3 + φ := three_plus_phi_pos
   rw [Real.le_sqrt (norm_nonneg _) (le_of_lt h3φ_pos)]
 
   -- At c = -1: A - B = -3 + 3ζ₅ - 2ζ₅² + ζ₅⁴
