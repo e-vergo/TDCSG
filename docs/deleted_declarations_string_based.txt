@@ -1,6 +1,5 @@
-Deleted 63 declarations at 2025-12-02T12:10:16.319788
+Deleted 54 declarations at 2025-12-02T12:40:02.476128
 
-A_w3_z1_at_c_lower
 GG5_IET_orbit_nonempty
 GG5_IET_rotation_irrational
 GG5_induced_IET_is_order3
@@ -15,14 +14,6 @@ circle_exp_two_pi_fifth
 denom_pos
 displacement2_eq_neg_length12
 exp_two_pi_fifth
-genA_bijective_proof
-genA_n_bijective_proof
-genA_perm_pow_five
-genB_bijective_proof
-genB_inside
-genB_n_bijective_proof
-genB_outside
-genB_perm_pow_five
 goldenRatio_mul_rat_irrational
 groupOrbit_5_eq
 interval2_image_bound

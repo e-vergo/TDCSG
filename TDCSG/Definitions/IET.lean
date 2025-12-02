@@ -163,8 +163,4 @@ noncomputable def wordForIterate (x0 : Real) : Nat -> Word
   | 0 => []
   | n + 1 => wordForIterate x0 n ++ IET_word (GG5_induced_IET.toFun^[n] x0)
 
-noncomputable def wordForIterate' : Nat -> Word
-  | 0 => []
-  | n + 1 => wordForIterate' n ++ word1
-
 end TDCSG.Definitions

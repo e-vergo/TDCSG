@@ -137,15 +137,15 @@ def search_declaration_in_files(
 def has_simp_attribute(file_path: str, line_num: int) -> bool:
     """
     Check if a declaration has a @[simp] attribute.
-    Looks backward from the declaration line for attributes.
+    Checks the declaration line itself (for inline @[simp]) and up to 5 lines before.
     """
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
             lines = f.readlines()
 
-        # Check up to 5 lines before the declaration for attributes
+        # Check up to 5 lines before the declaration AND the declaration line itself
         start = max(0, line_num - 6)
-        end = line_num
+        end = line_num + 1  # Include the declaration line (line_num is 1-indexed, but list is 0-indexed)
 
         for i in range(start, end):
             if i < len(lines):
@@ -203,13 +203,20 @@ def generate_report(dead_code_path: Path, search_dir: Path, output_path: Path):
             # Check for @[simp] attribute (implicit usage)
             has_simp = has_simp_attribute(file_path, line_num)
 
-            # Determine action: KEEP if count > 0 OR has @[simp] attribute
-            action = "DELETE" if (max_count == 0 and not has_simp) else "KEEP"
+            # Check if used in critical main theorem files
+            critical_files = {'MainTheorem.lean', 'ProofOfMainTheorem.lean'}
+            used_in_main_theorem = bool(all_files & critical_files)
 
-            # Add reason for KEEP if @[simp]
+            # Determine action: KEEP if count > 0 OR has @[simp] OR used in main theorem files
+            action = "DELETE" if (max_count == 0 and not has_simp and not used_in_main_theorem) else "KEEP"
+
+            # Add reason for KEEP
             keep_reason = ""
-            if has_simp and max_count == 0:
-                keep_reason = " (@[simp])"
+            if max_count == 0:
+                if has_simp:
+                    keep_reason = " (@[simp])"
+                elif used_in_main_theorem:
+                    keep_reason = " (MainTheorem)"
 
             results.append({
                 'action': action,
@@ -378,6 +385,10 @@ def find_declaration_block(lines: List[str], start_idx: int) -> Tuple[int, int]:
         current_indent = len(line) - len(stripped)
 
         if current_indent <= start_indent:
+            # Check for attributes (like @[simp]) which may precede declarations
+            if stripped.startswith('@['):
+                return (doc_start, i - 1)
+
             for keyword in decl_keywords:
                 if stripped.startswith(keyword):
                     return (doc_start, i - 1)

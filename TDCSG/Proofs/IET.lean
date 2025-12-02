@@ -353,10 +353,6 @@ lemma length12_lt_one : length1 + length2 < 1 := by
   have h := lengths_sum_to_one
   linarith [length3_pos]
 
-theorem length1_eq_length2 : length1 = length2 := rfl
-
-theorem length3_eq_one_over_phi : length3 = 1 / goldenRatio := rfl
-
 lemma length12_sum : length1 + length2 = 1 / (1 + goldenRatio) := by
   unfold length1 length2
   have h_pos : 0 < 1 + goldenRatio := one_plus_phi_pos
@@ -383,7 +379,5 @@ lemma displacement2_formula : displacement2 = -1 / (1 + goldenRatio) := by
 
 lemma displacement0_eq_displacement1 : displacement0 = displacement1 := by
   rw [displacement0_formula, displacement1_formula]
-
-lemma displacement2_eq_neg_length12 : displacement2 = -(length1 + length2) := rfl
 
 end TDCSG.CompoundSymmetry.GG5

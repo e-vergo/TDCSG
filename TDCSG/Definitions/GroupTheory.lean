@@ -60,10 +60,4 @@ lemma TwoDiskCompoundSymmetryGroup_5_eq (r : Real) :
   unfold TwoDiskCompoundSymmetryGroup
   simp only [genA_n_perm_5_eq_genA_perm, genB_n_perm_5_eq_genB_perm]
 
-lemma groupOrbit_5_eq (r : Real) (z : Complex) :
-    groupOrbit 5 (by norm_num) r z =
-    MulAction.orbit (Subgroup.closure {genA_perm r, genB_perm r}) z := by
-  unfold groupOrbit
-  rw [TwoDiskCompoundSymmetryGroup_5_eq]
-
 end TDCSG.Definitions

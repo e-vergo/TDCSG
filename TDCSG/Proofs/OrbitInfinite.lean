@@ -12,66 +12,6 @@ namespace TDCSG.CompoundSymmetry.GG5
 open Real Function Set RealDynamics
 open TDCSG.Definitions
 
-theorem goldenRatio_mul_rat_irrational (q : ℚ) (hq : q ≠ 0) :
-    Irrational (goldenRatio * q) := by
-  intro ⟨r, hr⟩
-  have h_phi_irr := goldenRatio_irrational
-  apply h_phi_irr
-  use r / q
-  have hq_cast : (q : ℝ) ≠ 0 := Rat.cast_ne_zero.mpr hq
-  rw [Rat.cast_div, div_eq_iff hq_cast, ← hr]
-
-theorem GG5_IET_rotation_irrational :
-    Irrational (length3 / length1) := by
-  unfold length3 length1
-  have h_phi_pos : 0 < goldenRatio := goldenRatio_pos
-  have h_one_plus_phi_pos : 0 < 1 + goldenRatio := one_plus_phi_pos
-  have h_one_plus_phi_ne : 1 + goldenRatio ≠ 0 := one_plus_phi_ne_zero
-  have h_phi_ne : goldenRatio ≠ 0 := phi_ne_zero
-
-  have h_ratio : (1 / goldenRatio) / (1 / (2 * (1 + goldenRatio))) =
-                 2 * (1 + goldenRatio) / goldenRatio := by field_simp
-  rw [h_ratio]
-
-  intro ⟨q, hq⟩
-  have h_phi_irr := goldenRatio_irrational
-  apply h_phi_irr
-  have hq_ne : q ≠ 0 := by
-    intro h_zero; rw [h_zero] at hq; simp only [Rat.cast_zero] at hq
-    have : 2 * (1 + goldenRatio) / goldenRatio = 0 := hq.symm
-    have := div_eq_zero_iff.mp this
-    rcases this with h | h
-    · linarith
-    · exact h_phi_ne h
-  have hq_cast_ne : (q : ℝ) ≠ 0 := Rat.cast_ne_zero.mpr hq_ne
-
-  have h_from_hq : (q : ℝ) * goldenRatio = 2 * (1 + goldenRatio) := by
-    field_simp [hq_cast_ne, h_phi_ne] at hq ⊢; linarith
-  have h_factor : goldenRatio * ((q : ℝ) - 2) = 2 := by linarith
-  have hq_ne_2 : (q : ℝ) ≠ 2 := by
-    intro h_eq2; rw [h_eq2] at h_factor; simp at h_factor
-  have hq_sub_ne : q - 2 ≠ 0 := by
-    intro h
-    have : (q : ℝ) = 2 := by
-      have hcast : ((q - 2 : ℚ) : ℝ) = (0 : ℝ) := by simp [h]
-      simp at hcast
-      linarith
-    exact hq_ne_2 this
-
-  use 2 / (q - 2)
-  push_cast
-  have hq_sub_cast_ne : (q : ℝ) - 2 ≠ 0 := fun h => hq_ne_2 (by linarith : (q : ℝ) = 2)
-
-  have h_phi_eq : goldenRatio = 2 / ((q : ℝ) - 2) := by
-    have := h_factor
-    field_simp [hq_sub_cast_ne] at this ⊢
-    linarith
-  exact h_phi_eq.symm
-
-theorem GG5_IET_orbit_nonempty (x : ℝ) (_ : x ∈ Ico 0 1) :
-    (RealDynamics.orbitSet GG5_induced_IET.toFun x).Nonempty :=
-  ⟨x, RealDynamics.mem_orbitSet_self _ _⟩
-
 theorem GG5_IET_orbit_finite_subset (n : ℕ) :
     ∃ (x : ℝ), x ∈ Ico 0 1 ∧
       ∃ (pts : Finset ℝ), pts.Nonempty ∧
@@ -370,43 +310,6 @@ theorem displacement_sum_ne_zero (n₀ n₁ n₂ : ℕ) (h_sum : 0 < n₀ + n₁
   have hn2 : n₂ = 0 := by omega
 
   omega
-
-theorem denom_pos : 0 < 1 + goldenRatio + goldenRatio ^ 2 := by
-  have h1 : 0 < goldenRatio := goldenRatio_pos
-  have h2 : 0 < goldenRatio ^ 2 := sq_pos_of_pos h1
-  linarith
-
-theorem length1_alt : length1 = 1 / (2 * (1 + goldenRatio)) := rfl
-
-theorem interval2_image_bound :
-    length1 + length2 = 1 / (1 + goldenRatio) := by
-  unfold length1 length2
-  have h_pos : 0 < 1 + goldenRatio := by have := goldenRatio_pos; linarith
-  have h_ne : 2 * (1 + goldenRatio) ≠ 0 := by linarith
-  field_simp; ring
-
-theorem length3_gt_length1 : length3 > length1 := by
-  unfold length1 length3
-  have hφ_pos : goldenRatio > 0 := Real.goldenRatio_pos
-  have h_one_phi_pos : 1 + goldenRatio > 0 := by linarith
-  have h_two_one_phi_pos : 0 < 2 * (1 + goldenRatio) := by linarith
-
-  have h_ineq : goldenRatio < 2 * (1 + goldenRatio) := by linarith
-  exact div_lt_div_of_pos_left (by norm_num : (0 : ℝ) < 1) hφ_pos h_ineq
-
-theorem length1_lt_half : length1 < 1 / 2 := by
-  have hφ := goldenRatio_pos
-  have h_one_phi_pos : 0 < 1 + goldenRatio := by linarith
-  unfold length1
-  rw [one_div_lt_one_div (by linarith : 0 < 2 * (1 + goldenRatio)) (by norm_num : (0 : ℝ) < 2)]
-
-  linarith
-
-theorem GG5_induced_IET_is_order3 :
-    ∀ i : Fin 3, GG5_induced_IET.permutation (GG5_induced_IET.permutation (GG5_induced_IET.permutation i)) = i := by
-  intro i
-  simp only [GG5_induced_IET]
-  fin_cases i <;> native_decide
 
 theorem GG5_IET_maps_to_self :
     ∀ x ∈ Set.Ico 0 1, GG5_induced_IET.toFun x ∈ Set.Ico 0 1 := by

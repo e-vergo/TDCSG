@@ -18,19 +18,6 @@ private noncomputable abbrev c_lower_word3 : ℝ := 2 - √5
 lemma c_lower_word2_eq : c_lower_word2 = (1 - √5) / 2 := by
   unfold c_lower_word2 Real.goldenConj; rfl
 
-lemma c_lower_word2_gt_neg1 : c_lower_word2 > -1 := by
-  rw [c_lower_word2_eq]
-  have h_sqrt5_lt_3 : √5 < 3 := by nlinarith [sqrt5_sq]
-  linarith
-
-lemma c_upper_word2_eq_c_lower_word3 : c_upper_word2 = c_lower_word3 := rfl
-
-lemma c_lower_lt_upper_word2 : c_lower_word2 < c_upper_word2 := by
-  rw [c_lower_word2_eq]
-  unfold c_upper_word2
-  have h_sqrt5_lt_3 : √5 < 3 := by nlinarith [sqrt5_sq]
-  linarith
-
 lemma interval1_c_lower_bound (x : ℝ) (hx : length1 ≤ x) :
     (1 - √5) / 2 ≤ 2 * x - 1 := by
   have h_length1 : length1 = 1 / (2 * (1 + goldenRatio)) := rfl

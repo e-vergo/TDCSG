@@ -36,13 +36,6 @@ lemma rotateAboutCircle_mul (c : ℂ) (a b : Circle) (z : ℂ) :
   simp only [rotateAboutCircle, Circle.coe_mul]
   ring
 
-lemma rotateAboutCircle_inv (c : ℂ) (a : Circle) (z : ℂ) :
-    rotateAboutCircle c a⁻¹ (rotateAboutCircle c a z) = z := by
-  simp only [rotateAboutCircle, Circle.coe_inv]
-  have h : (a : ℂ) ≠ 0 := Circle.coe_ne_zero a
-  field_simp [h]
-  ring
-
 lemma rotateAboutCircle_pow (c : ℂ) (a : Circle) (n : ℕ) (z : ℂ) :
     (rotateAboutCircle c a)^[n] z = rotateAboutCircle c (a ^ n) z := by
   induction n with

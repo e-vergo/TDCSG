@@ -417,13 +417,6 @@ lemma normSq_A4_at_neg1 : Complex.normSq ((-3 : ℂ) + 3*ζ₅ - 2*ζ₅^2 + ζ�
   rw [Complex.normSq_apply, A4_at_neg1_re, A4_at_neg1_im]
   simp only [← sq]
 
-lemma z4_vertex_gt_c_upper : (5 - 3*√5) / 4 > (1 - √5) / 2 := by
-  have h_sqrt5_pos : 0 < √5 := Real.sqrt_pos.mpr (by norm_num : (0 : ℝ) < 5)
-
-  have h_sqrt5_lt_3 : √5 < 3 := by nlinarith [sqrt5_sq]
-
-  linarith
-
 lemma normSq_A4 : Complex.normSq ((-2 : ℂ) + 2*ζ₅ - 2*ζ₅^2 + ζ₅^4) = 16 - 7*√5 := by
   rw [Complex.normSq_apply, A4_re, A4_im]
   have h_sin_sq : Real.sin (π / 5)^2 = (5 - √5) / 8 := sin_sq_pi_div_5
@@ -449,12 +442,6 @@ lemma normSq_A4 : Complex.normSq ((-2 : ℂ) + 2*ζ₅ - 2*ζ₅^2 + ζ₅^4) = 
   simp only [← sq]
   rw [h_re_sq, h_im_sq]
   nlinarith [sqrt5_sq]
-
-lemma seven_minus_3sqrt5_le_three_plus_phi : (7 - 3*√5) / 2 ≤ 3 + φ := by
-  have h_sqrt5_nonneg : 0 ≤ √5 := Real.sqrt_nonneg 5
-  unfold φ Real.goldenRatio
-
-  linarith
 
 lemma normSq_A4_at_neg1_le_three_plus_phi :
     Complex.normSq ((-3 : ℂ) + 3*ζ₅ - 2*ζ₅^2 + ζ₅^4) ≤ 3 + φ := by

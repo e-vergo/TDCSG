@@ -32,12 +32,6 @@ lemma genB_rotation_formula (z : ℂ) (hz : z ∈ rightDisk r_crit) :
   unfold rotateAboutC rightCenter
   rw [exp_neg_two_pi_fifth]
 
-lemma exp_two_pi_fifth : Complex.exp ((2 * π / 5 : ℝ) * I) = ζ₅ := by
-  unfold ζ₅ zeta5
-  congr 1
-  push_cast
-  ring
-
 lemma applyGen_Ainv_formula (z : ℂ)
     (hz : z ∈ leftDisk r_crit)
     (h1 : (-1 : ℂ) + ζ₅^4 * (z + 1) ∈ leftDisk r_crit)

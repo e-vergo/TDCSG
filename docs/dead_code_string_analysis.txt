@@ -1,5 +1,5 @@
 # String-Based Dead Code Analysis
-# Generated: 2025-12-02 12:29:16
+# Generated: 2025-12-02 12:37:25
 #
 # Instructions:
 # - Edit KEEP/DELETE actions as needed
@@ -72,15 +72,15 @@ DELETE  w3_z5_at_one_expr              count=  0    files=[]
 KEEP    genA_outside                   count=  1    files=[GroupTheory.lean]
 KEEP    genA_inside                    count=  5    files=[GroupTheory.lean]
 KEEP    genA_pow_five                  count=  4    files=[GroupTheory.lean]
-DELETE  genA_bijective_proof           count=  0    files=[]
-DELETE  genB_outside                   count=  0    files=[]
-DELETE  genB_inside                    count=  0    files=[]
+KEEP    genA_bijective_proof           count=  0    files=[] (has private helpers)
+KEEP    genB_outside                   count=  0    files=[] (has private helpers)
+KEEP    genB_inside                    count=  0    files=[] (has private helpers)
 KEEP    genB_pow_five                  count=  4    files=[GroupTheory.lean]
-DELETE  genB_bijective_proof           count=  0    files=[]
-DELETE  genA_perm_pow_five             count=  0    files=[]
-DELETE  genB_perm_pow_five             count=  0    files=[]
-DELETE  genA_n_bijective_proof         count=  0    files=[]
-DELETE  genB_n_bijective_proof         count=  0    files=[]
+KEEP    genB_bijective_proof           count=  0    files=[] (has private helpers)
+KEEP    genA_perm_pow_five             count=  0    files=[] (has private helpers)
+KEEP    genB_perm_pow_five             count=  0    files=[] (has private helpers)
+KEEP    genA_n_bijective_proof         count=  0    files=[] (has private helpers)
+KEEP    genB_n_bijective_proof         count=  0    files=[] (has private helpers)
 DELETE  word_orbit_infinite_iff_group_orbit_infinite count=  0    files=[]
 KEEP    GG5_infinite_of_infinite_orbit count=  1    files=[GroupTheory.lean]
 KEEP    GG5_has_infinite_group_orbit   count=  1    files=[GroupTheory.lean]

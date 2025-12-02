@@ -301,8 +301,6 @@ lemma psi_lt_one : psi < 1 := by
 
 lemma psi_le_one : psi ≤ 1 := le_of_lt psi_lt_one
 
-lemma t_G_pos : 0 < psi := psi_pos
-
 lemma psi_lt_t_F : psi < t_F := by
   rw [psi_eq]
   unfold t_F
@@ -312,8 +310,6 @@ lemma psi_lt_t_F : psi < t_F := by
       constructor <;> intro h <;> nlinarith [h]]
   field_simp
   linarith
-
-lemma t_G_lt_t_F : psi < t_F := psi_lt_t_F
 
 lemma t_F_lt_one : t_F < 1 := by
   unfold t_F
@@ -474,65 +470,5 @@ lemma G_eq_coeff_times_E : G = ((Real.sqrt 5 - 2) : ℝ) • E := by
   simp only [smul_smul, mul_one]
   rw [← sub_smul]
   rw [h_coeff]
-
-lemma G_on_segment_E'E :
-    ∃ t : ℝ, 0 ≤ t ∧ t ≤ 1 ∧ G = E' + t • (E - E') := by
-  use psi
-  constructor
-  · exact psi_pos.le
-  constructor
-  · exact psi_le_one
-  ·
-    unfold E'
-    rw [show E - (-E) = 2 • E by simp [two_smul]]
-    have step1 : psi • ((2 : ℕ) • E) = (psi * (2 : ℝ)) • E := by
-      rw [show (2 : ℕ) • E = ((2 : ℝ) • E) by norm_cast]
-      rw [mul_smul]
-    rw [step1]
-    rw [show -E + (psi * (2 : ℝ)) • E = (((-1 : ℝ) + 2 * psi) • E) by
-      rw [← neg_one_smul ℝ E, ← add_smul, mul_comm psi 2]]
-    have h1 : ((-1 : ℝ) + 2 * psi) = Real.sqrt 5 - 2 := by
-      rw [psi_eq]; field_simp; ring
-    rw [h1]
-    exact G_eq_coeff_times_E
-
-lemma segment_ordering :
-    ∃ (t_F' t_G' : ℝ), 0 < t_G' ∧ t_G' < t_F' ∧ t_F' < 1 ∧
-      F = E' + t_F' • (E - E') ∧
-      G = E' + t_G' • (E - E') := by
-  use t_F, psi
-  constructor
-  · exact psi_pos
-  constructor
-  · exact psi_lt_t_F
-  constructor
-  · exact t_F_lt_one
-  constructor
-  ·
-    unfold E'
-    rw [show E - (-E) = 2 • E by simp [two_smul]]
-    have step1 : t_F • ((2 : ℕ) • E) = (t_F * (2 : ℝ)) • E := by
-      rw [show (2 : ℕ) • E = ((2 : ℝ) • E) by norm_cast]
-      rw [mul_smul]
-    rw [step1]
-    rw [show -E + (t_F * (2 : ℝ)) • E = ((2 * t_F - 1) • E) by
-      rw [← neg_one_smul ℝ E, ← add_smul, mul_comm t_F 2, show (-1 : ℝ) + 2 * t_F = 2 * t_F - 1 by ring]]
-    have h_param : 2 * t_F - 1 = psi := by
-      unfold t_F; rw [psi_eq]; field_simp; ring
-    rw [h_param]
-    exact F_eq_psi_times_E
-  ·
-    unfold E'
-    rw [show E - (-E) = 2 • E by simp [two_smul]]
-    have step1 : psi • ((2 : ℕ) • E) = (psi * (2 : ℝ)) • E := by
-      rw [show (2 : ℕ) • E = ((2 : ℝ) • E) by norm_cast]
-      rw [mul_smul]
-    rw [step1]
-    rw [show -E + (psi * (2 : ℝ)) • E = (((-1 : ℝ) + 2 * psi) • E) by
-      rw [← neg_one_smul ℝ E, ← add_smul, mul_comm psi 2]]
-    have h1 : ((-1 : ℝ) + 2 * psi) = Real.sqrt 5 - 2 := by
-      rw [psi_eq]; field_simp; ring
-    rw [h1]
-    exact G_eq_coeff_times_E
 
 end TDCSG.CompoundSymmetry.GG5

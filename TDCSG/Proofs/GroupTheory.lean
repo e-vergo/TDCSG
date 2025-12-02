@@ -404,10 +404,6 @@ theorem orbit_eq_groupOrbit (r : Real) (z : Complex) :
   . exact word_orbit_subset_group_orbit r z
   . exact group_orbit_subset_word_orbit r z
 
-lemma word_orbit_infinite_iff_group_orbit_infinite (r : Real) (z : Complex) :
-    (orbit r z).Infinite <-> (groupOrbit 5 (by norm_num) r z).Infinite := by
-  rw [orbit_eq_groupOrbit]
-
 lemma infinite_orbit_implies_infinite_group {G : Type*} [Group G] [MulAction G Complex]
     (z : Complex) (h : (MulAction.orbit G z).Infinite) : Infinite G := by
   by_contra hfin
@@ -436,9 +432,5 @@ theorem GG5_has_infinite_group_orbit :
   rw [orbit_eq_groupOrbit] at h_word_inf
 
   exact h_word_inf
-
-theorem GG5_is_infinite : Infinite GG5_At_Critical_radius := by
-  obtain ⟨z, hz⟩ := GG5_has_infinite_group_orbit
-  exact GG5_infinite_of_infinite_orbit z hz
 
 end TDCSG.CompoundSymmetry.GG5
