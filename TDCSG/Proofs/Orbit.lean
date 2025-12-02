@@ -240,7 +240,8 @@ end RealDynamics
 
 namespace TDCSG.CompoundSymmetry.GG5
 
-open Real Function Set RealDynamics TDCSG.Definitions
+open Real Function Set RealDynamics
+open TDCSG.Definitions hiding φ r_crit
 
 -- GG5_displacement and cumulative_displacement are now in Definitions/RealDynamics.lean
 export TDCSG.Definitions (GG5_displacement cumulative_displacement)

@@ -16,7 +16,8 @@ Lemmas relating rotation angles to the 5th root of unity ζ₅ and
 formulas for applying generators A, B, A⁻¹, B⁻¹.
 -/
 
-open Complex Real TDCSG.Definitions
+open Complex Real
+open TDCSG.Definitions hiding φ r_crit
 
 namespace TDCSG.CompoundSymmetry.GG5
 

@@ -20,7 +20,8 @@ Contains proofs about:
 
 namespace TDCSG.CompoundSymmetry.GG5
 
-open Complex Real TDCSG.Definitions
+open Complex Real
+open TDCSG.Definitions hiding φ r_crit
 
 /-! ### E Real and Imaginary Parts -/
 

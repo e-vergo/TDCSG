@@ -30,13 +30,15 @@ The GG5 geometric construction has been refactored into:
 
 namespace TDCSG.CompoundSymmetry.GG5
 
-open Complex Real TDCSG.Definitions
+open Complex Real
+open TDCSG.Definitions hiding φ r_crit
 
 /-! ### Basic lemmas -/
 
 /-- The critical radius is positive. -/
 lemma r_crit_pos : 0 < r_crit := by
-  unfold r_crit φ
+  unfold r_crit TDCSG.Definitions.r_crit
+  simp only [TDCSG.Definitions.φ]
   apply Real.sqrt_pos_of_pos
   linarith [Real.goldenRatio_pos]
 

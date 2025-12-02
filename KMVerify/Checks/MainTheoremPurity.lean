@@ -15,13 +15,13 @@ Verify MainTheorem.lean contains no lemmas or theorems (only defs).
 
 namespace KMVerify.Checks
 
-/-- Check that MainTheorem.lean contains only definitions -/
+/-- Check that MainTheorem.lean contains only allowed declarations -/
 def checkMainTheoremPurity (resolved : ResolvedConfig) : IO CheckResult := do
   let decls ← parseDeclarations resolved.mainTheoremPath
 
-  -- Find forbidden declarations (lemmas, theorems, instances)
+  -- Find forbidden declarations using isDeclAllowed
   let forbidden := decls.filter fun d =>
-    d.kind == .theorem_ || d.kind == .lemma_ || d.kind == .instance_
+    !isDeclAllowed TrustLevel.MainTheorem d.kind
 
   -- Find the statement definition
   let statementDefs := decls.filter fun d =>
@@ -42,11 +42,11 @@ def checkMainTheoremPurity (resolved : ResolvedConfig) : IO CheckResult := do
     details := details ++ [s!"'{resolved.config.statementName}' not found"]
 
   if passed then
-    let defCount := decls.filter (fun d => d.kind == .def_ || d.kind == .abbrev_)
+    let declCount := decls.length
     return CheckResult.pass "MainTheorem Purity"
-      s!"Contains {defCount.length} definitions, no lemmas/theorems"
+      s!"Contains {declCount} allowed declarations"
   else
     return CheckResult.fail "MainTheorem Purity"
-      "MainTheorem.lean should contain only definitions" details
+      "MainTheorem.lean contains disallowed declarations" details
 
 end KMVerify.Checks

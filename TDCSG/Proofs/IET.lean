@@ -375,7 +375,8 @@ end IntervalExchangeTransformation
 
 namespace TDCSG.CompoundSymmetry.GG5
 
-open Real TDCSG.Definitions
+open Real
+open TDCSG.Definitions hiding φ r_crit
 
 -- Re-export definitions from TDCSG.Definitions for backward compatibility
 -- These are now defined in Definitions/IET.lean

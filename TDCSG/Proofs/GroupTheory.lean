@@ -42,41 +42,20 @@ orbit implies an infinite group.
 
 namespace TDCSG.CompoundSymmetry.GG5
 
-open TDCSG.Definitions
+open TDCSG.Definitions hiding φ r_crit
 open scoped Complex
 
-/-! ### Circle Exponential Lemmas -/
+/-! ### Circle Exponential Lemmas
 
-/-- Circle.exp theta ^ n = Circle.exp (n * theta). -/
-lemma Circle_exp_pow (theta : Real) (n : Nat) : Circle.exp theta ^ n = Circle.exp (n * theta) := by
-  induction n with
-  | zero => simp [Circle.exp_zero]
-  | succ n ih =>
-    rw [pow_succ, ih, <- Circle.exp_add]
-    congr 1
-    push_cast
-    ring
-
-/-- Circle.exp (-2pi) = 1, the fundamental periodicity. -/
-lemma circle_exp_neg_two_pi : Circle.exp (-2 * Real.pi) = 1 := by
-  apply Subtype.ext
-  simp only [Circle.coe_exp, Circle.coe_one]
-  push_cast
-  have h : (-2 : Complex) * Real.pi * Complex.I = -(2 * Real.pi * Complex.I) := by ring
-  rw [h, Complex.exp_neg, Complex.exp_two_pi_mul_I, inv_one]
+The core circle exponential lemmas (Circle_exp_pow, circle_exp_neg_two_pi,
+Circle_exp_neg_two_pi_over_n_pow_n) are defined in TDCSG.Definitions.GroupAction
+and available via the `open TDCSG.Definitions` statement above.
+-/
 
 /-- 5 rotations by -2pi/5 = identity (key for order 5). -/
 lemma Circle_exp_neg_two_pi_over_5_pow_5 : Circle.exp (-2 * Real.pi / 5) ^ 5 = 1 := by
   rw [Circle_exp_pow]
   have h : (5 : Nat) * (-2 * Real.pi / 5) = -2 * Real.pi := by ring
-  rw [h]
-  exact circle_exp_neg_two_pi
-
-/-- n rotations by -2pi/n = identity for n >= 1 (general order-n property). -/
-lemma Circle_exp_neg_two_pi_over_n_pow_n (n : Nat) (hn : n >= 1) :
-    Circle.exp (-2 * Real.pi / n) ^ n = 1 := by
-  rw [Circle_exp_pow]
-  have h : (n : Real) * (-2 * Real.pi / n) = -2 * Real.pi := by field_simp
   rw [h]
   exact circle_exp_neg_two_pi
 
@@ -93,14 +72,6 @@ lemma genA_inside (r : Real) (z : Complex) (hz : z ∈ leftDisk r) :
   unfold genA
   simp only [hz, if_true]
   rw [rotateAboutCircle_eq_rotateAboutC]
-
-/-- Rotation about leftCenter preserves leftDisk membership. -/
-lemma rotateAboutCircle_leftCenter_preserves_leftDisk (a : Circle) (r : Real) (z : Complex)
-    (hz : z ∈ leftDisk r) : rotateAboutCircle leftCenter a z ∈ leftDisk r := by
-  unfold leftDisk
-  have h_center : leftCenter = (-1 : Complex) := by unfold leftCenter; simp
-  rw [h_center]
-  exact rotateAboutCircle_preserves_disk (-1) a r z hz
 
 /-- Generator A has order 5: applying it 5 times gives the identity. -/
 lemma genA_pow_five (r : Real) (z : Complex) :
@@ -167,14 +138,6 @@ lemma genB_inside (r : Real) (z : Complex) (hz : z ∈ rightDisk r) :
   unfold genB
   simp only [hz, if_true]
   rw [rotateAboutCircle_eq_rotateAboutC]
-
-/-- Rotation about rightCenter preserves rightDisk membership. -/
-lemma rotateAboutCircle_rightCenter_preserves_rightDisk (a : Circle) (r : Real) (z : Complex)
-    (hz : z ∈ rightDisk r) : rotateAboutCircle rightCenter a z ∈ rightDisk r := by
-  unfold rightDisk
-  have h_center : rightCenter = (1 : Complex) := by unfold rightCenter; simp
-  rw [h_center]
-  exact rotateAboutCircle_preserves_disk 1 a r z hz
 
 /-- Generator B has order 5: applying it 5 times gives the identity. -/
 lemma genB_pow_five (r : Real) (z : Complex) :
@@ -274,136 +237,12 @@ lemma genB_perm_pow_five (r : Real) : genB_perm r ^ 5 = 1 := by
              Function.comp_apply, Equiv.Perm.coe_one, id_eq, genB_perm_apply]
   exact genB_pow_five r z
 
-/-! ### N-fold Generalized Properties -/
+/-! ### N-fold Generalized Properties
 
-/-- genA_n acts as identity outside the left disk. -/
-lemma genA_n_outside (n : Nat) (r : Real) (z : Complex) (hz : z ∉ leftDisk r) :
-    genA_n n r z = z := by
-  unfold genA_n
-  simp only [hz, if_false]
-
-/-- genA_n acts as rotation inside the left disk. -/
-lemma genA_n_inside (n : Nat) (r : Real) (z : Complex) (hz : z ∈ leftDisk r) :
-    genA_n n r z = rotateAboutCircle leftCenter (Circle.exp (-2 * Real.pi / n)) z := by
-  unfold genA_n
-  simp only [hz, if_true]
-  rw [rotateAboutCircle_eq_rotateAboutC]
-
-/-- genB_n acts as identity outside the right disk. -/
-lemma genB_n_outside (n : Nat) (r : Real) (z : Complex) (hz : z ∉ rightDisk r) :
-    genB_n n r z = z := by
-  unfold genB_n
-  simp only [hz, if_false]
-
-/-- genB_n acts as rotation inside the right disk. -/
-lemma genB_n_inside (n : Nat) (r : Real) (z : Complex) (hz : z ∈ rightDisk r) :
-    genB_n n r z = rotateAboutCircle rightCenter (Circle.exp (-2 * Real.pi / n)) z := by
-  unfold genB_n
-  simp only [hz, if_true]
-  rw [rotateAboutCircle_eq_rotateAboutC]
-
-/-- Helper: rotation about leftCenter preserves leftDisk through iterations. -/
-lemma rotateAboutCircle_leftCenter_iterate_preserves_leftDisk (a : Circle) (r : Real) (k : Nat)
-    (w : Complex) (hw : w ∈ leftDisk r) :
-    (rotateAboutCircle leftCenter a)^[k] w ∈ leftDisk r := by
-  induction k with
-  | zero => simpa
-  | succ k ih =>
-    simp only [Function.iterate_succ', Function.comp_apply]
-    exact rotateAboutCircle_leftCenter_preserves_leftDisk a r _ ih
-
-/-- Generator A_n has order n: applying it n times gives the identity. -/
-lemma genA_n_pow_n (n : Nat) (hn : n >= 1) (r : Real) (z : Complex) :
-    (genA_n n r)^[n] z = z := by
-  by_cases hz : z ∈ leftDisk r
-  . -- Inside case: n rotations = identity
-    set a := Circle.exp (-2 * Real.pi / n) with ha
-    -- Show that iterating genA_n n times equals iterating rotation n times
-    have h_eq_rot : forall k : Nat, forall w : Complex, w ∈ leftDisk r ->
-        (genA_n n r)^[k] w = (rotateAboutCircle leftCenter a)^[k] w := by
-      intro k
-      induction k with
-      | zero => simp
-      | succ k ih =>
-        intro w hw
-        simp only [Function.iterate_succ', Function.comp_apply]
-        have hw' : (rotateAboutCircle leftCenter a)^[k] w ∈ leftDisk r :=
-          rotateAboutCircle_leftCenter_iterate_preserves_leftDisk a r k w hw
-        rw [ih w hw]
-        rw [genA_n_inside n r _ hw']
-    rw [h_eq_rot n z hz]
-    -- Now use rotateAboutCircle_pow and periodicity
-    rw [rotateAboutCircle_pow]
-    rw [ha, Circle_exp_neg_two_pi_over_n_pow_n n hn]
-    exact rotateAboutCircle_one leftCenter z
-  . -- Outside case: genA_n is identity
-    have h_id : forall k : Nat, (genA_n n r)^[k] z = z := by
-      intro k
-      induction k with
-      | zero => simp
-      | succ k ih =>
-        simp only [Function.iterate_succ', Function.comp_apply, ih]
-        exact genA_n_outside n r z hz
-    exact h_id n
-
-/-- Helper: rotation about rightCenter preserves rightDisk through iterations. -/
-lemma rotateAboutCircle_rightCenter_iterate_preserves_rightDisk (a : Circle) (r : Real) (k : Nat)
-    (w : Complex) (hw : w ∈ rightDisk r) :
-    (rotateAboutCircle rightCenter a)^[k] w ∈ rightDisk r := by
-  induction k with
-  | zero => simpa
-  | succ k ih =>
-    simp only [Function.iterate_succ', Function.comp_apply]
-    exact rotateAboutCircle_rightCenter_preserves_rightDisk a r _ ih
-
-/-- Generator B_n has order n: applying it n times gives the identity. -/
-lemma genB_n_pow_n (n : Nat) (hn : n >= 1) (r : Real) (z : Complex) :
-    (genB_n n r)^[n] z = z := by
-  by_cases hz : z ∈ rightDisk r
-  . -- Inside case: n rotations = identity
-    set a := Circle.exp (-2 * Real.pi / n) with ha
-    -- Show that iterating genB_n n times equals iterating rotation n times
-    have h_eq_rot : forall k : Nat, forall w : Complex, w ∈ rightDisk r ->
-        (genB_n n r)^[k] w = (rotateAboutCircle rightCenter a)^[k] w := by
-      intro k
-      induction k with
-      | zero => simp
-      | succ k ih =>
-        intro w hw
-        simp only [Function.iterate_succ', Function.comp_apply]
-        have hw' : (rotateAboutCircle rightCenter a)^[k] w ∈ rightDisk r :=
-          rotateAboutCircle_rightCenter_iterate_preserves_rightDisk a r k w hw
-        rw [ih w hw]
-        rw [genB_n_inside n r _ hw']
-    rw [h_eq_rot n z hz]
-    -- Now use rotateAboutCircle_pow and periodicity
-    rw [rotateAboutCircle_pow]
-    rw [ha, Circle_exp_neg_two_pi_over_n_pow_n n hn]
-    exact rotateAboutCircle_one rightCenter z
-  . -- Outside case: genB_n is identity
-    have h_id : forall k : Nat, (genB_n n r)^[k] z = z := by
-      intro k
-      induction k with
-      | zero => simp
-      | succ k ih =>
-        simp only [Function.iterate_succ', Function.comp_apply, ih]
-        exact genB_n_outside n r z hz
-    exact h_id n
-
-/-- Helper: f^[n] x = f^[n-1] (f x) when n >= 1. -/
-lemma iterate_split (f : Complex -> Complex) (n : Nat) (hn : n >= 1) (x : Complex) :
-    f^[n] x = f^[n - 1] (f x) := by
-  have h : n = (n - 1) + 1 := (Nat.sub_add_cancel hn).symm
-  conv_lhs => rw [h]
-  rw [Function.iterate_succ_apply']
-  exact (Function.Commute.iterate_self f (n - 1) x).symm
-
-/-- Helper: f (f^[n-1] x) = f^[n] x when n >= 1. -/
-lemma iterate_unsplit (f : Complex -> Complex) (n : Nat) (hn : n >= 1) (x : Complex) :
-    f (f^[n - 1] x) = f^[n] x := by
-  have h : n = (n - 1) + 1 := (Nat.sub_add_cancel hn).symm
-  conv_rhs => rw [h]
-  exact (Function.iterate_succ_apply' f (n - 1) x).symm
+The core N-fold lemmas (genA_n_outside, genA_n_inside, genB_n_outside, genB_n_inside,
+genA_n_pow_n, genB_n_pow_n, iterate_split, iterate_unsplit, and the iterate preservation
+lemmas) are defined in TDCSG.Definitions.GroupAction and available via `open TDCSG.Definitions`.
+-/
 
 /-- Generalized generator A_n is a bijection for n >= 1. -/
 theorem genA_n_bijective_proof (n : Nat) (hn : n >= 1) (r : Real) :

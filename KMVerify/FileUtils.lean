@@ -99,8 +99,13 @@ def classifyImport (moduleName : String) (projectPrefix : String)
     let fullPrefix := projectPrefix ++ "."
     if moduleName.startsWith fullPrefix then
       let rest := moduleName.drop fullPrefix.length
+      -- Check for MainTheorem file specifically
+      if rest == "MainTheorem" then
+        "MainTheorem"
+      else if rest == "ProofOfMainTheorem" then
+        "ProofOfMainTheorem"
       -- Check MathlibExtensions
-      match mathlibExtDir with
+      else match mathlibExtDir with
       | some extDir =>
         if rest.startsWith (extDir ++ ".") || rest == extDir then
           "MathlibExtensions"
@@ -124,11 +129,8 @@ def classifyImport (moduleName : String) (projectPrefix : String)
 
 /-- Extract declaration name from rest of line -/
 private def extractDeclName (rest : String) : String :=
-  -- Take characters that are valid in Lean identifiers
-  rest.takeWhile (fun c =>
-    c.isAlphanum || c == '_' || c == '\'' ||
-    c == '₀' || c == '₁' || c == '₂' || c == '₃' || c == '₄' ||
-    c == '₅' || c == '₆' || c == '₇' || c == '₈' || c == '₉')
+  -- Take everything up to whitespace or colon (Lean allows Unicode in identifiers)
+  rest.takeWhile (fun c => c != ' ' && c != '\t' && c != ':' && c != '(')
 
 /-- Parse a single line for a declaration -/
 private def parseDeclarationLine (line : String) (lineNum : Nat) : Option ParsedDecl :=
@@ -180,12 +182,16 @@ def parseDeclarations (path : System.FilePath) : IO (List ParsedDecl) := do
       lineNum := lineNum + 1
       let trimmed := line.trim
 
-      -- Track block comments
-      if trimmed.startsWith "/-" && !trimmed.startsWith "/-!" then
+      -- Track block comments (but not doc comments /-- or module docs /-!)
+      if trimmed.startsWith "/-" && !trimmed.startsWith "/-!" && !trimmed.startsWith "/--" then
         inBlockComment := true
       if inBlockComment then
         if (trimmed.splitOn "-/").length > 1 then
           inBlockComment := false
+        continue
+
+      -- Skip doc comments /-- ... -/ on their own lines (declarations follow on next line)
+      if trimmed.startsWith "/--" then
         continue
 
       -- Skip line comments

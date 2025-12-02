@@ -47,11 +47,36 @@ def checkDuplicates (resolved : ResolvedConfig) : IO CheckResult := do
       let existing := definitions.getD decl.name []
       definitions := definitions.insert decl.name (relPath :: existing)
 
-  -- Find duplicates
+  -- Find duplicates, excluding MainTheorem re-exports
   let mut duplicates : List (String × List String) := []
   for (name, locations) in definitions.toList do
     if locations.length > 1 then
-      duplicates := (name, locations) :: duplicates
+      -- Check if this is a MainTheorem re-export of a Definitions item
+      let hasMainTheorem := locations.any (·.endsWith "MainTheorem.lean")
+      let hasDefinitions := locations.any (fun loc =>
+        containsSubstr loc ("/" ++ resolved.config.definitionsDir ++ "/"))
+
+      -- If it's a MainTheorem + Definitions pair, check if it's a re-export
+      if hasMainTheorem && hasDefinitions && locations.length == 2 then
+        -- Find the MainTheorem file and parse the declaration
+        let mainTheoremFile := allFiles.find? (·.toString.endsWith "MainTheorem.lean")
+        match mainTheoremFile with
+        | some mtFile =>
+          let mtDecls ← parseDeclarations mtFile
+          let mtDecl := mtDecls.find? (·.name == name)
+          -- If MainTheorem has an abbrev, it's a re-export, not a duplicate
+          match mtDecl with
+          | some d =>
+            if d.kind == DeclKind.abbrev_ then
+              continue  -- Skip this re-export
+            else
+              duplicates := (name, locations) :: duplicates
+          | none =>
+            duplicates := (name, locations) :: duplicates
+        | none =>
+          duplicates := (name, locations) :: duplicates
+      else
+        duplicates := (name, locations) :: duplicates
 
   if duplicates.isEmpty then
     return CheckResult.pass "No Duplicates"

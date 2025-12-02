@@ -229,13 +229,15 @@ def isImportAllowed (_resolved : ResolvedConfig) (trustLevel : TrustLevel)
     importClass == "Batteries" ||
     importClass == "MathlibExtensions"
   | .Definitions =>
-    -- Can import Mathlib, MathlibExtensions, and Definitions
+    -- Can import Mathlib, MathlibExtensions, Definitions, and MainTheorem
+    -- MainTheorem is allowed so Definitions can provide 5-fold specializations
     importClass == "Mathlib" ||
     importClass == "Init" ||
     importClass == "Lean" ||
     importClass == "Batteries" ||
     importClass == "MathlibExtensions" ||
-    importClass == "Definitions"
+    importClass == "Definitions" ||
+    importClass == "MainTheorem"
   | .Proofs =>
     -- Can import anything
     true
@@ -282,6 +284,8 @@ def isDeclAllowed (trustLevel : TrustLevel) (kind : DeclKind) : Bool :=
     | .abbrev_ => true
     | .structure_ => true
     | .class_ => true
+    | .theorem_ => true
+    | .lemma_ => true
     | _ => false
   | .ProofOfMainTheorem =>
     -- Only theorem (exactly one)

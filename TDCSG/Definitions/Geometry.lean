@@ -7,6 +7,7 @@ import TDCSG.Definitions.Core
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
 import Mathlib.Topology.MetricSpace.Basic
 import Mathlib.Analysis.Complex.Circle
+import Mathlib.NumberTheory.Real.GoldenRatio
 
 /-!
 # Geometric Definitions - Disks and Rotations
@@ -101,6 +102,33 @@ lemma rotateAboutCircle_preserves_disk (c : ℂ) (a : Circle) (r : ℝ) (z : ℂ
   -- ‖a‖ = 1 for a ∈ Circle
   rw [Circle.norm_coe, one_mul]
   exact hz
+
+/-! ### N-fold Generalized Generators
+
+The generators A_n and B_n are piecewise isometries that rotate by -2pi/n
+(clockwise) inside their respective disks and act as the identity outside.
+
+For n >= 1, these satisfy (A_n)^n = (B_n)^n = id, making them order-n elements.
+The 5-fold case (n=5) is what we study in GG5.
+-/
+
+/-- Generalized generator A_n: rotation by -2pi/n (clockwise) about the left disk center (-1).
+    Acts as the identity outside the left disk.
+
+    For n >= 1, this is an order-n element: (genA_n n r)^n = id.
+    The original genA used throughout the codebase is genA_n 5. -/
+noncomputable def genA_n (n : ℕ) (r : ℝ) (z : ℂ) : ℂ := by
+  classical
+  exact if z ∈ leftDisk r then rotateAboutC leftCenter (-2 * π / n) z else z
+
+/-- Generalized generator B_n: rotation by -2pi/n (clockwise) about the right disk center (1).
+    Acts as the identity outside the right disk.
+
+    For n >= 1, this is an order-n element: (genB_n n r)^n = id.
+    The original genB used throughout the codebase is genB_n 5. -/
+noncomputable def genB_n (n : ℕ) (r : ℝ) (z : ℂ) : ℂ := by
+  classical
+  exact if z ∈ rightDisk r then rotateAboutC rightCenter (-2 * π / n) z else z
 
 end TDCSG.Definitions
 

@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Eric Hearn
 -/
 import TDCSG.Definitions.Core
+import TDCSG.MainTheorem
 import Mathlib.Analysis.SpecialFunctions.Exp
 import Mathlib.NumberTheory.Real.GoldenRatio
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Complex
@@ -20,7 +21,7 @@ This file provides all algebraic identities for ζ₅ needed for the GG5 proof.
 The core definition `zeta5` and `ζ₅` are in TDCSG.Definitions.Core.
 Here we provide all the lemmas about the 5th root of unity.
 
-The critical radius r_crit is imported from TDCSG.Definitions.Core.
+The critical constants φ and r_crit are imported from TDCSG.MainTheorem.
 
 ## Main Definitions
 
@@ -39,9 +40,10 @@ The critical radius r_crit is imported from TDCSG.Definitions.Core.
 namespace TDCSG.CompoundSymmetry.GG5
 
 open scoped Complex
-open Complex Real TDCSG.Definitions
+open Complex Real
+open TDCSG.Definitions (ζ₅ zeta5 zeta5Circle zeta5CirclePow zeta5CircleInv φ r_crit)
 
--- ζ₅ is imported from TDCSG.Definitions.Core via the open statement below
+-- ζ₅ is imported from TDCSG.Definitions.Core via the open statement above
 
 /-! ### Real Number Helpers -/
 
