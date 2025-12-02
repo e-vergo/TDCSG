@@ -29,7 +29,7 @@ namespace TDCSG.CompoundSymmetry.GG5
 
 open scoped Complex
 open Complex Real
-open TDCSG.Definitions (psi t_F E E' F G ζ₅ zeta5 zeta5Circle zeta5CirclePow zeta5CircleInv φ r_crit)
+open TDCSG.Definitions (psi t_F E E' F G ζ₅ zeta5Circle zeta5CirclePow zeta5CircleInv φ r_crit)
 
 lemma E_re : E.re = Real.sqrt 5 / 2 := by
   unfold E

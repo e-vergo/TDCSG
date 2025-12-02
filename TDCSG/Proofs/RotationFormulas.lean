@@ -38,7 +38,7 @@ lemma exp_neg_two_pi_fifth : Complex.exp ((-2 * π / 5 : ℝ) * I) = ζ₅^4 := 
   have h1 : ((-2 * π / 5 : ℝ) : ℂ) * I = -(2 * ↑π * I / 5) := by push_cast; ring
   rw [h1, Complex.exp_neg]
 
-  have h2 : Complex.exp (2 * ↑π * I / 5) = ζ₅ := by unfold ζ₅ zeta5; rfl
+  have h2 : Complex.exp (2 * ↑π * I / 5) = ζ₅ := by unfold ζ₅; rfl
   rw [h2, zeta5_inv_eq_pow4]
 
 lemma genA_rotation_formula (z : ℂ) (hz : z ∈ leftDisk r_crit) :

@@ -35,7 +35,7 @@ namespace TDCSG.CompoundSymmetry.GG5
 
 open scoped Complex
 open Complex Real
-open TDCSG.Definitions (ζ₅ zeta5 zeta5Circle zeta5CirclePow zeta5CircleInv φ r_crit)
+open TDCSG.Definitions (ζ₅ zeta5Circle zeta5CirclePow zeta5CircleInv φ r_crit zeta5_isPrimitiveRoot)
 
 @[simp] lemma sqrt5_sq : Real.sqrt 5 ^ 2 = 5 := Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)
 
@@ -52,11 +52,8 @@ lemma one_plus_phi_ne_zero : 1 + φ ≠ 0 := ne_of_gt one_plus_phi_pos
 
 lemma phi_ne_zero : φ ≠ 0 := ne_of_gt (by unfold φ; exact Real.goldenRatio_pos)
 
-@[simp] lemma zeta5_pow_five : ζ₅ ^ 5 = 1 := by
-  unfold ζ₅ zeta5
-  rw [← Complex.exp_nat_mul]
-  convert Complex.exp_two_pi_mul_I using 2
-  ring
+@[simp] lemma zeta5_pow_five : ζ₅ ^ 5 = 1 :=
+  (zeta5_isPrimitiveRoot).pow_eq_one
 
 @[simp] lemma zeta5_pow_zero : ζ₅ ^ 0 = 1 := pow_zero ζ₅
 
@@ -65,7 +62,7 @@ lemma phi_ne_zero : φ ≠ 0 := ne_of_gt (by unfold φ; exact Real.goldenRatio_p
 @[simp] lemma zeta5_pow_zero_im : (ζ₅ ^ 0).im = 0 := by simp
 
 lemma zeta5_ne_one : ζ₅ ≠ 1 := by
-  unfold ζ₅ zeta5
+  unfold ζ₅
   have : (2 : ℝ) * π / 5 ≠ 0 := by
     apply div_ne_zero
     apply mul_ne_zero
@@ -100,7 +97,7 @@ lemma zeta5_ne_one : ζ₅ ≠ 1 := by
   norm_num at this
 
 @[simp] lemma zeta5_abs : ‖ζ₅‖ = 1 := by
-  unfold ζ₅ zeta5
+  unfold ζ₅
   rw [show (2 : ℂ) * π * I / 5 = (2 * π / 5 : ℝ) * I by
     simp [div_eq_mul_inv]
     ring]
@@ -112,7 +109,7 @@ lemma zeta5_ne_one : ζ₅ ≠ 1 := by
 lemma zeta5_abs_pow4 : ‖ζ₅^4‖ = 1 := zeta5_abs_pow 4
 
 lemma zeta5_isPrimitiveRoot : IsPrimitiveRoot ζ₅ 5 := by
-  unfold ζ₅ zeta5
+  unfold ζ₅
   rw [show (2 : ℂ) * π * I / 5 = 2 * π * I / (5 : ℂ) by norm_cast]
   exact Complex.isPrimitiveRoot_exp 5 (by norm_num)
 
@@ -146,7 +143,7 @@ lemma cos_two_pi_fifth :
 
 @[simp] lemma zeta5_conj : starRingEnd ℂ ζ₅ = ζ₅^4 := by
   have h5 : ζ₅ ^ 5 = 1 := zeta5_pow_five
-  unfold ζ₅ zeta5
+  unfold ζ₅
   rw [← Complex.exp_conj]
   rw [map_div₀, map_mul, map_mul]
   simp only [map_ofNat, Complex.conj_ofReal, Complex.conj_I]
@@ -154,7 +151,7 @@ lemma cos_two_pi_fifth :
   rw [Complex.exp_neg, ← Complex.exp_nat_mul]
   norm_num
   field_simp [Complex.exp_ne_zero]
-  unfold ζ₅ zeta5 at h5
+  unfold ζ₅ at h5
   rw [← Complex.exp_nat_mul] at h5
   ring_nf at h5 ⊢
   rw [← Complex.exp_add]
@@ -306,25 +303,25 @@ lemma cyclotomic5_sum : 1 + ζ₅ + ζ₅^2 + ζ₅^3 + ζ₅^4 = 0 := by
 @[simp] lemma zeta5_pow_twenty_C : ζ₅^20 = (1 : ℂ) := zeta5_pow_twenty
 
 lemma zeta5_re_eq_cos : ζ₅.re = Real.cos (2 * π / 5) := by
-  unfold ζ₅ zeta5
+  unfold ζ₅
   rw [show (2 : ℂ) * π * I / 5 = (2 * π / 5 : ℝ) * I by
     simp [div_eq_mul_inv]; ring]
   exact Complex.exp_ofReal_mul_I_re (2 * π / 5)
 
 @[simp] lemma zeta5_im_eq_sin : ζ₅.im = Real.sin (2 * π / 5) := by
-  unfold ζ₅ zeta5
+  unfold ζ₅
   rw [show (2 : ℂ) * π * I / 5 = (2 * π / 5 : ℝ) * I by
     simp [div_eq_mul_inv]; ring]
   exact Complex.exp_ofReal_mul_I_im (2 * π / 5)
 
 lemma zeta5_eq : ζ₅ = ↑(Real.cos (2 * π / 5)) + I * ↑(Real.sin (2 * π / 5)) := by
-  unfold ζ₅ zeta5
+  unfold ζ₅
   rw [show (2 : ℂ) * π * I / 5 = (2 * π / 5 : ℝ) * I by push_cast; field_simp]
   rw [Complex.exp_mul_I,  Complex.ofReal_cos, Complex.ofReal_sin]
   ring
 
 lemma zeta5_sq_eq : ζ₅^2 = ↑(Real.cos (4 * π / 5)) + I * ↑(Real.sin (4 * π / 5)) := by
-  unfold ζ₅ zeta5
+  unfold ζ₅
   rw [sq, show (exp (2 * ↑π * I / 5) : ℂ) * exp (2 * ↑π * I / 5) =
       exp ((2 * π / 5 : ℝ) * I + (2 * π / 5 : ℝ) * I) by
     rw [← Complex.exp_add]; congr 1; push_cast; field_simp]
@@ -355,7 +352,7 @@ lemma cos_four_pi_fifth_val : Real.cos (4 * π / 5) = -(Real.sqrt 5 + 1) / 4 := 
   ring
 
 lemma zeta5_cubed_eq : ζ₅^3 = Complex.exp ((6 * π / 5 : ℝ) * I) := by
-  unfold ζ₅ zeta5
+  unfold ζ₅
   rw [← Complex.exp_nat_mul]
   congr 1
   push_cast

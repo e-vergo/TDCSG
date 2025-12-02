@@ -29,7 +29,6 @@ for the two-disk compound symmetry groups.
 
 - `A⁻¹` for `Generator.Ainv`
 - `B⁻¹` for `Generator.Binv`
-- `ζ₅` for `zeta5`
 
 ## References
 
@@ -61,17 +60,14 @@ open scoped Complex
 open Complex
 
 /-- The primitive 5th root of unity ζ₅ = e^(2πi/5). -/
-noncomputable def zeta5 : Complex := exp (2 * Real.pi * Complex.I / 5)
+noncomputable def ζ₅ : Complex := exp (2 * Real.pi * Complex.I / 5)
 
-/-- Notation for the primitive 5th root of unity. -/
-noncomputable abbrev ζ₅ : Complex := zeta5
+/-- ζ₅ is a primitive 5th root of unity. -/
+lemma zeta5_isPrimitiveRoot : IsPrimitiveRoot ζ₅ 5 :=
+  Complex.isPrimitiveRoot_exp 5 (by norm_num)
 
-@[simp] lemma zeta5_abs : ‖ζ₅‖ = 1 := by
-  unfold ζ₅ zeta5
-  rw [show (2 : ℂ) * Real.pi * I / 5 = (2 * Real.pi / 5 : ℝ) * I by
-    simp [div_eq_mul_inv]
-    ring]
-  exact Complex.norm_exp_ofReal_mul_I (2 * Real.pi / 5)
+@[simp] lemma zeta5_abs : ‖ζ₅‖ = 1 :=
+  IsPrimitiveRoot.norm'_eq_one zeta5_isPrimitiveRoot (by norm_num)
 
 noncomputable def zeta5Circle : Circle :=
   ⟨ζ₅, mem_sphere_zero_iff_norm.2 zeta5_abs⟩

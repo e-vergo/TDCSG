@@ -27,7 +27,7 @@ namespace TDCSG.CompoundSymmetry.GG5
 
 open scoped Complex
 open Complex Real
-open TDCSG.Definitions (segment_length translation_length_1 translation_length_2 segmentPoint psi t_F E E' F G ζ₅ zeta5 zeta5Circle zeta5CirclePow zeta5CircleInv φ r_crit)
+open TDCSG.Definitions (segment_length translation_length_1 translation_length_2 segmentPoint psi t_F E E' F G ζ₅ zeta5Circle zeta5CirclePow zeta5CircleInv φ r_crit)
 
 lemma cross_disk_z2_bound_restricted (c : ℝ) (hc_lo : -1 ≤ c) (hc_hi : c ≤ (1 - √5) / 2) :
     ‖(-2 : ℂ) + ζ₅^2 + (c : ℂ) * (ζ₅^3 - ζ₅^4)‖ ≤ r_crit := by
