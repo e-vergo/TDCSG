@@ -1,24 +1,6 @@
-/-
-Copyright (c) 2025 Eric Hearn. All rights reserved.
-Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Eric Hearn
--/
 import TDCSG.Proofs.SegmentGeometry
 import TDCSG.Proofs.Zeta5
 import Mathlib.Analysis.Convex.Mul
-
-/-!
-# Basic Lemmas for Cross-Disk Analysis in GG(5,5)
-
-This file contains the foundational lemmas used in cross-disk membership bounds
-for GG(5,5), including:
-- Algebraic properties of the fifth roots of unity
-- Endpoint norm calculations at c = -1 and c = (1-sqrt5)/2
-- Helper lemmas for trigonometric identities and complex number calculations
-- Properties of the vectors A = -2 + zeta5^2 and B = zeta5^3 - zeta5^4
-
-These lemmas are shared across multiple proofs and extracted here for reusability.
--/
 
 namespace TDCSG.CompoundSymmetry.GG5
 
@@ -26,9 +8,6 @@ open scoped Complex
 open Complex Real
 open TDCSG.Definitions (segment_length translation_length_1 translation_length_2 segmentPoint psi t_F E E' F G ζ₅ zeta5 zeta5Circle zeta5CirclePow zeta5CircleInv φ r_crit)
 
-/-! ### B != 0 lemma -/
-
-/-- zeta5^3 - zeta5^4 != 0 since distinct primitive roots are distinct. -/
 lemma zeta5_cubed_minus_fourth_ne_zero : ζ₅^3 - ζ₅^4 ≠ 0 := by
   intro h
   have heq : ζ₅^3 = ζ₅^4 := sub_eq_zero.mp h
@@ -39,16 +18,12 @@ lemma zeta5_cubed_minus_fourth_ne_zero : ζ₅^3 - ζ₅^4 ≠ 0 := by
     grind
   exact zeta5_ne_one h1
 
-/-! ### Endpoint norm bounds -/
-
-/-- Real part of -2 + zeta5^2 - zeta5^3 + zeta5^4 equals (sqrt5 - 9)/4 -/
 lemma endpoint_neg1_re : (-2 + ζ₅^2 - ζ₅^3 + ζ₅^4).re = (√5 - 9) / 4 := by
   simp only [Complex.add_re, Complex.sub_re, Complex.neg_re]
   have h2 : (2 : ℂ).re = 2 := by simp
   rw [h2, zeta5_sq_re, zeta5_cubed_re, zeta5_pow4_re]
   ring
 
-/-- Imaginary part of -2 + zeta5^2 - zeta5^3 + zeta5^4 -/
 lemma endpoint_neg1_im : (-2 + ζ₅^2 - ζ₅^3 + ζ₅^4).im =
     2 * Real.sin (π / 5) - Real.sin (2 * π / 5) := by
   simp only [Complex.add_im, Complex.sub_im, Complex.neg_im]
@@ -56,29 +31,6 @@ lemma endpoint_neg1_im : (-2 + ζ₅^2 - ζ₅^3 + ζ₅^4).im =
   rw [h2, neg_zero, zeta5_sq_im_eq, zeta5_cubed_im_eq, zeta5_pow4_im]
   ring
 
-/-! ### Main norm bound at c = -1
-
-The key calculation is: ||-2 + zeta5^2 - zeta5^3 + zeta5^4||^2 <= 3 + phi
-
-re = (sqrt5 - 9)/4, im = 2sin(pi/5) - sin(2pi/5)
-
-Using sin(2pi/5) = 2sin(pi/5)cos(pi/5) and cos(pi/5) = (1+sqrt5)/4:
-im = 2sin(pi/5)(1 - (1+sqrt5)/4) = 2sin(pi/5)(3-sqrt5)/4 = sin(pi/5)(3-sqrt5)/2
-
-So normSq = ((sqrt5-9)/4)^2 + (sin(pi/5)(3-sqrt5)/2)^2
-
-Using sin^2(pi/5) = 1 - cos^2(pi/5) = 1 - ((1+sqrt5)/4)^2 = (5-sqrt5)/8:
-
-normSq = (86 - 18sqrt5)/16 + (5-sqrt5)/8 * (3-sqrt5)^2/4
-       = (34 - 10sqrt5)/4
-
-We need (34 - 10sqrt5)/4 <= 3 + phi = (14+2sqrt5)/4
-<=> 34 - 10sqrt5 <= 14 + 2sqrt5
-<=> 20 <= 12sqrt5
-<=> 5/3 <= sqrt5 (since sqrt5 ~ 2.236 > 1.67)
--/
-
-/-- The normSq at c = -1: ||-2 + zeta5^2 - zeta5^3 + zeta5^4||^2 <= 3 + phi -/
 lemma normSq_at_neg1 : ‖(-2 : ℂ) + ζ₅^2 - ζ₅^3 + ζ₅^4‖^2 ≤ 3 + φ := by
   rw [← Complex.normSq_eq_norm_sq, Complex.normSq_apply]
   rw [endpoint_neg1_re, endpoint_neg1_im]
@@ -101,30 +53,14 @@ lemma normSq_at_neg1 : ‖(-2 : ℂ) + ζ₅^2 - ζ₅^3 + ζ₅^4‖^2 ≤ 3 + 
   unfold φ  Real.goldenRatio
   nlinarith [Real.sqrt_nonneg 5, sqrt5_sq, sq_nonneg (Real.sin (π / 5)), sq_nonneg ((3 - √5) / 4), sq_nonneg ((√5 - 9) / 4)]
 
-/-! ### Main bound lemma for word1/word2
-
-The upper bound for c in word1: c < 2*length1 - 1 = (1-sqrt5)/2 ~ -0.618.
-Since the parabola f(c) = ||A + cB||^2 is upward-opening (coefficient of c^2 is ||B||^2 > 0),
-and [-1, c_upper] is entirely to the left of the vertex, the maximum is at c = -1.
-
-For c in [-1, c_upper], we have ||expression|| <= value_at_neg1 <= r_crit.
--/
-
-
-
-/-! ### Helper lemmas for upper endpoint calculation -/
-
-/-- sin^2(pi/5) = (5-sqrt5)/8 -/
 lemma sin_sq_pi_div_5 : Real.sin (π / 5)^2 = (5 - √5) / 8 := by
   have h_cos : Real.cos (π / 5) = (1 + √5) / 4 := Real.cos_pi_div_five
   have h := Real.sin_sq_add_cos_sq (π / 5)
   have h1 : Real.sin (π / 5)^2 = 1 - Real.cos (π / 5)^2 := by linarith
   grind
 
-/-- (sqrt5-1)^2 = 6 - 2*sqrt5 -/
 lemma sqrt5_minus_1_sq : (√5 - 1)^2 = 6 - 2*√5 := by grind
 
-/-- Im(zeta5^2) = sin(pi/5) -/
 lemma zeta5_sq_im' : (ζ₅^2).im = Real.sin (π / 5) := by
   rw [zeta5_sq_eq]
   simp only [Complex.add_im, Complex.ofReal_im, Complex.mul_im,
@@ -133,7 +69,6 @@ lemma zeta5_sq_im' : (ζ₅^2).im = Real.sin (π / 5) := by
     rw [show (4 * π / 5 : ℝ) = π - π / 5 by ring, Real.sin_pi_sub]
   linarith [h]
 
-/-- Im(zeta5^3) = -sin(pi/5) -/
 lemma zeta5_cubed_im' : (ζ₅^3).im = -Real.sin (π / 5) := by
   rw [zeta5_cubed_eq, Complex.exp_mul_I]
   simp only [Complex.add_im, Complex.mul_im, Complex.I_im, Complex.I_re,
@@ -141,24 +76,20 @@ lemma zeta5_cubed_im' : (ζ₅^3).im = -Real.sin (π / 5) := by
   rw [show (6 * π / 5 : ℝ) = π / 5 + π by ring, Real.sin_add_pi]
   ring
 
-/-- Im(zeta5^4) = -sin(2pi/5) -/
 lemma zeta5_pow4_im' : (ζ₅^4).im = -Real.sin (2 * π / 5) := by
   have : ζ₅^4 = starRingEnd ℂ ζ₅ := by rw [← zeta5_conj]
   rw [this, Complex.conj_im, zeta5_im_eq_sin]
 
-/-- Re(B) = -sqrt5/2 where B = zeta5^3 - zeta5^4 -/
 lemma B_re' : (ζ₅^3 - ζ₅^4).re = -√5 / 2 := by
   simp only [Complex.sub_re]
   rw [zeta5_cubed_re, zeta5_pow4_re]
   ring
 
-/-- Im(B) where B = zeta5^3 - zeta5^4 -/
 lemma B_im : (ζ₅^3 - ζ₅^4).im = Real.sin (2 * π / 5) - Real.sin (π / 5) := by
   simp only [Complex.sub_im]
   rw [zeta5_cubed_im', zeta5_pow4_im']
   ring
 
-/-- ||B||^2 = (5-sqrt5)/2 where B = zeta5^3 - zeta5^4 -/
 lemma normSq_B : Complex.normSq (ζ₅^3 - ζ₅^4) = (5 - √5) / 2 := by
   rw [Complex.normSq_apply]
   simp only [← sq]
@@ -177,7 +108,6 @@ lemma normSq_B : Complex.normSq (ζ₅^3 - ζ₅^4) = (5 - √5) / 2 := by
   rw [h2, h3, h_sin_sq, sqrt5_minus_1_sq]
   nlinarith [sqrt5_sq, Real.sqrt_nonneg 5]
 
-/-- Re(A*conj(B)) = 3*sqrt5/2 where A = -2 + zeta5^2, B = zeta5^3 - zeta5^4 -/
 lemma re_A_mul_conj_B :
     (((-2 : ℂ) + ζ₅^2) * starRingEnd ℂ (ζ₅^3 - ζ₅^4)).re = 3 * √5 / 2 := by
   have h_conj_B : starRingEnd ℂ (ζ₅^3 - ζ₅^4) = ζ₅^2 - ζ₅ := by
@@ -202,7 +132,6 @@ lemma re_A_mul_conj_B :
   rw [zeta5_sq_re, zeta5_re, zeta5_pow4_re, zeta5_cubed_re]
   ring
 
-/-- The vertex of f(c) = ||A + cB||^2 is at c_v < -1 -/
 lemma vertex_lt_neg1 : -(3 * √5 / 2) / ((5 - √5) / 2) < -1 := by
   have h_sqrt5_pos : 0 < √5 := Real.sqrt_pos.mpr (by norm_num : (0 : ℝ) < 5)
   have h_sqrt25 : √25 = 5 := by
@@ -231,7 +160,6 @@ lemma vertex_lt_neg1 : -(3 * √5 / 2) / ((5 - √5) / 2) < -1 := by
   rw [one_lt_div h_5_minus_sqrt5_pos]
   linarith
 
-/-- normSq at upper endpoint equals 3 + phi -/
 lemma normSq_at_upper_endpoint :
     Complex.normSq ((-2 : ℂ) + ζ₅^2 + (((1 - √5)/2 : ℝ) : ℂ) * (ζ₅^3 - ζ₅^4)) = 3 + φ := by
   have h_sin_sq := sin_sq_pi_div_5
