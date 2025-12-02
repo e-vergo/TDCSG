@@ -34,14 +34,6 @@ points whose orbits are infinite (proven via interval exchange transformation an
 
 open TDCSG.Definitions
 
-/-- Configuration for the GG(5,5) two-disk system at critical radius. -/
-noncomputable def GG5_critical :
-    CompoundSymmetry.TwoDiskSystem where
-  r1 := r_crit
-  r2 := r_crit
-  n1 := 5
-  n2 := 5
-
 /-- **Theorem 2**: The compound symmetry group GG₅ at the critical radius is infinite.
 
     This is the precise statement from arXiv:2302.12950v1:
