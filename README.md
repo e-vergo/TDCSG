@@ -9,14 +9,15 @@ Formal verification in Lean 4 of the critical radius theorem for two-disk compou
 | Metric | Value |
 |--------|-------|
 | Build | ✅ Compiles (2404 jobs) |
-| Total Declarations | 431 |
-| Reachable from Main Theorem | 309 (71%) |
+| Total Declarations | 399 (after dead code cleanup) |
+| Reachable from Main Theorem | 309 (77%) |
 | Sorries | 0 |
 | Axioms | Standard only (propext, Quot.sound, Classical.choice, funext) |
 | Kim Morrison Standard | ✅ All checks pass |
-| Lines of Code | 7,510 |
+| Lines of Code | 6,808 |
+| Review Burden | 937 lines (13%) |
 
-**Complete.** All proofs are fully formalized with no sorries or non-standard axioms.
+**Complete.** All proofs are fully formalized with no sorries or non-standard axioms. Dead code has been systematically removed while preserving all @[simp] lemmas and maintaining full build integrity.
 
 ## Main Theorem Statement
 
@@ -58,11 +59,11 @@ This project follows the [Kim Morrison standard](https://leanprover.zulipchat.co
 
 - **MainTheorem.lean** contains only definitions and the theorem statement (58 lines)
 - **ProofOfMainTheorem.lean** provides the proof (43 lines)
-- **Definitions/** contains all definitions and supporting lemmas (human-reviewable, 977 lines)
-- **Proofs/** contains only lemmas and theorems (machine-verified, 6,461 lines)
+- **Definitions/** contains all definitions and supporting lemmas (human-reviewable, 879 lines)
+- **Proofs/** contains only lemmas and theorems (machine-verified, 5,828 lines)
 - Uses only standard axioms
 
-**Key architectural decision**: MainTheorem.lean contains only definitions (φ, r_crit, genA_n_perm, genB_n_perm, TwoDiskCompoundSymmetryGroup, GG5_At_Critical_radius, StatementOfTheorem). All proof machinery, including bijectivity proofs for the generators, lives in Definitions/GroupAction.lean. This makes MainTheorem.lean maximally readable while keeping the review burden low.
+**Key architectural decision**: MainTheorem.lean contains only definitions (φ, r_crit, genA_n_perm, genB_n_perm, TwoDiskCompoundSymmetryGroup, GG5_At_Critical_radius, StatementOfTheorem). All proof machinery, including bijectivity proofs for the generators, lives in Definitions/GroupAction.lean. This makes MainTheorem.lean maximally readable while keeping the review burden low (937 lines total for full human review).
 
 Run verification:
 
@@ -75,19 +76,19 @@ lake build && lake env lean --run KMVerify/Main.lean
 ```
 ================================================================================
 KIM MORRISON STANDARD VERIFICATION
-Project: TDCSG (After Dead Code Cleanup)
+Project: TDCSG
 ================================================================================
 
 TRUST TIER SUMMARY
 --------------------------------------------------------------------------------
-  MathlibExtensions/          [NOT PRESENT]
-  Definitions/                8 files      977 lines
-  Proofs/                     19 files    6461 lines
-  MainTheorem.lean                         58 lines
-  ProofOfMainTheorem.lean                  43 lines
+  MathlibExtensions/            [NOT PRESENT]
+  Definitions/          8 files      879 lines
+  Proofs/              19 files    5828 lines
+  MainTheorem.lean                    58 lines
+  ProofOfMainTheorem.lean             43 lines
 --------------------------------------------------------------------------------
-  REVIEW BURDEN: 1035 lines (Definitions + MainTheorem)
-  TOTAL: 7539 lines (13% requires review)
+  REVIEW BURDEN: 937 lines (Definitions + MainTheorem)
+  TOTAL: 6808 lines (13% requires review)
 
 CHECKS
 --------------------------------------------------------------------------------
@@ -119,26 +120,26 @@ TDCSG/
                               # Imports φ, r_crit, genA_n, genB_n from Definitions/
   ProofOfMainTheorem.lean     # Complete proof of main theorem (43 lines)
 
-  Definitions/                # All definitions (8 files, 977 lines)
+  Definitions/                # All definitions (8 files, 879 lines)
     Core.lean                 # φ, r_crit, Generator, Word, ζ₅ (zeta5), Circle defs
     Geometry.lean             # Disk geometry, rotations, genA_n, genB_n (N-fold generators)
     GroupAction.lean          # genA, genB (5-fold), applyGen, applyWord, orbit
                               # Bijectivity proofs: genA_n_bijective, genB_n_bijective
                               # Circle periodicity, order-n properties
-    GroupTheory.lean          # 5-fold infrastructure (genA_perm, genB_perm)
-                              # Group orbits, specialization lemmas
+    GroupTheory.lean          # Specialization lemmas (genA_eq_genA_n_5, genB_eq_genB_n_5)
+                              # Group orbits (groupOrbit)
     IET.lean                  # Interval exchange transformations
-    Points.lean               # Special points E, E', F, G, segmentPoint
+    Points.lean               # Special points E, E', psi, t_G, segmentPoint
     RealDynamics.lean         # Real dynamics, displacement functions
     WordCorrespondence.lean   # word1, word2, word3 for IET correspondence
 
-  Proofs/                     # Supporting lemmas (19 files, 6,461 lines)
+  Proofs/                     # Supporting lemmas (19 files, 5,828 lines)
     GroupTheory.lean          # Orbit-group correspondence, infinite orbit theorems
     IETOrbit.lean             # IET infinite orbit theorems
     OrbitInfinite.lean        # Main infinite orbit result
-    Points.lean               # Point properties, scalar relations
+    Points.lean               # Point properties (E_on_left_disk_boundary, E_in_right_disk)
     Geometry.lean             # Critical radius lemmas
-    SegmentGeometry.lean      # Segment lengths and ratios
+    SegmentGeometry.lean      # Segment geometry and properties
     Zeta5.lean                # ζ₅ identities and properties
     IET.lean                  # IET interval properties
     Orbit.lean                # General orbit theory
@@ -163,7 +164,7 @@ KMVerify/                     # Kim Morrison standard verification tool
 
 ## Dependency Graph
 
-An interactive visualization of all 431 TDCSG declarations and their dependencies:
+An interactive visualization of all 399 TDCSG declarations and their dependencies:
 
 ```bash
 ./scripts/build_dep_graph.sh  # Generate graph
@@ -176,7 +177,7 @@ open docs/deps_static.svg     # View static version (faster for large graphs)
 - **Loading indicator**: Shows progress for large graph rendering
 - **Static fallback**: Pre-rendered SVG available if interactive version is slow
 - **Filtered**: Excludes compiler-generated auxiliary declarations (._proof, ._simp, etc.)
-- **Color-coded**: Green shades indicate formalized declarations (all 431 are complete)
+- **Color-coded**: Green shades indicate formalized declarations (all 399 are complete, dead code removed)
   - Light green: Definitions
   - Lawn green: CompoundSymmetry proofs
   - Pale green: Supporting proofs
@@ -233,10 +234,13 @@ python3 scripts/strip_comments.py TDCSG/
 - **Automatic backups**: `.tar.gz` backups created before any deletions
 
 **Current Status (Dec 2025)**:
-- 431 user-written declarations (compiler artifacts excluded from analysis)
-- 309 declarations reachable from main theorem (71%)
-- 128 unreachable declarations (29%) - supporting lemmas, alternative proofs, or exploratory work
-- Build verified and all KMVerify checks pass
+- 399 user-written declarations (compiler artifacts excluded from analysis)
+- 309 declarations reachable from main theorem (77%)
+- 90 unreachable declarations (23%) - preserved @[simp] lemmas (19) and other potentially useful infrastructure
+- **Dead code cleanup completed**: 32 declarations removed in systematic cleanup (Dec 2025)
+  - Removed: 6 from Definitions/GroupTheory, 5 from Proofs/Zeta5, 21 from Points cascade
+  - Preserved: All 19 @[simp] lemmas (implicitly used by simplifier)
+  - Result: Build verified and all KMVerify checks pass
 
 ## Build Commands
 
