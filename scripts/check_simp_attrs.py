@@ -8,9 +8,14 @@ import re
 from pathlib import Path
 from typing import Dict, Set, Tuple
 
-def find_declaration_with_attrs(file_path: Path, decl_name: str) -> Tuple[bool, Set[str]]:
+def find_declaration_with_attrs(file_path: Path, decl_name: str, line_num: int) -> Tuple[bool, Set[str]]:
     """
     Check if a declaration has attributes like @[simp].
+
+    Args:
+        file_path: Path to the Lean file
+        decl_name: Short name of the declaration
+        line_num: Line number (1-indexed) where declaration is found
 
     Returns: (found, attributes_set)
     """
@@ -18,24 +23,36 @@ def find_declaration_with_attrs(file_path: Path, decl_name: str) -> Tuple[bool, 
         content = file_path.read_text()
         lines = content.split('\n')
 
-        # Look for the declaration
-        for i, line in enumerate(lines):
-            # Check if this line contains the declaration
-            if decl_name in line and any(kw in line for kw in ['def ', 'theorem ', 'lemma ', 'instance ']):
-                # Check previous lines for attributes (within 3 lines before)
-                attrs = set()
-                for j in range(max(0, i-3), i):
-                    attr_line = lines[j].strip()
-                    # Match @[...] patterns
-                    attr_matches = re.findall(r'@\[([^\]]+)\]', attr_line)
-                    for match in attr_matches:
-                        # Split by comma to handle @[simp, ext] style
-                        for attr in match.split(','):
-                            attrs.add(attr.strip())
+        # Convert to 0-indexed
+        target_line = line_num - 1
 
-                return (True, attrs)
+        if target_line < 0 or target_line >= len(lines):
+            return (False, set())
 
-        return (False, set())
+        # Check if the target line actually contains this declaration
+        line = lines[target_line]
+
+        # Must have the decl_name and a keyword
+        keywords = ['def ', 'theorem ', 'lemma ', 'instance ', 'abbrev ', 'opaque ']
+        has_keyword = any(kw in line for kw in keywords)
+        has_name = decl_name in line
+
+        if not (has_keyword and has_name):
+            return (False, set())
+
+        # Check previous 5 lines AND the declaration line itself for attributes
+        attrs = set()
+        for j in range(max(0, target_line - 5), target_line + 1):
+            attr_line = lines[j].strip()
+            # Match @[...] patterns
+            attr_matches = re.findall(r'@\[([^\]]+)\]', attr_line)
+            for match in attr_matches:
+                # Split by comma to handle @[simp, ext] style
+                for attr in match.split(','):
+                    attrs.add(attr.strip())
+
+        return (True, attrs)
+
     except Exception as e:
         print(f"Error reading {file_path}: {e}")
         return (False, set())
@@ -78,7 +95,7 @@ def main():
     for decl in declarations:
         file_path = project_root / decl['file']
         if file_path.exists():
-            found, attrs = find_declaration_with_attrs(file_path, decl['short_name'])
+            found, attrs = find_declaration_with_attrs(file_path, decl['short_name'], decl['line'])
             if found and attrs:
                 if 'simp' in attrs:
                     simp_decls.append((decl, attrs))
