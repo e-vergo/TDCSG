@@ -98,13 +98,9 @@ lemma word2_produces_displacement1 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     rw [h, h_z5_eq]
 
   have hz1_left : z1 ∈ leftDisk r_crit := by
-    unfold leftDisk closedDiskC at hz0_left' ⊢
-    simp only [Set.mem_setOf_eq] at hz0_left' ⊢
     simp only [z1]
-    rw [show (-1 : ℂ) + ζ₅ * (z0 + 1) - (-1) = ζ₅ * (z0 + 1) by ring]
-    rw [Complex.norm_mul, zeta5_abs, one_mul]
-    convert hz0_left' using 2
-    ring
+    have h := leftDisk_zeta_rotation r_crit 1 z0 hz0_left'
+    simpa using h
 
   have hz1_right : z1 ∈ rightDisk r_crit := by
     unfold rightDisk closedDiskC
@@ -122,12 +118,9 @@ lemma word2_produces_displacement1 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     exact cross_disk_w2_z1_bound c hc_interval_lo hc_interval_hi_le
 
   have hz2_right : z2 ∈ rightDisk r_crit := by
-    unfold rightDisk closedDiskC at hz1_right ⊢
-    simp only [Set.mem_setOf_eq] at hz1_right ⊢
     simp only [z2]
-    rw [show (1 : ℂ) + ζ₅ * (z1 - 1) - 1 = ζ₅ * (z1 - 1) by ring]
-    rw [Complex.norm_mul, zeta5_abs, one_mul]
-    exact hz1_right
+    have h := rightDisk_zeta_rotation r_crit 1 z1 hz1_right
+    simpa using h
 
   have hz2_left : z2 ∈ leftDisk r_crit := by
     unfold leftDisk closedDiskC
@@ -144,12 +137,9 @@ lemma word2_produces_displacement1 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     exact cross_disk_w2_z2_bound c hc_interval_lo hc_interval_hi_le
 
   have hz3_left : z3 ∈ leftDisk r_crit := by
-    unfold leftDisk closedDiskC at hz2_left ⊢
-    simp only [Set.mem_setOf_eq] at hz2_left ⊢
     simp only [z3]
-    rw [show (-1 : ℂ) + ζ₅ * (z2 + 1) - (-1) = ζ₅ * (z2 + 1) by ring]
-    rw [Complex.norm_mul, zeta5_abs, one_mul]
-    convert hz2_left using 2; ring
+    have h := leftDisk_zeta_rotation r_crit 1 z2 hz2_left
+    simpa using h
 
   have hz3_right : z3 ∈ rightDisk r_crit := by
     unfold rightDisk closedDiskC
@@ -167,12 +157,9 @@ lemma word2_produces_displacement1 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     exact cross_disk_w2_z3_bound c hc_interval_lo hc_interval_hi_le
 
   have hz4_right : z4 ∈ rightDisk r_crit := by
-    unfold rightDisk closedDiskC at hz3_right ⊢
-    simp only [Set.mem_setOf_eq] at hz3_right ⊢
     simp only [z4]
-    rw [show (1 : ℂ) + ζ₅ * (z3 - 1) - 1 = ζ₅ * (z3 - 1) by ring]
-    rw [Complex.norm_mul, zeta5_abs, one_mul]
-    exact hz3_right
+    have h := rightDisk_zeta_rotation r_crit 1 z3 hz3_right
+    simpa using h
 
   have h_step1 : applyGen r_crit z0 .Ainv = z1 := applyGen_Ainv_formula' z0 hz0_left'
   have h_step2 : applyGen r_crit z1 .Binv = z2 := applyGen_Binv_formula' z1 hz1_right

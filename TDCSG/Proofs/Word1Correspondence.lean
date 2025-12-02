@@ -114,20 +114,12 @@ lemma word1_produces_displacement0 (x : ℝ) (hx : x ∈ Set.Ico 0 1) (hx_int : 
     rw [h, h_z5_eq]
 
   have hz1_left : z1 ∈ leftDisk r_crit := by
-    unfold leftDisk closedDiskC at hz0_left' ⊢
-    simp only [Set.mem_setOf_eq] at hz0_left' ⊢
     simp only [z1]
-    rw [show (-1 : ℂ) + ζ₅^4 * (z0 + 1) - (-1) = ζ₅^4 * (z0 + 1) by ring]
-    rw [Complex.norm_mul, zeta5_abs_pow4]
-    grind
+    exact leftDisk_zeta_rotation r_crit 4 z0 hz0_left'
 
   have hz2_left : z2 ∈ leftDisk r_crit := by
-    unfold leftDisk closedDiskC at hz1_left ⊢
-    simp only [Set.mem_setOf_eq] at hz1_left ⊢
     simp only [z2]
-    rw [show (-1 : ℂ) + ζ₅^4 * (z1 + 1) - (-1) = ζ₅^4 * (z1 + 1) by ring]
-    rw [Complex.norm_mul, zeta5_abs_pow4]
-    grind
+    exact leftDisk_zeta_rotation r_crit 4 z1 hz1_left
 
   have hz2_right : z2 ∈ rightDisk r_crit := by
     unfold rightDisk closedDiskC
@@ -147,12 +139,8 @@ lemma word1_produces_displacement0 (x : ℝ) (hx : x ∈ Set.Ico 0 1) (hx_int : 
     exact cross_disk_z2_bound_restricted c hc_lo hc_hi_le'
 
   have hz3_right : z3 ∈ rightDisk r_crit := by
-    unfold rightDisk closedDiskC at hz2_right ⊢
-    simp only [Set.mem_setOf_eq] at hz2_right ⊢
     simp only [z3]
-    rw [show (1 : ℂ) + ζ₅^4 * (z2 - 1) - 1 = ζ₅^4 * (z2 - 1) by ring]
-    rw [Complex.norm_mul, zeta5_abs_pow 4, one_mul]
-    exact hz2_right
+    exact rightDisk_zeta_rotation r_crit 4 z2 hz2_right
 
   have hz3_left : z3 ∈ leftDisk r_crit := by
     unfold leftDisk closedDiskC
@@ -174,12 +162,8 @@ lemma word1_produces_displacement0 (x : ℝ) (hx : x ∈ Set.Ico 0 1) (hx_int : 
     exact cross_disk_z3_bound_restricted c hc_lo hc_hi_le'
 
   have hz4_left : z4 ∈ leftDisk r_crit := by
-    unfold leftDisk closedDiskC at hz3_left ⊢
-    simp only [Set.mem_setOf_eq] at hz3_left ⊢
     simp only [z4]
-    rw [show (-1 : ℂ) + ζ₅^4 * (z3 + 1) - (-1) = ζ₅^4 * (z3 + 1) by ring]
-    rw [Complex.norm_mul, zeta5_abs_pow 4, one_mul]
-    grind
+    exact leftDisk_zeta_rotation r_crit 4 z3 hz3_left
 
   have hz4_right : z4 ∈ rightDisk r_crit := by
     unfold rightDisk closedDiskC
