@@ -62,13 +62,28 @@ python3 scripts/check_simp_attrs.py
 
 ## Dependency Graph Tools
 
-Generate visual dependency graphs:
+Generate visual dependency graphs with dead code highlighting:
 
 ```bash
 ./scripts/build_dep_graph.sh
 ```
 
-Outputs:
+### Features
+
+- **Dead code highlighting**: Unreachable declarations shown in light pink
+- **Color-coded by type**: Definitions (light green), Proofs (pale green), Main proofs (lawn green)
+- **Interactive HTML**: Search, zoom, and explore dependencies
+- **Legend included**: Color key embedded in the graph
+
+### Outputs
+
 - `docs/deps.dot` - GraphViz DOT format
 - `docs/deps_static.svg` - Static SVG visualization
 - `docs/dep_graph.html` - Interactive HTML graph (searchable, zoomable)
+
+### Color Scheme
+
+- **Light Pink (#FFB6C1)**: Dead code (unreachable from main theorem)
+- **Light Green (#90EE90)**: Definitions
+- **Pale Green (#98FB98)**: Supporting proofs
+- **Lawn Green (#7CFC00)**: Main proofs (CompoundSymmetry module)
