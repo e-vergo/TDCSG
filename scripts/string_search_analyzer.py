@@ -134,6 +134,30 @@ def search_declaration_in_files(
     return total_count, files_found
 
 
+def has_simp_attribute(file_path: str, line_num: int) -> bool:
+    """
+    Check if a declaration has a @[simp] attribute.
+    Looks backward from the declaration line for attributes.
+    """
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+
+        # Check up to 5 lines before the declaration for attributes
+        start = max(0, line_num - 6)
+        end = line_num
+
+        for i in range(start, end):
+            if i < len(lines):
+                line = lines[i].strip()
+                if '@[simp]' in line or '@[simp,' in line:
+                    return True
+    except Exception:
+        pass
+
+    return False
+
+
 def generate_report(dead_code_path: Path, search_dir: Path, output_path: Path):
     """
     Generate string-based analysis report.
@@ -141,6 +165,7 @@ def generate_report(dead_code_path: Path, search_dir: Path, output_path: Path):
     For each declaration:
     - Search all namespace variants
     - Count occurrences (excluding definition)
+    - Check for @[simp] attributes (implicit usage)
     - Determine KEEP/DELETE action
     - Write to report file
     """
@@ -175,8 +200,16 @@ def generate_report(dead_code_path: Path, search_dir: Path, output_path: Path):
                 elif count == max_count:
                     all_files.update(files)
 
-            # Determine action
-            action = "DELETE" if max_count == 0 else "KEEP"
+            # Check for @[simp] attribute (implicit usage)
+            has_simp = has_simp_attribute(file_path, line_num)
+
+            # Determine action: KEEP if count > 0 OR has @[simp] attribute
+            action = "DELETE" if (max_count == 0 and not has_simp) else "KEEP"
+
+            # Add reason for KEEP if @[simp]
+            keep_reason = ""
+            if has_simp and max_count == 0:
+                keep_reason = " (@[simp])"
 
             results.append({
                 'action': action,
@@ -185,12 +218,13 @@ def generate_report(dead_code_path: Path, search_dir: Path, output_path: Path):
                 'files': sorted(all_files),
                 'full_name': full_name,
                 'def_file': file_path,
-                'def_line': line_num
+                'def_line': line_num,
+                'has_simp': has_simp
             })
 
             # Progress indicator
             status_symbol = "❌" if action == "DELETE" else "✅"
-            print(f"{status_symbol} {short_name:30s} count={max_count:3d}  files={len(all_files)}")
+            print(f"{status_symbol} {short_name:30s} count={max_count:3d}  files={len(all_files)}{keep_reason}")
 
     # Write report
     print(f"\n📝 Writing report to: {output_path}")
