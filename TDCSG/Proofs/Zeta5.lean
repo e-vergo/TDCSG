@@ -44,10 +44,6 @@ lemma three_plus_phi_pos : 0 < 3 + φ := by
   have := Real.goldenRatio_pos
   linarith
 
-lemma one_plus_phi_pos : 0 < 1 + φ := by
-  unfold φ
-  linarith [Real.goldenRatio_pos]
-
 @[simp] lemma zeta5_pow_five : ζ₅ ^ 5 = 1 :=
   (zeta5_isPrimitiveRoot).pow_eq_one
 

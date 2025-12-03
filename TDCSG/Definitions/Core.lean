@@ -91,6 +91,14 @@ GG(5,5) is infinite at the critical radius.
 We use Mathlib's definition to ensure compatibility with existing lemmas. -/
 noncomputable def φ : ℝ := Real.goldenRatio
 
+/-- 1 + φ is positive.
+
+This basic property is used throughout the IET (Interval Exchange Transformation) proofs
+for showing that lengths and displacements are well-defined. -/
+lemma one_plus_phi_pos : 0 < 1 + φ := by
+  unfold φ
+  linarith [Real.goldenRatio_pos]
+
 /-- The critical radius r_crit = √(3 + φ) ≈ 2.05817.
 
 At this radius, the two disks of radius r_crit centered at ±1 overlap in a

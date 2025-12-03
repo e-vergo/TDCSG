@@ -367,8 +367,6 @@ open TDCSG.Definitions
 export TDCSG.Definitions (cyclicPerm3 GG5_induced_IET
   length1_pos length2_pos length3_pos lengths_sum_to_one)
 
-open TDCSG.CompoundSymmetry.GG5 (one_plus_phi_pos)
-
 lemma length1_lt_one : length1 < 1 := by
   have h := lengths_sum_to_one
   linarith [length2_pos, length3_pos]

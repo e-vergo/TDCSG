@@ -113,17 +113,15 @@ noncomputable def displacement1 : ℝ := length3
 
 noncomputable def displacement2 : ℝ := -(length1 + length2)
 
-private lemma one_plus_phi_pos : 0 < 1 + Real.goldenRatio := by
-  have h1 : 0 < Real.goldenRatio := Real.goldenRatio_pos
-  linarith
-
 lemma length1_pos : 0 < length1 := by
   unfold length1
-  exact div_pos one_pos (by linarith [one_plus_phi_pos])
+  have := one_plus_phi_pos
+  exact div_pos one_pos (by unfold φ at this; linarith)
 
 lemma length2_pos : 0 < length2 := by
   unfold length2
-  exact div_pos one_pos (by linarith [one_plus_phi_pos])
+  have := one_plus_phi_pos
+  exact div_pos one_pos (by unfold φ at this; linarith)
 
 lemma length3_pos : 0 < length3 := by
   unfold length3
@@ -132,7 +130,8 @@ lemma length3_pos : 0 < length3 := by
 lemma lengths_sum_to_one : length1 + length2 + length3 = 1 := by
   unfold length1 length2 length3
   have h_phi_pos : 0 < Real.goldenRatio := Real.goldenRatio_pos
-  have h_one_plus_phi_pos : 0 < 1 + Real.goldenRatio := one_plus_phi_pos
+  have h_one_plus_phi_pos : 0 < 1 + Real.goldenRatio := by
+    show 0 < 1 + φ; exact one_plus_phi_pos
   have h_phi_ne : Real.goldenRatio ≠ 0 := ne_of_gt h_phi_pos
   have h_one_plus_phi_ne : 1 + Real.goldenRatio ≠ 0 := ne_of_gt h_one_plus_phi_pos
   have h_two_ne : (2 : ℝ) ≠ 0 := by norm_num
