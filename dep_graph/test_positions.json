@@ -1,0 +1,14 @@
+{
+  "TDCSG.MainTheorem.StatementOfTheorem": {
+    "x": 400,
+    "y": 200
+  },
+  "TDCSG.Definitions.r_crit": {
+    "x": 200,
+    "y": 400
+  },
+  "TDCSG.ProofSteps.InfiniteOrbitLemma": {
+    "x": 600,
+    "y": 400
+  }
+}

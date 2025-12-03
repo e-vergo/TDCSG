@@ -35,3 +35,8 @@ lean_exe «extract_dep_graph» where
 lean_exe «find_dead_code» where
   root := `scripts.find_dead_code
   supportInterpreter := true
+
+lean_exe «extract_graph» where
+  root := `ExtractGraph
+  srcDir := "dep_graph"
+  supportInterpreter := true

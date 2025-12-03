@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>TDCSG Dependency Graph</title>
+
+  <!-- Cytoscape.js from CDN -->
+  <script src="https://unpkg.com/cytoscape@3.28.1/dist/cytoscape.min.js"></script>
+  <!-- Cose-Bilkent layout -->
+  <script src="https://unpkg.com/cytoscape-cose-bilkent@4.1.0/cytoscape-cose-bilkent.js"></script>
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="error-message" style="display: none;">
+    <h2>Error Loading Graph</h2>
+    <p id="error-text"></p>
+  </div>
+
+  <div id="container">
+    <div id="cy"></div>
+    <div id="info-panel">
+      <h3 id="node-name"></h3>
+      <p><strong>Type:</strong> <span id="node-type"></span></p>
+      <div id="node-docstring"></div>
+      <div id="node-dependencies"></div>
+      <div id="node-links"></div>
+      <button id="close-panel">Close</button>
+    </div>
+  </div>
+
+  <div id="controls">
+    <input type="text" id="search" placeholder="Search declarations...">
+    <button id="save-layout">Save Layout</button>
+    <button id="reset-zoom">Reset View</button>
+    <div id="stats"></div>
+  </div>
+
+  <div id="file-loader" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); z-index: 9999;">
+    <h3>Load Graph Data</h3>
+    <p>Due to browser security restrictions, please select graph.json:</p>
+    <input type="file" id="graph-file-input" accept=".json">
+    <p style="margin-top: 15px; font-size: 14px; color: #666;">
+      <strong>Tip:</strong> For easier usage, run <code>./serve.sh</code> from terminal instead.
+    </p>
+  </div>
+
+  <script src="graph.js?v=2"></script>
+</body>
+</html>

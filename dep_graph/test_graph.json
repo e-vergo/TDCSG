@@ -1,0 +1,81 @@
+{
+  "nodes": [
+    {
+      "id": "TDCSG.MainTheorem.StatementOfTheorem",
+      "label": "StatementOfTheorem",
+      "type": "theorem",
+      "namespace": ["TDCSG", "MainTheorem"],
+      "file": "TDCSG/MainTheorem.lean",
+      "line": 77,
+      "docstring": "Main theorem: The compound symmetry group GG(5,5) at the critical radius is infinite.",
+      "paperRefs": [],
+      "isMainTheorem": true
+    },
+    {
+      "id": "TDCSG.Definitions.r_crit",
+      "label": "r_crit",
+      "type": "def",
+      "namespace": ["TDCSG", "Definitions"],
+      "file": "TDCSG/Definitions/Core.lean",
+      "line": 45,
+      "docstring": "The critical radius where the group becomes infinite.",
+      "paperRefs": [],
+      "isMainTheorem": false
+    },
+    {
+      "id": "TDCSG.ProofSteps.InfiniteOrbitLemma",
+      "label": "InfiniteOrbitLemma",
+      "type": "lemma",
+      "namespace": ["TDCSG", "ProofSteps"],
+      "file": "TDCSG/ProofSteps.lean",
+      "line": 120,
+      "docstring": "If the IET orbit is infinite, then the group orbit is infinite.",
+      "paperRefs": ["Theorem 3.2"],
+      "isMainTheorem": false
+    },
+    {
+      "id": "TDCSG.Structures.CompoundSymmetry",
+      "label": "CompoundSymmetry",
+      "type": "inductive",
+      "namespace": ["TDCSG", "Structures"],
+      "file": "TDCSG/Structures.lean",
+      "line": 34,
+      "docstring": "Inductive definition of the compound symmetry structure.",
+      "paperRefs": [],
+      "isMainTheorem": false
+    },
+    {
+      "id": "TDCSG.Helpers.OrbitProperties",
+      "label": "OrbitProperties",
+      "type": "theorem",
+      "namespace": ["TDCSG", "Helpers"],
+      "file": "TDCSG/Helpers.lean",
+      "line": 88,
+      "docstring": "Basic properties of orbits in the context of interval exchange transformations.",
+      "paperRefs": [],
+      "isMainTheorem": false
+    }
+  ],
+  "edges": [
+    {
+      "source": "TDCSG.MainTheorem.StatementOfTheorem",
+      "target": "TDCSG.Definitions.r_crit"
+    },
+    {
+      "source": "TDCSG.MainTheorem.StatementOfTheorem",
+      "target": "TDCSG.ProofSteps.InfiniteOrbitLemma"
+    },
+    {
+      "source": "TDCSG.ProofSteps.InfiniteOrbitLemma",
+      "target": "TDCSG.Structures.CompoundSymmetry"
+    },
+    {
+      "source": "TDCSG.ProofSteps.InfiniteOrbitLemma",
+      "target": "TDCSG.Helpers.OrbitProperties"
+    },
+    {
+      "source": "TDCSG.Helpers.OrbitProperties",
+      "target": "TDCSG.Definitions.r_crit"
+    }
+  ]
+}
