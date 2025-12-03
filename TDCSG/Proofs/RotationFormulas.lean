@@ -82,7 +82,7 @@ lemma applyGen_Ainv_formula (z : ℂ)
     (h3 : (-1 : ℂ) + ζ₅^4 * ((-1 : ℂ) + ζ₅^4 * ((-1 : ℂ) + ζ₅^4 * (z + 1) + 1) + 1) ∈ leftDisk r_crit) :
     applyGen r_crit z .Ainv = (-1 : ℂ) + ζ₅ * (z + 1) := by
   unfold applyGen
-  simp only
+  simp only [Function.iterate_succ', Function.iterate_zero, id_eq, Function.comp_apply]
 
   rw [genA_rotation_formula z hz]
 
@@ -103,7 +103,7 @@ lemma applyGen_Binv_formula (z : ℂ)
     (h3 : (1 : ℂ) + ζ₅^4 * ((1 : ℂ) + ζ₅^4 * ((1 : ℂ) + ζ₅^4 * (z - 1) - 1) - 1) ∈ rightDisk r_crit) :
     applyGen r_crit z .Binv = (1 : ℂ) + ζ₅ * (z - 1) := by
   unfold applyGen
-  simp only
+  simp only [Function.iterate_succ', Function.iterate_zero, id_eq, Function.comp_apply]
   rw [genB_rotation_formula z hz]
   rw [genB_rotation_formula _ h1]
   rw [genB_rotation_formula _ h2]

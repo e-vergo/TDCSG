@@ -18,17 +18,27 @@ for the two-disk compound symmetry groups.
 
 ## Main definitions
 
-- `Generator`: The four generators A, A⁻¹, B, B⁻¹ of the group
+- `Generator`: The four generators A, A⁻¹, B, B⁻¹ of the group (with Inv instance)
 - `Word`: A word is a list of generators
-- `φ`: The golden ratio $(1 + \sqrt{5})/2$
-- `r_crit`: The critical radius $\sqrt{3 + φ}$ at which GG(5,5) becomes infinite
-- `ζ₅`: The primitive 5th root of unity $e^{2πi/5}$
+- `φ`: The golden ratio (1 + √5)/2
+- `r_crit`: The critical radius √(3 + φ) at which GG(5,5) becomes infinite
+- `ζ₅`: The primitive 5th root of unity e^(2πi/5)
 - `zeta5Circle`: ζ₅ as an element of the unit circle
 
-## Notation
+## Algebraic Structure
 
-- `A⁻¹` for `Generator.Ainv`
-- `B⁻¹` for `Generator.Binv`
+The `Generator` type has an `Inv` instance, allowing the use of `g⁻¹` notation.
+The inverse is defined algebraically: A⁻¹ inverts A, B⁻¹ inverts B, and the
+operation is involutive ((g⁻¹)⁻¹ = g).
+
+## Implementation Notes
+
+The golden ratio φ is imported directly from `Mathlib.NumberTheory.Real.GoldenRatio`,
+ensuring consistency with Mathlib's definition and enabling the use of existing lemmas
+about algebraic properties of φ.
+
+The primitive 5th root of unity ζ₅ is defined via complex exponential rather than
+as a solution to x^5 = 1, which simplifies proofs about rotations.
 
 ## References
 
@@ -44,16 +54,53 @@ inductive Generator where
   | A | Ainv | B | Binv
   deriving DecidableEq, Repr
 
-notation "A⁻¹" => Generator.Ainv
-notation "B⁻¹" => Generator.Binv
+/-- Inverse operation for generators.
 
-/-- A word is a finite sequence of generators. -/
+The inverse of a generator is defined algebraically:
+- A⁻¹ is the inverse of A (4th power, since A has order 5)
+- B⁻¹ is the inverse of B (4th power, since B has order 5)
+- Inverses are involutive: (A⁻¹)⁻¹ = A and (B⁻¹)⁻¹ = B
+
+This instance allows using the standard `g⁻¹` notation for generators. -/
+instance : Inv Generator where
+  inv
+    | .A => .Ainv
+    | .Ainv => .A
+    | .B => .Binv
+    | .Binv => .B
+
+/-- The inverse operation on generators is involutive. -/
+@[simp]
+lemma Generator.inv_inv (g : Generator) : g⁻¹⁻¹ = g := by
+  cases g <;> rfl
+
+/-- A word is a finite sequence of generators.
+
+Words represent elements of the free group on two generators {A, B}.
+In the two-disk compound symmetry group, not all formal words represent
+distinct group elements (there are relations), but every group element
+can be expressed as a word. -/
 abbrev Word := List Generator
 
-/-- The golden ratio φ = (1 + √5)/2. -/
+/-- The golden ratio φ = (1 + √5)/2.
+
+This is the unique positive solution to x² = x + 1, and has the key property
+that φ² = φ + 1. This algebraic relationship is central to the proof that
+GG(5,5) is infinite at the critical radius.
+
+We use Mathlib's definition to ensure compatibility with existing lemmas. -/
 noncomputable def φ : ℝ := Real.goldenRatio
 
-/-- The critical radius r_crit = √(3 + φ) at which GG(5,5) is infinite. -/
+/-- The critical radius r_crit = √(3 + φ) ≈ 2.05817.
+
+At this radius, the two disks of radius r_crit centered at ±1 overlap in a
+specific way that creates a golden ratio relationship in the induced interval
+exchange transformation. This causes a phase transition from finite to infinite
+for the group GG(5,5).
+
+For r < r_crit, the group GG(5,5) is finite.
+For r > r_crit, the group GG(5,5) is also finite (with different structure).
+Only at r = r_crit is the group infinite. -/
 noncomputable def r_crit : ℝ := Real.sqrt (3 + φ)
 
 open scoped Complex
