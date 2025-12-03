@@ -29,6 +29,12 @@ namespace TDCSG.CompoundSymmetry.GG5
 open Complex Real
 open TDCSG.Definitions (segmentPoint E E' ζ₅ φ r_crit)
 
+/-- The point `E = zeta5^4 - zeta5^3` is nonzero.
+
+This is a foundational fact needed for the injectivity of the segment parameterization.
+The proof proceeds by contradiction: if `E = 0`, then `zeta5^3 * (zeta5 - 1) = 0`, which
+would imply either `zeta5^3 = 0` (impossible since `zeta5` is a root of unity) or
+`zeta5 = 1` (contradicting that `zeta5` is a primitive 5th root of unity). -/
 lemma E_ne_zero : E ≠ 0 := by
 
   intro h
@@ -57,6 +63,16 @@ lemma E_ne_zero : E ≠ 0 := by
     exact h5.symm
   exact zeta5_ne_one this
 
+/-- The segment parameterization `segmentPoint : R -> C` given by `t |-> E' + t * (E - E')` is
+injective.
+
+This establishes that the line segment from E' to E has no self-intersections when parameterized
+by the real line. The proof uses that `E - E' = 2E` is nonzero (from `E_ne_zero`), so the
+parameterization is a non-degenerate affine map.
+
+This injectivity is crucial for the dynamical argument in the paper showing that GG_5 is infinite
+at the critical radius: the three piecewise transformations translate portions of segment E'E
+onto itself, and injectivity ensures distinct parameter values map to distinct points. -/
 theorem segmentPoint_injective : Function.Injective segmentPoint := by
   intro t₁ t₂ h
   unfold segmentPoint at h
@@ -83,18 +99,45 @@ theorem segmentPoint_injective : Function.Injective segmentPoint := by
     exact smul_eq_zero.mp h_smul |>.resolve_left hsub_ne
   exact hne this
 
+/-- Point E' lies exactly on the boundary of the right disk (centered at 1 with radius `r_crit`).
+
+Since `E' = -E` by definition, and the two-disk system is symmetric about the origin,
+E' being on the right disk boundary is equivalent to E being on the left disk boundary
+(proved in `E_on_left_disk_boundary`). This symmetry is essential: together with
+`E_on_left_disk_boundary`, it shows that the segment E'E has its endpoints on opposite
+disk boundaries, spanning the disk intersection region. -/
 lemma E'_on_right_disk_boundary : ‖E' - 1‖ = r_crit := by
   unfold E'
   rw [show ((-E : ℂ) - (1 : ℂ)) = -(E + 1) by ring]
   rw [norm_neg]
   exact E_on_left_disk_boundary
 
+/-- Point E' lies inside (or on the boundary of) the left disk (centered at -1 with radius `r_crit`).
+
+By symmetry, `E' = -E` being in the left disk is equivalent to E being in the right disk.
+Combined with `E'_on_right_disk_boundary`, this shows E' lies in the intersection of both disks,
+which is the "active region" where both rotations can act on points. -/
 lemma E'_in_left_disk : ‖E' - (-1)‖ ≤ r_crit := by
   unfold E'
   rw [show ((-E : ℂ) - (-1 : ℂ)) = -(E - 1) by ring]
   rw [norm_neg]
   exact E_in_right_disk
 
+/-- Every point on the segment from E' to E lies in the intersection of both disks.
+
+For any parameter `t` in [0,1], the point `p = E' + t * (E - E')` satisfies both
+`|p + 1| <= r_crit` (inside left disk) and `|p - 1| <= r_crit` (inside right disk).
+
+This is the key geometric containment result for the GG_5 critical radius proof. The paper's
+dynamical argument shows that certain group element sequences translate portions of this
+segment onto itself without any point ever leaving the disk intersection. This lemma provides
+the necessary containment guarantee: if a point starts on the segment, and the segment is
+contained in the disk intersection, then the transformations (which preserve points in their
+respective disks) keep the point in the active region where both rotations can act.
+
+The proof uses convexity of closed balls: since both E' and E lie in each disk (by
+`E'_in_left_disk`, `E_on_left_disk_boundary`, `E'_on_right_disk_boundary`, `E_in_right_disk`),
+and closed balls are convex, the entire segment lies in each disk. -/
 lemma segment_in_disk_intersection (t : ℝ)
     (ht : 0 ≤ t ∧ t ≤ 1) :
     let p := E' + t • (E - E')

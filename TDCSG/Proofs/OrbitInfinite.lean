@@ -36,22 +36,28 @@ namespace TDCSG.CompoundSymmetry.GG5
 open Real Function Set RealDynamics
 open TDCSG.Definitions
 
+/-- The left endpoint of interval 0 in the GG5 IET is 0 (the domain origin). -/
 theorem GG5_domainLeft_0 : GG5_induced_IET.domainLeft 0 = 0 := by
   unfold IntervalExchangeTransformation.domainLeft
   simp
 
+/-- The left endpoint of interval 1 equals `length1`, the first interval's width. -/
 theorem GG5_domainLeft_1 : GG5_induced_IET.domainLeft 1 = length1 := by
   unfold IntervalExchangeTransformation.domainLeft GG5_induced_IET
   simp
 
+/-- The left endpoint of interval 2 equals `length1 + length2`. -/
 theorem GG5_domainLeft_2 : GG5_induced_IET.domainLeft 2 = length1 + length2 := by
   unfold IntervalExchangeTransformation.domainLeft GG5_induced_IET
   simp [Fin.sum_univ_two]
 
+/-- The left endpoint of range interval 0 is 0. -/
 theorem GG5_rangeLeft_0 : GG5_induced_IET.rangeLeft 0 = 0 := by
   unfold IntervalExchangeTransformation.rangeLeft
   simp
 
+/-- The left endpoint of range interval 1 equals `length3` (the cyclic permutation
+    places interval 2 first in the range). -/
 theorem GG5_rangeLeft_1 : GG5_induced_IET.rangeLeft 1 = length3 := by
 
   unfold IntervalExchangeTransformation.rangeLeft GG5_induced_IET
@@ -65,6 +71,7 @@ theorem GG5_rangeLeft_1 : GG5_induced_IET.rangeLeft 1 = length3 := by
     simp only [Fin.sum_univ_one, Fin.val_zero, hs, Fin.reduceEq, ↓reduceIte]
   convert h_eq using 2
 
+/-- The left endpoint of range interval 2 equals `length3 + length1`. -/
 theorem GG5_rangeLeft_2 : GG5_induced_IET.rangeLeft 2 = length3 + length1 := by
 
   unfold IntervalExchangeTransformation.rangeLeft GG5_induced_IET
@@ -77,34 +84,45 @@ theorem GG5_rangeLeft_2 : GG5_induced_IET.rangeLeft 2 = length3 + length1 := by
     simp only [Fin.sum_univ_two, Fin.val_zero, Fin.val_one, hs0, hs1, Fin.reduceEq, ↓reduceIte]
   convert h_eq using 2
 
+/-- The GG5 cyclic permutation sends interval 0 to position 1 (0 -> 1 -> 2 -> 0). -/
 @[simp] theorem GG5_perm_0 : GG5_induced_IET.permutation 0 = 1 := by
   unfold GG5_induced_IET cyclicPerm3; decide
 
+/-- The GG5 cyclic permutation sends interval 1 to position 2. -/
 @[simp] theorem GG5_perm_1 : GG5_induced_IET.permutation 1 = 2 := by
   unfold GG5_induced_IET cyclicPerm3; decide
 
+/-- The GG5 cyclic permutation sends interval 2 to position 0. -/
 @[simp] theorem GG5_perm_2 : GG5_induced_IET.permutation 2 = 0 := by
   unfold GG5_induced_IET cyclicPerm3; decide
 
+/-- The displacement for interval 0 matches `displacement0`. Points in the first
+    interval are translated by `length3` (= 1/phi) under the IET. -/
 theorem GG5_actual_displacement_interval0 :
     GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation 0) - GG5_induced_IET.domainLeft 0 = displacement0 := by
   simp only [GG5_perm_0, GG5_rangeLeft_1, GG5_domainLeft_0]
 
   unfold displacement0; ring
 
+/-- The displacement for interval 1 matches `displacement1`. Points in the second
+    interval are also translated by `length3` (= 1/phi). -/
 theorem GG5_actual_displacement_interval1 :
     GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation 1) - GG5_induced_IET.domainLeft 1 = displacement1 := by
   simp only [GG5_perm_1, GG5_rangeLeft_2, GG5_domainLeft_1]
 
   unfold displacement1; ring
 
+/-- The displacement for interval 2 matches `displacement2`. Points in the third
+    interval are translated by `-1/(1+phi)`. -/
 theorem GG5_actual_displacement_interval2 :
     GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation 2) - GG5_induced_IET.domainLeft 2 = displacement2 := by
   simp only [GG5_perm_2, GG5_rangeLeft_0, GG5_domainLeft_2]
 
   unfold displacement2; ring
 
-/-- Helper lemma: The IET toFun at a point in interval i equals the expected translation. -/
+/-- For a point in interval `i`, the IET evaluates to the range-left of the permuted interval
+    plus the offset within the original interval. This characterizes the piecewise translation
+    behavior of interval exchange transformations. -/
 lemma IET_toFun_at_interval (i : Fin 3) (x : ℝ) (h_in_i : x ∈ GG5_induced_IET.interval i) :
     GG5_induced_IET.toFun x =
     GG5_induced_IET.rangeLeft (GG5_induced_IET.permutation i) + (x - GG5_induced_IET.domainLeft i) := by
@@ -135,6 +153,9 @@ lemma IET_toFun_at_interval (i : Fin 3) (x : ℝ) (h_in_i : x ∈ GG5_induced_IE
 
   exact h_eps
 
+/-- The symbolic displacement function `GG5_displacement` equals the actual translation
+    performed by the IET. This connects the abstract displacement tracking to concrete
+    IET dynamics. -/
 theorem GG5_displacement_eq_toFun_sub (x : ℝ) (hx : x ∈ Set.Ico 0 1) :
     GG5_displacement x = GG5_induced_IET.toFun x - x := by
   unfold GG5_displacement
@@ -175,6 +196,9 @@ theorem GG5_displacement_eq_toFun_sub (x : ℝ) (hx : x ∈ Set.Ico 0 1) :
       rw [← GG5_actual_displacement_interval2, GG5_domainLeft_2]
       ring
 
+/-- The cumulative displacement after `n` iterations telescopes to `f^n(y) - y`.
+    This is the key identity connecting the sum of per-step displacements to
+    the total displacement of the orbit. -/
 theorem cumulative_displacement_telescope (y : ℝ)
     (n : ℕ) (hn : ∀ k < n, (GG5_induced_IET.toFun^[k]) y ∈ Set.Ico 0 1) :
     cumulative_displacement y n = (GG5_induced_IET.toFun^[n]) y - y := by
@@ -192,6 +216,9 @@ theorem cumulative_displacement_telescope (y : ℝ)
     simp only [Function.iterate_succ_apply']
     ring
 
+/-- If `a + b * phi = 0` for integers `a, b`, then both must be zero.
+    This follows from the irrationality of the golden ratio: any nonzero integer
+    combination would give a rational value for phi. -/
 theorem int_add_int_mul_phi_eq_zero (a b : ℤ)
     (h : (a : ℝ) + (b : ℝ) * goldenRatio = 0) : a = 0 ∧ b = 0 := by
   by_cases hb : b = 0
@@ -215,6 +242,15 @@ theorem int_add_int_mul_phi_eq_zero (a b : ℤ)
     push_cast
     exact hφ.symm
 
+/-- Any nontrivial combination of the three IET displacements is nonzero.
+
+This is the core algebraic fact enabling the infinite orbit proof. The displacements
+are `1/phi`, `1/phi`, and `-1/(1+phi)`. A periodic orbit would require some combination
+`n0 * d0 + n1 * d1 + n2 * d2 = 0`, but clearing denominators and using the irrationality
+of phi shows this forces all coefficients to zero.
+
+This corresponds to the paper's proof that the interval exchange has no periodic orbits
+because the ratio of displacements involves the golden ratio irrationally. -/
 theorem displacement_sum_ne_zero (n₀ n₁ n₂ : ℕ) (h_sum : 0 < n₀ + n₁ + n₂) :
     n₀ * displacement0 + n₁ * displacement1 + n₂ * displacement2 ≠ 0 := by
   intro h_zero
@@ -254,6 +290,8 @@ theorem displacement_sum_ne_zero (n₀ n₁ n₂ : ℕ) (h_sum : 0 < n₀ + n₁
 
   omega
 
+/-- The GG5 IET preserves the unit interval [0, 1). This is a standard property of
+    interval exchange transformations: they are bijections on their domain interval. -/
 theorem GG5_IET_maps_to_self :
     ∀ x ∈ Set.Ico 0 1, GG5_induced_IET.toFun x ∈ Set.Ico 0 1 := by
   intro x hx
@@ -305,6 +343,8 @@ theorem GG5_IET_maps_to_self :
         have h := lengths_sum_to_one; linarith [length1_pos, length2_pos]
     linarith [h_bound, h_offset_lt]
 
+/-- The midpoint of the first interval lies in [0, 1), providing a witness point
+    for the infinite orbit theorem. -/
 theorem length1_half_mem_Ico : length1 / 2 ∈ Set.Ico 0 1 := by
   constructor
   · apply le_of_lt
@@ -319,6 +359,8 @@ theorem length1_half_mem_Ico : length1 / 2 ∈ Set.Ico 0 1 := by
         have : length1 + length2 + length3 = 1 := lengths_sum_to_one
         linarith [length2_pos, length3_pos]
 
+/-- All iterates of the witness point remain in [0, 1). This follows from
+    the invariance of the interval under the IET. -/
 theorem GG5_IET_iterate_mem_Ico (n : ℕ) :
     (GG5_induced_IET.toFun^[n]) (length1 / 2) ∈ Set.Ico 0 1 := by
   induction n with
@@ -328,6 +370,15 @@ theorem GG5_IET_iterate_mem_Ico (n : ℕ) :
     apply GG5_IET_maps_to_self
     exact ih
 
+/-- The map `n -> f^n(x0)` is injective, where `x0 = length1/2`.
+
+This is the key technical lemma: distinct iteration counts produce distinct points.
+The proof proceeds by contradiction: if `f^m(x0) = f^n(x0)` for `m < n`, then
+the point `f^m(x0)` is periodic with some minimal period `p`. But then the
+cumulative displacement over `p` steps must be zero (the point returns to itself),
+which by `displacement_sum_ne_zero` is impossible unless all visit counts are zero.
+
+This establishes that the orbit of `x0` contains infinitely many distinct points. -/
 theorem GG5_IET_iterates_injective :
     Function.Injective (fun n : ℕ => (GG5_induced_IET.toFun^[n]) (length1 / 2)) := by
 
@@ -495,6 +546,21 @@ theorem GG5_IET_iterates_injective :
   rw [h_cum_as_sum] at h_cum_zero
   exact h_ne_zero h_cum_zero
 
+/-- The GG5-induced IET has a point with infinite orbit.
+
+This is the main result of this file, directly supporting the paper's Theorem 2
+("GG5 is infinite at r = sqrt(3 + phi)"). The interval exchange transformation
+induced by the GG5 geometry at critical radius has the property that any point
+in the interior generates infinitely many distinct images under iteration.
+
+The proof exhibits `length1/2` as a witness: since distinct iteration counts
+produce distinct points (`GG5_IET_iterates_injective`), the orbit must be infinite.
+
+## Paper Reference
+Section "Geometric Constructions" proves that at r = sqrt(3 + phi), the three
+line segments E'F', F'G', G'E are mapped onto subsegments of E'E by specific
+word sequences, with irrational translation ratios involving phi. This file
+formalizes the consequence: no orbit can be periodic. -/
 theorem GG5_IET_has_infinite_orbit :
     ∃ (x : ℝ), x ∈ Set.Ico 0 1 ∧
       (RealDynamics.orbitSet GG5_induced_IET.toFun x).Infinite := by

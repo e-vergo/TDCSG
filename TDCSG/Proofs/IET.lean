@@ -34,6 +34,13 @@ variable {n : ℕ} (iet : IntervalExchangeTransformation n)
 
 open Set
 
+/--
+Every interval in an IET partition is nonempty.
+
+This follows directly from the positivity of interval lengths: since `lengths i > 0`,
+the half-open interval `[domainLeft i, domainRight i)` contains at least its left
+endpoint.
+-/
 theorem interval_nonempty (i : Fin n) : (iet.interval i).Nonempty := by
   use iet.domainLeft i
   simp only [interval, mem_Ico]
@@ -42,6 +49,17 @@ theorem interval_nonempty (i : Fin n) : (iet.interval i).Nonempty := by
   · simp only [domainRight]
     linarith [iet.lengths_pos i]
 
+/--
+The domain intervals of an IET exactly partition `[0,1)`.
+
+This is a fundamental property of interval exchange transformations: the `n` domain
+intervals `[domainLeft i, domainRight i)` for `i = 0, ..., n-1` cover the half-open
+unit interval exactly once. The proof proceeds in two directions:
+- Any point in an interval lies in `[0,1)` (using nonnegativity of `domainLeft` and
+  the sum-to-one property of lengths)
+- Any point in `[0,1)` lies in exactly one interval (by finding the minimal index
+  whose `domainRight` exceeds the point)
+-/
 theorem intervals_cover : ⋃ i, iet.interval i = Ico 0 1 := by
   ext x
   simp only [Set.mem_iUnion, interval, mem_Ico]
@@ -202,6 +220,13 @@ theorem intervals_cover : ⋃ i, iet.interval i = Ico 0 1 := by
 
     use i
 
+/--
+The left endpoint function is strictly monotone: if `i < j` then `domainLeft i < domainLeft j`.
+
+Since `domainLeft i` is the sum of lengths for indices `< i`, and `domainLeft j` includes
+additional positive terms for indices in `[i, j)`, strict monotonicity follows from
+the positivity of all interval lengths.
+-/
 lemma domainLeft_strictMono {i j : Fin n} (hij : i < j) : iet.domainLeft i < iet.domainLeft j := by
   unfold domainLeft
   have h_i_lt_n : i.val < n := i.isLt
@@ -232,6 +257,11 @@ lemma domainLeft_strictMono {i j : Fin n} (hij : i < j) : iet.domainLeft i < iet
                     intro k _ _
                     exact le_of_lt (iet.lengths_pos ⟨k, Nat.lt_trans k.isLt h_j_lt_n⟩)
 
+/--
+The left endpoint function is monotone (non-strict): if `i <= j` then `domainLeft i <= domainLeft j`.
+
+A weaker version of `domainLeft_strictMono` that handles the equality case.
+-/
 lemma domainLeft_mono {i j : Fin n} (hij : i ≤ j) : iet.domainLeft i ≤ iet.domainLeft j := by
   unfold domainLeft
   by_cases h_eq : i = j
@@ -253,12 +283,26 @@ lemma domainLeft_mono {i j : Fin n} (hij : i ≤ j) : iet.domainLeft i ≤ iet.d
           intro k _ _
           exact le_of_lt (iet.lengths_pos ⟨k, Nat.lt_trans k.isLt j.isLt⟩)
 
+/--
+The right endpoint of interval `i` equals the left endpoint of interval `i+1`.
+
+This contiguity property ensures the intervals tile `[0,1)` without gaps: the right
+boundary of each interval coincides with the left boundary of its successor.
+-/
 lemma domainRight_eq_domainLeft_succ (i : Fin n) (hi : i.val + 1 < n) :
     iet.domainRight i = iet.domainLeft ⟨i.val + 1, hi⟩ := by
   unfold domainRight domainLeft
   rw [Fin.sum_univ_castSucc]
   congr 1
 
+/--
+If `i < j`, then the right endpoint of interval `i` is at most the left endpoint of interval `j`.
+
+This is a key ordering lemma that ensures distinct intervals do not overlap: the right
+boundary of an earlier interval never exceeds the left boundary of any later interval.
+Combined with `domainRight_eq_domainLeft_succ`, it shows consecutive intervals are
+contiguous while non-consecutive intervals have a gap between them.
+-/
 lemma domainRight_le_domainLeft_of_lt {i j : Fin n} (hij : i < j) :
     iet.domainRight i ≤ iet.domainLeft j := by
   unfold domainRight domainLeft
@@ -281,6 +325,16 @@ lemma domainRight_le_domainLeft_of_lt {i j : Fin n} (hij : i < j) :
         = iet.domainLeft ⟨i.val + 1, h_cons⟩ := iet.domainRight_eq_domainLeft_succ i h_cons
       _ ≤ iet.domainLeft j := iet.domainLeft_mono h_le
 
+/--
+The domain intervals of an IET are pairwise disjoint.
+
+Distinct intervals `[domainLeft i, domainRight i)` and `[domainLeft j, domainRight j)`
+have empty intersection. This follows from the ordering properties: if `i < j`, then
+`domainRight i <= domainLeft j`, so the intervals cannot overlap.
+
+Together with `intervals_cover`, this establishes that the domain intervals form a
+partition of `[0,1)`.
+-/
 theorem intervals_disjoint : (Set.range iet.interval).PairwiseDisjoint (fun x => x) := by
   intro s hs t ht hst
   obtain ⟨i, rfl⟩ := hs
@@ -305,6 +359,13 @@ theorem intervals_disjoint : (Set.range iet.interval).PairwiseDisjoint (fun x =>
       rw [heq] at hst
       exact absurd rfl hst
 
+/--
+The interval map is injective: distinct indices yield distinct intervals.
+
+If `interval i = interval j` as sets, then `i = j`. This follows from the strict
+monotonicity of `domainLeft`: equal sets must have equal left endpoints, but
+`domainLeft` is strictly monotone, so the indices must be equal.
+-/
 lemma interval_injective : Function.Injective (interval iet) := by
   intro i j h_eq
   unfold interval at h_eq
@@ -367,28 +428,71 @@ open TDCSG.Definitions
 export TDCSG.Definitions (cyclicPerm3 GG5_induced_IET
   length1_pos length2_pos length3_pos lengths_sum_to_one)
 
+/--
+The first interval length is strictly less than 1.
+
+Since all three lengths are positive and sum to 1, any individual length must be
+strictly less than 1.
+-/
 lemma length1_lt_one : length1 < 1 := by
   have h := lengths_sum_to_one
   linarith [length2_pos, length3_pos]
 
+/--
+The sum of the first two interval lengths is strictly less than 1.
+
+Since `length3 > 0` and `length1 + length2 + length3 = 1`, we have
+`length1 + length2 < 1`. This bound is used in verifying that interval
+boundaries lie within `[0,1)`.
+-/
 lemma length12_lt_one : length1 + length2 < 1 := by
   have h := lengths_sum_to_one
   linarith [length3_pos]
 
+/--
+The sum of the first two interval lengths equals `1 / (1 + phi)`.
+
+Since `length1 = length2 = 1 / (2 * (1 + phi))`, their sum is `1 / (1 + phi)`.
+This quantity equals `1 - length3 = 1 - 1/phi`, reflecting the complement of
+the third interval within the unit interval.
+-/
 lemma length12_sum : length1 + length2 = 1 / (1 + goldenRatio) := by
   unfold length1 length2
   have h_pos : 0 < 1 + goldenRatio := one_plus_phi_pos
   have h_ne : 2 * (1 + goldenRatio) ≠ 0 := by linarith
   field_simp; norm_num
 
+/--
+The first displacement equals `1 / phi`.
+
+Points in the first interval are translated forward by `length3 = 1/phi`.
+This is the translation component of the piecewise isometry acting on
+segment `E'F'` in the GG5 geometric construction.
+-/
 lemma displacement0_formula : displacement0 = 1 / goldenRatio := by
   unfold displacement0 length3
   rfl
 
+/--
+The second displacement equals `1 / phi`.
+
+Points in the second interval are also translated forward by `length3 = 1/phi`.
+This is the translation component of the piecewise isometry acting on
+segment `F'G'` in the GG5 geometric construction. The equality
+`displacement1 = displacement0` reflects a symmetry in the IET structure.
+-/
 lemma displacement1_formula : displacement1 = 1 / goldenRatio := by
   unfold displacement1 length3
   rfl
 
+/--
+The third displacement equals `-1 / (1 + phi)`.
+
+Points in the third interval are translated backward by `length1 + length2 = 1/(1+phi)`.
+This negative displacement moves points from the right portion of `[0,1)` back toward
+the left, completing the cyclic exchange. The displacement magnitude equals the total
+length of the first two intervals.
+-/
 lemma displacement2_formula : displacement2 = -1 / (1 + goldenRatio) := by
   unfold displacement2 length1 length2
   have h_pos : 0 < 1 + goldenRatio := one_plus_phi_pos
@@ -399,6 +503,16 @@ lemma displacement2_formula : displacement2 = -1 / (1 + goldenRatio) := by
     _ = -(1 / (1 + goldenRatio)) := by field_simp
     _ = -1 / (1 + goldenRatio) := by ring
 
+/--
+The first two displacements are equal.
+
+Both `displacement0` and `displacement1` equal `1/phi = length3`. This reflects the
+fact that segments `E'F'` and `F'G'` in the GG5 construction are translated by the
+same amount (namely, the length of segment `G'E`).
+
+This equality is essential to the IET structure: the first two intervals experience
+identical forward translations, while the third interval is translated backward.
+-/
 lemma displacement0_eq_displacement1 : displacement0 = displacement1 := by
   rw [displacement0_formula, displacement1_formula]
 

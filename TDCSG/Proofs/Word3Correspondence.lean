@@ -28,6 +28,25 @@ namespace TDCSG.CompoundSymmetry.GG5
 open Complex Real
 open TDCSG.Definitions
 
+/-- For a point `x` in interval 2 (the third IET interval), applying word3 to its image
+on the segment E'E produces a translation by `displacement2` along the segment.
+
+This establishes the correspondence between the interval exchange transformation (IET)
+and the group action for the third interval of the GG5 system at critical radius.
+The word3 sequence `[Ainv, Binv, Ainv, B, A, B]` realizes the IET translation on
+points parametrized by `x` in `[length1 + length2, 1)`.
+
+The proof proceeds by:
+1. Computing the image of `segmentPoint x` under each generator in word3
+2. Verifying at each step that intermediate points remain in the appropriate disks
+   (left disk for A/Ainv operations, right disk for B/Binv operations)
+3. Using the algebraic identity `word3_algebraic_identity` to confirm the final
+   position equals `segmentPoint (x + displacement2)`
+
+This is part of the verification that the IET dynamics on E'E correspond to the
+action of words word1, word2, word3 on the three respective intervals, proving
+that the origin has infinite orbit under GG5 at critical radius.
+See main.tex Theorem "GG5 is infinite at r = sqrt(3 + phi)". -/
 lemma word3_produces_displacement2 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     (hx_interval2 : length1 + length2 ≤ x) :
     applyWord r_crit word3 (segmentPoint x) =

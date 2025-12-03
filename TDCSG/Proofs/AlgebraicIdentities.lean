@@ -30,6 +30,28 @@ namespace TDCSG.CompoundSymmetry.GG5
 
 open Complex Real TDCSG.Definitions CompoundSymmetry.GG5
 
+/--
+Algebraic verification that word1 produces the correct displacement on segment E'E.
+
+Word1 corresponds to the move sequence `a^(-2) b^(-1) a^(-1) b^(-1)` from the paper's
+proof that GG_5 is infinite at critical radius. This lemma verifies that applying
+this sequence of rotations to any point `z = c * E` on the segment E'E results in
+a translation by `2 * displacement0` in the direction of E.
+
+The five rotation steps are:
+1. Rotate by `zeta5^4` (= `zeta5^(-1)`) about the left disk center (-1, 0)
+2. Rotate by `zeta5^4` about the left disk center
+3. Rotate by `zeta5^4` about the right disk center (1, 0)
+4. Rotate by `zeta5^4` about the left disk center
+5. Rotate by `zeta5^4` about the right disk center
+
+The net effect is a translation of magnitude `2 * length3 = 2 / phi` along E'E.
+This corresponds to segment `E'F'` being mapped to segment `GF` in the paper.
+
+## Paper Reference
+Section "Geometric Constructions": "Line segment E'F' is transformed by
+a^(-2) b^(-1) a^(-1) b^(-1) to line segment GF."
+-/
 lemma word1_algebraic_identity :
     ∀ c : ℝ, c ∈ Set.Icc (-1 : ℝ) 1 →
     let z := (c : ℂ) • E
@@ -97,6 +119,29 @@ lemma word1_algebraic_identity :
   push_cast
   ring
 
+/--
+Algebraic verification that word2 produces the correct displacement on segment E'E.
+
+Word2 corresponds to the move sequence `a b a b^2` from the paper's proof that
+GG_5 is infinite at critical radius. This lemma verifies that applying this
+sequence of rotations to any point `z = c * E` on the segment E'E results in
+a translation by `2 * displacement1` in the direction of E.
+
+The five rotation steps are:
+1. Rotate by `zeta5` about the left disk center (-1, 0)
+2. Rotate by `zeta5` about the right disk center (1, 0)
+3. Rotate by `zeta5` about the left disk center
+4. Rotate by `zeta5` about the right disk center
+5. Rotate by `zeta5` about the right disk center
+
+Since `displacement1 = displacement0 = length3 = 1/phi`, this transformation
+also translates by `2 / phi` along E'E. This corresponds to segment `F'G'`
+being mapped to segment `FE` in the paper.
+
+## Paper Reference
+Section "Geometric Constructions": "Line segment F'G' is transformed by
+a b a b^2 to line segment FE."
+-/
 lemma word2_algebraic_identity :
     ∀ c : ℝ, c ∈ Set.Icc (-1 : ℝ) 1 →
     let z := (c : ℂ) • E
@@ -169,6 +214,33 @@ lemma word2_algebraic_identity :
   push_cast
   ring
 
+/--
+Algebraic verification that word3 produces the correct displacement on segment E'E.
+
+Word3 corresponds to the move sequence `a b a b^(-1) a^(-1) b^(-1)` from the paper's
+proof that GG_5 is infinite at critical radius. This lemma verifies that applying
+this sequence of rotations to any point `z = c * E` on the segment E'E results in
+a translation by `2 * displacement2` in the direction of E.
+
+The six rotation steps are:
+1. Rotate by `zeta5` about the left disk center (-1, 0)
+2. Rotate by `zeta5` about the right disk center (1, 0)
+3. Rotate by `zeta5` about the left disk center
+4. Rotate by `zeta5^4` (= `zeta5^(-1)`) about the right disk center
+5. Rotate by `zeta5^4` about the left disk center
+6. Rotate by `zeta5^4` about the right disk center
+
+Since `displacement2 = -(length1 + length2) = -1/(1 + phi)`, this transformation
+translates by a negative amount (backward along E'E). This corresponds to segment
+`G'E` being mapped to segment `E'G` in the paper.
+
+The key identity used is `2 * displacement2 = sqrt(5) - 3`, which connects
+the geometric displacement to the algebraic structure of the fifth root of unity.
+
+## Paper Reference
+Section "Geometric Constructions": "Line segment G'E is transformed by
+a b a b^(-1) a^(-1) b^(-1) to line segment E'G."
+-/
 lemma word3_algebraic_identity :
     ∀ c : ℝ, c ∈ Set.Icc (-1 : ℝ) 1 →
     let z := (c : ℂ) • E

@@ -33,6 +33,11 @@ open TDCSG.Definitions
 
 namespace TDCSG.CompoundSymmetry.GG5
 
+/-- The complex exponential of -2π/5 radians equals ζ₅⁴.
+
+This converts between the real-valued angle representation and the algebraic
+fifth root of unity representation. Since ζ₅ = exp(2πi/5), we have
+exp(-2πi/5) = ζ₅⁻¹ = ζ₅⁴ by the primitive root property. -/
 lemma exp_neg_two_pi_fifth : Complex.exp ((-2 * π / 5 : ℝ) * I) = ζ₅^4 := by
 
   have h1 : ((-2 * π / 5 : ℝ) : ℂ) * I = -(2 * ↑π * I / 5) := by push_cast; ring
@@ -41,6 +46,11 @@ lemma exp_neg_two_pi_fifth : Complex.exp ((-2 * π / 5 : ℝ) * I) = ζ₅^4 := 
   have h2 : Complex.exp (2 * ↑π * I / 5) = ζ₅ := by unfold ζ₅; rfl
   rw [h2, zeta5_inv_eq_pow4]
 
+/-- Generator A rotates points by ζ₅⁴ about the left disk center (-1).
+
+For GG₅, the generator A performs clockwise rotation by 2π/5 (equivalently,
+multiplication by ζ₅⁴) about the center of the left disk. This formula
+expresses genA in terms of roots of unity rather than complex exponentials. -/
 lemma genA_rotation_formula (z : ℂ) (hz : z ∈ leftDisk r_crit) :
     genA r_crit z = (-1 : ℂ) + ζ₅^4 * (z + 1) := by
   unfold genA
@@ -49,6 +59,11 @@ lemma genA_rotation_formula (z : ℂ) (hz : z ∈ leftDisk r_crit) :
   rw [exp_neg_two_pi_fifth]
   ring
 
+/-- Generator B rotates points by ζ₅⁴ about the right disk center (+1).
+
+For GG₅, the generator B performs clockwise rotation by 2π/5 (equivalently,
+multiplication by ζ₅⁴) about the center of the right disk. This is the
+symmetric counterpart to `genA_rotation_formula`. -/
 lemma genB_rotation_formula (z : ℂ) (hz : z ∈ rightDisk r_crit) :
     genB r_crit z = (1 : ℂ) + ζ₅^4 * (z - 1) := by
   unfold genB
@@ -75,6 +90,11 @@ lemma rightDisk_zeta_rotation (r : ℝ) (k : ℕ) (z : ℂ) (hz : z ∈ rightDis
   rw [Complex.norm_mul, zeta5_abs_pow k, one_mul]
   exact hz
 
+/-- A⁻¹ rotates by ζ₅ about the left disk center, given explicit membership hypotheses.
+
+Since A⁻¹ = A⁴ in the cyclic group of order 5, applying A four times is equivalent
+to counterclockwise rotation by 2π/5, i.e., multiplication by ζ₅. This version
+requires explicit proof that intermediate points remain in the left disk. -/
 lemma applyGen_Ainv_formula (z : ℂ)
     (hz : z ∈ leftDisk r_crit)
     (h1 : (-1 : ℂ) + ζ₅^4 * (z + 1) ∈ leftDisk r_crit)
@@ -96,6 +116,11 @@ lemma applyGen_Ainv_formula (z : ℂ)
   ring_nf
   simp only [h16]
 
+/-- B⁻¹ rotates by ζ₅ about the right disk center, given explicit membership hypotheses.
+
+Since B⁻¹ = B⁴ in the cyclic group of order 5, applying B four times is equivalent
+to counterclockwise rotation by 2π/5, i.e., multiplication by ζ₅. This version
+requires explicit proof that intermediate points remain in the right disk. -/
 lemma applyGen_Binv_formula (z : ℂ)
     (hz : z ∈ rightDisk r_crit)
     (h1 : (1 : ℂ) + ζ₅^4 * (z - 1) ∈ rightDisk r_crit)
@@ -111,16 +136,23 @@ lemma applyGen_Binv_formula (z : ℂ)
   ring_nf
   simp
 
+/-- Generator A expressed via `applyGen`: rotation by ζ₅⁴ about the left center. -/
 lemma applyGen_A_formula (z : ℂ) (hz : z ∈ leftDisk r_crit) :
     applyGen r_crit z .A = (-1 : ℂ) + ζ₅^4 * (z + 1) := by
   unfold applyGen
   exact genA_rotation_formula z hz
 
+/-- Generator B expressed via `applyGen`: rotation by ζ₅⁴ about the right center. -/
 lemma applyGen_B_formula (z : ℂ) (hz : z ∈ rightDisk r_crit) :
     applyGen r_crit z .B = (1 : ℂ) + ζ₅^4 * (z - 1) := by
   unfold applyGen
   exact genB_rotation_formula z hz
 
+/-- A⁻¹ rotates by ζ₅ about the left disk center (-1).
+
+This is the user-friendly version that automatically derives disk membership
+for intermediate points using `leftDisk_zeta_rotation`. Counterclockwise
+rotation by 2π/5 is multiplication by ζ₅ = exp(2πi/5). -/
 lemma applyGen_Ainv_formula' (z : ℂ) (hz : z ∈ leftDisk r_crit) :
     applyGen r_crit z .Ainv = (-1 : ℂ) + ζ₅ * (z + 1) := by
   have h1 : (-1 : ℂ) + ζ₅^4 * (z + 1) ∈ leftDisk r_crit := leftDisk_zeta_rotation r_crit 4 z hz
@@ -130,6 +162,11 @@ lemma applyGen_Ainv_formula' (z : ℂ) (hz : z ∈ leftDisk r_crit) :
     leftDisk_zeta_rotation r_crit 4 _ h2
   exact applyGen_Ainv_formula z hz h1 h2 h3
 
+/-- B⁻¹ rotates by ζ₅ about the right disk center (+1).
+
+This is the user-friendly version that automatically derives disk membership
+for intermediate points using `rightDisk_zeta_rotation`. Counterclockwise
+rotation by 2π/5 is multiplication by ζ₅ = exp(2πi/5). -/
 lemma applyGen_Binv_formula' (z : ℂ) (hz : z ∈ rightDisk r_crit) :
     applyGen r_crit z .Binv = (1 : ℂ) + ζ₅ * (z - 1) := by
   have h1 : (1 : ℂ) + ζ₅^4 * (z - 1) ∈ rightDisk r_crit := rightDisk_zeta_rotation r_crit 4 z hz
@@ -139,6 +176,11 @@ lemma applyGen_Binv_formula' (z : ℂ) (hz : z ∈ rightDisk r_crit) :
     rightDisk_zeta_rotation r_crit 4 _ h2
   exact applyGen_Binv_formula z hz h1 h2 h3
 
+/-- The sum of interval lengths length1 + length2 equals (3 - sqrt(5))/2.
+
+This establishes the relationship between the IET interval lengths defined in
+terms of the golden ratio and their explicit algebraic form. Since
+1/(1 + phi) = (3 - sqrt(5))/2, this provides a more computable representation. -/
 lemma length12_eq_sqrt5 : length1 + length2 = (3 - Real.sqrt 5) / 2 := by
   have h_goldenRatio : Real.goldenRatio = (1 + Real.sqrt 5) / 2 := Real.goldenRatio.eq_1
   have h_one_plus_phi : (1 : ℝ) + Real.goldenRatio = (3 + Real.sqrt 5) / 2 := by
@@ -151,17 +193,32 @@ lemma length12_eq_sqrt5 : length1 + length2 = (3 - Real.sqrt 5) / 2 := by
 
   nlinarith [sqrt5_sq]
 
+/-- Lower bound on 2x - 1 when x is in the third IET interval.
+
+For x >= length1 + length2, the transformed coordinate 2x - 1 satisfies
+2 - sqrt(5) <= 2x - 1. This bound is used when analyzing segment point
+positions in the third interval of the interval exchange transformation. -/
 lemma interval2_c_lower_bound (x : ℝ) (hx : length1 + length2 ≤ x) :
     2 - Real.sqrt 5 ≤ 2 * x - 1 := by
   rw [length12_eq_sqrt5] at hx
   linarith
 
+/-- Segment points are scalar multiples of E.
+
+The segment E'E (from -E to E) is parameterized by segmentPoint(x) for x in [0,1].
+This lemma shows segmentPoint(x) = (2x - 1) * E, making the linear structure
+explicit: at x=0 we get -E, at x=1/2 we get 0, and at x=1 we get E. -/
 lemma segmentPoint_eq_smul_E (x : ℝ) : segmentPoint x = (2 * x - 1) • E := by
   unfold segmentPoint E'
   rw [sub_neg_eq_add, show E + E = (2 : ℝ) • E by simp [two_smul], smul_smul]
   rw [show -E + (x * 2) • E = (x * 2 - 1) • E by rw [sub_smul, one_smul]; ring_nf]
   congr 1; ring
 
+/-- Displacement along the segment E'E is linear in E.
+
+Adding d to the parameter x shifts the segment point by 2d * E. This captures
+the fact that the segment has length 2|E| and segmentPoint is a linear
+parameterization. Used to analyze translations induced by the IET. -/
 lemma segmentPoint_add_displacement (x d : ℝ) :
     segmentPoint (x + d) = segmentPoint x + (2 * d) • E := by
   rw [segmentPoint_eq_smul_E, segmentPoint_eq_smul_E]

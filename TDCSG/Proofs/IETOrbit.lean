@@ -35,6 +35,11 @@ namespace TDCSG.CompoundSymmetry.GG5
 open Complex Real CompoundSymmetry.GG5
 open TDCSG.Definitions
 
+/-- For points in the first interval `[0, length1)`, the IET acts as translation by `displacement0`.
+
+This is the first of three cases characterizing the IET action on each subinterval.
+The displacement `1/goldenRatio` moves points from interval 0 to their image in the rearranged
+partition, corresponding to the cyclic permutation that maps interval 0 to position 1. -/
 lemma IET_toFun_interval0 (x : ℝ) (hx_lo : 0 ≤ x) (hx_hi : x < length1) :
     CompoundSymmetry.GG5.GG5_induced_IET.toFun x = x + displacement0 := by
   have hx_mem : x ∈ Set.Ico 0 1 := by
@@ -47,6 +52,11 @@ lemma IET_toFun_interval0 (x : ℝ) (hx_lo : 0 ≤ x) (hx_hi : x < length1) :
   simp only [hx_hi, if_true] at h
   linarith
 
+/-- For points in the second interval `[length1, length1 + length2)`, the IET acts as
+translation by `displacement1`.
+
+The displacement equals `1/goldenRatio` (same as `displacement0`), moving points from
+interval 1 to position 2 in the rearranged partition. -/
 lemma IET_toFun_interval1 (x : ℝ) (hx_lo : length1 ≤ x)
     (hx_hi : x < length1 + length2) :
     CompoundSymmetry.GG5.GG5_induced_IET.toFun x = x + displacement1 := by
@@ -62,6 +72,11 @@ lemma IET_toFun_interval1 (x : ℝ) (hx_lo : length1 ≤ x)
   simp only [h_not_0, if_false, hx_hi, if_true] at h
   linarith
 
+/-- For points in the third interval `[length1 + length2, 1)`, the IET acts as
+translation by `displacement2`.
+
+The displacement is `-1/(1 + goldenRatio)` (negative), moving points from interval 2
+back to position 0 in the rearranged partition, completing the cyclic permutation. -/
 lemma IET_toFun_interval2 (x : ℝ)
     (hx_lo : length1 + length2 ≤ x) (hx_hi : x < 1) :
     CompoundSymmetry.GG5.GG5_induced_IET.toFun x = x + displacement2 := by
@@ -85,6 +100,16 @@ lemma IET_toFun_interval2 (x : ℝ)
   simp only [h_not_0, if_false, h_not_1, if_false] at h
   linarith
 
+/-- A single IET step corresponds exactly to applying the appropriate word to the segment.
+
+This is the fundamental correspondence theorem: for any point `x` in `[0,1)`, applying
+the group word `IET_word x` (which is `word1`, `word2`, or `word3` depending on which
+interval contains `x`) to `segmentPoint x` produces `segmentPoint (IET.toFun x)`.
+
+This establishes that the IET dynamics on the interval faithfully encode the group
+action on the invariant segment `E'E` at the critical radius. See the paper's
+proof that GG5 is infinite at the critical radius (Theorem in Section "Geometric
+Constructions"), which relies on this piecewise translation structure. -/
 theorem IET_step_word_correspondence (x : ℝ) (hx : x ∈ Set.Ico 0 1) :
     applyWord r_crit (IET_word x) (segmentPoint x) =
     segmentPoint (CompoundSymmetry.GG5.GG5_induced_IET.toFun x) := by
@@ -112,6 +137,11 @@ theorem IET_step_word_correspondence (x : ℝ) (hx : x ∈ Set.Ico 0 1) :
       congr 1
       exact (IET_toFun_interval2 x (le_of_not_gt h1) hx.2).symm
 
+/-- The IET preserves the unit interval: iterates of any starting point in `[0,1)` remain
+in `[0,1)`.
+
+This is essential for the correspondence to hold at all iterations, since `IET_word`
+and `segmentPoint` are only defined on `[0,1)`. -/
 theorem IET_iterate_mem_Ico (x₀ : ℝ) (hx₀ : x₀ ∈ Set.Ico 0 1) (n : ℕ) :
     CompoundSymmetry.GG5.GG5_induced_IET.toFun^[n] x₀ ∈ Set.Ico 0 1 := by
   induction n with
@@ -120,6 +150,12 @@ theorem IET_iterate_mem_Ico (x₀ : ℝ) (hx₀ : x₀ ∈ Set.Ico 0 1) (n : ℕ
     simp only [Function.iterate_succ', Function.comp_apply]
     exact CompoundSymmetry.GG5.GG5_IET_maps_to_self _ ih
 
+/-- The accumulated word for `n` IET iterations correctly maps the initial segment point
+to the n-th iterate's segment point.
+
+This extends `IET_step_word_correspondence` from a single step to `n` steps by induction.
+The word `wordForIterate x₀ n` is the concatenation of all single-step words along the
+trajectory, and applying it produces exactly `segmentPoint (IET^n x₀)`. -/
 theorem wordForIterate_correct (x₀ : ℝ) (hx₀ : x₀ ∈ Set.Ico 0 1) (n : ℕ) :
     applyWord r_crit (wordForIterate x₀ n) (segmentPoint x₀) =
     segmentPoint (CompoundSymmetry.GG5.GG5_induced_IET.toFun^[n] x₀) := by
@@ -144,6 +180,11 @@ theorem wordForIterate_correct (x₀ : ℝ) (hx₀ : x₀ ∈ Set.Ico 0 1) (n : 
     rw [h_outer]
     exact IET_step_word_correspondence _ (IET_iterate_mem_Ico x₀ hx₀ n)
 
+/-- Every point in the IET orbit corresponds to a point in the group orbit.
+
+For any `y` in the IET orbit of `x₀`, there exists a group word `w` such that
+`applyWord r_crit w (segmentPoint x₀) = segmentPoint y`. This embeds the IET
+dynamics into the compound symmetry group action. -/
 theorem IET_orbit_subset_group_orbit (x₀ : ℝ) (hx₀ : x₀ ∈ Set.Ico 0 1) :
     ∀ y ∈ RealDynamics.orbitSet CompoundSymmetry.GG5.GG5_induced_IET.toFun x₀,
       ∃ w : Word, applyWord r_crit w (segmentPoint x₀) = segmentPoint y := by
@@ -155,6 +196,15 @@ theorem IET_orbit_subset_group_orbit (x₀ : ℝ) (hx₀ : x₀ ∈ Set.Ico 0 1)
   rw [← hn]
   exact wordForIterate_correct x₀ hx₀ n
 
+/-- An infinite IET orbit implies an infinite group orbit.
+
+This is the key transfer theorem: if the IET has an infinite orbit starting from `x₀`,
+then the compound symmetry group GG5 at critical radius `r_crit` has an infinite orbit
+starting from `segmentPoint x₀`.
+
+Combined with `GG5_IET_has_infinite_orbit` (which proves the IET has an infinite orbit),
+this establishes that GG5 is infinite at the critical radius `sqrt(3 + phi)`, as stated
+in the paper's main theorem about the n=5 case. -/
 theorem IET_orbit_infinite_implies_group_orbit_infinite (x₀ : ℝ) (hx₀ : x₀ ∈ Set.Ico 0 1)
     (h_inf : (RealDynamics.orbitSet CompoundSymmetry.GG5.GG5_induced_IET.toFun x₀).Infinite) :
     (orbit r_crit (segmentPoint x₀)).Infinite := by

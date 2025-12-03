@@ -41,10 +41,38 @@ between the disk overlap and rotation angles. -/
 noncomputable def GG5_At_Critical_radius : Subgroup (Equiv.Perm ℂ) :=
   TwoDiskCompoundSymmetryGroup 5 (by norm_num) r_crit
 
-/-- **Main Theorem**: The compound symmetry group GG₅ at the critical radius is infinite.
+/-- **Main Theorem**: The compound symmetry group GG(5,5) at the critical radius is infinite.
 
-This formalizes Theorem 2 from arXiv:2302.12950v1, showing that the two-disk
-compound symmetry group with 5-fold rotations exhibits a phase transition at
-r_crit = √(3 + φ), where the group becomes infinite. -/
+This is the central result from arXiv:2302.12950v1 "Two-Disk Compound Symmetry Groups"
+(Hearn, Kretschmer, Rokicki, Streeter, Vergo).
+
+## Mathematical Statement
+
+The two-disk compound symmetry group GG_5(r) with n = 5 (pentagonal rotations) becomes
+infinite precisely at the critical radius r_crit = √(3 + φ) ≈ 2.149, where φ = (1 + √5)/2
+is the golden ratio.
+
+## Proof Strategy (from paper)
+
+The proof works in the complex plane, interpreting the plane as ℂ with disks centered at
+-1 and 1. Let ζ₅ = e^(2πi/5), and define key points:
+- E = ζ₅ - ζ₅² (with |E + 1| = r_crit)
+- F = 1 - ζ₅ + ζ₅² - ζ₅³ (lies on segment E'E)
+- G = 2F - E (also on segment E'E)
+
+Three specific move sequences act as translations on the line segment E'E:
+1. a⁻²b⁻¹a⁻¹b⁻¹ maps E'F' to GF
+2. ab ab² maps F'G' to FE
+3. ab ab⁻¹a⁻¹b⁻¹ maps G'E to E'G
+
+Since |E - E'|/|F - F'| = φ (the golden ratio), these translations have irrational
+ratio to the segment length. Iterating these piecewise translations produces an
+infinite orbit for the origin, hence the group is infinite.
+
+## References
+
+* arXiv:2302.12950v1, Section "Geometric Constructions", Theorem on page 5
+* The proof demonstrates a connection between golden ratio geometry and group infinitude
+-/
 def StatementOfTheorem : Prop :=
   Infinite GG5_At_Critical_radius

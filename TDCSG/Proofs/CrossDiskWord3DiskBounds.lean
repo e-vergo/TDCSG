@@ -31,6 +31,24 @@ open Complex Real
 open TDCSG.Definitions
 
 set_option maxHeartbeats 2000000 in
+/--
+Norm bound for the first intermediate point in the word3 computation.
+
+For `c` in the parameter interval `[2 - sqrt(5), 1]`, the point
+`(zeta_5^4 - 2) + c * (1 - zeta_5)` lies within the critical radius `r_crit = sqrt(3 + phi)`.
+
+This represents the first step of the word3 transformation applied to a parameterized
+line segment in the complex plane. The proof analyzes the quadratic function
+`f(c) = ||A + c*B||^2` where `A = zeta_5^4 - 2` and `B = 1 - zeta_5`, showing that
+the maximum over the interval occurs at the endpoints (since the vertex
+`c = (3 - sqrt(5))/4` lies within the interval).
+
+This bound is essential for establishing that the word3 transformation keeps points
+within the intersection of the two disks in the GG5 compound symmetry group, which is
+required for the proof that GG5 is infinite at the critical radius.
+
+See: main.tex, proof that "GG5 is infinite at r = sqrt(3 + phi)"
+-/
 lemma cross_disk_w3_z1_bound (c : ℝ) (hc_lo : 2 - √5 ≤ c) (hc_hi : c ≤ 1) :
     ‖(ζ₅^4 - 2 : ℂ) + (c : ℂ) * (1 - ζ₅)‖ ≤ r_crit := by
   set A : ℂ := ζ₅^4 - 2 with hA_def
@@ -165,7 +183,18 @@ lemma cross_disk_w3_z1_bound (c : ℝ) (hc_lo : 2 - √5 ≤ c) (hc_hi : c ≤ 1
   exact h_f_le_max
 
 set_option maxHeartbeats 1600000 in
+/--
+Norm bound for the second intermediate point in the word3 computation.
 
+For `c` in the parameter interval `[2 - sqrt(5), 1]`, the point
+`(2 + zeta_5^3 - 2*zeta_5^4) + c * (zeta_5^4 - 1)` lies within the critical radius.
+
+The quadratic `f(c) = ||A + c*B||^2` has its vertex at `c = (7 - sqrt(5))/4 > 1`,
+so the function is monotonically decreasing on `[2 - sqrt(5), 1]`. The maximum
+therefore occurs at the lower endpoint `c = 2 - sqrt(5)`.
+
+See: main.tex, proof that "GG5 is infinite at r = sqrt(3 + phi)"
+-/
 lemma cross_disk_w3_z2_bound (c : ℝ) (hc_lo : 2 - √5 ≤ c) (hc_hi : c ≤ 1) :
     ‖((2 : ℂ) + ζ₅^3 - 2*ζ₅^4) + (c : ℂ) * (ζ₅^4 - 1)‖ ≤ r_crit := by
   set A : ℂ := (2 : ℂ) + ζ₅^3 - 2*ζ₅^4 with hA_def
@@ -265,7 +294,19 @@ lemma cross_disk_w3_z2_bound (c : ℝ) (hc_lo : 2 - √5 ≤ c) (hc_hi : c ≤ 1
   exact h_f_le_max
 
 set_option maxHeartbeats 1600000 in
+/--
+Norm bound for the third intermediate point in the word3 computation.
 
+For `c` in the parameter interval `[2 - sqrt(5), 1]`, the point
+`(-2 + zeta_5^2 - 2*zeta_5^3 + 2*zeta_5^4) + c * (zeta_5^3 - zeta_5^4)` lies within
+the critical radius.
+
+The quadratic `f(c) = ||A + c*B||^2` has its vertex at `c = (5 - 3*sqrt(5))/4 < 2 - sqrt(5)`,
+so the function is monotonically increasing on the entire interval. The maximum
+therefore occurs at the upper endpoint `c = 1`.
+
+See: main.tex, proof that "GG5 is infinite at r = sqrt(3 + phi)"
+-/
 lemma cross_disk_w3_z3_bound (c : ℝ) (hc_lo : 2 - √5 ≤ c) (hc_hi : c ≤ 1) :
     ‖((-2 : ℂ) + ζ₅^2 - 2*ζ₅^3 + 2*ζ₅^4) + (c : ℂ) * (ζ₅^3 - ζ₅^4)‖ ≤ r_crit := by
   set A : ℂ := ((-2 : ℂ) + ζ₅^2 - 2*ζ₅^3 + 2*ζ₅^4) with hA_def
@@ -345,6 +386,19 @@ lemma cross_disk_w3_z3_bound (c : ℝ) (hc_lo : 2 - √5 ≤ c) (hc_hi : c ≤ 1
 
   exact h_f_le_max
 
+/--
+Norm bound for the fourth intermediate point in the word3 computation.
+
+For `c` in the parameter interval `[2 - sqrt(5), 1]`, the point
+`(4 - 2*zeta_5 + zeta_5^3 - 2*zeta_5^4) + c * (zeta_5^4 - 1)` lies within
+the critical radius.
+
+The proof uses direct numerical bounds via `nlinarith`, exploiting the structure
+of the quadratic expression in `c` with coefficients derived from the complex
+arithmetic involving fifth roots of unity.
+
+See: main.tex, proof that "GG5 is infinite at r = sqrt(3 + phi)"
+-/
 lemma cross_disk_w3_z4_bound (c : ℝ) (hc_lo : 2 - √5 ≤ c) (hc_hi : c ≤ 1) :
     ‖((4 : ℂ) - 2*ζ₅ + ζ₅^3 - 2*ζ₅^4) + (c : ℂ) * (ζ₅^4 - 1)‖ ≤ r_crit := by
   set A : ℂ := (4 : ℂ) - 2*ζ₅ + ζ₅^3 - 2*ζ₅^4 with hA_def
@@ -383,7 +437,23 @@ lemma cross_disk_w3_z4_bound (c : ℝ) (hc_lo : 2 - √5 ≤ c) (hc_hi : c ≤ 1
   exact h_f_le_max
 
 set_option maxHeartbeats 1600000 in
+/--
+Norm bound for the fifth (final) intermediate point in the word3 computation.
 
+For `c` in the parameter interval `[2 - sqrt(5), 1]`, the point
+`(-4 + 4*zeta_5 - 2*zeta_5^2 + zeta_5^4) + c * (1 - zeta_5)` lies within
+the critical radius.
+
+The quadratic `f(c) = ||A + c*B||^2` has its vertex at `c = (65 - 15*sqrt(5))/20 > 1`,
+so the function is monotonically decreasing on the interval. The maximum occurs
+at the lower endpoint `c = 2 - sqrt(5)`.
+
+This completes the verification that all five intermediate points of the word3
+transformation remain within the critical radius, ensuring the transformation
+is well-defined on the line segment E'E in the GG5 construction.
+
+See: main.tex, proof that "GG5 is infinite at r = sqrt(3 + phi)"
+-/
 lemma cross_disk_w3_z5_bound (c : ℝ) (hc_lo : 2 - √5 ≤ c) (hc_hi : c ≤ 1) :
     ‖((-4 : ℂ) + 4*ζ₅ - 2*ζ₅^2 + ζ₅^4) + (c : ℂ) * (1 - ζ₅)‖ ≤ r_crit := by
   set A : ℂ := (-4 : ℂ) + 4*ζ₅ - 2*ζ₅^2 + ζ₅^4 with hA_def

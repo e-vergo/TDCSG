@@ -30,18 +30,24 @@ open scoped Complex
 open Complex Real
 open TDCSG.Definitions (segmentPoint E E' ζ₅ φ r_crit)
 
+/-- Real part of the constant coefficient A for the z1 parametric path in word 3.
+The expression zeta_5^4 - 2 arises as the base point of a linear path in the complex plane
+representing transformed positions under the word 3 action. -/
 lemma A_w3_z1_re : (ζ₅^4 - 2 : ℂ).re = (√5 - 9) / 4 := by
   simp only [Complex.sub_re]
   have h2re : (2 : ℂ).re = 2 := by rfl
   rw [h2re, zeta5_pow4_re]
   ring
 
+/-- Imaginary part of the constant coefficient A for the z1 parametric path. -/
 lemma A_w3_z1_im : (ζ₅^4 - 2 : ℂ).im = -Real.sin (2 * π / 5) := by
   simp only [Complex.sub_im]
   have h2im : (2 : ℂ).im = 0 := by rfl
   rw [h2im, zeta5_pow4_im']
   ring
 
+/-- Norm squared of the constant coefficient A for z1.
+This value 6 - sqrt(5) is used in bounding the norm of points along the z1 path. -/
 lemma normSq_A_w3_z1 : Complex.normSq (ζ₅^4 - 2) = 6 - √5 := by
   rw [Complex.normSq_apply, A_w3_z1_re, A_w3_z1_im]
   have h_sin_sq : Real.sin (2 * π / 5)^2 = (5 + √5) / 8 := sin_sq_two_pi_div_5
@@ -50,6 +56,9 @@ lemma normSq_A_w3_z1 : Complex.normSq (ζ₅^4 - 2) = 6 - √5 := by
   have h_neg_sq : (-Real.sin (2 * π / 5))^2 = Real.sin (2 * π / 5)^2 := by ring
   grind
 
+/-- Real part of A times conjugate of B for z1.
+Used in computing the vertex of the quadratic normSq(A + t*B) to determine
+where the maximum occurs on the parameter interval. -/
 lemma re_A_w3_z1_mul_conj_B :
     ((ζ₅^4 - 2 : ℂ) * starRingEnd ℂ (1 - ζ₅)).re = (2*√5 - 5) / 2 := by
   rw [conj_one_sub_zeta5]
@@ -65,24 +74,33 @@ lemma re_A_w3_z1_mul_conj_B :
   rw [zeta5_pow4_re, zeta5_cubed_re]
   ring
 
+/-- Vertex location of the quadratic norm function for z1.
+The vertex t = (3 - sqrt(5))/4 determines where the maximum of normSq(A + t*B) occurs. -/
 lemma w3_z1_vertex : -(((2*√5 - 5) / 2) / ((5 - √5) / 2)) = (3 - √5) / 4 := by
   have h_5_minus_sqrt5_ne : 5 - √5 ≠ 0 := by nlinarith [Real.sqrt_nonneg 5, sqrt5_sq]
   field_simp
   nlinarith [sqrt5_sq]
 
+/-- The z1 vertex lies strictly within the parameter interval (2 - sqrt(5), 1).
+Since the quadratic opens upward and the vertex is interior, the maximum on the
+interval must occur at one of the endpoints. -/
 lemma w3_z1_vertex_in_interval : (2 - √5) < (3 - √5) / 4 ∧ (3 - √5) / 4 < 1 := by
   constructor <;> nlinarith [Real.sqrt_nonneg 5, sqrt5_sq]
 
+/-- Real part of the z1 path evaluated at the upper endpoint t = 1. -/
 lemma w3_z1_at_one_re : (ζ₅^4 - ζ₅ - 1 : ℂ).re = -1 := by
   simp only [Complex.sub_re, Complex.one_re]
   rw [zeta5_pow4_re, zeta5_re]
   ring
 
+/-- Imaginary part of the z1 path evaluated at the upper endpoint t = 1. -/
 lemma w3_z1_at_one_im : (ζ₅^4 - ζ₅ - 1 : ℂ).im = -2 * Real.sin (2 * π / 5) := by
   simp only [Complex.sub_im, Complex.one_im]
   rw [zeta5_pow4_im', zeta5_im_eq_sin]
   ring
 
+/-- Norm squared of the z1 path at t = 1 equals exactly 3 + phi = r_crit^2.
+This is the tight bound: the point lies exactly on the critical radius disk boundary. -/
 lemma normSq_w3_z1_at_one : Complex.normSq (ζ₅^4 - ζ₅ - 1) = 3 + φ := by
   rw [Complex.normSq_apply, w3_z1_at_one_re, w3_z1_at_one_im]
   have h_sin_sq : Real.sin (2 * π / 5)^2 = (5 + √5) / 8 := sin_sq_two_pi_div_5
@@ -95,6 +113,7 @@ lemma normSq_w3_z1_at_one : Complex.normSq (ζ₅^4 - ζ₅ - 1) = 3 + φ := by
     _ = 3 + (1 + √5) / 2 := by ring
     _ = 3 + φ := by unfold φ Real.goldenRatio; ring
 
+/-- Real part of the z1 path evaluated at the lower endpoint t = 2 - sqrt(5). -/
 lemma w3_z1_at_lower_re : (ζ₅^4 - (2 - √5)*ζ₅ - √5 : ℂ).re = 3 * (1 - √5) / 2 := by
   have h_expr : (ζ₅^4 - (2 - √5)*ζ₅ - √5 : ℂ) = ζ₅^4 - ((2 - √5 : ℝ) : ℂ) * ζ₅ - (√5 : ℂ) := by
     push_cast; ring
@@ -103,6 +122,7 @@ lemma w3_z1_at_lower_re : (ζ₅^4 - (2 - √5)*ζ₅ - √5 : ℂ).re = 3 * (1 
   rw [zeta5_pow4_re, zeta5_re]
   nlinarith [sqrt5_sq]
 
+/-- Imaginary part of the z1 path evaluated at the lower endpoint t = 2 - sqrt(5). -/
 lemma w3_z1_at_lower_im : (ζ₅^4 - (2 - √5)*ζ₅ - √5 : ℂ).im = -(3 - √5) * Real.sin (2 * π / 5) := by
   have h_expr : (ζ₅^4 - (2 - √5)*ζ₅ - √5 : ℂ) = ζ₅^4 - ((2 - √5 : ℝ) : ℂ) * ζ₅ - (√5 : ℂ) := by
     push_cast; ring
@@ -111,6 +131,8 @@ lemma w3_z1_at_lower_im : (ζ₅^4 - (2 - √5)*ζ₅ - √5 : ℂ).im = -(3 - �
   rw [zeta5_pow4_im', zeta5_im_eq_sin]
   ring
 
+/-- The norm squared of the z1 path at the lower endpoint is bounded by r_crit^2.
+Together with `normSq_w3_z1_at_one`, this ensures the entire z1 path stays within the disk. -/
 lemma normSq_w3_z1_at_lower : Complex.normSq (ζ₅^4 - (2 - √5)*ζ₅ - √5) ≤ 3 + φ := by
   rw [Complex.normSq_apply, w3_z1_at_lower_re, w3_z1_at_lower_im]
   have h_sin_sq : Real.sin (2 * π / 5)^2 = (5 + √5) / 8 := sin_sq_two_pi_div_5
@@ -118,6 +140,7 @@ lemma normSq_w3_z1_at_lower : Complex.normSq (ζ₅^4 - (2 - √5)*ζ₅ - √5)
   unfold φ Real.goldenRatio
   nlinarith [sqrt5_sq, Real.sqrt_nonneg 5, h_sin_sq, sq_nonneg (Real.sin (2 * π / 5))]
 
+/-- Real part of the constant coefficient A for the z2 parametric path. -/
 lemma A_w3_z2_re : ((2 : ℂ) + ζ₅^3 - 2*ζ₅^4).re = (9 - 3*√5) / 4 := by
   have h2re : (2 : ℂ).re = 2 := rfl
   simp only [Complex.add_re, Complex.sub_re, Complex.mul_re, h2re]
@@ -126,6 +149,7 @@ lemma A_w3_z2_re : ((2 : ℂ) + ζ₅^3 - 2*ζ₅^4).re = (9 - 3*√5) / 4 := by
   rw [zeta5_cubed_re, zeta5_pow4_re]
   ring
 
+/-- Imaginary part of the constant coefficient A for the z2 parametric path. -/
 lemma A_w3_z2_im : ((2 : ℂ) + ζ₅^3 - 2*ζ₅^4).im = 2 * Real.sin (2 * π / 5) - Real.sin (π / 5) := by
   have h2im : (2 : ℂ).im = 0 := rfl
   have h2re : (2 : ℂ).re = 2 := rfl
@@ -133,6 +157,7 @@ lemma A_w3_z2_im : ((2 : ℂ) + ζ₅^3 - 2*ζ₅^4).im = 2 * Real.sin (2 * π /
   rw [zeta5_cubed_im_eq, zeta5_pow4_im]
   ring
 
+/-- Norm squared of the constant coefficient A for z2. -/
 lemma normSq_A_w3_z2 : Complex.normSq ((2 : ℂ) + ζ₅^3 - 2*ζ₅^4) = 11 - 4*√5 := by
   rw [Complex.normSq_apply, A_w3_z2_re, A_w3_z2_im]
   have h_sin_double : Real.sin (2 * π / 5) = Real.sin (π / 5) * (1 + √5) / 2 := by
@@ -147,12 +172,15 @@ lemma normSq_A_w3_z2 : Complex.normSq ((2 : ℂ) + ζ₅^3 - 2*ζ₅^4) = 11 - 4
   have h_im_sq : (Real.sin (π / 5) * √5)^2 = Real.sin (π / 5)^2 * 5 := by grind
   grind
 
+/-- Complex conjugate of the direction vector B for z2 and z4 paths.
+Uses that the conjugate of zeta_5 is zeta_5^4. -/
 lemma conj_B3 : starRingEnd ℂ (ζ₅^4 - 1) = ζ₅ - 1 := by
   simp only [map_sub, map_one, map_pow, zeta5_conj]
   calc (ζ₅^4)^4 - 1 = ζ₅^16 - 1 := by ring
     _ = ζ₅^(16 % 5) - 1 := by rw [zeta5_pow_reduce 16]
     _ = ζ₅ - 1 := by norm_num
 
+/-- Real part of A times conjugate of B for z2, used in vertex computation. -/
 lemma re_A_w3_z2_mul_conj_B :
     (((2 : ℂ) + ζ₅^3 - 2*ζ₅^4) * starRingEnd ℂ (ζ₅^4 - 1)).re = (3*√5 - 10) / 2 := by
   rw [conj_B3]
@@ -172,27 +200,34 @@ lemma re_A_w3_z2_mul_conj_B :
   rw [zeta5_re, zeta5_pow4_re, zeta5_cubed_re]
   ring
 
+/-- Vertex location of the quadratic norm function for z2. -/
 lemma w3_z2_vertex : -(((3*√5 - 10) / 2) / ((5 - √5) / 2)) = (7 - √5) / 4 := by
   have h_5_minus_sqrt5_ne : 5 - √5 ≠ 0 := by nlinarith [Real.sqrt_nonneg 5, sqrt5_sq]
   have h_denom_ne : (5 - √5) / 2 ≠ 0 := by grind
   grind
 
+/-- The z2 vertex lies above the parameter interval, so the maximum on [2-sqrt(5), 1]
+occurs at the upper endpoint t = 1. -/
 lemma w3_z2_vertex_above_interval : (7 - √5) / 4 > 1 := by
   nlinarith [sqrt5_sq]
 
+/-- Simplification of the z2 path expression at t = 1. -/
 lemma w3_z2_at_one_expr : ((2 : ℂ) + ζ₅^3 - 2*ζ₅^4) + (1 : ℂ) * (ζ₅^4 - 1) = 1 + ζ₅^3 - ζ₅^4 := by
   ring
 
+/-- Real part of the z2 path at t = 1. -/
 lemma w3_z2_at_one_re : ((1 : ℂ) + ζ₅^3 - ζ₅^4).re = (2 - √5) / 2 := by
   simp only [Complex.add_re, Complex.sub_re, Complex.one_re]
   rw [zeta5_cubed_re, zeta5_pow4_re]
   ring
 
+/-- Imaginary part of the z2 path at t = 1. -/
 lemma w3_z2_at_one_im : ((1 : ℂ) + ζ₅^3 - ζ₅^4).im = Real.sin (2 * π / 5) - Real.sin (π / 5) := by
   simp only [Complex.add_im, Complex.sub_im, Complex.one_im]
   rw [zeta5_cubed_im_eq, zeta5_pow4_im]
   ring
 
+/-- The norm squared of the z2 path at t = 1 is bounded by r_crit^2. -/
 lemma normSq_w3_z2_at_one : Complex.normSq ((1 : ℂ) + ζ₅^3 - ζ₅^4) ≤ 3 + φ := by
   rw [Complex.normSq_apply, w3_z2_at_one_re, w3_z2_at_one_im]
   have h_sin_double : Real.sin (2 * π / 5) = Real.sin (π / 5) * (1 + √5) / 2 := by
@@ -207,22 +242,27 @@ lemma normSq_w3_z2_at_one : Complex.normSq ((1 : ℂ) + ζ₅^3 - ζ₅^4) ≤ 3
   unfold φ Real.goldenRatio
   nlinarith [sqrt5_sq, Real.sqrt_nonneg 5, h_sin_sq, sq_nonneg (Real.sin (π / 5))]
 
+/-- Simplification of the z2 path expression at the lower endpoint t = 2 - sqrt(5). -/
 lemma w3_z2_at_lower_expr : ((2 : ℂ) + ζ₅^3 - 2*ζ₅^4) + ((2 - √5 : ℝ) : ℂ) * (ζ₅^4 - 1) =
     (√5 : ℂ) + ζ₅^3 - (√5 : ℂ) * ζ₅^4 := by
   push_cast
   ring
 
+/-- Real part of the z2 path at t = 2 - sqrt(5). -/
 lemma w3_z2_at_lower_re : ((√5 : ℂ) + ζ₅^3 - (√5 : ℂ) * ζ₅^4).re = (2*√5 - 3) / 2 := by
   simp only [Complex.add_re, Complex.sub_re, Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im]
   rw [zeta5_cubed_re, zeta5_pow4_re]
   nlinarith [sqrt5_sq]
 
+/-- Imaginary part of the z2 path at t = 2 - sqrt(5). -/
 lemma w3_z2_at_lower_im : ((√5 : ℂ) + ζ₅^3 - (√5 : ℂ) * ζ₅^4).im =
     √5 * Real.sin (2 * π / 5) - Real.sin (π / 5) := by
   simp only [Complex.add_im, Complex.sub_im, Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im]
   rw [zeta5_cubed_im_eq, zeta5_pow4_im]
   ring
 
+/-- The norm squared of the z2 path at t = 2 - sqrt(5) is bounded by r_crit^2.
+Together with `normSq_w3_z2_at_one`, this ensures the entire z2 path stays within the disk. -/
 lemma normSq_w3_z2_at_lower : Complex.normSq ((√5 : ℂ) + ζ₅^3 - (√5 : ℂ) * ζ₅^4) ≤ 3 + φ := by
   rw [Complex.normSq_apply, w3_z2_at_lower_re, w3_z2_at_lower_im]
   have h_sin_double : Real.sin (2 * π / 5) = Real.sin (π / 5) * (1 + √5) / 2 := by
@@ -240,6 +280,7 @@ lemma normSq_w3_z2_at_lower : Complex.normSq ((√5 : ℂ) + ζ₅^3 - (√5 : �
   unfold φ Real.goldenRatio
   nlinarith [sqrt5_sq, Real.sqrt_nonneg 5, h_sin_sq, sq_nonneg (Real.sin (π / 5))]
 
+/-- Real part of the constant coefficient A for the z3 parametric path. -/
 lemma A_w3_z3_re : ((-2 : ℂ) + ζ₅^2 - 2*ζ₅^3 + 2*ζ₅^4).re = (3*√5 - 9) / 4 := by
   have h2re : (2 : ℂ).re = 2 := rfl
   have h2im : (2 : ℂ).im = 0 := rfl
@@ -248,6 +289,7 @@ lemma A_w3_z3_re : ((-2 : ℂ) + ζ₅^2 - 2*ζ₅^3 + 2*ζ₅^4).re = (3*√5 -
   rw [zeta5_sq_re, zeta5_cubed_re, zeta5_pow4_re]
   ring
 
+/-- Imaginary part of the constant coefficient A for the z3 parametric path. -/
 lemma A_w3_z3_im : ((-2 : ℂ) + ζ₅^2 - 2*ζ₅^3 + 2*ζ₅^4).im =
     3 * Real.sin (π / 5) - 2 * Real.sin (2 * π / 5) := by
   have h2re : (2 : ℂ).re = 2 := rfl
@@ -257,6 +299,7 @@ lemma A_w3_z3_im : ((-2 : ℂ) + ζ₅^2 - 2*ζ₅^3 + 2*ζ₅^4).im =
   rw [zeta5_sq_im', zeta5_cubed_im', zeta5_pow4_im']
   ring
 
+/-- Norm squared of the constant coefficient A for z3. -/
 lemma normSq_A_w3_z3 : Complex.normSq ((-2 : ℂ) + ζ₅^2 - 2*ζ₅^3 + 2*ζ₅^4) = 16 - 7*√5 := by
   rw [Complex.normSq_apply, A_w3_z3_re, A_w3_z3_im]
   have h_sin_double : Real.sin (2 * π / 5) = Real.sin (π / 5) * (1 + √5) / 2 := by
@@ -272,6 +315,7 @@ lemma normSq_A_w3_z3 : Complex.normSq ((-2 : ℂ) + ζ₅^2 - 2*ζ₅^3 + 2*ζ�
   rw [h_im_simp]
   nlinarith [sqrt5_sq, Real.sqrt_nonneg 5, h_sin_sq, sq_nonneg (Real.sin (π / 5))]
 
+/-- Complex conjugate of the direction vector B for the z3 path. -/
 lemma conj_B_z3 : starRingEnd ℂ (ζ₅^3 - ζ₅^4) = ζ₅^2 - ζ₅ := by
   rw [map_sub]
   have h3 : starRingEnd ℂ (ζ₅^3) = ζ₅^2 := by
@@ -284,6 +328,7 @@ lemma conj_B_z3 : starRingEnd ℂ (ζ₅^3 - ζ₅^4) = ζ₅^2 - ζ₅ := by
       _ = ζ₅ := zeta5_pow_sixteen
   rw [h3, h4]
 
+/-- Real part of A times conjugate of B for z3, used in vertex computation. -/
 lemma re_A_w3_z3_mul_conj_B :
     (((-2 : ℂ) + ζ₅^2 - 2*ζ₅^3 + 2*ζ₅^4) * starRingEnd ℂ (ζ₅^3 - ζ₅^4)).re = (5*√5 - 10) / 2 := by
   rw [conj_B_z3]
@@ -305,18 +350,23 @@ lemma re_A_w3_z3_mul_conj_B :
   rw [zeta5_re, zeta5_sq_re, zeta5_cubed_re, zeta5_pow4_re]
   ring
 
+/-- The z3 vertex lies below the parameter interval, so the maximum on [2-sqrt(5), 1]
+occurs at the lower endpoint t = 2 - sqrt(5). -/
 lemma w3_z3_vertex_below_interval : (5 - 3*√5) / 4 < 2 - √5 := by
   nlinarith [sqrt5_sq]
 
+/-- Simplification of the z3 path expression at t = 1. -/
 lemma w3_z3_at_one_expr : ((-2 : ℂ) + ζ₅^2 - 2*ζ₅^3 + 2*ζ₅^4) + (1 : ℂ) * (ζ₅^3 - ζ₅^4) =
     -2 + ζ₅^2 - ζ₅^3 + ζ₅^4 := by ring
 
+/-- Real part of the z3 path at t = 1. -/
 lemma w3_z3_at_one_re : ((-2 : ℂ) + ζ₅^2 - ζ₅^3 + ζ₅^4).re = (√5 - 9) / 4 := by
   simp only [Complex.add_re, Complex.sub_re, Complex.neg_re]
   have h2re : (2 : ℂ).re = 2 := rfl
   rw [h2re, zeta5_sq_re, zeta5_cubed_re, zeta5_pow4_re]
   ring
 
+/-- Imaginary part of the z3 path at t = 1. -/
 lemma w3_z3_at_one_im : ((-2 : ℂ) + ζ₅^2 - ζ₅^3 + ζ₅^4).im =
     2 * Real.sin (π / 5) - Real.sin (2 * π / 5) := by
   simp only [Complex.add_im, Complex.sub_im, Complex.neg_im]
@@ -324,6 +374,7 @@ lemma w3_z3_at_one_im : ((-2 : ℂ) + ζ₅^2 - ζ₅^3 + ζ₅^4).im =
   rw [h2im, zeta5_sq_im', zeta5_cubed_im', zeta5_pow4_im']
   ring
 
+/-- The norm squared of the z3 path at t = 1 is bounded by r_crit^2. -/
 lemma normSq_w3_z3_at_one : Complex.normSq ((-2 : ℂ) + ζ₅^2 - ζ₅^3 + ζ₅^4) ≤ 3 + φ := by
   rw [Complex.normSq_apply, w3_z3_at_one_re, w3_z3_at_one_im]
   have h_sin_double : Real.sin (2 * π / 5) = Real.sin (π / 5) * (1 + √5) / 2 := by
@@ -345,12 +396,14 @@ lemma normSq_w3_z3_at_one : Complex.normSq ((-2 : ℂ) + ζ₅^2 - ζ₅^3 + ζ�
   unfold φ
   nlinarith [sqrt5_sq, Real.sqrt_nonneg 5, Real.goldenRatio_pos]
 
+/-- Simplification of the z3 path expression at t = 2 - sqrt(5). -/
 lemma w3_z3_at_lower_expr :
     ((-2 : ℂ) + ζ₅^2 - 2*ζ₅^3 + 2*ζ₅^4) + ((2 - √5 : ℝ) : ℂ) * (ζ₅^3 - ζ₅^4) =
     (-2 : ℂ) + ζ₅^2 - (√5 : ℂ) * ζ₅^3 + (√5 : ℂ) * ζ₅^4 := by
   push_cast
   ring
 
+/-- Real part of the z3 path at t = 2 - sqrt(5). -/
 lemma w3_z3_at_lower_re :
     ((-2 : ℂ) + ζ₅^2 - (√5 : ℂ) * ζ₅^3 + (√5 : ℂ) * ζ₅^4).re = (1 - √5) / 4 := by
   simp only [Complex.add_re, Complex.sub_re, Complex.neg_re, Complex.mul_re,
@@ -359,6 +412,7 @@ lemma w3_z3_at_lower_re :
   rw [h2re, zeta5_sq_re, zeta5_cubed_re, zeta5_pow4_re]
   nlinarith [sqrt5_sq]
 
+/-- Imaginary part of the z3 path at t = 2 - sqrt(5). -/
 lemma w3_z3_at_lower_im :
     ((-2 : ℂ) + ζ₅^2 - (√5 : ℂ) * ζ₅^3 + (√5 : ℂ) * ζ₅^4).im =
     Real.sin (π / 5) * (√5 - 3) / 2 := by
@@ -382,6 +436,8 @@ lemma w3_z3_at_lower_im :
       _ = s * (√5 - 3) / 2 := by ring
   convert h_factor using 1; ring
 
+/-- The norm squared of the z3 path at t = 2 - sqrt(5) is bounded by r_crit^2.
+Together with `normSq_w3_z3_at_one`, this ensures the entire z3 path stays within the disk. -/
 lemma normSq_w3_z3_at_lower :
     Complex.normSq ((-2 : ℂ) + ζ₅^2 - (√5 : ℂ) * ζ₅^3 + (√5 : ℂ) * ζ₅^4) ≤ 3 + φ := by
   rw [Complex.normSq_apply, w3_z3_at_lower_re, w3_z3_at_lower_im]
@@ -395,6 +451,7 @@ lemma normSq_w3_z3_at_lower :
   unfold φ
   nlinarith [sqrt5_sq, Real.sqrt_nonneg 5, Real.goldenRatio_pos]
 
+/-- Real part of the constant coefficient A for the z4 parametric path. -/
 lemma A_w3_z4_re : ((4 : ℂ) - 2*ζ₅ + ζ₅^3 - 2*ζ₅^4).re = (19 - 5*√5) / 4 := by
   have h4re : (4 : ℂ).re = 4 := rfl
   have h4im : (4 : ℂ).im = 0 := rfl
@@ -404,6 +461,7 @@ lemma A_w3_z4_re : ((4 : ℂ) - 2*ζ₅ + ζ₅^3 - 2*ζ₅^4).re = (19 - 5*√5
   rw [zeta5_re, zeta5_cubed_re, zeta5_pow4_re]
   ring
 
+/-- Imaginary part of the constant coefficient A for the z4 parametric path. -/
 lemma A_w3_z4_im : ((4 : ℂ) - 2*ζ₅ + ζ₅^3 - 2*ζ₅^4).im = -Real.sin (π / 5) := by
   have h4im : (4 : ℂ).im = 0 := Complex.ofReal_im 4
   have h2re : (2 : ℂ).re = 2 := Complex.ofReal_re 2
@@ -416,6 +474,7 @@ lemma A_w3_z4_im : ((4 : ℂ) - 2*ζ₅ + ζ₅^3 - 2*ζ₅^4).im = -Real.sin (�
   rw [h_sin6]
   ring
 
+/-- Norm squared of the constant coefficient A for z4. -/
 lemma normSq_A_w3_z4 : Complex.normSq ((4 : ℂ) - 2*ζ₅ + ζ₅^3 - 2*ζ₅^4) = 31 - 12*√5 := by
   rw [Complex.normSq_apply, A_w3_z4_re, A_w3_z4_im]
   have h_sin_sq : Real.sin (π / 5)^2 = (5 - √5) / 8 := sin_sq_pi_div_5
@@ -423,6 +482,7 @@ lemma normSq_A_w3_z4 : Complex.normSq ((4 : ℂ) - 2*ζ₅ + ζ₅^3 - 2*ζ₅^4
   rw [neg_sq, h_sin_sq]
   nlinarith [sqrt5_sq]
 
+/-- Real part of A times conjugate of B for z4, used in vertex computation. -/
 lemma re_A_w3_z4_mul_conj_B : (((4 : ℂ) - 2*ζ₅ + ζ₅^3 - 2*ζ₅^4) * starRingEnd ℂ (ζ₅^4 - 1)).re =
     (6*√5 - 15) / 2 := by
   rw [conj_B3]
@@ -442,6 +502,7 @@ lemma re_A_w3_z4_mul_conj_B : (((4 : ℂ) - 2*ζ₅ + ζ₅^3 - 2*ζ₅^4) * sta
   rw [h_expand, h_sin_sq]
   nlinarith [sqrt5_sq]
 
+/-- Real part of the constant coefficient A for the z5 parametric path. -/
 lemma A_w3_z5_re : ((-4 : ℂ) + 4*ζ₅ - 2*ζ₅^2 + ζ₅^4).re = (7*√5 - 19) / 4 := by
   have h4re : (4 : ℂ).re = 4 := by rfl
   have h4im : (4 : ℂ).im = 0 := by rfl
@@ -452,6 +513,7 @@ lemma A_w3_z5_re : ((-4 : ℂ) + 4*ζ₅ - 2*ζ₅^2 + ζ₅^4).re = (7*√5 - 1
   rw [zeta5_re, zeta5_sq_re, zeta5_pow4_re]
   ring
 
+/-- Imaginary part of the constant coefficient A for the z5 parametric path. -/
 lemma A_w3_z5_im : ((-4 : ℂ) + 4*ζ₅ - 2*ζ₅^2 + ζ₅^4).im =
     3 * Real.sin (2 * π / 5) - 2 * Real.sin (π / 5) := by
   have h4im : (4 : ℂ).im = 0 := Complex.ofReal_im 4
@@ -463,6 +525,7 @@ lemma A_w3_z5_im : ((-4 : ℂ) + 4*ζ₅ - 2*ζ₅^2 + ζ₅^4).im =
              zeta5_im_eq_sin, zeta5_sq_im_eq, zeta5_pow4_im]
   ring
 
+/-- Norm squared of the constant coefficient A for z5. -/
 lemma normSq_A_w3_z5 : Complex.normSq ((-4 : ℂ) + 4*ζ₅ - 2*ζ₅^2 + ζ₅^4) = 46 - 19*√5 := by
   rw [Complex.normSq_apply, A_w3_z5_re, A_w3_z5_im]
   have h_sin_double : Real.sin (2 * π / 5) = Real.sin (π / 5) * (1 + √5) / 2 := by
@@ -483,6 +546,7 @@ lemma normSq_A_w3_z5 : Complex.normSq ((-4 : ℂ) + 4*ζ₅ - 2*ζ₅^2 + ζ₅^
   rw [h_re_sq, h_im_sq, h_sin_sq, h_factor]
   nlinarith [sqrt5_sq, Real.sqrt_nonneg 5]
 
+/-- Real part of A times conjugate of B for z5, used in vertex computation. -/
 lemma re_A_w3_z5_mul_conj_B :
     (((-4 : ℂ) + 4*ζ₅ - 2*ζ₅^2 + ζ₅^4) * starRingEnd ℂ (1 - ζ₅)).re = (7*√5 - 20) / 2 := by
   rw [conj_one_sub_zeta5]
@@ -507,9 +571,12 @@ lemma re_A_w3_z5_mul_conj_B :
   rw [zeta5_re, zeta5_sq_re, zeta5_cubed_re, zeta5_pow4_re]
   ring
 
+/-- The z5 vertex lies above the parameter interval, so the maximum on [2-sqrt(5), 1]
+occurs at the upper endpoint t = 1. -/
 lemma w3_z5_vertex_above_interval : (65 - 15*√5) / 20 > 1 := by
   nlinarith [sqrt5_sq]
 
+/-- Real part of the z5 path at t = 1. -/
 lemma w3_z5_at_one_re : ((-3 : ℂ) + 3*ζ₅ - 2*ζ₅^2 + ζ₅^4).re = (6*√5 - 14) / 4 := by
   have h1 : ζ₅.re = (√5 - 1) / 4 := zeta5_re
   have h2 : (ζ₅^2).re = -(√5 + 1) / 4 := zeta5_sq_re
@@ -520,6 +587,7 @@ lemma w3_z5_at_one_re : ((-3 : ℂ) + 3*ζ₅ - 2*ζ₅^2 + ζ₅^4).re = (6*√
   norm_num
   ring
 
+/-- Imaginary part of the z5 path at t = 1. -/
 lemma w3_z5_at_one_im : ((-3 : ℂ) + 3*ζ₅ - 2*ζ₅^2 + ζ₅^4).im =
     2 * Real.sin (2 * π / 5) - 2 * Real.sin (π / 5) := by
   have h1 : ζ₅.re = (√5 - 1) / 4 := zeta5_re
@@ -531,6 +599,7 @@ lemma w3_z5_at_one_im : ((-3 : ℂ) + 3*ζ₅ - 2*ζ₅^2 + ζ₅^4).im =
   norm_num
   ring
 
+/-- The norm squared of the z5 path at t = 1 is bounded by r_crit^2. -/
 lemma normSq_w3_z5_at_one : Complex.normSq ((-3 : ℂ) + 3*ζ₅ - 2*ζ₅^2 + ζ₅^4) ≤ 3 + φ := by
   rw [Complex.normSq_apply, w3_z5_at_one_re, w3_z5_at_one_im]
   have h_sin_double : Real.sin (2 * π / 5) = Real.sin (π / 5) * (1 + √5) / 2 := by
@@ -551,11 +620,13 @@ lemma normSq_w3_z5_at_one : Complex.normSq ((-3 : ℂ) + 3*ζ₅ - 2*ζ₅^2 + �
   unfold φ Real.goldenRatio
   nlinarith [sqrt5_sq, Real.sqrt_nonneg 5]
 
+/-- Simplification of the z5 path expression at t = 2 - sqrt(5). -/
 lemma w3_z5_at_lower_expr : ((-4 : ℂ) + 4*ζ₅ - 2*ζ₅^2 + ζ₅^4) + ((2 - √5 : ℝ) : ℂ) * (1 - ζ₅) =
     (-2 - √5 : ℂ) + (2 + √5 : ℂ) * ζ₅ - 2*ζ₅^2 + ζ₅^4 := by
   push_cast
   ring
 
+/-- Real part of the z5 path at t = 2 - sqrt(5). -/
 lemma w3_z5_at_lower_re : ((-2 - √5 : ℂ) + (2 + √5 : ℂ) * ζ₅ - 2*ζ₅^2 + ζ₅^4).re = -1 := by
   have h : ((-2 - √5 : ℂ) + (2 + √5 : ℂ) * ζ₅ - 2*ζ₅^2 + ζ₅^4).re =
       (-2 - √5) + (2 + √5) * ζ₅.re - 2 * (ζ₅^2).re + (ζ₅^4).re := by
@@ -569,6 +640,7 @@ lemma w3_z5_at_lower_re : ((-2 - √5 : ℂ) + (2 + √5 : ℂ) * ζ₅ - 2*ζ�
   rw [h, zeta5_re, zeta5_sq_re, zeta5_pow4_re]
   nlinarith [sqrt5_sq]
 
+/-- Imaginary part of the z5 path at t = 2 - sqrt(5). -/
 lemma w3_z5_at_lower_im : ((-2 - √5 : ℂ) + (2 + √5 : ℂ) * ζ₅ - 2*ζ₅^2 + ζ₅^4).im =
     Real.sin (π / 5) * (1 + √5) := by
   have h : ((-2 - √5 : ℂ) + (2 + √5 : ℂ) * ζ₅ - 2*ζ₅^2 + ζ₅^4).im =
@@ -589,6 +661,8 @@ lemma w3_z5_at_lower_im : ((-2 - √5 : ℂ) + (2 + √5 : ℂ) * ζ₅ - 2*ζ�
   have h_sin_pos : 0 < Real.sin (π / 5) := Real.sin_pos_of_pos_of_lt_pi (by linarith [Real.pi_pos]) (by linarith [Real.pi_pos])
   nlinarith [sqrt5_sq, h_1_plus_sqrt5_sq, h_sin_pos, sq_nonneg (1 + √5)]
 
+/-- The norm squared of the z5 path at t = 2 - sqrt(5) is bounded by r_crit^2.
+Together with `normSq_w3_z5_at_one`, this ensures the entire z5 path stays within the disk. -/
 lemma normSq_w3_z5_at_lower : Complex.normSq ((-2 - √5 : ℂ) + (2 + √5 : ℂ) * ζ₅ - 2*ζ₅^2 + ζ₅^4) ≤ 3 + φ := by
   rw [Complex.normSq_apply, w3_z5_at_lower_re, w3_z5_at_lower_im]
   have h_sin_sq : Real.sin (π / 5)^2 = (5 - √5) / 8 := sin_sq_pi_div_5

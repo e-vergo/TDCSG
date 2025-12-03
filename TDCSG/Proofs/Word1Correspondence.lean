@@ -29,6 +29,14 @@ namespace TDCSG.CompoundSymmetry.GG5
 open Complex Real
 open TDCSG.Definitions
 
+/-- Points in interval 0 satisfy an upper bound on the normalized coordinate `c = 2x - 1`.
+
+For the IET, interval 0 is `[0, length1)`. When parametrizing points on the segment `E'E`
+via `segmentPoint x = (2x - 1) * E`, points in interval 0 have `c < (1 - sqrt 5) / 2`.
+This bound is critical for ensuring that intermediate points in the word1 transformation
+remain within the required disk boundaries.
+
+The proof uses the explicit formula `length1 = 1 / (1 + phi)` where `phi` is the golden ratio. -/
 lemma interval0_c_upper_bound (x : ℝ) (hx : x < length1) :
     2 * x - 1 < (1 - Real.sqrt 5) / 2 := by
   have h_phi := Real.goldenRatio.eq_1
@@ -47,6 +55,26 @@ lemma interval0_c_upper_bound (x : ℝ) (hx : x < length1) :
     nlinarith [sqrt5_sq]
   grind
 
+/-- **Main Correspondence Theorem for Interval 0**: Applying `word1` to a point in
+interval 0 produces displacement `displacement0`.
+
+This theorem establishes the core correspondence between the IET (Interval Exchange
+Transformation) and the compound symmetry group action for the first interval. Specifically:
+
+- **Input**: A point `x` in the IET interval `[0, length1)`, mapped to the complex plane
+  via `segmentPoint x` on the segment `E'E`.
+- **Output**: The group action of `word1 = [A, A, B, A, B]` translates the point by
+  `displacement0` along the segment.
+
+The proof verifies that each intermediate point in the word application stays within
+the required disk (left or right) to ensure the rotation applies. The key technical
+challenges are:
+1. Tracking the algebraic form of each intermediate point `z1, z2, z3, z4, z5`
+2. Using `cross_disk_z*_bound_restricted` lemmas to verify disk membership at each step
+3. Connecting the final algebraic result to the geometric displacement
+
+This corresponds to the n=5 case analysis in the paper's proof that GG5 is infinite
+at the critical radius r = sqrt(3 + phi). See Theorem 2 in the paper. -/
 lemma word1_produces_displacement0 (x : ℝ) (hx : x ∈ Set.Ico 0 1) (hx_int : x < length1) :
     applyWord r_crit word1 (segmentPoint x) =
     segmentPoint (x + displacement0) := by

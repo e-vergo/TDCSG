@@ -55,21 +55,61 @@ namespace TDCSG.Definitions
 
 open scoped Complex
 
+/-- The generator `genA` for the specialized n=5 case equals the general `genA_n` applied at n=5.
+
+This compatibility lemma bridges the original n=5 specific definitions with the generalized
+n-fold rotation framework. It allows proofs written for the general case to be applied
+to the concrete GG_5 systems studied in the paper. -/
 lemma genA_eq_genA_n_5 (r : Real) (z : Complex) : genA r z = genA_n 5 r z := by
   unfold genA genA_n
   simp only [Nat.cast_ofNat]
 
+/-- The generator `genB` for the specialized n=5 case equals the general `genB_n` applied at n=5.
+
+Analogous to `genA_eq_genA_n_5`, this bridges the right-disk rotation for the n=5 case
+with the generalized framework. -/
 lemma genB_eq_genB_n_5 (r : Real) (z : Complex) : genB r z = genB_n 5 r z := by
   unfold genB genB_n
   simp only [Nat.cast_ofNat]
 
-/-- Convert a single generator to its corresponding group element -/
+/-- Maps a single generator symbol to its corresponding permutation in the two-disk
+compound symmetry group `TwoDiskCompoundSymmetryGroup 5`.
+
+This is the fundamental embedding that connects the syntactic representation (generators
+as symbols `A`, `A⁻¹`, `B`, `B⁻¹`) to the semantic representation (actual permutations
+of the complex plane).
+
+In the paper's notation, for `GG_5(r)`:
+- `Generator.A` maps to the permutation implementing clockwise rotation by `2π/5` about `(-1, 0)`
+- `Generator.B` maps to the permutation implementing clockwise rotation by `2π/5` about `(1, 0)`
+- Inverse generators map to the group-theoretic inverses (counterclockwise rotations)
+
+The membership proofs use `Subgroup.subset_closure` to show each generator lies in the
+closure of the generating set `{genA_n_perm, genB_n_perm}`.
+
+## Mathematical significance
+
+This embedding is the first step in establishing the isomorphism between:
+1. The free group on two generators modulo relations
+2. The actual permutation group acting on the complex plane
+
+Combined with `wordToPerm`, it extends to an embedding of words (generator sequences)
+into group elements. -/
 noncomputable def genToPerm (r : Real) : Generator -> TwoDiskCompoundSymmetryGroup 5 (by norm_num) r
   | .A => { val := genA_n_perm 5 (by norm_num) r, property := Subgroup.subset_closure (Set.mem_insert _ _) }
   | .Ainv => { val := (genA_n_perm 5 (by norm_num) r)⁻¹, property := Subgroup.inv_mem _ (Subgroup.subset_closure (Set.mem_insert _ _)) }
   | .B => { val := genB_n_perm 5 (by norm_num) r, property := Subgroup.subset_closure (Set.mem_insert_of_mem _ (Set.mem_singleton _)) }
   | .Binv => { val := (genB_n_perm 5 (by norm_num) r)⁻¹, property := Subgroup.inv_mem _ (Subgroup.subset_closure (Set.mem_insert_of_mem _ (Set.mem_singleton _))) }
 
+/-- Acting on a point with `genToPerm g` equals applying the generator directly via `applyGen`.
+
+This lemma establishes the fundamental correspondence between:
+- The semantic action: `(genToPerm r g).val p` (applying the group element as a permutation)
+- The syntactic action: `applyGen r p g` (direct computation of the generator's effect)
+
+The proof proceeds by case analysis on the four generator variants, using:
+- For `A` and `B`: Direct unfolding shows the permutation equals the generator function
+- For `A⁻¹` and `B⁻¹`: Uses the fact that `g⁻¹ = g^4` when `g^5 = 1` (fifth roots of unity) -/
 lemma genToPerm_action (r : Real) (g : Generator) (p : Complex) :
     (genToPerm r g).val p = applyGen r p g := by
   cases g with
@@ -112,11 +152,49 @@ lemma genToPerm_action (r : Real) (g : Generator) (p : Complex) :
                Function.comp_apply, genB_n_perm, Equiv.ofBijective_apply]
     rw [genB_eq_genB_n_5, genB_eq_genB_n_5, genB_eq_genB_n_5, genB_eq_genB_n_5]
 
-/-- Convert a word (list of generators) to its corresponding group element -/
+/-- Maps a word (sequence of generators) to its corresponding group element in
+`TwoDiskCompoundSymmetryGroup 5`.
+
+This extends `genToPerm` from single generators to arbitrary words, providing the
+complete embedding from syntactic word representations to semantic group elements.
+
+The definition processes the word right-to-left, matching the group action convention
+where `ab(x) = b(a(x))` (function composition applies leftmost element first).
+For a word `[g₁, g₂, ..., gₙ]`:
+```
+wordToPerm [g₁, g₂, ..., gₙ] = genToPerm gₙ * ... * genToPerm g₂ * genToPerm g₁
+```
+
+## Examples
+
+- `wordToPerm []` = 1 (empty word is the identity)
+- `wordToPerm [A]` = `genToPerm A` (single generator)
+- `wordToPerm [A, B]` = `genToPerm B * genToPerm A` (apply A first, then B)
+
+## Mathematical significance
+
+This embedding is central to the formalization because it allows us to:
+1. Represent any group element as a finite sequence of generators
+2. Compute the action of arbitrary group elements on points
+3. Reason about word equivalence through group equality
+
+The paper's move sequences like `a⁻²b⁻¹a⁻¹b⁻¹` (from the n=5 proof) can be directly
+represented and manipulated using this embedding. -/
 noncomputable def wordToPerm (r : Real) : Word -> TwoDiskCompoundSymmetryGroup 5 (by norm_num) r
   | [] => 1
   | g :: gs => wordToPerm r gs * genToPerm r g
 
+/-- Acting on a point with `wordToPerm w` equals applying the word directly via `applyWord`.
+
+This is the key theorem establishing that the two computation methods are equivalent:
+- Semantic: Convert word to group element, then apply as permutation
+- Syntactic: Fold the generators over the point directly
+
+The proof proceeds by induction on the word, using `genToPerm_action` at each step.
+
+This theorem validates that the embedding `wordToPerm` correctly captures the intended
+group action semantics. Any property proved about `applyWord` transfers to group
+element actions and vice versa. -/
 lemma wordToPerm_action (r : Real) (w : Word) (p : Complex) :
     (wordToPerm r w).val p = applyWord r w p := by
   induction w generalizing p with
@@ -132,6 +210,18 @@ lemma wordToPerm_action (r : Real) (w : Word) (p : Complex) :
     rw [h1, genToPerm_action, ih]
     rfl
 
+/-- Word concatenation corresponds to group multiplication (in reverse order).
+
+For words `u` and `v`:
+```
+wordToPerm (u ++ v) = wordToPerm v * wordToPerm u
+```
+
+The reversal reflects the list representation convention: concatenating `u` then `v`
+means applying `u` first (rightmost in group multiplication).
+
+This lemma is essential for proving `closure_element_has_word` because it shows
+that the word representation respects group multiplication. -/
 lemma wordToPerm_append (r : Real) (u v : Word) :
     wordToPerm r (u ++ v) = wordToPerm r v * wordToPerm r u := by
   induction u with
@@ -141,6 +231,26 @@ lemma wordToPerm_append (r : Real) (u v : Word) :
     rw [ih]
     group
 
+/-- Every element of the two-disk compound symmetry group has a word representation.
+
+This theorem establishes that `wordToPerm` is surjective onto the group: for any
+group element `g`, there exists a word `w` such that `wordToPerm w = g`.
+
+The proof uses `Subgroup.closure_induction` to show that the property holds for:
+1. **Generators**: `genA_n_perm` has word `[A]`, `genB_n_perm` has word `[B]`
+2. **Identity**: The empty word `[]` represents 1
+3. **Products**: If `g` has word `w₁` and `h` has word `w₂`, then `g * h` has word `w₂ ++ w₁`
+4. **Inverses**: If `g` has word `w`, then `g⁻¹` has word `w.reverse.map invGen`
+
+## Mathematical significance
+
+This theorem, combined with `wordToPerm_action`, establishes the computational
+completeness of the word representation: any group element's action on any point
+can be computed by finding a representing word and applying it step by step.
+
+In the context of the paper, this means that the syntactic move sequences
+(like those in Theorem 2's proof) are sufficient to describe all elements of
+`GG_5(r)` for any radius `r`. -/
 lemma closure_element_has_word (r : Real) (g : TwoDiskCompoundSymmetryGroup 5 (by norm_num) r) :
     exists w : Word, g.val = (wordToPerm r w).val := by
   obtain ⟨g_perm, hg⟩ := g

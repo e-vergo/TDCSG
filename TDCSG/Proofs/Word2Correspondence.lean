@@ -9,18 +9,44 @@ import TDCSG.Proofs.SegmentGeometry
 import TDCSG.Proofs.CrossDiskWord2DiskBounds
 
 /-!
-# Word 2 Correspondence
+# Word 2 Correspondence for GG_5
 
-This file proves that applying word2 to points in the second IET interval produces the correct
-displacement, establishing the correspondence between the IET and group action for interval 1.
+This file establishes the correspondence between the word `a^{-1}b^{-1}a^{-1}b^{-2}` (word2)
+and the Interval Exchange Transformation (IET) dynamics for the second interval of the
+GG_5 compound symmetry group at critical radius.
 
-## Main results
+## Mathematical Context
 
-- `word2_produces_displacement1`: Word2 produces displacement1 for interval 1 points
+In the paper "Two-Disk Compound Symmetry Groups", the proof that GG_5 is infinite at
+critical radius r = sqrt(3 + phi) proceeds by showing that points along the segment E'E
+can be translated piecewise onto itself indefinitely. The segment is partitioned into
+three intervals, and each interval has an associated "word" (group element) that
+translates points within that interval.
+
+For interval 1 (points with parameter x in [length1, length1 + length2)):
+- The associated word is `a^{-1}b^{-1}a^{-1}b^{-2}` (encoded as word2)
+- Applying this word produces a translation by displacement1 along E'E
+- The ratio of interval lengths involves the golden ratio, ensuring the dynamics
+  are non-periodic
+
+## Main Results
+
+- `word2_produces_displacement1`: For points in interval 1 of the IET partition,
+  applying word2 translates them by exactly displacement1 along the segment E'E.
+
+## Implementation Notes
+
+The proof proceeds by:
+1. Computing the parametrized point z0 = c * E where c = 2x - 1
+2. Verifying that each intermediate point z1, z2, z3, z4, z5 in the word application
+   remains within the appropriate disk (so the rotations are well-defined)
+3. Using the algebraic identity from `AlgebraicIdentities.lean` to conclude that
+   z5 = z0 + (2 * displacement1) * E
 
 ## References
 
-* [arXiv:2302.12950v1](https://arxiv.org/abs/2302.12950)
+* Main paper: "Two-Disk Compound Symmetry Groups" (Hearn, Kretschmer, Rokicki, Streeter, Vergo)
+* See Theorem 2 in the paper for the geometric construction
 -/
 
 namespace TDCSG.CompoundSymmetry.GG5
@@ -28,6 +54,24 @@ namespace TDCSG.CompoundSymmetry.GG5
 open Complex Real
 open TDCSG.Definitions
 
+/-- Applying word2 to points in interval 1 produces a translation by displacement1.
+
+This lemma is one of three correspondence lemmas (for words 1, 2, and 3) that together
+establish the piecewise translation structure used to prove GG_5 is infinite at
+critical radius.
+
+**Mathematical content**: For x in [length1, length1 + length2), the point
+`segmentPoint x` lies on the segment E'E. Applying the word `a^{-1}b^{-1}a^{-1}b^{-2}`
+(equivalently, rotating by zeta_5 about the appropriate centers in sequence) translates
+this point to `segmentPoint (x + displacement1)`.
+
+**Geometric interpretation**: This corresponds to case (1) in the paper's proof of
+Theorem 2, where the line segment E'F' is transformed by `a^{-2}b^{-1}a^{-1}b^{-1}`
+to line segment GF. The translation length is |F - F'|.
+
+The proof verifies that all intermediate points z1, z2, z3, z4 during the word
+application remain within the appropriate disks, ensuring each rotation step is
+well-defined. The disk membership bounds come from `CrossDiskWord2DiskBounds.lean`. -/
 lemma word2_produces_displacement1 (x : ℝ) (hx : x ∈ Set.Ico 0 1)
     (hx_lo : length1 ≤ x) (hx_hi : x < length1 + length2) :
     applyWord r_crit word2 (segmentPoint x) =

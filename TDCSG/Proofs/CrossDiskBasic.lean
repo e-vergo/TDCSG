@@ -30,6 +30,8 @@ open scoped Complex
 open Complex Real
 open TDCSG.Definitions (segmentPoint E E' ζ₅ φ r_crit)
 
+/-- The difference `ζ₅^3 - ζ₅^4` is nonzero. This is used to ensure certain denominators
+in segment parameterizations are well-defined. -/
 lemma zeta5_cubed_minus_fourth_ne_zero : ζ₅^3 - ζ₅^4 ≠ 0 := by
   intro h
   have heq : ζ₅^3 = ζ₅^4 := sub_eq_zero.mp h
@@ -40,12 +42,16 @@ lemma zeta5_cubed_minus_fourth_ne_zero : ζ₅^3 - ζ₅^4 ≠ 0 := by
     grind
   exact zeta5_ne_one h1
 
+/-- Real part of the complex expression `-2 + ζ₅^2 - ζ₅^3 + ζ₅^4`, which represents
+the point on segment `E'E` at parameter `t = -1`. -/
 lemma endpoint_neg1_re : (-2 + ζ₅^2 - ζ₅^3 + ζ₅^4).re = (√5 - 9) / 4 := by
   simp only [Complex.add_re, Complex.sub_re, Complex.neg_re]
   have h2 : (2 : ℂ).re = 2 := by simp
   rw [h2, zeta5_sq_re, zeta5_cubed_re, zeta5_pow4_re]
   ring
 
+/-- Imaginary part of the complex expression `-2 + ζ₅^2 - ζ₅^3 + ζ₅^4`, which represents
+the point on segment `E'E` at parameter `t = -1`. -/
 lemma endpoint_neg1_im : (-2 + ζ₅^2 - ζ₅^3 + ζ₅^4).im =
     2 * Real.sin (π / 5) - Real.sin (2 * π / 5) := by
   simp only [Complex.add_im, Complex.sub_im, Complex.neg_im]
@@ -53,6 +59,9 @@ lemma endpoint_neg1_im : (-2 + ζ₅^2 - ζ₅^3 + ζ₅^4).im =
   rw [h2, neg_zero, zeta5_sq_im_eq, zeta5_cubed_im_eq, zeta5_pow4_im]
   ring
 
+/-- At parameter `t = -1`, the squared norm of `A + t * B` is bounded by `r_crit^2 = 3 + φ`.
+This establishes that the lower endpoint of the relevant parameter interval stays within
+the disk of radius `r_crit` centered at `(-1, 0)`. -/
 lemma normSq_at_neg1 : ‖(-2 : ℂ) + ζ₅^2 - ζ₅^3 + ζ₅^4‖^2 ≤ 3 + φ := by
   rw [← Complex.normSq_eq_norm_sq, Complex.normSq_apply]
   rw [endpoint_neg1_re, endpoint_neg1_im]
@@ -75,6 +84,7 @@ lemma normSq_at_neg1 : ‖(-2 : ℂ) + ζ₅^2 - ζ₅^3 + ζ₅^4‖^2 ≤ 3 + 
   unfold φ  Real.goldenRatio
   nlinarith [Real.sqrt_nonneg 5, sqrt5_sq, sq_nonneg (Real.sin (π / 5)), sq_nonneg ((3 - √5) / 4), sq_nonneg ((√5 - 9) / 4)]
 
+/-- Alternative form for the imaginary part of `ζ₅^2`, using `sin(π/5)` rather than `sin(4π/5)`. -/
 lemma zeta5_sq_im' : (ζ₅^2).im = Real.sin (π / 5) := by
   rw [zeta5_sq_eq]
   simp only [Complex.add_im, Complex.ofReal_im, Complex.mul_im,
@@ -83,6 +93,7 @@ lemma zeta5_sq_im' : (ζ₅^2).im = Real.sin (π / 5) := by
     rw [show (4 * π / 5 : ℝ) = π - π / 5 by ring, Real.sin_pi_sub]
   linarith [h]
 
+/-- Alternative form for the imaginary part of `ζ₅^3`, using `-sin(π/5)` rather than `sin(6π/5)`. -/
 lemma zeta5_cubed_im' : (ζ₅^3).im = -Real.sin (π / 5) := by
   rw [zeta5_cubed_eq, Complex.exp_mul_I]
   simp only [Complex.add_im, Complex.mul_im, Complex.I_im, Complex.I_re,
@@ -90,20 +101,28 @@ lemma zeta5_cubed_im' : (ζ₅^3).im = -Real.sin (π / 5) := by
   rw [show (6 * π / 5 : ℝ) = π / 5 + π by ring, Real.sin_add_pi]
   ring
 
+/-- Alternative form for the imaginary part of `ζ₅^4`, using `-sin(2π/5)`.
+Derived from the conjugate relationship `ζ₅^4 = conj(ζ₅)`. -/
 lemma zeta5_pow4_im' : (ζ₅^4).im = -Real.sin (2 * π / 5) := by
   have : ζ₅^4 = starRingEnd ℂ ζ₅ := by rw [← zeta5_conj]
   rw [this, Complex.conj_im, zeta5_im_eq_sin]
 
+/-- Real part of the direction vector `B = ζ₅^3 - ζ₅^4` along segment `E'E`.
+This vector defines the parameterization `A + t * B` of the segment. -/
 lemma B_re' : (ζ₅^3 - ζ₅^4).re = -√5 / 2 := by
   simp only [Complex.sub_re]
   rw [zeta5_cubed_re, zeta5_pow4_re]
   ring
 
+/-- Imaginary part of the direction vector `B = ζ₅^3 - ζ₅^4` along segment `E'E`. -/
 lemma B_im : (ζ₅^3 - ζ₅^4).im = Real.sin (2 * π / 5) - Real.sin (π / 5) := by
   simp only [Complex.sub_im]
   rw [zeta5_cubed_im', zeta5_pow4_im']
   ring
 
+/-- Squared norm of the direction vector `B = ζ₅^3 - ζ₅^4`.
+This value `(5 - √5)/2` appears as the coefficient of `t^2` in the quadratic expansion
+of `‖A + t*B‖^2`, determining the curvature of the norm function along the segment. -/
 lemma normSq_B : Complex.normSq (ζ₅^3 - ζ₅^4) = (5 - √5) / 2 := by
   rw [Complex.normSq_apply]
   simp only [← sq]
@@ -122,6 +141,9 @@ lemma normSq_B : Complex.normSq (ζ₅^3 - ζ₅^4) = (5 - √5) / 2 := by
   rw [h2, h3, h_sin_sq, sqrt5_minus_one_sq]
   nlinarith [sqrt5_sq, Real.sqrt_nonneg 5]
 
+/-- Real part of `A * conj(B)`, where `A = -2 + ζ₅^2` and `B = ζ₅^3 - ζ₅^4`.
+This quantity appears as the linear coefficient in the quadratic expansion of `‖A + t*B‖^2`,
+and determines the location of the parabola's vertex. -/
 lemma re_A_mul_conj_B :
     (((-2 : ℂ) + ζ₅^2) * starRingEnd ℂ (ζ₅^3 - ζ₅^4)).re = 3 * √5 / 2 := by
   have h_conj_B : starRingEnd ℂ (ζ₅^3 - ζ₅^4) = ζ₅^2 - ζ₅ := by
@@ -146,6 +168,11 @@ lemma re_A_mul_conj_B :
   rw [zeta5_sq_re, zeta5_re, zeta5_pow4_re, zeta5_cubed_re]
   ring
 
+/-- The vertex of the parabola `t ↦ ‖A + t*B‖^2` lies at `t < -1`.
+Since the parabola opens upward (coefficient of `t^2` is positive), this means
+the function is decreasing on `[-1, 0]` and increasing on `[0, 1]`.
+Therefore the maximum on any interval `[a, b]` with `-1 ≤ a < b ≤ 1` is attained
+at the endpoints. -/
 lemma vertex_lt_neg1 : -(3 * √5 / 2) / ((5 - √5) / 2) < -1 := by
   have h_sqrt5_pos : 0 < √5 := Real.sqrt_pos.mpr (by norm_num : (0 : ℝ) < 5)
   have h_sqrt25 : √25 = 5 := by
@@ -189,6 +216,14 @@ lemma normSq_add_ofReal_mul (A B : ℂ) (t : ℝ) :
   rw [h_re_scale]
   ring
 
+/-- At the upper endpoint of the parameter interval (corresponding to point `E` on the segment),
+the squared norm exactly equals `r_crit^2 = 3 + φ`. Combined with `normSq_at_neg1` and
+`vertex_lt_neg1`, this establishes that the entire segment `E'E` lies within the disk
+of radius `r_crit` centered at `(-1, 0)`.
+
+The parameter value `(1 - √5)/2 = -1/φ` corresponds to point `E` in the segment parameterization.
+See paper Section "Geometric Constructions" for the significance of `r_crit = √(3 + φ) ≈ 2.149`
+as the critical radius for `GG_5`. -/
 lemma normSq_at_upper_endpoint :
     Complex.normSq ((-2 : ℂ) + ζ₅^2 + (((1 - √5)/2 : ℝ) : ℂ) * (ζ₅^3 - ζ₅^4)) = 3 + φ := by
   have h_sin_sq := sin_sq_pi_div_5

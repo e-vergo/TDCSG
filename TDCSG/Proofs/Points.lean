@@ -28,6 +28,10 @@ open scoped Complex
 open Complex Real
 open TDCSG.Definitions (E E' ζ₅ φ r_crit)
 
+/-- The real part of E + 1, where E = zeta5^4 - zeta5^3.
+
+Computes the x-coordinate of the vector from the left disk center (-1, 0) to point E.
+Uses conjugate symmetry of fifth roots of unity: zeta5^4 = conj(zeta5) and zeta5^3 = conj(zeta5^2). -/
 private lemma E_plus_one_re : (E + 1).re = 1 + Real.cos (2 * π / 5) - Real.cos (4 * π / 5) := by
   unfold E
   simp only [Complex.add_re, Complex.sub_re, Complex.one_re]
@@ -49,6 +53,10 @@ private lemma E_plus_one_re : (E + 1).re = 1 + Real.cos (2 * π / 5) - Real.cos 
         field_simp
         ring
 
+/-- The imaginary part of E + 1, where E = zeta5^4 - zeta5^3.
+
+Computes the y-coordinate of the vector from the left disk center (-1, 0) to point E.
+The result sin(4pi/5) - sin(2pi/5) is negative since sin(4pi/5) = sin(pi/5) < sin(2pi/5). -/
 private lemma E_plus_one_im : (E + 1).im = Real.sin (4 * π / 5) - Real.sin (2 * π / 5) := by
   unfold E
   simp only [Complex.add_im, Complex.sub_im, Complex.one_im]
@@ -74,10 +82,22 @@ private lemma E_plus_one_im : (E + 1).im = Real.sin (4 * π / 5) - Real.sin (2 *
     _ = (ζ₅^2).im - ζ₅.im := by ring
     _ = Real.sin (4 * π / 5) - Real.sin (2 * π / 5) := by rw [h2_im, zeta5_im_eq_sin]
 
+/-- Double angle formula for sin(2pi/5) = 2 sin(pi/5) cos(pi/5).
+
+A direct application of the sine double-angle identity sin(2x) = 2 sin(x) cos(x). -/
 private lemma sin_two_pi_fifth : Real.sin (2 * π / 5) = 2 * Real.sin (π / 5) * Real.cos (π / 5) := by
   rw [show (2 * π / 5 : ℝ) = 2 * (π / 5) by ring]
   exact Real.sin_two_mul (π / 5)
 
+/-- Point E lies exactly on the boundary of the left disk at critical radius.
+
+Establishes that ||E + 1|| = sqrt(3 + phi), where -1 is the center of the left disk
+and r_crit = sqrt(3 + phi) is the critical radius. This is a key geometric constraint
+from main.tex Figure 5(a): point E is constructed so that it lies precisely on the
+left disk boundary, enabling the interval exchange transformation structure.
+
+The proof computes ||E + 1||^2 = 3 + phi by expanding E = zeta5^4 - zeta5^3 in
+trigonometric form and simplifying using algebraic identities involving sqrt(5). -/
 lemma E_on_left_disk_boundary : ‖E + 1‖ = r_crit := by
   have h_sq : ‖E + 1‖ ^ 2 = 3 + Real.goldenRatio := by
     unfold E
@@ -129,6 +149,10 @@ lemma E_on_left_disk_boundary : ‖E + 1‖ = r_crit := by
       _ = 2 * 4 ^ 2 * (2 * 3 + (1 + Real.sqrt 5)) := by norm_num
   rw [← Real.sqrt_sq (norm_nonneg (E + 1)), h_sq]
 
+/-- The real part of E - 1, where E = zeta5^4 - zeta5^3.
+
+Computes the x-coordinate of the vector from the right disk center (1, 0) to point E.
+Uses conjugate symmetry of fifth roots of unity, analogous to `E_plus_one_re`. -/
 private lemma E_minus_one_re : (E - 1).re = Real.cos (2 * π / 5) - Real.cos (4 * π / 5) - 1 := by
   unfold E
   simp only [Complex.sub_re, Complex.one_re]
@@ -150,6 +174,10 @@ private lemma E_minus_one_re : (E - 1).re = Real.cos (2 * π / 5) - Real.cos (4 
         field_simp
         ring
 
+/-- The imaginary part of E - 1, where E = zeta5^4 - zeta5^3.
+
+Computes the y-coordinate of the vector from the right disk center (1, 0) to point E.
+Identical to `E_plus_one_im` since subtracting 1 (real) does not affect the imaginary part. -/
 private lemma E_minus_one_im : (E - 1).im = Real.sin (4 * π / 5) - Real.sin (2 * π / 5) := by
   unfold E
   simp only [Complex.sub_im, Complex.one_im]
@@ -175,6 +203,17 @@ private lemma E_minus_one_im : (E - 1).im = Real.sin (4 * π / 5) - Real.sin (2 
     _ = (ζ₅^2).im - ζ₅.im := by ring
     _ = Real.sin (4 * π / 5) - Real.sin (2 * π / 5) := by rw [h2_im, zeta5_im_eq_sin]
 
+/-- Point E lies strictly inside the right disk at critical radius.
+
+Establishes that ||E - 1|| < r_crit = sqrt(3 + phi), where 1 is the center of the right
+disk. Combined with `E_on_left_disk_boundary`, this shows E is in the intersection of
+the two disks: on the left boundary but inside the right disk.
+
+This asymmetry (E on the left boundary, strictly inside the right disk) is crucial for
+the IET structure in main.tex. The translations in the proof of Theorem "GG5 is infinite"
+keep points within the disk intersection during all intermediate steps.
+
+The proof shows ||E - 1||^2 = 224 - 96*sqrt(5) < 224 + 32*sqrt(5) = (3 + phi) * 64. -/
 lemma E_in_right_disk : ‖E - 1‖ ≤ r_crit := by
 
   have h_sq : ‖E - 1‖ ^ 2 < 3 + Real.goldenRatio := by

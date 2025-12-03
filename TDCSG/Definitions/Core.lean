@@ -113,13 +113,26 @@ noncomputable abbrev r_crit : ℝ := Real.sqrt (3 + φ)
 open scoped Complex
 open Complex
 
-/-- The primitive 5th root of unity ζ₅ = e^(2πi/5). -/
+/-- The primitive 5th root of unity ζ₅ = e^(2πi/5).
+
+This root of unity is central to the analysis of GG(5,5), the two-disk compound symmetry
+group with 5-fold rotations. In [arXiv:2302.12950v1], the proof that GG₅ is infinite at the
+critical radius uses points defined in terms of ζ₅, such as E = ζ₅ - ζ₅² and
+F = 1 - ζ₅ + ζ₅² - ζ₅³.
+
+The 5th root of unity satisfies ζ₅⁵ = 1 and the minimal polynomial x⁴ + x³ + x² + x + 1 = 0,
+which implies ζ₅⁴ + ζ₅³ + ζ₅² + ζ₅ + 1 = 0. -/
 noncomputable def ζ₅ : Complex := exp (2 * Real.pi * Complex.I / 5)
 
-/-- ζ₅ is a primitive 5th root of unity. -/
+/-- ζ₅ is a primitive 5th root of unity.
+
+This establishes that ζ₅ has exact order 5 in the multiplicative group of complex numbers,
+meaning ζ₅⁵ = 1 and no smaller positive power equals 1. This property is essential for
+verifying that rotations by 2π/5 generate the expected cyclic structure in GG(5,5). -/
 lemma zeta5_isPrimitiveRoot : IsPrimitiveRoot ζ₅ 5 :=
   Complex.isPrimitiveRoot_exp 5 (by norm_num)
 
+/-- The complex norm of ζ₅ equals 1, since ζ₅ lies on the unit circle. -/
 @[simp] lemma zeta5_abs : ‖ζ₅‖ = 1 :=
   IsPrimitiveRoot.norm'_eq_one zeta5_isPrimitiveRoot (by norm_num)
 

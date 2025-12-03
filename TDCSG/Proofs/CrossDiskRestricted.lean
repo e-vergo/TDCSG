@@ -29,6 +29,16 @@ open scoped Complex
 open Complex Real
 open TDCSG.Definitions (segmentPoint E E' ζ₅ φ r_crit)
 
+/-- The second intermediate point `z2` in word1 stays within the critical radius `r_crit`
+for parameters `c` in the restricted interval `[-1, (1-sqrt(5))/2]`.
+
+The point `z2 = -2 + zeta5^2 + c*(zeta5^3 - zeta5^4)` represents the position after applying
+the first two rotations in the word1 sequence. This bound ensures `z2` remains in the
+intersection of both disks, which is required for the subsequent rotations to be applicable.
+
+The proof shows the squared norm is maximized at the upper endpoint `c = (1-sqrt(5))/2`,
+where it equals exactly `3 + phi = r_crit^2`, by analyzing the quadratic dependence on `c`
+and showing the parabola's vertex lies below the interval. -/
 lemma cross_disk_z2_bound_restricted (c : ℝ) (hc_lo : -1 ≤ c) (hc_hi : c ≤ (1 - √5) / 2) :
     ‖(-2 : ℂ) + ζ₅^2 + (c : ℂ) * (ζ₅^3 - ζ₅^4)‖ ≤ r_crit := by
   set A : ℂ := -2 + ζ₅^2 with hA_def
@@ -143,16 +153,20 @@ lemma cross_disk_z2_bound_restricted (c : ℝ) (hc_lo : -1 ≤ c) (hc_hi : c ≤
     rw [h_coerce]
   grind
 
+/-- Real part of `zeta5^4 - 1`, used in z3 norm computations. -/
 lemma B3_re : (ζ₅^4 - 1 : ℂ).re = (√5 - 5) / 4 := by
   simp only [Complex.sub_re, Complex.one_re]
   rw [zeta5_pow4_re]
   ring
 
+/-- Imaginary part of `zeta5^4 - 1`, used in z3 norm computations. -/
 lemma B3_im : (ζ₅^4 - 1 : ℂ).im = -Real.sin (2 * π / 5) := by
   simp only [Complex.sub_im, Complex.one_im]
   rw [zeta5_pow4_im_neg, zeta5_im_eq_sin]
   ring
 
+/-- The squared norm of `zeta5^4 - 1` equals `(5 - sqrt(5))/2`.
+This is the coefficient vector B3 in the z3 parametrization. -/
 lemma normSq_B3 : Complex.normSq (ζ₅^4 - 1) = (5 - √5) / 2 := by
   rw [Complex.normSq_apply]
   simp only [← sq]
@@ -167,6 +181,9 @@ lemma normSq_B3 : Complex.normSq (ζ₅^4 - 1) = (5 - √5) / 2 := by
     grind
   grind
 
+/-- At the upper endpoint `c = (1-sqrt(5))/2`, the squared norm of z3 equals `(7+sqrt(5))/2`.
+This evaluates to `3 + phi = r_crit^2`, showing z3 lies exactly on the critical radius
+boundary at this parameter value. -/
 lemma z3_normSq_at_c_upper :
     Complex.normSq ((2 : ℂ) - 2*ζ₅ + ζ₅^3 + (((1 - √5)/2 : ℝ) : ℂ) * (ζ₅^4 - 1)) = (7 + √5) / 2 := by
   rw [Complex.normSq_apply]
@@ -216,10 +233,21 @@ lemma z3_normSq_at_c_upper :
     linarith
   grind
 
+/-- The algebraic identity `(7 + sqrt(5))/2 = 3 + phi` where `phi` is the golden ratio.
+Connects the z3 norm computation to the critical radius squared. -/
 lemma seven_plus_sqrt5_div_2_eq : (7 + √5) / 2 = 3 + φ := by
   unfold φ Real.goldenRatio
   ring
 
+/-- The third intermediate point `z3` in word1 stays within the critical radius `r_crit`
+for parameters `c` in the restricted interval `[-1, (1-sqrt(5))/2]`.
+
+The point `z3 = 2 - 2*zeta5 + zeta5^3 + c*(zeta5^4 - 1)` represents the position after
+applying the first three rotations in word1. Like z2, this bound ensures z3 remains in
+the disk intersection for the remaining rotations.
+
+The proof analyzes the quadratic norm function and shows it is maximized at the upper
+endpoint, where it equals `3 + phi = r_crit^2`. -/
 lemma cross_disk_z3_bound_restricted (c : ℝ) (hc_lo : -1 ≤ c) (hc_hi : c ≤ (1 - √5) / 2) :
     ‖(2 : ℂ) - 2*ζ₅ + ζ₅^3 + (c : ℂ) * (ζ₅^4 - 1)‖ ≤ r_crit := by
   set A : ℂ := 2 - 2*ζ₅ + ζ₅^3 with hA_def
@@ -349,6 +377,9 @@ lemma cross_disk_z3_bound_restricted (c : ℝ) (hc_lo : -1 ≤ c) (hc_hi : c ≤
     nlinarith [h_factor_pos, h_cupper_minus_c, h_diff_expand, sqrt5_sq]
   grind
 
+/-- The real part of `A4 * conj(B4)` where `A4 = -2 + 2*zeta5 - 2*zeta5^2 + zeta5^4`
+and `B4 = 1 - zeta5`. This cross-term coefficient is needed for the z4 quadratic
+norm analysis. -/
 lemma re_A4_mul_conj_B4 :
     (((-2 : ℂ) + 2*ζ₅ - 2*ζ₅^2 + ζ₅^4) * starRingEnd ℂ (1 - ζ₅)).re = (5*√5 - 10) / 2 := by
   rw [conj_one_sub_zeta5]
@@ -370,6 +401,7 @@ lemma re_A4_mul_conj_B4 :
   rw [zeta5_re, zeta5_sq_re, zeta5_cubed_re, zeta5_pow4_re]
   ring
 
+/-- Real part of z4 evaluated at `c = -1`. Used in the lower endpoint bound for z4. -/
 lemma A4_at_neg1_re : ((-3 : ℂ) + 3*ζ₅ - 2*ζ₅^2 + ζ₅^4).re = (-7 + 3*√5) / 2 := by
   simp only [Complex.add_re, Complex.sub_re, Complex.mul_re, Complex.neg_re]
   have h3re : (3 : ℂ).re = 3 := by rfl
@@ -380,6 +412,7 @@ lemma A4_at_neg1_re : ((-3 : ℂ) + 3*ζ₅ - 2*ζ₅^2 + ζ₅^4).re = (-7 + 3*
   rw [zeta5_re, zeta5_sq_re, zeta5_pow4_re]
   ring
 
+/-- Imaginary part of z4 evaluated at `c = -1`. Used in the lower endpoint bound for z4. -/
 lemma A4_at_neg1_im : ((-3 : ℂ) + 3*ζ₅ - 2*ζ₅^2 + ζ₅^4).im = 2*Real.sin (2 * π / 5) - 2*Real.sin (π / 5) := by
   simp only [Complex.add_im, Complex.sub_im, Complex.mul_im, Complex.neg_im]
   have h3re : (3 : ℂ).re = 3 := by rfl
@@ -390,11 +423,19 @@ lemma A4_at_neg1_im : ((-3 : ℂ) + 3*ζ₅ - 2*ζ₅^2 + ζ₅^4).im = 2*Real.s
   rw [zeta5_im_eq_sin, zeta5_sq_im', zeta5_pow4_im']
   ring
 
+/-- Squared norm of z4 at `c = -1` expressed in terms of real and imaginary parts.
+Intermediate step in verifying the lower endpoint bound. -/
 lemma normSq_A4_at_neg1 : Complex.normSq ((-3 : ℂ) + 3*ζ₅ - 2*ζ₅^2 + ζ₅^4) =
     ((-7 + 3*√5) / 2)^2 + (2*Real.sin (2 * π / 5) - 2*Real.sin (π / 5))^2 := by
   rw [Complex.normSq_apply, A4_at_neg1_re, A4_at_neg1_im]
   simp only [← sq]
 
+/-- At `c = -1`, the squared norm of z4 is at most `3 + phi = r_crit^2`.
+This establishes the lower endpoint bound for the z4 cross-disk constraint.
+
+Unlike z2 and z3 where the maximum occurs at the upper endpoint, z4's maximum
+occurs at the lower endpoint `c = -1`. The proof reduces to explicit
+trigonometric computations involving sin(pi/5) and sin(2*pi/5). -/
 lemma normSq_A4_at_neg1_le_three_plus_phi :
     Complex.normSq ((-3 : ℂ) + 3*ζ₅ - 2*ζ₅^2 + ζ₅^4) ≤ 3 + φ := by
   rw [normSq_A4_at_neg1]
@@ -423,6 +464,16 @@ lemma normSq_A4_at_neg1_le_three_plus_phi :
     _ ≤ (7 + √5) / 2 := by nlinarith [Real.sqrt_nonneg 5]
     _ = 3 + φ := by unfold φ Real.goldenRatio; ring
 
+/-- The fourth intermediate point `z4` in word1 stays within the critical radius `r_crit`
+for parameters `c` in the restricted interval `[-1, (1-sqrt(5))/2]`.
+
+The point `z4 = -2 + 2*zeta5 - 2*zeta5^2 + zeta5^4 + c*(1 - zeta5)` represents the position
+after applying four rotations in word1. This is the final cross-disk bound needed for
+the restricted interval.
+
+Unlike z2 and z3, the quadratic norm of z4 is maximized at `c = -1` (the lower endpoint),
+not the upper endpoint. The proof shows monotonicity in the opposite direction by
+analyzing the parabola's vertex position and the sign of the linear coefficient. -/
 lemma cross_disk_z4_bound_restricted (c : ℝ) (hc_lo : -1 ≤ c) (hc_hi : c ≤ (1 - √5) / 2) :
     ‖(-2 : ℂ) + 2*ζ₅ - 2*ζ₅^2 + ζ₅^4 + (c : ℂ) * (1 - ζ₅)‖ ≤ r_crit := by
   set A : ℂ := -2 + 2*ζ₅ - 2*ζ₅^2 + ζ₅^4 with hA_def

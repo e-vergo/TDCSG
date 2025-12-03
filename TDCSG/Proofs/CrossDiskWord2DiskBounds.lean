@@ -31,6 +31,10 @@ open scoped Complex
 open Complex Real
 open TDCSG.Definitions
 
+/-- Maps the lower bound of interval 1 in the segment parameterization to its corresponding
+coefficient value. When `x >= length1`, the transformed parameter `2x - 1` is bounded below
+by `(1 - sqrt(5))/2`. This establishes that points in interval 1 map to coefficients within
+the valid range for word2 disk bounds. -/
 lemma interval1_c_lower_bound (x : ℝ) (hx : length1 ≤ x) :
     (1 - √5) / 2 ≤ 2 * x - 1 := by
   have h_length1 : length1 = 1 / (2 * (1 + goldenRatio)) := rfl
@@ -46,6 +50,10 @@ lemma interval1_c_lower_bound (x : ℝ) (hx : length1 ≤ x) :
     _ = (3 - √5 - 2) / 2 := by ring
     _ = (1 - √5) / 2 := by ring
 
+/-- Maps the upper bound of interval 1 in the segment parameterization to its corresponding
+coefficient value. When `x < length1 + length2`, the transformed parameter `2x - 1` is
+strictly bounded above by `2 - sqrt(5)`. Combined with `interval1_c_lower_bound`, this
+constrains coefficients to the range `[(1-sqrt(5))/2, 2-sqrt(5))` for interval 1 points. -/
 lemma interval1_c_upper_bound (x : ℝ) (hx : x < length1 + length2) :
     2 * x - 1 < 2 - √5 := by
   have h_length12 : length1 + length2 = (3 - √5) / 2 := length12_eq_sqrt5
@@ -55,7 +63,18 @@ lemma interval1_c_upper_bound (x : ℝ) (hx : x < length1 + length2) :
     _ = 2 - √5 := by ring
 
 set_option maxHeartbeats 600000 in
+/-- First intermediate bound for word2 computation in GG_5.
 
+Establishes that for coefficients `c` in `[(1-sqrt(5))/2, 2-sqrt(5)]`, the complex expression
+`(zeta_5^4 - 2) + c*(1 - zeta_5)` has norm bounded by the critical radius `r_crit = sqrt(3 + phi)`.
+
+This bound ensures that the first step of word2 application keeps points within the disk
+intersection region. The proof analyzes the quadratic dependence of the norm on `c`,
+showing the parabola achieves its minimum outside the interval, so the bound holds
+at both endpoints and hence throughout.
+
+The expression arises from applying word2 to points on segment E'E parameterized by coefficient c.
+See the paper's Theorem on GG_5 being infinite at critical radius. -/
 lemma cross_disk_w2_z1_bound (c : ℝ) (hc_lo : (1 - √5) / 2 ≤ c) (hc_hi : c ≤ 2 - √5) :
     ‖(ζ₅^4 - 2 : ℂ) + (c : ℂ) * (1 - ζ₅)‖ ≤ r_crit := by
 
@@ -176,6 +195,17 @@ lemma cross_disk_w2_z1_bound (c : ℝ) (hc_lo : (1 - √5) / 2 ≤ c) (hc_hi : c
         apply h_mono ((1 - √5)/2) c (le_refl _) hc_lo hc_hi
     _ ≤ 3 + φ := by rw [← hA_def, ← hB_def, Complex.normSq_eq_norm_sq]; exact h_at_lower
 
+/-- Second intermediate bound for word2 computation in GG_5.
+
+Establishes that for coefficients `c` in `[(1-sqrt(5))/2, 2-sqrt(5)]`, the complex expression
+`(2 - 2*zeta_5^4 + zeta_5^3) + c*(zeta_5^4 - 1)` has norm bounded by `r_crit`.
+
+This bound ensures the second step of word2 application keeps points within the critical disk.
+The quadratic norm function has its vertex at `(7 - sqrt(5))/4 > 1`, which lies above the
+coefficient interval, so the norm is monotonically decreasing on the interval. The bound
+is verified at the lower endpoint `(1 - sqrt(5))/2`.
+
+Part of the sequence of bounds needed to verify word2 preserves disk membership. -/
 lemma cross_disk_w2_z2_bound (c : ℝ) (hc_lo : (1 - √5) / 2 ≤ c) (hc_hi : c ≤ 2 - √5) :
     ‖((2 : ℂ) - 2*ζ₅^4 + ζ₅^3) + (c : ℂ) * (ζ₅^4 - 1)‖ ≤ r_crit := by
 
@@ -313,6 +343,17 @@ lemma cross_disk_w2_z2_bound (c : ℝ) (hc_lo : (1 - √5) / 2 ≤ c) (hc_hi : c
         apply h_mono ((1 - √5)/2) c (le_refl _) hc_lo hc_hi
     _ ≤ 3 + φ := by rw [← hA_def, ← hB_def, Complex.normSq_eq_norm_sq]; exact h_at_lower
 
+/-- Third intermediate bound for word2 computation in GG_5.
+
+Establishes that for coefficients `c` in `[(1-sqrt(5))/2, 2-sqrt(5)]`, the complex expression
+`(-2 + 2*zeta_5^4 - 2*zeta_5^3 + zeta_5^2) + c*(zeta_5^3 - zeta_5^4)` has norm bounded by `r_crit`.
+
+This bound ensures the third step of word2 application keeps points within the critical disk.
+Unlike the previous bounds, this quadratic has its vertex at `(5 - 3*sqrt(5))/4 < 2 - sqrt(5)`,
+which lies below the coefficient interval. The norm function achieves equal values at both
+endpoints of the interval, making the proof require careful analysis of monotonicity.
+
+Completes the sequence of bounds for word2 disk membership verification. -/
 lemma cross_disk_w2_z3_bound (c : ℝ) (hc_lo : (1 - √5) / 2 ≤ c) (hc_hi : c ≤ 2 - √5) :
     ‖((-2 : ℂ) + 2*ζ₅^4 - 2*ζ₅^3 + ζ₅^2) + (c : ℂ) * (ζ₅^3 - ζ₅^4)‖ ≤ r_crit := by
 

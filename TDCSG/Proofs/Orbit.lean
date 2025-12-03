@@ -28,18 +28,33 @@ namespace RealDynamics
 
 open Function Set
 
+/-- Every point belongs to its own orbit set.
+
+This is the reflexivity property: `x` is always in `orbitSet f x` since `f^[0] x = x`. -/
 theorem mem_orbitSet_self (f : ℝ → ℝ) (x : ℝ) : x ∈ orbitSet f x := by
   use 0
   simp
 
+/-- If `y` is an iterate of `x` under `f`, then `y` belongs to the orbit of `x`.
+
+Given `f^[n] x = y`, we have `y ∈ orbitSet f x`. -/
 theorem mem_orbitSet_of_iterate (f : ℝ → ℝ) (x y : ℝ) (n : ℕ) (h : (f^[n]) x = y) :
     y ∈ orbitSet f x :=
   ⟨n, h⟩
 
+/-- The `n`-th iterate of `x` under `f` belongs to the orbit of `x`.
+
+Direct consequence of the definition of `orbitSet`. -/
 theorem orbitSet_iterate (f : ℝ → ℝ) (x : ℝ) (n : ℕ) :
     (f^[n]) x ∈ orbitSet f x :=
   ⟨n, rfl⟩
 
+/-- Finite orbits contain collisions: two distinct iterates must coincide.
+
+**Pigeonhole principle**: If `orbitSet f x` is finite with cardinality `n`, then among the
+`n+1` iterates `f^[0] x, f^[1] x, ..., f^[n] x`, two must be equal.
+
+This is a key lemma for establishing periodicity in finite orbits. -/
 theorem finite_orbit_has_collision (f : ℝ → ℝ) (x : ℝ) (h_fin : (orbitSet f x).Finite) :
     ∃ (i j : ℕ), i < j ∧ (f^[i]) x = (f^[j]) x := by
 
@@ -84,6 +99,12 @@ theorem finite_orbit_has_collision (f : ℝ → ℝ) (x : ℝ) (h_fin : (orbitSe
     Finset.card_le_card h_image_subset
   omega
 
+/-- Finite orbits exhibit eventual periodicity.
+
+From `finite_orbit_has_collision`, a collision `f^[i] x = f^[j] x` with `i < j` yields
+period `k = j - i > 0` starting at index `i`.
+
+This establishes the structure: finite orbit = finite transient + periodic cycle. -/
 theorem finite_orbit_implies_periodic (f : ℝ → ℝ) (x : ℝ)
     (h_fin : (orbitSet f x).Finite) :
     ∃ (i k : ℕ), k > 0 ∧ (f^[i + k]) x = (f^[i]) x := by
@@ -94,6 +115,10 @@ theorem finite_orbit_implies_periodic (f : ℝ → ℝ) (x : ℝ)
   · calc (f^[i + (j - i)]) x = (f^[j]) x := by congr 1; omega
       _ = (f^[i]) x := heq.symm
 
+/-- Finite orbits contain a periodic point.
+
+Reformulation of `finite_orbit_implies_periodic`: there exists a point `y = f^[m] x` on the
+orbit that is fixed by `f^[p]` for some `p > 0`. The point `y` lies on the eventual cycle. -/
 theorem finite_orbit_has_periodic_point (f : ℝ → ℝ) (x : ℝ)
     (h_fin : (orbitSet f x).Finite) :
     ∃ (m p : ℕ), p > 0 ∧ (f^[p]) ((f^[m]) x) = (f^[m]) x := by
@@ -106,6 +131,14 @@ theorem finite_orbit_has_periodic_point (f : ℝ → ℝ) (x : ℝ)
       _ = (f^[i + k]) x := by congr 1; omega
       _ = (f^[i]) x := hk
 
+/-- Orbits without periodic points are infinite.
+
+**Contrapositive of finite orbit periodicity**: If no point on the orbit is periodic under `f`,
+then the orbit must be infinite. This is the forward direction of the characterization
+`HasInfiniteOrbit f x <-> (orbitSet f x).Infinite`.
+
+Key for proving that two-disk compound symmetry groups become infinite at critical radius,
+as absence of periodicity in the dynamics implies unbounded orbit growth. -/
 theorem no_orbit_point_periodic_implies_infinite (f : ℝ → ℝ) (x : ℝ)
     (h_no_periodic : ∀ y ∈ orbitSet f x, y ∉ Function.periodicPts f) :
     (orbitSet f x).Infinite := by
@@ -117,6 +150,10 @@ theorem no_orbit_point_periodic_implies_infinite (f : ℝ → ℝ) (x : ℝ)
     Function.mk_mem_periodicPts hp_pos hp_eq
   exact h_no_periodic _ h_in_orbit h_periodic
 
+/-- A collision between iterates creates a periodic point.
+
+If `f^[m] x = f^[n] x` with `m < n`, then `f^[m] x` is periodic with period dividing `n - m`.
+This is the mechanism by which collisions in finite orbits produce periodicity. -/
 theorem iterate_collision_implies_periodic (f : ℝ → ℝ) (x : ℝ) {m n : ℕ}
     (hmn : m < n) (heq : (f^[m]) x = (f^[n]) x) :
     (f^[m]) x ∈ Function.periodicPts f := by
@@ -127,6 +164,11 @@ theorem iterate_collision_implies_periodic (f : ℝ → ℝ) (x : ℝ) {m n : �
       _ = (f^[m]) x := heq.symm
   exact Function.mk_mem_periodicPts hk_pos h_period
 
+/-- The iteration map is injective when the orbit contains no periodic points.
+
+If no point `y` on the orbit of `x` is periodic, then `n -> f^[n] x` is injective:
+distinct iteration counts yield distinct points. This is the contrapositive of
+`iterate_collision_implies_periodic`. -/
 theorem iterate_injective_of_no_periodic_orbit (f : ℝ → ℝ) (x : ℝ)
     (h_no_periodic : ∀ y ∈ orbitSet f x, y ∉ Function.periodicPts f) :
     Function.Injective (fun n : ℕ => (f^[n]) x) := by
@@ -143,6 +185,16 @@ theorem iterate_injective_of_no_periodic_orbit (f : ℝ → ℝ) (x : ℝ)
 
   exact h_no_periodic _ h_fm_in_orbit h_fm_periodic
 
+/-- Infinite orbits contain no periodic points.
+
+**Converse of `no_orbit_point_periodic_implies_infinite`**: If the orbit is infinite,
+then no point on it can be periodic. A periodic point would make the orbit eventually
+cycle through a finite set, contradicting infinitude.
+
+The proof splits the orbit at a hypothetical periodic point `y` into:
+1. A finite prefix (iterations before reaching `y`)
+2. A finite cycle (iterations of `y` under the minimal period)
+Both finite, so the union is finite, contradicting the hypothesis. -/
 theorem no_periodic_orbit_of_orbitSet_infinite (f : ℝ → ℝ) (x : ℝ)
     (h_inf : (orbitSet f x).Infinite) :
     ∀ y ∈ orbitSet f x, y ∉ Function.periodicPts f := by
@@ -211,6 +263,18 @@ theorem no_periodic_orbit_of_orbitSet_infinite (f : ℝ → ℝ) (x : ℝ)
     exact Set.Finite.union h_pre h_post
   exact h_inf h_orbit_x_finite
 
+/-- Characterization of infinite orbits via absence of periodic points.
+
+**Main theorem**: `HasInfiniteOrbit f x` (no periodic points on orbit) is equivalent to
+`(orbitSet f x).Infinite` (the orbit set is infinite). This bidirectional equivalence
+combines the two directions:
+
+- Forward (`no_orbit_point_periodic_implies_infinite`): No periodicity implies infinite orbit
+- Backward (`no_periodic_orbit_of_orbitSet_infinite`): Infinite orbit implies no periodicity
+
+This characterization is fundamental for analyzing two-disk compound symmetry groups (GG_n):
+proving infinite orbits at critical radius by ruling out periodic behavior, which
+establishes that the group itself is infinite (Theorem 1 in the paper). -/
 theorem hasInfiniteOrbit_iff_orbitSet_infinite (f : ℝ → ℝ) (x : ℝ) :
     HasInfiniteOrbit f x ↔ (orbitSet f x).Infinite := by
   unfold HasInfiniteOrbit
@@ -220,6 +284,10 @@ theorem hasInfiniteOrbit_iff_orbitSet_infinite (f : ℝ → ℝ) (x : ℝ) :
 
 end RealDynamics
 
+-- Namespace for GG_5 (five-fold rotational symmetry) compound symmetry group analysis.
+-- Re-exports displacement functions from `TDCSG.Definitions` for use in orbit computations.
+-- The GG_5 system has critical radius `r = sqrt(3 + phi)` where `phi` is the golden ratio,
+-- and exhibits characteristic fractal behavior at this threshold.
 namespace TDCSG.CompoundSymmetry.GG5
 
 open Real Function Set RealDynamics

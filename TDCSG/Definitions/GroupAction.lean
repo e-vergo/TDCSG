@@ -72,6 +72,8 @@ noncomputable def genB (r : ℝ) (z : ℂ) : ℂ := by
   classical
   exact if z ∈ rightDisk r then rotateAboutC rightCenter (-2 * π / 5) z else z
 
+/-- Exponentiation of `Circle.exp` distributes over multiplication in the exponent.
+This is the circle group analogue of the law `exp(nθ) = exp(θ)^n` for complex exponentials. -/
 lemma Circle_exp_pow (theta : ℝ) (n : ℕ) : Circle.exp theta ^ n = Circle.exp (n * theta) := by
   induction n with
   | zero => simp [Circle.exp_zero]
@@ -81,6 +83,8 @@ lemma Circle_exp_pow (theta : ℝ) (n : ℕ) : Circle.exp theta ^ n = Circle.exp
     push_cast
     ring
 
+/-- Rotation by -2π (one full turn clockwise) is the identity in the circle group.
+This is the periodicity property of the exponential map to the unit circle. -/
 lemma circle_exp_neg_two_pi : Circle.exp (-2 * π) = 1 := by
   apply Subtype.ext
   simp only [Circle.coe_exp, Circle.coe_one]
@@ -97,6 +101,8 @@ lemma Circle_exp_neg_two_pi_over_n_pow_n (n : ℕ) (hn : n ≥ 1) :
   rw [h]
   exact circle_exp_neg_two_pi
 
+/-- Rotation about the left center preserves membership in the left disk.
+This is geometrically obvious: rotating a point about the center of a disk keeps it in that disk. -/
 lemma rotateAboutCircle_leftCenter_preserves_leftDisk (a : Circle) (r : ℝ) (z : ℂ)
     (hz : z ∈ leftDisk r) : rotateAboutCircle leftCenter a z ∈ leftDisk r := by
   unfold leftDisk
@@ -104,6 +110,8 @@ lemma rotateAboutCircle_leftCenter_preserves_leftDisk (a : Circle) (r : ℝ) (z 
   rw [h_center]
   exact rotateAboutCircle_preserves_disk (-1) a r z hz
 
+/-- Rotation about the right center preserves membership in the right disk.
+This is geometrically obvious: rotating a point about the center of a disk keeps it in that disk. -/
 lemma rotateAboutCircle_rightCenter_preserves_rightDisk (a : Circle) (r : ℝ) (z : ℂ)
     (hz : z ∈ rightDisk r) : rotateAboutCircle rightCenter a z ∈ rightDisk r := by
   unfold rightDisk
@@ -111,28 +119,38 @@ lemma rotateAboutCircle_rightCenter_preserves_rightDisk (a : Circle) (r : ℝ) (
   rw [h_center]
   exact rotateAboutCircle_preserves_disk 1 a r z hz
 
+/-- Generator A acts as the identity on points outside the left disk.
+This is a defining property of the piecewise isometry: it only affects points within its disk. -/
 lemma genA_n_outside (n : ℕ) (r : ℝ) (z : ℂ) (hz : z ∉ leftDisk r) :
     genA_n n r z = z := by
   unfold genA_n
   simp only [hz, if_false]
 
+/-- Generator A rotates points inside the left disk by -2π/n about the left center.
+This is the rotation behavior on points within the disk, forming a fractional rotation of order n. -/
 lemma genA_n_inside (n : ℕ) (r : ℝ) (z : ℂ) (hz : z ∈ leftDisk r) :
     genA_n n r z = rotateAboutCircle leftCenter (Circle.exp (-2 * π / n)) z := by
   unfold genA_n
   simp only [hz, if_true]
   rw [rotateAboutCircle_eq_rotateAboutC]
 
+/-- Generator B acts as the identity on points outside the right disk.
+This is a defining property of the piecewise isometry: it only affects points within its disk. -/
 lemma genB_n_outside (n : ℕ) (r : ℝ) (z : ℂ) (hz : z ∉ rightDisk r) :
     genB_n n r z = z := by
   unfold genB_n
   simp only [hz, if_false]
 
+/-- Generator B rotates points inside the right disk by -2π/n about the right center.
+This is the rotation behavior on points within the disk, forming a fractional rotation of order n. -/
 lemma genB_n_inside (n : ℕ) (r : ℝ) (z : ℂ) (hz : z ∈ rightDisk r) :
     genB_n n r z = rotateAboutCircle rightCenter (Circle.exp (-2 * π / n)) z := by
   unfold genB_n
   simp only [hz, if_true]
   rw [rotateAboutCircle_eq_rotateAboutC]
 
+/-- Iterated rotation about the left center preserves membership in the left disk.
+By induction: each single rotation preserves the disk, so any finite iteration does. -/
 lemma rotateAboutCircle_leftCenter_iterate_preserves_leftDisk' (a : Circle) (r : ℝ) (k : ℕ)
     (w : ℂ) (hw : w ∈ leftDisk r) :
     (rotateAboutCircle leftCenter a)^[k] w ∈ leftDisk r := by
@@ -142,6 +160,8 @@ lemma rotateAboutCircle_leftCenter_iterate_preserves_leftDisk' (a : Circle) (r :
     simp only [Function.iterate_succ', Function.comp_apply]
     exact rotateAboutCircle_leftCenter_preserves_leftDisk a r _ ih
 
+/-- Iterated rotation about the right center preserves membership in the right disk.
+By induction: each single rotation preserves the disk, so any finite iteration does. -/
 lemma rotateAboutCircle_rightCenter_iterate_preserves_rightDisk' (a : Circle) (r : ℝ) (k : ℕ)
     (w : ℂ) (hw : w ∈ rightDisk r) :
     (rotateAboutCircle rightCenter a)^[k] w ∈ rightDisk r := by
@@ -191,6 +211,13 @@ lemma genA_n_pow_n (n : ℕ) (hn : n ≥ 1) (r : ℝ) (z : ℂ) :
         exact genA_n_outside n r z hz
     exact h_id n
 
+/-- Generator B has order n: applying it n times returns to the identity.
+
+The proof is symmetric to `genA_n_pow_n`:
+- Inside the right disk: rotation by -2π/n repeated n times equals rotation by -2π = identity
+- Outside the right disk: the generator is already the identity
+
+This is the fundamental periodicity property for the right generator. -/
 lemma genB_n_pow_n (n : ℕ) (hn : n ≥ 1) (r : ℝ) (z : ℂ) :
     (genB_n n r)^[n] z = z := by
   by_cases hz : z ∈ rightDisk r
@@ -224,6 +251,8 @@ lemma genB_n_pow_n (n : ℕ) (hn : n ≥ 1) (r : ℝ) (z : ℂ) :
         exact genB_n_outside n r z hz
     exact h_id n
 
+/-- Rewriting `f^[n] x` as `f^[n-1] (f x)`: "peel off" the first application.
+This is useful for induction arguments where we need to relate n iterations to n-1 iterations. -/
 lemma iterate_split (f : ℂ -> ℂ) (n : ℕ) (hn : n ≥ 1) (x : ℂ) :
     f^[n] x = f^[n - 1] (f x) := by
   have h : n = (n - 1) + 1 := (Nat.sub_add_cancel hn).symm
@@ -231,6 +260,8 @@ lemma iterate_split (f : ℂ -> ℂ) (n : ℕ) (hn : n ≥ 1) (x : ℂ) :
   rw [Function.iterate_succ_apply']
   exact (Function.Commute.iterate_self f (n - 1) x).symm
 
+/-- Rewriting `f (f^[n-1] x)` as `f^[n] x`: "add on" one more application.
+This is the converse of `iterate_split`, useful for constructing surjectivity proofs. -/
 lemma iterate_unsplit (f : ℂ -> ℂ) (n : ℕ) (hn : n ≥ 1) (x : ℂ) :
     f (f^[n - 1] x) = f^[n] x := by
   have h : n = (n - 1) + 1 := (Nat.sub_add_cancel hn).symm
@@ -275,6 +306,13 @@ lemma genA_n_bijective (n : ℕ) (hn : n ≥ 1) (r : ℝ) : Function.Bijective (
         = (genA_n n r)^[n] y := iterate_unsplit (genA_n n r) n hn y
       _ = y := h_period y
 
+/-- The n-fold generator B is bijective.
+
+The proof is symmetric to `genA_n_bijective`:
+- Injectivity: if B(x) = B(y), apply B^(n-1) and use B^n = id to get x = y
+- Surjectivity: for any y, its preimage is B^(n-1)(y)
+
+This bijectivity allows B to be viewed as a permutation of the complex plane. -/
 lemma genB_n_bijective (n : ℕ) (hn : n ≥ 1) (r : ℝ) : Function.Bijective (genB_n n r) := by
   have h_period : forall z, (genB_n n r)^[n] z = z := fun z => genB_n_pow_n n hn r z
   constructor
@@ -316,9 +354,21 @@ noncomputable def applyGen (r : ℝ) (z : ℂ) : Generator → ℂ
   | .B    => genB r z
   | .Binv => (genB r)^[4] z
 
+/-- Apply a word (sequence of generators) to a point in the complex plane.
+
+Words are applied left-to-right via `foldl`: the word `[A, B, A⁻¹]` computes `A⁻¹(B(A(z)))`.
+This convention matches the paper where `ab(x) = b(a(x))` (function composition on the left). -/
 noncomputable def applyWord (r : ℝ) (w : Word) (z : ℂ) : ℂ :=
   w.foldl (applyGen r) z
 
+/-- The orbit of a point z under the two-disk compound symmetry group at radius r.
+
+The orbit is the set of all points reachable from z by applying any finite sequence of
+generators. For finite groups (r < r_crit), orbits are finite sets. At the critical radius,
+certain orbits become infinite, forming the characteristic fractals discussed in the paper.
+
+Mathematically, this is the set `{g(z) | g in GG(n,n)(r)}` where GG(n,n)(r) is the group
+generated by the two n-fold rotations. -/
 noncomputable def orbit (r : ℝ) (z : ℂ) : Set ℂ :=
   { w | ∃ word : Word, applyWord r word z = w }
 
