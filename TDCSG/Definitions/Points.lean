@@ -37,9 +37,6 @@ noncomputable def E' : ℂ := -E
 /-- The golden conjugate ψ = -φ⁻¹ = -(√5 - 1)/2. -/
 noncomputable abbrev psi : ℝ := -Real.goldenConj
 
-/-- Parameter t for point G on the segment E'E. -/
-noncomputable abbrev t_G : ℝ := psi
-
 /-- Parameterization of the segment from E' to E by parameter t ∈ [0,1]. -/
 noncomputable def segmentPoint (t : ℝ) : ℂ := E' + t • (E - E')
 

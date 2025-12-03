@@ -26,7 +26,7 @@ namespace TDCSG.CompoundSymmetry.GG5
 
 open scoped Complex
 open Complex Real
-open TDCSG.Definitions (E E' psi t_G ζ₅ zeta5Circle zeta5CirclePow zeta5CircleInv φ r_crit)
+open TDCSG.Definitions (E E' psi ζ₅ zeta5Circle zeta5CirclePow zeta5CircleInv φ r_crit)
 
 private lemma E_plus_one_re : (E + 1).re = 1 + Real.cos (2 * π / 5) - Real.cos (4 * π / 5) := by
   unfold E
@@ -246,31 +246,5 @@ lemma E_in_right_disk : ‖E - 1‖ ≤ r_crit := by
           apply Real.sqrt_lt_sqrt (sq_nonneg _) h_sq
       _ = r_crit := by unfold r_crit; rfl
   exact this.le
-
-private lemma zeta5_sq_plus_zeta5_cube : ζ₅^2 + ζ₅^3 = -Real.goldenRatio := by
-
-  have h_conj : ζ₅^3 = starRingEnd ℂ (ζ₅^2) := by
-    rw [map_pow, zeta5_conj]
-    rw [show (ζ₅ ^ 4) ^ 2 = ζ₅^8 by ring]
-    rw [show (8 : ℕ) = 5 + 3 by norm_num]
-    rw [pow_add, zeta5_pow_five, one_mul]
-  rw [h_conj]
-  have h_real : ζ₅^2 + starRingEnd ℂ (ζ₅^2) = (2 * (ζ₅^2).re : ℝ) := Complex.add_conj (ζ₅^2)
-  rw [h_real]
-  have h2 : (ζ₅^2).re = Real.cos (4 * π / 5) := by
-    have h := zeta5_sq_eq
-    rw [h]
-    simp only [Complex.add_re, Complex.mul_re, Complex.I_re, Complex.I_im, Complex.ofReal_re, Complex.ofReal_im]
-    ring
-  rw [h2]
-  rw [cos_four_pi_fifth, Real.cos_pi_div_five]
-  unfold Real.goldenRatio
-  push_cast
-  ring
-
-private lemma goldenRatio_eq_one_add_psi : Real.goldenRatio = 1 + psi := by
-  unfold Real.goldenRatio psi
-  field_simp
-  ring
 
 end TDCSG.CompoundSymmetry.GG5
