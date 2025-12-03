@@ -129,8 +129,6 @@ lemma E_on_left_disk_boundary : ‖E + 1‖ = r_crit := by
       _ = 2 * 4 ^ 2 * (2 * 3 + (1 + Real.sqrt 5)) := by norm_num
   rw [← Real.sqrt_sq (norm_nonneg (E + 1)), h_sq]
 
-  rfl
-
 private lemma E_minus_one_re : (E - 1).re = Real.cos (2 * π / 5) - Real.cos (4 * π / 5) - 1 := by
   unfold E
   simp only [Complex.sub_re, Complex.one_re]

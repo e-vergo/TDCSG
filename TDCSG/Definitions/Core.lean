@@ -88,7 +88,7 @@ that φ² = φ + 1. This algebraic relationship is central to the proof that
 GG(5,5) is infinite at the critical radius.
 
 We use Mathlib's definition to ensure compatibility with existing lemmas. -/
-noncomputable def φ : ℝ := Real.goldenRatio
+noncomputable abbrev φ : ℝ := Real.goldenRatio
 
 /-- 1 + φ is positive.
 
@@ -108,7 +108,7 @@ for the group GG(5,5).
 For r < r_crit, the group GG(5,5) is finite.
 For r > r_crit, the group GG(5,5) is also finite (with different structure).
 Only at r = r_crit is the group infinite. -/
-noncomputable def r_crit : ℝ := Real.sqrt (3 + φ)
+noncomputable abbrev r_crit : ℝ := Real.sqrt (3 + φ)
 
 open scoped Complex
 open Complex
