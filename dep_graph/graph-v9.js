@@ -1,5 +1,5 @@
-// GRAPH.JS VERSION 9-custom - User-edited sizes and colors
-console.log('🎨 GRAPH.JS VERSION 9-custom LOADED - Nodes (180x100), text wrap (160px), purple theorems, teal defs, muted gold main');
+// GRAPH.JS VERSION 13 - Added statement display and pruned tree filter
+console.log('🎨 GRAPH.JS VERSION 13 LOADED - Statement display, pruned tree filter, all previous features');
 
 // Register Cose-Bilkent layout extension with comprehensive debugging
 (function() {
@@ -97,19 +97,33 @@ Promise.all([
         selector: 'node',
         style: {
           'background-color': '#95A5A6', // Gray for misc
-          'shape': 'ellipse',
+          'shape': 'round-rectangle',  // Unified shape for all nodes
           'label': 'data(label)',
           'font-size': 16,
           'text-wrap': 'wrap',
-          'text-max-width':  160,              // increased from 85 to prevent overflow
+          'text-max-width': function(node) {
+            // Text width based on label length
+            const labelLen = node.data('label').length;
+            return labelLen * 8;
+          },
           'text-valign': 'center',
           'text-halign': 'center',
-          'width': 180,                       // increased from 90 (50% larger than original 80)
-          'height': 100,                       // increased from 70 (50% larger than original 60)
-          'color': '#333',
+          'width': function(node) {
+            // Box is 10 pixels larger than text
+            const labelLen = node.data('label').length;
+            const textWidth = labelLen * 8;
+            return textWidth + 10;
+          },
+          'height': function(node) {
+            // Height based on width with rectangle aspect ratio
+            const labelLen = node.data('label').height;
+            const width = labelLen + 10;
+            return width;
+          },
+          'color': '#ffffff',
           'font-weight': 500,
           'text-background-color': '#ffffff',
-          'text-background-opacity': 0.8,
+          'text-background-opacity': 0.0,
           'text-background-padding': '3px'
         }
       },
@@ -126,8 +140,7 @@ Promise.all([
       {
         selector: 'node[type="def"]',
         style: {
-          'background-color': '#3ab7c4',  // removed 'ff' alpha
-          'shape': 'rectangle'
+          'background-color': '#3ab7c4'  // removed 'ff' alpha
         }
       },
 
@@ -136,14 +149,30 @@ Promise.all([
         selector: '.mainTheorem',
         style: {
           'background-color': '#e0d07a',  // removed 'ff' alpha
-          'width': 180,                    // increased from 140 (2.25x original)
-          'height': 130,                   // increased from 100 (2.17x original)
-          'font-size': 22,                 // increased from 20
+          'width': function(node) {
+            // Main theorems: 1.3x larger than regular nodes
+            const labelLen = node.data('label').length;
+            const textWidth = labelLen * 8;
+            const baseWidth = textWidth + 10;
+            return baseWidth * 1.3;
+          },
+          'height': function(node) {
+            // Main theorems: 1.3x larger with rectangle aspect ratio
+            const labelLen = node.data('label').length;
+            const textWidth = labelLen * 8;
+            const baseWidth = textWidth + 10;
+            return baseWidth * 1.3 * 0.45;
+          },
+          'font-size': 22,
           'font-weight': 'bold',
-          'text-max-width': 170,           // ensure text fits in larger node
+          'text-max-width': function(node) {
+            // Main theorems: text width for larger font
+            const labelLen = node.data('label').length;
+            return labelLen * 10;  // Slightly larger multiplier for bigger font
+          },
           'border-width': 6,
           'border-style': 'double',
-          'border-color': '#e0b643ff'
+          'border-color': '#e0b643'  // removed 'ff' alpha
         }
       },
 
@@ -193,9 +222,9 @@ Promise.all([
     layout: {
       name: Object.keys(savedPositions).length > 0 ? 'preset' :
             (typeof cytoscapeCoseBilkent !== 'undefined' ? 'cose-bilkent' : 'cose'),
-      idealEdgeLength: 200,    // increased from 150 for much more spacing
-      nodeRepulsion: 20000,    // increased from 12000 for stronger push
-      gravity: 0.05,           // decreased from 0.08 for more spread
+      idealEdgeLength: 150,    // increased from 150 for much more spacing
+      nodeRepulsion: 2000000,    // increased from 12000 for stronger push
+      gravity: 0,           // decreased from 0.08 for more spread
       numIter: 1000,
       randomize: true
     }
@@ -248,6 +277,11 @@ Promise.all([
     // Populate info panel
     document.getElementById('node-name').textContent = data.id;
     document.getElementById('node-type').textContent = data.type;
+
+    // Statement (GitHub link to view full signature)
+    const githubSourceUrl = `https://github.com/e-vergo/TDCSG/blob/main/${data.file}#L${data.line}`;
+    document.getElementById('node-statement').innerHTML =
+      `<p><strong>Statement:</strong> <a href="${githubSourceUrl}" target="_blank">View source</a></p>`;
 
     // Docstring
     const docstring = data.docstring || 'No documentation available';
@@ -303,13 +337,6 @@ Promise.all([
     }
     linksHtml += `</ul>`;
     document.getElementById('node-links').innerHTML = linksHtml;
-
-    document.getElementById('info-panel').style.display = 'block';
-  });
-
-  // Close panel
-  document.getElementById('close-panel').addEventListener('click', () => {
-    document.getElementById('info-panel').style.display = 'none';
   });
 
   // Save layout
@@ -365,10 +392,24 @@ Promise.all([
       document.getElementById('distance-controls').style.display = 'none';
       cy.nodes('[type="def"]').forEach(n => visibleNodes.add(n.id()));
     }
+    else if (mode === 'pruned-tree') {
+      document.getElementById('distance-controls').style.display = 'none';
+      cy.nodes().forEach(node => {
+        const inDegree = cy.edges(`[target="${node.id()}"]`).length;
+        // Include nodes with at least one incoming edge, OR main theorems
+        if (inDegree > 0 || node.data('isMainTheorem')) {
+          visibleNodes.add(node.id());
+        }
+      });
+    }
 
-    // Apply visibility
+    // Apply visibility using Cytoscape's hide/show methods
     cy.nodes().forEach(node => {
-      node.toggleClass('hidden', !visibleNodes.has(node.id()));
+      if (visibleNodes.has(node.id())) {
+        node.show();
+      } else {
+        node.hide();
+      }
     });
 
     // Update count

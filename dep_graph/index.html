@@ -23,18 +23,36 @@
 
   <div id="container">
     <div id="cy"></div>
-    <div id="info-panel">
-      <h3 id="node-name"></h3>
-      <p><strong>Type:</strong> <span id="node-type"></span></p>
-      <div id="node-docstring"></div>
-      <div id="node-dependencies"></div>
-      <div id="node-links"></div>
-      <button id="close-panel">Close</button>
-    </div>
+  </div>
+
+  <div id="info-panel">
+    <h3 id="node-name">Click a node to view details</h3>
+    <p><strong>Type:</strong> <span id="node-type">-</span></p>
+    <div id="node-statement"></div>
+    <div id="node-docstring"></div>
+    <div id="node-dependencies"></div>
+    <div id="node-links"></div>
   </div>
 
   <div id="controls">
     <input type="text" id="search" placeholder="Search declarations...">
+
+    <label for="filter-mode">Filter Mode:</label>
+    <select id="filter-mode">
+      <option value="all" selected>All Nodes (362)</option>
+      <option value="proof-focus">Proof Focus (~100)</option>
+      <option value="theorems-only">Theorems Only (289)</option>
+      <option value="definitions-only">Definitions Only (67)</option>
+      <option value="pruned-tree">Pruned Tree (~270)</option>
+    </select>
+
+    <div id="distance-controls" style="display: none;">
+      <label>Distance: <span id="distance-value">3</span> hops</label>
+      <input type="range" id="distance-slider" min="1" max="5" value="3">
+    </div>
+
+    <div id="node-count-display">Showing: <span id="visible-count">362</span> / 362</div>
+
     <button id="save-layout">Save Layout</button>
     <button id="reset-zoom">Reset View</button>
     <div id="stats"></div>
@@ -49,6 +67,6 @@
     </p>
   </div>
 
-  <script src="graph.js?v=2"></script>
+  <script src="graph-v9.js"></script>
 </body>
 </html>
