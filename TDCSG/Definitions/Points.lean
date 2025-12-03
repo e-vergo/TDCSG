@@ -15,7 +15,6 @@ for establishing the interval exchange transformation.
 ## Main definitions
 
 - `E`, `E'`: The endpoints of the critical segment on the boundary
-- `psi`: The golden conjugate $-φ^{-1}$
 - `t_G`: Parameter value for point G on the segment
 - `segmentPoint t`: Parameterization of the segment from E' to E
 
@@ -33,9 +32,6 @@ noncomputable def E : ℂ := ζ₅^4 - ζ₅^3
 
 /-- The point E' = -E, the opposite endpoint of the critical segment. -/
 noncomputable def E' : ℂ := -E
-
-/-- The golden conjugate ψ = -φ⁻¹ = -(√5 - 1)/2. -/
-noncomputable abbrev psi : ℝ := -Real.goldenConj
 
 /-- Parameterization of the segment from E' to E by parameter t ∈ [0,1]. -/
 noncomputable def segmentPoint (t : ℝ) : ℂ := E' + t • (E - E')

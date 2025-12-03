@@ -27,7 +27,7 @@ lies in the intersection of both disks and that the segment parameterization is 
 namespace TDCSG.CompoundSymmetry.GG5
 
 open Complex Real
-open TDCSG.Definitions (segmentPoint psi E E' ζ₅ zeta5Circle zeta5CirclePow zeta5CircleInv φ r_crit)
+open TDCSG.Definitions (segmentPoint E E' ζ₅ φ r_crit)
 
 lemma E_ne_zero : E ≠ 0 := by
 

@@ -28,7 +28,7 @@ namespace TDCSG.CompoundSymmetry.GG5
 
 open scoped Complex
 open Complex Real
-open TDCSG.Definitions (segmentPoint psi E E' ζ₅ zeta5Circle zeta5CirclePow zeta5CircleInv φ r_crit)
+open TDCSG.Definitions (segmentPoint E E' ζ₅ φ r_crit)
 
 lemma A_w3_z1_re : (ζ₅^4 - 2 : ℂ).re = (√5 - 9) / 4 := by
   simp only [Complex.sub_re]

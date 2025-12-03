@@ -23,7 +23,6 @@ for the two-disk compound symmetry groups.
 - `φ`: The golden ratio (1 + √5)/2
 - `r_crit`: The critical radius √(3 + φ) at which GG(5,5) becomes infinite
 - `ζ₅`: The primitive 5th root of unity e^(2πi/5)
-- `zeta5Circle`: ζ₅ as an element of the unit circle
 
 ## Algebraic Structure
 
@@ -123,18 +122,5 @@ lemma zeta5_isPrimitiveRoot : IsPrimitiveRoot ζ₅ 5 :=
 
 @[simp] lemma zeta5_abs : ‖ζ₅‖ = 1 :=
   IsPrimitiveRoot.norm'_eq_one zeta5_isPrimitiveRoot (by norm_num)
-
-noncomputable def zeta5Circle : Circle :=
-  ⟨ζ₅, mem_sphere_zero_iff_norm.2 zeta5_abs⟩
-
-@[simp]
-lemma zeta5Circle_coe : (zeta5Circle : ℂ) = ζ₅ := rfl
-
-noncomputable def zeta5CirclePow (n : ℕ) : Circle := zeta5Circle ^ n
-
-noncomputable def zeta5CircleInv : Circle := zeta5Circle⁻¹
-
-@[simp]
-lemma zeta5CircleInv_coe : (zeta5CircleInv : ℂ) = ζ₅⁻¹ := rfl
 
 end TDCSG.Definitions
