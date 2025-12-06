@@ -4,7 +4,25 @@ Formal verification in Lean 4 of the critical radius theorem for two-disk compou
 
 **Main Theorem (Theorem 2):** The compound symmetry group GG(5,5) at the critical radius r_crit = √(3 + φ) is infinite.
 
-## Project Status
+## Active Development
+
+This project is actively extending the formalization to additional cases. See **[docs/DEVELOPMENT_STATUS.md](docs/DEVELOPMENT_STATUS.md)** for detailed progress.
+
+| Case | Status | Critical Radius |
+|------|--------|-----------------|
+| GG(5,5) | ✅ Complete | √(3 + φ) ≈ 2.149 |
+| GG(10,10) | 🚧 In Progress | √(4 - φ) ≈ 1.543 |
+| GG(8,8) | 📋 Planned | TBD |
+| GG(12,12) | 📋 Planned | TBD |
+
+### GG(10,10) Current State
+
+The GG10 formalization structure is complete with 2 remaining sorries in algebraic identity proofs:
+- **Files created**: `TDCSG/GG10/{Core,Points,IET,AlgebraicIdentities,OrbitInfinite,MainTheorem}.lean`
+- **Blocking issue**: Cyclotomic polynomial relations (ζ₁₀^4 = ζ₁₀^3 - ζ₁₀^2 + ζ₁₀ - 1) need proper proof
+- **Key insight**: GG10 uses a simpler 2-interval IET (vs GG5's 3-interval) conjugate to rotation by 1/φ
+
+## GG(5,5) Project Status (Complete)
 
 | Metric | Value |
 |--------|-------|
@@ -168,7 +186,7 @@ RESULT: PROJECT VERIFIED
 
 ```text
 TDCSG/
-  MainTheorem.lean            # Core definitions + theorem statement (58 lines)
+  MainTheorem.lean            # GG5 Core definitions + theorem statement (58 lines)
                               # Contains: genA_n_perm, genB_n_perm,
                               #           TwoDiskCompoundSymmetryGroup, GG5_At_Critical_radius,
                               #           StatementOfTheorem

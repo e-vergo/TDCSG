@@ -262,6 +262,20 @@ def findSorries (path : System.FilePath) : IO (List Nat) := do
 
 /-! ## Trivial Definition Detection -/
 
+/-- Normalize whitespace to handle multi-line formatting -/
+private def normalizeWhitespace (s : String) : String :=
+  -- Replace multiple spaces with single space
+  let rec go (chars : List Char) (inSpace : Bool) : List Char :=
+    match chars with
+    | [] => []
+    | c :: rest =>
+      if c == ' ' || c == '\t' then
+        if inSpace then go rest true
+        else ' ' :: go rest true
+      else
+        c :: go rest false
+  String.ofList (go s.toList false)
+
 /-- Patterns for trivially true/false definitions -/
 def isTrivialDef (path : System.FilePath) (decl : ParsedDecl) : IO Bool := do
   if decl.kind != .def_ then return false
@@ -277,6 +291,8 @@ def isTrivialDef (path : System.FilePath) (decl : ParsedDecl) : IO Bool := do
     let endIdx := min (startIdx + 5) lines.length
     let defLines := (lines.toArray[startIdx:endIdx]).toList
     let defText := String.intercalate " " defLines
+    -- Normalize whitespace to handle indentation in multi-line defs
+    let normalized := normalizeWhitespace defText
 
     -- Check for trivial patterns
     let trivialPatterns := [
@@ -288,7 +304,7 @@ def isTrivialDef (path : System.FilePath) (decl : ParsedDecl) : IO Bool := do
       "forall _, True"
     ]
 
-    return trivialPatterns.any (fun pat => containsSubstr defText pat)
+    return trivialPatterns.any (fun pat => containsSubstr normalized pat)
   catch _ =>
     return false
 
